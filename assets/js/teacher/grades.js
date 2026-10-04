@@ -160,15 +160,7 @@ function renderTeacherGrades(data) {
 
             <!-- Right Panel -->
             <div class="gr-main-panel tchr-flat-panel" id="gr-main-panel">
-                <div class="gr-panel-empty">
-                    <svg viewBox="0 0 24 24" width="40" height="40" stroke="#4fd1c5" stroke-width="1.5" fill="none">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14 2 14 8 20 8"></polyline>
-                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                    </svg>
-                    <p>Select an assessment to view learner grades</p>
-                </div>
+                ${grEmptyStateHtml()}
             </div>
 
             <!-- railId lets renderGradesInPanel()/renderOpenEndedGrades()
@@ -247,55 +239,8 @@ function renderTeacherGrades(data) {
 
     html += `</div>`;
 
-    // Add Quiz Modal
-    html += `
-        <div id="addQuizModal" class="teacher-modal-overlay gr-modal-hidden">
-            <div class="teacher-modal-box gr-modal-box--add-quiz">
-                <div class="teacher-modal-header">
-                    <span>Add Assessment Manually</span>
-                    <button onclick="closeAddQuizModal()" class="teacher-modal-close">&times;</button>
-                </div>
-                <div class="teacher-modal-body">
-                    <div class="teacher-grades-info gr-info-box-spaced">
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none" class="gr-info-icon">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <line x1="12" y1="8" x2="12" y2="12"></line>
-                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                        </svg>
-                        <span>After adding, find the assessment in the list and click it to enter each learner's marks.</span>
-                    </div>
-
-                    <label class="teacher-modal-label">Assessment Title *</label>
-                    <input type="text" id="quizTitle" class="teacher-modal-input" placeholder="e.g. Chapter 3 Test">
-
-                    <label class="teacher-modal-label">Select Class *</label>
-                    <select id="quizClass" class="teacher-modal-input">
-                        <option value="">-- Choose Class --</option>
-                    </select>
-
-                    <label class="teacher-modal-label gr-checkbox-label">
-                        <input type="checkbox" id="quizSummative" onchange="toggleWeightField()">
-                        Counts toward term mark
-                    </label>
-
-                    <div id="weightContainer" class="gr-weight-container">
-                        <label class="teacher-modal-label">Weight %</label>
-                        <input type="number" id="quizWeight" class="teacher-modal-input gr-weight-input"
-                            min="0" max="100" step="0.1" placeholder="e.g. 30">
-                    </div>
-
-                    <div id="addQuizError" class="gr-form-error"></div>
-                </div>
-                <div class="teacher-modal-footer">
-                    <button onclick="closeAddQuizModal()" class="teacher-modal-cancel">Cancel</button>
-                    <button onclick="submitAddQuiz()" class="teacher-modal-submit" id="addQuizSubmitBtn">Add Assessment</button>
-                </div>
-            </div>
-        </div>`;
-
     apiArea.innerHTML = html;
     if (typeof injectSharedTeacherDesktopLayoutStyles === 'function') injectSharedTeacherDesktopLayoutStyles();
-    loadGradesClasses();
     window.wireTeacherSearchBar('gr');
 
     // Restore whichever quiz was selected before navigating away, and
@@ -305,6 +250,21 @@ function renderTeacherGrades(data) {
     window.wireTeacherSectionScroll('grades-sidebar', sidebarScrollEl);
     window.restoreTeacherScrollState('grades-sidebar', sidebarScrollEl);
 
+    // An assessment was just added through the form: open it straight away so
+    // the teacher can start entering marks (it is matched by title + class,
+    // taking the newest if there are several).
+    const pending = window._grPendingSelect;
+    window._grPendingSelect = null;
+    let pendingId = null;
+    if (pending) {
+        const hits = window._allGradesQuizzesFlat.filter(q => q.title === pending.title && q.class_name === pending.className);
+        if (hits.length) pendingId = Math.max(...hits.map(q => Number(q.id)));
+    }
+    if (pendingId != null) {
+        selectDesktopGradeQuiz(pendingId).then(() => grFocusFirstAddMarks());
+        return;
+    }
+
     const savedQuizId = window.teacherSectionState.selection.grades;
     if (savedQuizId && window._allGradesQuizzesFlat.some(q => q.id == savedQuizId)) {
         selectDesktopGradeQuiz(savedQuizId);
@@ -312,19 +272,94 @@ function renderTeacherGrades(data) {
 }
 
 // ── DESKTOP PANEL: SELECT QUIZ ───────────────────────────────────────────────
+// ─────────────────────────────────────────────
+// DESKTOP PANEL HELPERS
+// (desktop only: the mobile views keep their own markup and styles)
+// ─────────────────────────────────────────────
+function grDpIcon(name, size) {
+    const paths = {
+        plus:  '<path d="M12 5v14M5 12h14"/>',
+        check: '<path d="M20 6 9 17l-5-5"/>'
+    };
+    return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] || ''}</svg>`;
+}
+
+function grPlural(n, word) {
+    return `${n} ${word}${n === 1 ? '' : 's'}`;
+}
+
+function grToast(message) {
+    if (typeof window.showToast === 'function') window.showToast(message);
+}
+
+// Same bands as getGradeBadgeClass: 75+ / 50-74 / below 50.
+function grBand(p) { return p >= 75 ? 'hi' : p >= 50 ? 'mid' : 'lo'; }
+function grBandColor(band) {
+    return band === 'hi' ? '#1ed760' : band === 'mid' ? '#4fd1c5' : band === 'lo' ? '#e74c3c' : 'rgba(255,255,255,0.095)';
+}
+
+/** Whole-number percentage for a learner, or null if no mark is recorded.
+ * Prefers the server's own figure, since that is what learners see. */
+function grPercent(l) {
+    if (l.score === null || l.score === undefined || l.score === '') return null;
+    const server = parseFloat(l.percentage);
+    if (Number.isFinite(server)) return Math.round(server);
+    const s = parseFloat(l.score), t = parseFloat(l.total);
+    return Number.isFinite(s) && t > 0 ? Math.round((s / t) * 100) : null;
+}
+
+function grQuizMeta(quizId) {
+    return (window._allGradesQuizzesFlat || []).find(q => String(q.id) === String(quizId)) || {};
+}
+
+function grEmptyStateHtml() {
+    const count = (window._allGradesQuizzesFlat || []).length;
+    const title = count ? 'Pick an assessment' : 'No assessments yet';
+    const body  = count
+        ? `${grPlural(count, 'assessment')} across your classes. Choose one to enter marks or grade responses.`
+        : 'Add one to record marks for a paper test, an oral, or anything captured outside iSkool.';
+    return `
+        <div class="gr-dp-empty">
+            <h2 class="gr-dp-empty-title">${title}</h2>
+            <p class="gr-dp-empty-body">${body}</p>
+            <button type="button" class="gr-dp-btn gr-dp-btn--primary" onclick="openAddQuizModal()">
+                ${grDpIcon('plus', 14)}Add an assessment
+            </button>
+        </div>`;
+}
+
+function grFocusFirstAddMarks() {
+    const btn = document.querySelector('#gr-main-panel [data-gr="edit"]');
+    if (btn) btn.focus();
+}
+
+// ─────────────────────────────────────────────
+// DESKTOP PANEL: SELECT ASSESSMENT
+// ─────────────────────────────────────────────
 window.selectDesktopGradeQuiz = async function(quizId) {
     document.querySelectorAll('.gr-sidebar-item').forEach(el => el.classList.remove('active'));
     const sidebarItem = document.getElementById(`gr-sidebar-${quizId}`);
     if (sidebarItem) sidebarItem.classList.add('active');
+    const newBtn = document.getElementById('gr-new-btn');
+    if (newBtn) newBtn.classList.remove('active');
 
+    // A different assessment starts with fresh view state.
+    if (String(window._activeDesktopGradeQuizId) !== String(quizId)) {
+        window._grFilter = 'all';
+        window._grOeFilter = 'all';
+        window._grEdit = null;
+        window._grOpenLearners = new Set();
+    }
+    window._grPrevQuizId = null;
     window._activeDesktopGradeQuizId = quizId;
     window.teacherSectionState.selection.grades = quizId;
     window.persistTeacherSectionState();
 
-    const panel  = document.getElementById('gr-main-panel');
+    const panel = document.getElementById('gr-main-panel');
     if (!panel) return;
+    panel.onclick = panel.oninput = panel.onkeydown = panel.onmouseover = panel.onmouseleave = null;
 
-    // Already fetched this quiz this session — render instantly, no re-fetch, no spinner
+    // Already fetched this assessment this session: render instantly.
     const cached = window._teacherGradeQuizCache[quizId];
     if (cached) {
         if (cached.type === 'open_ended') {
@@ -337,24 +372,27 @@ window.selectDesktopGradeQuiz = async function(quizId) {
         return;
     }
 
-    // Show a loading state inside the panel
     panel.innerHTML = `
-        <div class="gr-panel-empty">
-            <svg viewBox="0 0 24 24" width="30" height="30" stroke="#4fd1c5" stroke-width="2" fill="none"
-                class="gr-panel-loading-spinner">
+        <div class="gr-dp-empty" role="status">
+            <svg viewBox="0 0 24 24" width="26" height="26" stroke="#4fd1c5" stroke-width="2" fill="none"
+                class="gr-panel-loading-spinner" aria-hidden="true">
                 <circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="12"></circle>
             </svg>
-            <p>Loading grades...</p>
+            <p class="gr-dp-empty-body">Loading grades&hellip;</p>
         </div>`;
 
     try {
-        const res  = await fetch(`api/teacher/get_quiz_grades.php?quiz_id=${quizId}`);
-        const data = await res.json();
+        // Both requests are independent, so they run together.
+        const [data, resultPayload] = await Promise.all([
+            fetch(`api/teacher/get_quiz_grades.php?quiz_id=${quizId}`).then(r => r.json()),
+            fetch(`api/teacher/get_quiz_results.php?quiz_id=${quizId}`, {
+                headers: { 'X-CSRF-Token': getCsrfToken() }
+            }).then(r => r.json())
+        ]);
         if (data.error) throw new Error(data.error);
-        const resultRes = await fetch(`api/teacher/get_quiz_results.php?quiz_id=${quizId}`, {
-            headers: { 'X-CSRF-Token': getCsrfToken() }
-        });
-        const resultPayload = await resultRes.json();
+        // The teacher moved on while this was loading: do not overwrite what they are looking at.
+        if (String(window._activeDesktopGradeQuizId) !== String(quizId)) return;
+
         const resultData = normalizeQuizResultsPayload(resultPayload);
         if (resultData && resultData.has_open_ended == 1) {
             window.currentOpenEndedQuizData = resultData;
@@ -366,79 +404,325 @@ window.selectDesktopGradeQuiz = async function(quizId) {
             renderGradesInPanel(data, panel);
         }
     } catch (e) {
-        panel.innerHTML = `<div class="gr-panel-empty"><p class="gr-panel-error-text">Error loading grades.</p></div>`;
+        if (String(window._activeDesktopGradeQuizId) !== String(quizId)) return;
+        panel.innerHTML = `
+            <div class="gr-dp-empty">
+                <h2 class="gr-dp-empty-title">Couldn't load grades</h2>
+                <p class="gr-dp-empty-body">Check your connection and try again.</p>
+                <button type="button" class="gr-dp-btn" onclick="selectDesktopGradeQuiz(${Number(quizId)})">Try again</button>
+            </div>`;
     }
 };
 
-function renderGradesInPanel(data, panel) {
-    let html = `
-        <div class="gr-panel-content">
-            <div class="gr-panel-header">
-                <div class="gr-panel-title">${escapeHtml(data.quiz_title)}</div>
-                <div class="gr-panel-meta">${data.learners.length} learner${data.learners.length !== 1 ? 's' : ''}</div>
-            </div>`;
+// ─────────────────────────────────────────────
+// STANDARD ASSESSMENT PANEL (marks entry, inline editing)
+// ─────────────────────────────────────────────
+function grDefaultTotal(learners) {
+    // Most teachers mark everyone out of the same total, so a learner with no mark
+    // yet is offered the total already used for this assessment (else 100).
+    const tally = {};
+    learners.forEach(l => {
+        if (l.score === null || l.score === undefined || l.score === '') return;
+        const t = parseFloat(l.total);
+        if (Number.isFinite(t) && t > 0) tally[t] = (tally[t] || 0) + 1;
+    });
+    const best = Object.keys(tally).sort((a, b) => tally[b] - tally[a])[0];
+    return best !== undefined ? parseFloat(best) : 100;
+}
 
-    if (data.learners.length === 0) {
-        html += `<p class="teacher-empty-state">No learners found in this class.</p>`;
-    } else {
-        html += `<div class="teacher-grades-table-wrapper">
-            <table class="teacher-grades-table">
-                <thead>
-                    <tr>
-                        <th>Learner</th>
-                        <th>Score</th>
-                        <th>Percentage</th>
-                        <th>Edit</th>
-                    </tr>
-                </thead>
-                <tbody>`;
-
-        data.learners.forEach(learner => {
-            const score = learner.score !== null
-                ? `${escapeHtml(learner.score)} / ${escapeHtml(learner.total)}`
-                : '<span class="gr-cell-muted">Not recorded</span>';
-            const perc  = learner.percentage
-                ? `<span class="teacher-grade-badge ${getGradeBadgeClass(learner.percentage)}">${escapeHtml(learner.percentage)}</span>`
-                : '<span class="gr-cell-muted">—</span>';
-
-            html += `
-                <tr>
-                    <td>${escapeHtml(learner.name)}</td>
-                    <td>${score}</td>
-                    <td>${perc}</td>
-                    <td>
-                        <button class="teacher-edit-marks-btn"
-                            data-email="${escapeHtml(learner.email)}" data-name="${escapeHtml(learner.name)}" data-quiz-id="${data.quiz_id}" data-quiz-title="${escapeHtml(data.quiz_title)}" data-score="${escapeHtml(learner.score ?? '')}" data-total="${escapeHtml(learner.total ?? 100)}"
-                            onclick="openEditMarksInPanelFromElement(this)">
-                            Edit
-                        </button>
-                    </td>
-                </tr>`;
-        });
-
-        html += `</tbody></table></div>`;
+function grStatsHtml(learners) {
+    const pcts = learners.map(grPercent).filter(p => p !== null);
+    if (!pcts.length) {
+        return `<p class="gr-dp-nomarks">No marks recorded yet. Choose <b>Add marks</b> beside a learner to start.</p>`;
     }
+    const avg = Math.round(pcts.reduce((a, b) => a + b, 0) / pcts.length);
+    const counts = { hi: 0, mid: 0, lo: 0, none: 0 };
+    learners.forEach(l => { const p = grPercent(l); counts[p === null ? 'none' : grBand(p)]++; });
+    const items = [
+        ['hi',   '75% and above', grBandColor('hi')],
+        ['mid',  '50 to 74%',     grBandColor('mid')],
+        ['lo',   'Below 50%',     grBandColor('lo')],
+        ['none', 'Not recorded',  grBandColor('none')]
+    ];
+    const segs = items.map(([k, label, col], i) => counts[k]
+        ? `<i data-k="${i}" style="--g:${counts[k]};--c:${col};" title="${label}: ${counts[k]}"></i>` : '').join('');
+    const legend = items.map(([k, label, col], i) => `
+        <li data-k="${i}" class="${counts[k] ? '' : 'is-zero'}" style="--c:${col};">
+            <span class="gr-dp-sq"></span>${label}<span class="gr-dp-ct">${counts[k]}</span>
+        </li>`).join('');
+    const aria = items.map(([k, label]) => `${label} ${counts[k]}`).join(', ');
+    return `
+        <div class="gr-dp-stats">
+            <div><b>${avg}%</b><span>Class average</span></div>
+            <div><b>${Math.max(...pcts)}%</b><span>Highest</span></div>
+            <div><b>${Math.min(...pcts)}%</b><span>Lowest</span></div>
+        </div>
+        <div class="gr-dp-dist">
+            <div class="gr-dp-dbar" role="img" aria-label="${escapeHtml(aria)}">${segs}</div>
+            <ul class="gr-dp-dlg">${legend}</ul>
+        </div>`;
+}
 
-    html += `</div>`;
-    panel.innerHTML = html;
+function grStdRowsHtml(data) {
+    const learners = data.learners || [];
+    const filter = window._grFilter || 'all';
+    const list = learners.filter(l => filter === 'all' || l.score === null || l.score === undefined);
+    if (!list.length) {
+        return `<tr><td colspan="4" class="gr-dp-table-empty">${filter === 'out' ? 'Every learner has a mark.' : 'No learners found in this class.'}</td></tr>`;
+    }
+    const defaultTotal = grDefaultTotal(learners);
+    return list.map(l => {
+        const p = grPercent(l);
+        const email = escapeHtml(l.email);
+        const name = escapeHtml(l.name);
+        const pcHtml = p === null
+            ? '<span class="gr-dp-mut">&mdash;</span>'
+            : `<span class="gr-dp-pc"><i class="gr-dp-dot" style="--c:${grBandColor(grBand(p))};"></i>${p}%</span>`;
 
-    // Swap the info rail to reflect this assessment's grading progress,
-    // instead of leaving it on the generic page-level copy. Runs on
-    // every render (fresh fetch, cache hit, or "Back" from Edit Marks)
-    // since they all call this function.
-    if (typeof updateInfoRail === 'function') {
-        const ungraded = data.learners.filter(l => l.score === null).length;
-        if (ungraded > 0) {
-            updateInfoRail('gr-rail', 'Grading In Progress', `
-                <p><strong>${ungraded}</strong> of ${data.learners.length} learners still have no score recorded for ${escapeHtml(data.quiz_title)}.</p>
-                <p>Marks stay hidden from learners until you toggle <strong>Publish Marks</strong> for this assessment.</p>
-            `);
-        } else {
-            updateInfoRail('gr-rail', 'Fully Graded', `
-                <p>Every learner in this class has a recorded score for ${escapeHtml(data.quiz_title)}.</p>
-                <p>Toggle <strong>Publish Marks</strong> when you're ready for learners to see their results.</p>
-            `);
+        if (window._grEdit !== null && String(window._grEdit) === String(l.email)) {
+            const total = formatOpenEndedScore(l.total !== null && l.total !== undefined && l.total !== '' ? l.total : defaultTotal);
+            return `
+                <tr data-email="${email}">
+                    <td class="gr-dp-nm">${name}</td>
+                    <td><span class="gr-dp-ed">
+                        <input class="gr-dp-in gr-dp-in--s gr-dp-ed-in" id="gr-e-score" type="number" min="0" step="0.01"
+                            value="${escapeHtml(formatOpenEndedScore(l.score))}" placeholder="0" aria-label="Score for ${name}">
+                        /
+                        <input class="gr-dp-in gr-dp-in--s gr-dp-ed-in" id="gr-e-total" type="number" min="0" step="0.01"
+                            value="${escapeHtml(total)}" aria-label="Total marks">
+                    </span></td>
+                    <td><span class="gr-dp-pc" id="gr-e-pc">${pcHtml}</span></td>
+                    <td>
+                        <button type="button" class="gr-dp-btn gr-dp-btn--sm gr-dp-btn--ghost" data-gr="cancel">Cancel</button>
+                        <button type="button" class="gr-dp-btn gr-dp-btn--sm gr-dp-btn--primary" data-gr="save" data-email="${email}">Save</button>
+                    </td>
+                </tr>
+                <tr class="gr-dp-er" id="gr-e-er" hidden><td colspan="4"></td></tr>`;
         }
+
+        const recorded = l.score !== null && l.score !== undefined && l.score !== '';
+        const flash = window._grFlash && String(window._grFlash) === String(l.email) ? ' is-flash' : '';
+        return `
+            <tr class="${flash.trim()}" data-email="${email}">
+                <td class="gr-dp-nm">${name}</td>
+                <td>${recorded
+                    ? `${escapeHtml(formatOpenEndedScore(l.score))} / ${escapeHtml(formatOpenEndedScore(l.total))}`
+                    : '<span class="gr-dp-mut">Not recorded</span>'}</td>
+                <td>${pcHtml}</td>
+                <td><button type="button" class="gr-dp-btn gr-dp-btn--sm gr-dp-btn--ghost" data-gr="edit" data-email="${email}">${recorded ? 'Edit' : 'Add marks'}</button></td>
+            </tr>`;
+    }).join('');
+}
+
+function grUpdateStandardRail(data) {
+    if (typeof updateInfoRail !== 'function') return;
+    const learners = data.learners || [];
+    const ungraded = learners.filter(l => l.score === null || l.score === undefined).length;
+    if (ungraded > 0) {
+        updateInfoRail('gr-rail', 'Grading In Progress', `
+            <p><strong>${ungraded}</strong> of ${learners.length} learners still have no score recorded for ${escapeHtml(data.quiz_title)}.</p>
+            <p>Marks stay hidden from learners until you toggle <strong>Publish Marks</strong> for this assessment.</p>
+        `);
+    } else {
+        updateInfoRail('gr-rail', 'Fully Graded', `
+            <p>Every learner in this class has a recorded score for ${escapeHtml(data.quiz_title)}.</p>
+            <p>Toggle <strong>Publish Marks</strong> when you're ready for learners to see their results.</p>
+        `);
+    }
+}
+
+function renderGradesInPanel(data, panel) {
+    const learners = data.learners || [];
+    const quizId = data.quiz_id != null ? data.quiz_id : window._activeDesktopGradeQuizId;
+    const same = String(panel.dataset.grQuiz) === String(quizId);
+    const keepTop = same ? panel.scrollTop : 0;
+    panel.dataset.grQuiz = quizId;
+    window.currentQuizData = data;
+
+    const meta = grQuizMeta(quizId);
+    const recorded = learners.filter(l => l.score !== null && l.score !== undefined).length;
+    const filter = window._grFilter || 'all';
+
+    panel.innerHTML = `
+        <div class="gr-dp${same ? ' gr-dp--still' : ''}">
+            <p class="gr-dp-crumb">${escapeHtml(meta.class_name || '')}${meta.term ? ` &middot; Term ${escapeHtml(meta.term)}` : ''}</p>
+            <h2 class="gr-dp-title">${escapeHtml(data.quiz_title)}</h2>
+            <div class="gr-dp-meta">
+                <span class="gr-dp-pill" id="gr-std-pill">${recorded} of ${learners.length} recorded</span>
+                ${meta.created_at ? `<span>Created ${escapeHtml(meta.created_at)}</span>` : ''}
+            </div>
+            ${learners.length ? `
+            <div id="gr-std-top">${grStatsHtml(learners)}</div>
+            <section class="gr-dp-section">
+                <h3 class="gr-dp-h">Learners</h3>
+                <div class="gr-dp-tools">
+                    <div class="gr-dp-seg" id="gr-std-filter" role="group" aria-label="Filter learners">
+                        <button type="button" data-gr="filter" data-filter="all" aria-pressed="${filter === 'all'}">All ${learners.length}</button>
+                        <button type="button" data-gr="filter" data-filter="out" aria-pressed="${filter === 'out'}">Not recorded ${learners.length - recorded}</button>
+                    </div>
+                </div>
+                <table class="gr-dp-table" aria-label="Learner marks">
+                    <colgroup><col class="gr-dp-c-name"><col class="gr-dp-c-score"><col class="gr-dp-c-pct"><col></colgroup>
+                    <thead><tr><th scope="col">Learner</th><th scope="col">Score</th><th scope="col">Percentage</th><th scope="col"><span class="gr-dp-sr">Action</span></th></tr></thead>
+                    <tbody id="gr-std-rows">${grStdRowsHtml(data)}</tbody>
+                </table>
+            </section>` : `<p class="gr-dp-nomarks">No learners found in this class.</p>`}
+        </div>`;
+
+    panel.scrollTop = keepTop;
+    grWireStandard(panel);
+    grUpdateStandardRail(data);
+}
+
+/** Redraws only the parts that change, so the scroll position and the page never jump. */
+function grRefreshStandard() {
+    const data = window.currentQuizData;
+    if (!data) return;
+    const learners = data.learners || [];
+    const top = document.getElementById('gr-std-top');
+    const rows = document.getElementById('gr-std-rows');
+    if (!top || !rows) return;
+    const recorded = learners.filter(l => l.score !== null && l.score !== undefined).length;
+    top.innerHTML = grStatsHtml(learners);
+    rows.innerHTML = grStdRowsHtml(data);
+    const pill = document.getElementById('gr-std-pill');
+    if (pill) pill.textContent = `${recorded} of ${learners.length} recorded`;
+    const filter = window._grFilter || 'all';
+    document.querySelectorAll('#gr-std-filter button').forEach(b => {
+        b.setAttribute('aria-pressed', String(b.dataset.filter === filter));
+    });
+    const outBtn = document.querySelector('#gr-std-filter [data-filter="out"]');
+    if (outBtn) outBtn.textContent = `Not recorded ${learners.length - recorded}`;
+    grUpdateStandardRail(data);
+}
+
+function grWireStandard(panel) {
+    panel.onclick = function(e) {
+        const b = e.target.closest('[data-gr]');
+        if (!b || !panel.contains(b)) return;
+        const act = b.dataset.gr;
+        if (act === 'filter') {
+            window._grFilter = b.dataset.filter;
+            window._grEdit = null;
+            grRefreshStandard();
+        } else if (act === 'edit') {
+            window._grEdit = b.dataset.email;
+            grRefreshStandard();
+            const sc = document.getElementById('gr-e-score');
+            if (sc) { sc.focus(); sc.select(); }
+        } else if (act === 'cancel') {
+            const email = window._grEdit;
+            window._grEdit = null;
+            grRefreshStandard();
+            const back = Array.from(document.querySelectorAll('#gr-std-rows [data-gr="edit"]')).find(x => x.dataset.email === email);
+            if (back) back.focus();
+        } else if (act === 'save') {
+            grSaveRow(b.dataset.email);
+        }
+    };
+    // live percentage while typing
+    panel.oninput = function(e) {
+        if (!e.target.classList || !e.target.classList.contains('gr-dp-ed-in')) return;
+        const sc = document.getElementById('gr-e-score'), tt = document.getElementById('gr-e-total');
+        const pc = document.getElementById('gr-e-pc'), er = document.getElementById('gr-e-er');
+        const s = parseFloat(sc.value), t = parseFloat(tt.value);
+        const p = Number.isFinite(s) && t > 0 ? Math.round((s / t) * 100) : null;
+        if (pc) pc.innerHTML = p === null ? '<span class="gr-dp-mut">&mdash;</span>'
+            : `<span class="gr-dp-pc"><i class="gr-dp-dot" style="--c:${grBandColor(grBand(p))};"></i>${p}%</span>`;
+        if (er) er.hidden = true;
+    };
+    panel.onkeydown = function(e) {
+        if (!e.target.classList || !e.target.classList.contains('gr-dp-ed-in')) return;
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const save = document.querySelector('#gr-std-rows [data-gr="save"]');
+            if (save) grSaveRow(save.dataset.email);
+        } else if (e.key === 'Escape') {
+            const cancel = document.querySelector('#gr-std-rows [data-gr="cancel"]');
+            if (cancel) cancel.click();
+        }
+    };
+    // hover a bar segment or a legend item: that band lights up in both
+    const clear = () => panel.querySelectorAll('.gr-dp-dist.is-hl').forEach(q => {
+        q.classList.remove('is-hl');
+        q.querySelectorAll('.is-on').forEach(x => x.classList.remove('is-on'));
+    });
+    panel.onmouseover = function(e) {
+        clear();
+        const t = e.target.closest ? e.target.closest('.gr-dp-dist [data-k]') : null;
+        if (!t) return;
+        const q = t.closest('.gr-dp-dist');
+        q.classList.add('is-hl');
+        q.querySelectorAll(`[data-k="${t.dataset.k}"]`).forEach(x => x.classList.add('is-on'));
+    };
+    panel.onmouseleave = clear;
+}
+
+async function grSaveRow(email) {
+    const data = window.currentQuizData;
+    if (!data) return;
+    const quizId = data.quiz_id != null ? data.quiz_id : window._activeDesktopGradeQuizId;
+    const scoreEl = document.getElementById('gr-e-score');
+    const totalEl = document.getElementById('gr-e-total');
+    const er = document.getElementById('gr-e-er');
+    if (!scoreEl || !totalEl) return;
+
+    const fail = msg => { if (er) { er.hidden = false; er.firstElementChild.textContent = msg; } };
+    const score = scoreEl.value.trim(), total = totalEl.value.trim();
+    if (score === '') return fail('Please enter a score.');
+    if (parseFloat(score) < 0) return fail("The score can't be negative.");
+    if (!total || !(parseFloat(total) > 0)) return fail('Please enter the total.');
+
+    const fd = new FormData();
+    fd.append('quiz_id',    quizId);
+    fd.append('user_email', email);
+    fd.append('score',      score);
+    fd.append('total',      total);
+
+    const saveBtn = document.querySelector('#gr-std-rows [data-gr="save"]');
+    const hideLoader = window.showTeacherButtonLoader(saveBtn);
+    try {
+        const res = await fetch('api/teacher/save_marks.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd });
+        const result = await res.json();
+        if (!result.success) { fail(result.error || 'Failed to save marks.'); return; }
+
+        // Re-read the grades so the percentage matches what learners will see.
+        let fresh = null;
+        try {
+            const r2 = await fetch(`api/teacher/get_quiz_grades.php?quiz_id=${quizId}`);
+            const f = await r2.json();
+            if (f && !f.error && Array.isArray(f.learners)) fresh = f;
+        } catch (_) { /* fall back to the local update below */ }
+
+        const idx = (data.learners || []).findIndex(l => String(l.email) === String(email));
+        if (fresh) {
+            window._teacherGradeQuizCache[quizId] = { type: 'standard', data: fresh };
+            window.currentQuizData = fresh;
+        } else if (idx !== -1) {
+            data.learners[idx].score = parseFloat(score);
+            data.learners[idx].total = parseFloat(total);
+            data.learners[idx].percentage = null;
+            delete window._teacherGradeQuizCache[quizId];   // so the next visit re-reads it
+        }
+
+        window._grEdit = null;
+        window._grFlash = email;
+        grRefreshStandard();
+        setTimeout(() => { window._grFlash = null; }, 1500);
+        grToast('Marks saved');
+
+        // Fast data entry: land on the next learner who still has no mark.
+        const learners = (window.currentQuizData.learners || []);
+        const here = learners.findIndex(l => String(l.email) === String(email));
+        const next = learners.find((l, i) => i > here && (l.score === null || l.score === undefined));
+        if (next && (window._grFilter || 'all') === 'all') {
+            const btn = Array.from(document.querySelectorAll('#gr-std-rows [data-gr="edit"]')).find(x => x.dataset.email === String(next.email));
+            if (btn) btn.focus();
+        }
+    } catch (e) {
+        fail('Connection error. Please try again.');
+    } finally {
+        hideLoader();
     }
 }
 
@@ -733,7 +1017,260 @@ function formatOpenEndedScore(value) {
     return Number.isFinite(parsed) ? parsed.toString() : '';
 }
 
+// ─────────────────────────────────────────────
+// OPEN-ENDED GRADING PANEL
+// ─────────────────────────────────────────────
 function renderOpenEndedGrades(data, target, isPanel) {
+    if (!target) return;
+    // Anything outside the desktop panel keeps the original renderer.
+    if (!isPanel) return renderOpenEndedGradesClassic(data, target, false);
+    renderOpenEndedPanel(data, target);
+}
+
+function grOeRowsHtml(data) {
+    const results = data.results || [];
+    const filter = window._grOeFilter || 'all';
+    const open = window._grOpenLearners || new Set();
+    const list = results.filter(r => filter === 'all' || !r.is_fully_graded);
+    if (!results.length) return `<div class="gr-dp-lr"><div class="gr-dp-lrt gr-dp-lrt--note">No submitted attempts found for this assessment.</div></div>`;
+    if (!list.length) return `<div class="gr-dp-lr"><div class="gr-dp-lrt gr-dp-lrt--note">Everyone is fully graded.</div></div>`;
+
+    return list.map(learner => {
+        const attemptId = escapeHtml(learner.attempt_id);
+        const questions = learner.open_ended || [];
+        const pending = questions.filter(q => !q.grade).length;
+        const full = !!learner.is_fully_graded;
+        const isOpen = open.has(String(learner.attempt_id));
+
+        const qHtml = questions.map(q => {
+            const saved = q.grade ? formatOpenEndedScore(q.grade.score) : '';
+            const fb = q.grade && q.grade.feedback ? q.grade.feedback : '';
+            const pts = formatOpenEndedScore(q.points);
+            const qid = escapeHtml(q.question_id);
+            return `
+                <div class="gr-dp-qb">
+                    <div class="gr-dp-qh"><p class="gr-dp-qt">${escapeHtml(q.question_text || '')}</p><span class="gr-dp-qpt">${grPlural(Number(pts) || 0, 'point')}</span></div>
+                    <blockquote class="gr-dp-ans${q.answer_text ? '' : ' is-none'}">${escapeHtml(q.answer_text || 'No answer submitted.')}</blockquote>
+                    <div class="gr-dp-gg">
+                        <label class="gr-dp-gl">Score
+                            <span class="gr-dp-scw"><input type="number" min="0" max="${escapeHtml(q.points)}" step="0.01"
+                                class="gr-dp-in gr-dp-score" id="oe-score-${attemptId}-${qid}" value="${escapeHtml(saved)}"><span>/ ${escapeHtml(pts)}</span></span>
+                        </label>
+                        <label class="gr-dp-gl">Feedback
+                            <textarea class="gr-dp-in gr-dp-fb" id="oe-feedback-${attemptId}-${qid}" rows="2">${escapeHtml(fb)}</textarea>
+                        </label>
+                        <button type="button" class="gr-dp-btn gr-dp-btn--sm" data-action="save-open-ended-grade"
+                            data-attempt-id="${attemptId}" data-question-id="${qid}" data-points="${escapeHtml(q.points)}">Save</button>
+                    </div>
+                    <div class="gr-dp-qmsg" id="oe-msg-${attemptId}-${qid}">${q.grade
+                        ? `<p class="gr-dp-sv">${grDpIcon('check', 14)}Saved: ${escapeHtml(saved || '0')} / ${escapeHtml(pts)}</p>`
+                        : `<p class="gr-dp-nd"><i class="gr-dp-dot" style="--c:#f3a93c;"></i>Needs grading</p>`}</div>
+                </div>`;
+        }).join('');
+
+        return `
+            <div class="gr-dp-lr" data-attempt="${attemptId}">
+                <div class="gr-dp-lrt">
+                    <div class="gr-dp-who"><b>${escapeHtml(learner.name || learner.user_email || 'Learner')}</b>
+                        <small>${full ? `Score ${escapeHtml(formatOpenEndedScore(learner.score) || '0')} / ${escapeHtml(formatOpenEndedScore(learner.total) || '0')}` : 'Score pending'}</small></div>
+                    <span class="gr-dp-st"><i class="gr-dp-dot" style="--c:${full ? '#22c55e' : '#f3a93c'};"></i>${full ? 'Fully graded' : `${grPlural(pending, 'question')} to grade`}</span>
+                    <button type="button" class="gr-dp-btn gr-dp-btn--sm" data-gr="toggle" data-attempt="${attemptId}" aria-expanded="${isOpen}">${isOpen ? 'Hide responses' : full ? 'Review responses' : 'Grade responses'}</button>
+                </div>
+                <div class="gr-dp-lq" ${isOpen ? '' : 'hidden'}>${qHtml}</div>
+            </div>`;
+    }).join('');
+}
+
+function renderOpenEndedPanel(data, panel) {
+    const quizId = data.quiz_id;
+    const same = String(panel.dataset.grQuiz) === String(quizId);
+    const keepTop = same ? panel.scrollTop : 0;
+    panel.dataset.grQuiz = quizId;
+    window.currentOpenEndedQuizData = data;
+
+    const results = data.results || [];
+    const fullyGraded = data.quiz_fully_graded === true || data.quiz_fully_graded === 1;
+    const gradedCount = results.filter(r => r.is_fully_graded).length;
+    const pendingLearners = results.length - gradedCount;
+    const releaseDisabled = data.has_open_ended == 1 && !fullyGraded;
+    const marksPublished = data.publish_marks == 1;
+    const pct = results.length ? Math.round((gradedCount / results.length) * 100) : 0;
+    const meta = grQuizMeta(quizId);
+    const filter = window._grOeFilter || 'all';
+    const reason = 'Grade all open-ended responses before releasing marks.';
+
+    panel.innerHTML = `
+        <div class="gr-dp${same ? ' gr-dp--still' : ''}">
+            <p class="gr-dp-crumb">${escapeHtml(meta.class_name || '')}${meta.term ? ` &middot; Term ${escapeHtml(meta.term)}` : ''}</p>
+            <div class="gr-dp-head">
+                <div class="gr-dp-head-main">
+                    <h2 class="gr-dp-title">${escapeHtml(data.quiz_title || 'Assessment Results')}</h2>
+                    <div class="gr-dp-meta">
+                        <span class="gr-dp-pill"><i class="gr-dp-dot" style="--c:${marksPublished ? '#22c55e' : '#5f656e'};"></i>${marksPublished ? 'Marks released' : 'Marks hidden from learners'}</span>
+                        <span>${grPlural(results.length, 'submitted learner')}</span>
+                    </div>
+                </div>
+                <div class="gr-dp-actions">
+                    <button type="button" class="gr-dp-btn${marksPublished ? '' : ' gr-dp-btn--primary'}" data-action="toggle-open-ended-publish"
+                        data-quiz-id="${escapeHtml(quizId)}" ${releaseDisabled ? `disabled title="${reason}"` : ''}>${marksPublished ? 'Unpublish marks' : 'Release marks'}</button>
+                </div>
+            </div>
+            <div id="oeReleaseMessage" class="gr-dp-relmsg" role="status"></div>
+
+            <div class="gr-dp-progwrap">
+                <div class="gr-dp-prog"><div class="gr-dp-big">${gradedCount} of ${results.length}<span>learners fully graded</span></div></div>
+                <div class="gr-dp-track"><i style="width:${pct}%;--c:${pendingLearners ? '#4fd1c5' : '#22c55e'};"></i></div>
+                ${releaseDisabled ? `<p class="gr-dp-note gr-dp-note--warn">Grade every open-ended response before releasing marks.</p>` : ''}
+            </div>
+
+            <section class="gr-dp-section">
+                <h3 class="gr-dp-h">Learners</h3>
+                <div class="gr-dp-tools">
+                    <div class="gr-dp-seg" id="gr-oe-filter" role="group" aria-label="Filter learners">
+                        <button type="button" data-gr="filter" data-filter="all" aria-pressed="${filter === 'all'}">All ${results.length}</button>
+                        <button type="button" data-gr="filter" data-filter="out" aria-pressed="${filter === 'out'}">Needs grading ${pendingLearners}</button>
+                    </div>
+                </div>
+                <div class="gr-dp-lrs" id="gr-oe-rows">${grOeRowsHtml(data)}</div>
+            </section>
+        </div>`;
+
+    panel.scrollTop = keepTop;
+    grWireOpenEnded(panel);
+
+    // Swap the info rail to reflect this assessment's grading/publish state.
+    if (typeof updateInfoRail === 'function') {
+        if (pendingLearners > 0) {
+            updateInfoRail('gr-rail', 'Manual Grading Needed', `
+                <p><strong>${pendingLearners}</strong> learner${pendingLearners !== 1 ? 's' : ''} still ${pendingLearners !== 1 ? 'have' : 'has'} open-ended responses waiting to be graded for ${escapeHtml(data.quiz_title || 'this assessment')}.</p>
+                <p>Marks can't be released until every learner is fully graded.</p>
+            `);
+        } else if (marksPublished) {
+            updateInfoRail('gr-rail', 'Marks Released', `
+                <p>All responses are graded and learners can currently see their results for ${escapeHtml(data.quiz_title || 'this assessment')}.</p>
+                <p>Use <strong>Unpublish marks</strong> if you need to hide them again, e.g. to fix a grading issue.</p>
+            `);
+        } else {
+            updateInfoRail('gr-rail', 'Ready to Release', `
+                <p>Every learner is fully graded for ${escapeHtml(data.quiz_title || 'this assessment')}, but marks aren't released yet.</p>
+                <p>Use <strong>Release marks</strong> when you're ready for learners to see their results.</p>
+            `);
+        }
+    }
+}
+
+function grWireOpenEnded(panel) {
+    panel.onclick = function(e) {
+        const b = e.target.closest('[data-gr]');
+        if (!b || !panel.contains(b)) return;
+        if (b.dataset.gr === 'filter') {
+            window._grOeFilter = b.dataset.filter;
+            const data = window.currentOpenEndedQuizData;
+            if (!data) return;
+            document.getElementById('gr-oe-rows').innerHTML = grOeRowsHtml(data);
+            document.querySelectorAll('#gr-oe-filter button').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.filter === window._grOeFilter)));
+        } else if (b.dataset.gr === 'toggle') {
+            const row = b.closest('.gr-dp-lr');
+            const box = row && row.querySelector('.gr-dp-lq');
+            if (!box) return;
+            const opening = box.hidden;
+            box.hidden = !opening;
+            const id = String(b.dataset.attempt);
+            if (opening) window._grOpenLearners.add(id); else window._grOpenLearners.delete(id);
+            b.setAttribute('aria-expanded', String(opening));
+            const learner = ((window.currentOpenEndedQuizData || {}).results || []).find(r => String(r.attempt_id) === id);
+            b.textContent = opening ? 'Hide responses' : (learner && learner.is_fully_graded ? 'Review responses' : 'Grade responses');
+        }
+    };
+    // Enter in a score box (or Ctrl/Cmd+Enter in feedback) saves that question.
+    panel.onkeydown = function(e) {
+        if (e.key !== 'Enter') return;
+        const t = e.target;
+        const isScore = t.classList && t.classList.contains('gr-dp-score');
+        const isFb = t.classList && t.classList.contains('gr-dp-fb') && (e.ctrlKey || e.metaKey);
+        if (!isScore && !isFb) return;
+        e.preventDefault();
+        const block = t.closest('.gr-dp-qb');
+        const save = block && block.querySelector('[data-action="save-open-ended-grade"]');
+        if (save) save.click();
+    };
+}
+
+/** After a grade is saved, move to the next question still needing a grade in the same learner. */
+function grFocusNextQuestion(attemptId, questionId) {
+    const row = Array.from(document.querySelectorAll('#gr-oe-rows .gr-dp-lr')).find(r => r.dataset.attempt === String(attemptId));
+    if (!row) return;
+    const blocks = Array.from(row.querySelectorAll('.gr-dp-qb'));
+    const here = blocks.findIndex(b => b.querySelector('[data-action="save-open-ended-grade"]').dataset.questionId === String(questionId));
+    const todo = blocks.find((b, i) => i > here && b.querySelector('.gr-dp-nd'));
+    const target = todo ? todo.querySelector('.gr-dp-score') : (blocks[here] && blocks[here].querySelector('[data-action="save-open-ended-grade"]'));
+    if (target) target.focus();
+}
+
+async function saveOpenEndedGradePanel(button) {
+    const attemptId = button.dataset.attemptId;
+    const questionId = button.dataset.questionId;
+    const max = parseFloat(button.dataset.points);
+    const scoreEl = document.getElementById(`oe-score-${attemptId}-${questionId}`);
+    const fbEl = document.getElementById(`oe-feedback-${attemptId}-${questionId}`);
+    const msg = document.getElementById(`oe-msg-${attemptId}-${questionId}`);
+    const showErr = text => { if (msg) msg.innerHTML = `<p class="gr-dp-qerr">${escapeHtml(text)}</p>`; };
+
+    const score = scoreEl ? scoreEl.value.trim() : '';
+    if (score === '') return showErr('Please enter a score.');
+    const n = parseFloat(score);
+    if (!Number.isFinite(n) || n < 0 || (Number.isFinite(max) && n > max)) {
+        return showErr(`The score must be between 0 and ${formatOpenEndedScore(max)}.`);
+    }
+
+    const quizId = window.currentOpenEndedQuizData?.quiz_id;
+    const fd = new FormData();
+    fd.append('attempt_id', attemptId);
+    fd.append('question_id', questionId);
+    fd.append('score', score);
+    fd.append('feedback', fbEl ? fbEl.value : '');
+
+    const hideLoader = window.showTeacherButtonLoader(button);
+    try {
+        const res = await fetch('api/teacher/grade_open_ended.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd });
+        const data = await res.json();
+        if (data.status !== 'success') throw new Error(data.message || 'Unable to save grade.');
+        // The panel is redrawn from fresh data; open learners and scroll position are kept.
+        await refreshOpenEndedGrades(quizId, 'panel');
+        grToast('Grade saved');
+        grFocusNextQuestion(attemptId, questionId);
+    } catch (e) {
+        showErr(e.message || 'Unable to save grade.');
+    } finally {
+        hideLoader();
+    }
+}
+
+async function toggleOpenEndedPublishPanel(button) {
+    const quizId = parseInt(button.dataset.quizId, 10);
+    const message = document.getElementById('oeReleaseMessage');
+    const hideLoader = window.showTeacherButtonLoader(button);
+    if (message) { message.textContent = ''; message.classList.remove('is-error'); }
+    try {
+        const res = await fetch('api/teacher/toggle_publish_marks.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrfToken() },
+            body: JSON.stringify({ quiz_id: quizId })
+        });
+        const data = await res.json();
+        if (data.status !== 'success' && !data.success) throw new Error(data.message || 'Unable to release marks.');
+        const released = data.newStatus == 1 || (data.data && data.data.newStatus == 1);
+        await refreshOpenEndedGrades(quizId, 'panel').catch(() => {});
+        grToast(released ? 'Marks released' : 'Marks unpublished');
+    } catch (e) {
+        if (message) { message.textContent = e.message || 'Unable to release marks.'; message.classList.add('is-error'); }
+        else alert(e.message || 'Unable to release marks.');
+    } finally {
+        hideLoader();
+    }
+}
+
+function renderOpenEndedGradesClassic(data, target, isPanel) {
     if (!target) return;
     const results = data.results || [];
     const fullyGraded = data.quiz_fully_graded === true || data.quiz_fully_graded === 1;
@@ -875,6 +1412,7 @@ async function refreshOpenEndedGrades(quizId, targetMode) {
 }
 
 async function saveOpenEndedGrade(button) {
+    if (button.closest('.gr-dp')) return saveOpenEndedGradePanel(button);
     const attemptId = button.dataset.attemptId;
     const questionId = button.dataset.questionId;
     const score = document.getElementById(`oe-score-${attemptId}-${questionId}`)?.value ?? '';
@@ -908,6 +1446,7 @@ async function saveOpenEndedGrade(button) {
 
 async function toggleOpenEndedPublish(button) {
     if (button.disabled) return;
+    if (button.closest('.gr-dp')) return toggleOpenEndedPublishPanel(button);
     const quizId = parseInt(button.dataset.quizId, 10);
     const message = document.getElementById('oeReleaseMessage');
     const hideButtonLoader = window.showTeacherButtonLoader(button);
@@ -1093,63 +1632,156 @@ window.saveMarksFromElement = function(el) {
 };
 
 // ─────────────────────────────────────────────
-// ADD QUIZ MODAL
+// ADD ASSESSMENT (form opens in the desktop panel)
 // ─────────────────────────────────────────────
-async function loadGradesClasses() {
+async function loadGradesClasses(preferredClassName) {
+    const sel = document.getElementById('quizClass');
     try {
         const res  = await fetch('api/teacher/get_classes.php');
         const data = await res.json();
-        const sel  = document.getElementById('quizClass');
-        if (!sel) return;
+        const el   = document.getElementById('quizClass');
+        if (!el) return;
+        el.innerHTML = '<option value="">Choose a class</option>';
         data.forEach(c => {
             const opt = document.createElement('option');
             opt.value = c.id;
             opt.textContent = c.name;
-            sel.appendChild(opt);
+            el.appendChild(opt);
         });
+        // Adding several assessments to one class is the common case, so the
+        // class of the assessment you were just looking at is preselected.
+        const match = preferredClassName && data.find(c => c.name === preferredClassName);
+        if (match) el.value = String(match.id);
+        else if (data.length === 1) el.value = String(data[0].id);
     } catch (e) {
         console.error('Failed to load classes', e);
+        if (sel) sel.innerHTML = '<option value="">Couldn\'t load classes</option>';
+        const err = document.getElementById('addQuizError');
+        if (err) { err.textContent = "Couldn't load your classes. Close this form and try again."; err.style.display = 'block'; }
     }
 }
 
 window.toggleWeightField = function() {
-    const cb        = document.getElementById('quizSummative');
+    const cb = document.getElementById('quizSummative');
     const container = document.getElementById('weightContainer');
-    if (container) container.style.display = cb.checked ? 'block' : 'none';
+    if (!cb || !container) return;
+    container.hidden = !cb.checked;
+    if (cb.checked) { const w = document.getElementById('quizWeight'); if (w) w.focus(); }
 };
 
 window.openAddQuizModal = function() {
-    const modal = document.getElementById('addQuizModal');
-    if (modal) modal.style.display = 'flex';
+    const panel = document.getElementById('gr-main-panel');
+    if (!panel) return;
+
+    // Remember what was open so Cancel can go back to it.
+    if (!panel.querySelector('.gr-dp-form') && window._activeDesktopGradeQuizId != null) {
+        window._grPrevQuizId = window._activeDesktopGradeQuizId;
+    }
+    window._activeDesktopGradeQuizId = null;   // ignore any load still in flight
+    document.querySelectorAll('.gr-sidebar-item').forEach(el => el.classList.remove('active'));
     const newBtn = document.getElementById('gr-new-btn');
     if (newBtn) newBtn.classList.add('active');
+
+    const prev = grQuizMeta(window._grPrevQuizId);
+    delete panel.dataset.grQuiz;
+    panel.onclick = panel.oninput = panel.onmouseover = panel.onmouseleave = null;
+
+    panel.innerHTML = `
+        <div class="gr-dp gr-dp-form">
+            <p class="gr-dp-crumb">Grades</p>
+            <h2 class="gr-dp-title">Add an assessment</h2>
+            <p class="gr-dp-lede">For marks captured outside iSkool, like a paper test or an oral. You'll enter each learner's mark next.</p>
+
+            <section class="gr-dp-section">
+                <h3 class="gr-dp-h">Details</h3>
+                <div class="gr-dp-fld gr-dp-fld--first">
+                    <label class="gr-dp-lbl" for="quizTitle">Title</label>
+                    <input type="text" id="quizTitle" class="gr-dp-in" placeholder="e.g. Chapter 3 Test" autocomplete="off">
+                </div>
+                <div class="gr-dp-fld">
+                    <label class="gr-dp-lbl" for="quizClass">Class</label>
+                    <select id="quizClass" class="gr-dp-in"><option value="">Loading classes&hellip;</option></select>
+                </div>
+            </section>
+
+            <section class="gr-dp-section">
+                <h3 class="gr-dp-h">Term mark</h3>
+                <div class="gr-dp-rows">
+                    <div class="gr-dp-row">
+                        <div>
+                            <label class="gr-dp-rt" for="quizSummative">Counts toward the term mark</label>
+                            <p class="gr-dp-rs">Include this assessment when the term mark is calculated.</p>
+                        </div>
+                        <input type="checkbox" id="quizSummative" class="gr-dp-switch" role="switch" onchange="toggleWeightField()">
+                    </div>
+                    <div id="weightContainer" class="gr-dp-wrow" hidden>
+                        <label class="gr-dp-lbl" for="quizWeight">Weight<span class="gr-dp-opt">Optional</span></label>
+                        <div class="gr-dp-wi"><input type="number" id="quizWeight" class="gr-dp-in" min="0" max="100" step="0.1" placeholder="30" inputmode="decimal"><span>%</span></div>
+                        <p class="gr-dp-hint">Its share of the term mark, up to 100%.</p>
+                    </div>
+                </div>
+            </section>
+
+            <div class="gr-dp-formactions">
+                <div id="addQuizError" class="gr-dp-err" role="alert"></div>
+                <button type="button" class="gr-dp-btn" onclick="closeAddQuizModal()">Cancel</button>
+                <button type="button" class="gr-dp-btn gr-dp-btn--primary" id="addQuizSubmitBtn" onclick="submitAddQuiz()">Add assessment</button>
+            </div>
+        </div>`;
+
+    // Enter in the title or weight box submits.
+    panel.onkeydown = function(e) {
+        if (e.key === 'Enter' && e.target.matches && e.target.matches('#quizTitle, #quizWeight')) {
+            e.preventDefault();
+            window.submitAddQuiz();
+        }
+    };
+
+    panel.scrollTop = 0;
+    const title = document.getElementById('quizTitle');
+    if (title) title.focus();
+    loadGradesClasses(prev.class_name);
 };
 
+// Back out of the form: return to the assessment that was open, or the empty state.
 window.closeAddQuizModal = function() {
-    const modal = document.getElementById('addQuizModal');
-    if (modal) modal.style.display = 'none';
     const newBtn = document.getElementById('gr-new-btn');
     if (newBtn) newBtn.classList.remove('active');
-    document.getElementById('quizTitle').value       = '';
-    document.getElementById('quizClass').value       = '';
-    document.getElementById('quizSummative').checked  = false;
-    document.getElementById('weightContainer').style.display = 'none';
-    document.getElementById('addQuizError').style.display    = 'none';
+    const panel = document.getElementById('gr-main-panel');
+    const prevId = window._grPrevQuizId;
+    window._grPrevQuizId = null;
+    if (prevId != null && (window._allGradesQuizzesFlat || []).some(q => String(q.id) === String(prevId))) {
+        selectDesktopGradeQuiz(prevId);
+    } else if (panel) {
+        panel.onkeydown = null;
+        delete panel.dataset.grQuiz;
+        panel.innerHTML = grEmptyStateHtml();
+    }
 };
 
 window.submitAddQuiz = async function() {
-    const title       = document.getElementById('quizTitle').value.trim();
-    const classId     = document.getElementById('quizClass').value;
-    const isSummative = document.getElementById('quizSummative').checked;
-    const weight      = document.getElementById('quizWeight')?.value ?? '';
-    const errorDiv    = document.getElementById('addQuizError');
-    const submitBtn   = document.getElementById('addQuizSubmitBtn');
-    const loader      = document.getElementById('loaderOverlay');
+    const titleEl  = document.getElementById('quizTitle');
+    const classEl  = document.getElementById('quizClass');
+    const sumEl    = document.getElementById('quizSummative');
+    const weightEl = document.getElementById('quizWeight');
+    const err      = document.getElementById('addQuizError');
+    const btn      = document.getElementById('addQuizSubmitBtn');
+    if (!titleEl || !classEl || !err || !btn) return;
 
-    errorDiv.style.display = 'none';
+    const title       = titleEl.value.trim();
+    const classId     = classEl.value;
+    const isSummative = !!(sumEl && sumEl.checked);
+    const weight      = weightEl ? weightEl.value.trim() : '';
 
-    if (!title)   { errorDiv.textContent = 'Please enter an assessment title.'; errorDiv.style.display = 'block'; return; }
-    if (!classId) { errorDiv.textContent = 'Please select a class.';     errorDiv.style.display = 'block'; return; }
+    const fail = (text, el) => { err.textContent = text; err.style.display = 'block'; if (el) el.focus(); };
+    err.style.display = 'none';
+
+    if (!title)   return fail('Please enter an assessment title.', titleEl);
+    if (!classId) return fail('Please select a class.', classEl);
+    if (isSummative && weight !== '') {
+        const w = parseFloat(weight);
+        if (!(w > 0 && w <= 100)) return fail('The weight must be more than 0 and no more than 100.', weightEl);
+    }
 
     const fd = new FormData();
     fd.append('title',    title);
@@ -1159,24 +1791,26 @@ window.submitAddQuiz = async function() {
         if (weight) fd.append('weight_percent', weight);
     }
 
-    const hideSubmitLoader = window.showTeacherButtonLoader(submitBtn);
-
+    const className = classEl.options[classEl.selectedIndex] ? classEl.options[classEl.selectedIndex].textContent : '';
+    const hideLoader = window.showTeacherButtonLoader(btn);
     try {
         const res  = await fetch('api/teacher/add_manual_quiz.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd });
         const data = await res.json();
 
         if (data.success) {
-            closeAddQuizModal();
+            // Reload the list; renderTeacherGrades then opens the new assessment
+            // so the teacher can start entering marks straight away.
+            window._grPendingSelect = { title, className };
+            window._grPrevQuizId = null;
             window.teacherGradesCache = null;
-            fetchTeacherGrades();
+            await fetchTeacherGrades();
+            grToast('Assessment added. Enter the marks below.');
         } else {
-            errorDiv.textContent = data.error || 'Failed to add assessment.';
-            errorDiv.style.display = 'block';
+            fail(data.error || 'Failed to add assessment.');
         }
     } catch (e) {
-        errorDiv.textContent = 'Connection error. Please try again.';
-        errorDiv.style.display = 'block';
+        fail('Connection error. Please try again.');
     } finally {
-        hideSubmitLoader();
+        hideLoader();
     }
 };
