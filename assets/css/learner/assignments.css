@@ -15,12 +15,17 @@
 
 .las-desktop-layout {
     --las-listw: 320px;
-    /* Type weights for the whole desktop page. Tune here. */
-    --las-w-strong: 700;  /* title, status chip, group labels, primary button */
-    --las-w-medium: 600;  /* list rows, filter chips, values, small actions */
+    /* Type weights for the whole desktop page (Geist). Tune here. */
+    --las-w-strong: 500;  /* title, status chip, group labels, primary button */
+    --las-w-medium: 450;  /* list rows, filter chips, values, small actions */
     display: flex;
     gap: 0;
     min-height: 500px;
+    font-family: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-weight: 400;
+    font-variant-numeric: tabular-nums; /* marks, dates and counts line up */
+    -webkit-font-smoothing: antialiased; /* keeps light weights from looking heavy on dark */
+    -moz-osx-font-smoothing: grayscale;
 }
 
 /* ── List pane ── */
@@ -60,7 +65,7 @@
     border: 1px solid rgba(255,255,255,0.07);
     color: #e6edf3;
     font-size: 13px;
-    font-family: 'Nunito', sans-serif;
+    font-family: inherit;
     transition: border-color 0.2s;
 }
 .las-desktop-search:focus { outline: none; border-color: #4fd1c5; }
@@ -841,4 +846,16 @@
     .las-submission-submit {
         width: 100%;
     }
+}
+
+/* ── DESKTOP TYPOGRAPHY (Geist, 900px and up) ──
+   Scoped to .las-desktop-layout: the submission form markup is shared with the mobile detail view. */
+@media (min-width: 900px) {
+    .las-desktop-layout .las-fx b { font-weight: var(--las-w-medium, 450); }
+    .las-desktop-layout .las-submission-form-heading { font-weight: var(--las-w-strong, 500); }
+    .las-desktop-layout .las-submission-label { font-weight: var(--las-w-medium, 450); }
+    .las-desktop-layout .las-submission-label span { font-weight: 400; }
+    .las-desktop-layout .las-submission-current-file a { font-weight: var(--las-w-medium, 450); }
+    .las-desktop-layout .las-submission-cancel,
+    .las-desktop-layout .las-submission-submit { font-weight: var(--las-w-strong, 500); }
 }

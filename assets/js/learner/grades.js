@@ -1982,6 +1982,35 @@ function ensurePrStylesInjected() {
                 .pr-info-modal-title { font-size: 16.5px; }
                 .pr-info-modal-body { font-size: 13.5px; }
             }
+
+            /* ── DESKTOP TYPOGRAPHY (Geist, 900px and up) ──
+               On desktop the report is rendered inside #grades-dt-panel (on mobile it is a full-screen
+               sheet and keeps the Nunito weights above). The info modal is appended to <body>. */
+            @media (min-width: 900px) {
+                #grades-dt-panel .pr-wrap { font-family: inherit; }
+                #grades-dt-panel .pr-learn-more-btn { font-family: inherit; }
+                #grades-dt-panel .pr-hero-status,
+                #grades-dt-panel .pr-hero-avatar,
+                #grades-dt-panel .pr-hero-name,
+                #grades-dt-panel .pr-hero-trendlabel,
+                #grades-dt-panel .pr-hero-trenditem-v,
+                #grades-dt-panel .pr-subjects-title,
+                #grades-dt-panel .pr-subject-v2-badge,
+                #grades-dt-panel .pr-subject-v2-pct,
+                #grades-dt-panel .pr-grade-pill,
+                #grades-dt-panel .pr-learn-more-btn { font-weight: 500; }
+                #grades-dt-panel .pr-subject-v2-name { font-weight: 450; }
+                #grades-dt-panel .pr-hero-avgnum { font-weight: 300; }
+                .pr-info-modal-box {
+                    font-family: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+                    font-variant-numeric: tabular-nums;
+                    -webkit-font-smoothing: antialiased;
+                    -moz-osx-font-smoothing: grayscale;
+                }
+                .pr-info-modal-badge,
+                .pr-info-modal-title,
+                .pr-info-modal-notes-title { font-weight: 500; }
+            }
         `;
     document.head.appendChild(style);
 }

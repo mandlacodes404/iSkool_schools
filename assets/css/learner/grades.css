@@ -14,12 +14,17 @@
 
 .grades-desktop-layout {
     --gr-listw: 320px;
-    /* Type weights for the whole desktop page. Tune here. */
-    --gr-w-strong: 700;  /* title, status chip, group labels, primary button */
-    --gr-w-medium: 600;  /* list rows, filter chips, values, small actions */
+    /* Type weights for the whole desktop page (Geist). Tune here. */
+    --gr-w-strong: 500;  /* title, status chip, group labels, primary button */
+    --gr-w-medium: 450;  /* list rows, filter chips, values, small actions */
     display: flex;
     gap: 0;
     min-height: 500px;
+    font-family: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-weight: 400;
+    font-variant-numeric: tabular-nums; /* marks, dates and counts line up */
+    -webkit-font-smoothing: antialiased; /* keeps light weights from looking heavy on dark */
+    -moz-osx-font-smoothing: grayscale;
 }
 
 /* ── List pane ── */
@@ -59,7 +64,7 @@
     border: 1px solid rgba(255,255,255,0.07);
     color: #e6edf3;
     font-size: 13px;
-    font-family: 'Nunito', sans-serif;
+    font-family: inherit;
     transition: border-color 0.2s;
 }
 .gr-desktop-search:focus { outline: none; border-color: #4fd1c5; }
@@ -302,7 +307,7 @@
 .gr-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 10px; }
 .gr-card { border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; background: #12161c; padding: 14px 16px; min-width: 0; }
 .gr-card small { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: var(--gr-w-strong, 700); letter-spacing: 0.6px; text-transform: uppercase; color: #7d8794; }
-.gr-card b { display: block; font-size: 26px; font-weight: var(--gr-w-strong, 700); margin: 6px 0 2px; line-height: 1.1; color: #e6edf3; }
+.gr-card b { display: block; font-size: 26px; font-weight: 300; margin: 6px 0 2px; line-height: 1.1; color: #e6edf3; }
 .gr-card span.gr-cap { font-size: 12px; color: #9aa4b2; }
 .gr-bar1 { height: 4px; border-radius: 2px; background: rgba(255,255,255,0.08); margin: 10px 0 8px; overflow: hidden; }
 .gr-bar1 i { display: block; height: 100%; background: #4fd1c5; }
@@ -328,27 +333,27 @@
 .gr-xp td { padding: 0 !important; background: rgba(255,255,255,0.02); text-align: left !important; }
 .gr-ov { padding: 20px 18px; text-align: left; font-weight: 400; }
 .gr-ov-head { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-.gr-ov-big { font-size: 28px; font-weight: 600; line-height: 1; color: #e6edf3; }
+.gr-ov-big { font-size: 28px; font-weight: 300; line-height: 1; color: #e6edf3; }
 .gr-ov-of { color: #9aa4b2; font-size: 14px; font-weight: 400; }
 .gr-ov-sp { flex: 1; }
-.gr-ov-chip { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 999px; font-size: 12px; font-weight: 600; border: 1px solid rgba(255,255,255,0.07); }
+.gr-ov-chip { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 999px; font-size: 12px; font-weight: var(--gr-w-medium, 450); border: 1px solid rgba(255,255,255,0.07); }
 .gr-ov-chip[hidden] { display: none; }
 .gr-ov-chip.ok { background: rgba(34,197,94,0.1); border-color: rgba(34,197,94,0.3); color: #22c55e; }
 .gr-ov-chip.mid { background: rgba(255,255,255,0.05); color: #9aa4b2; }
 .gr-ov-chip.warn { background: rgba(242,140,56,0.1); border-color: rgba(242,140,56,0.3); color: #f28c38; }
 .gr-ov-c-ok { color: #22c55e; } .gr-ov-c-mid { color: #e6edf3; } .gr-ov-c-warn { color: #f28c38; }
-.gr-ov .gr-btn2 { font-weight: 600; }
+.gr-ov .gr-btn2 { font-weight: var(--gr-w-medium, 450); }
 .gr-ov-msg { color: #7d8794; font-size: 13px; padding: 18px 0 6px; font-weight: 400; }
 .gr-ov-rng { position: relative; margin: 56px 40px 0; height: 10px; }
 .gr-ov-tr { position: absolute; inset: 0; border-radius: 5px; background: rgba(255,255,255,0.07); }
 .gr-ov-band { position: absolute; top: 0; bottom: 0; border-radius: 5px; background: rgba(79,209,197,0.22); }
 .gr-ov-avg { position: absolute; top: -6px; bottom: -6px; width: 2px; margin-left: -1px; background: #f28c38; border-radius: 1px; }
 .gr-ov-you { position: absolute; top: 50%; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; background: #4fd1c5; border: 3px solid #fff; box-shadow: 0 0 0 3px rgba(79,209,197,0.25); }
-.gr-ov-you em { position: absolute; bottom: 26px; left: 50%; transform: translateX(-50%); white-space: nowrap; font-style: normal; font-size: 12px; font-weight: 600; background: #4fd1c5; color: #0d1117; padding: 3px 9px; border-radius: 999px; }
+.gr-ov-you em { position: absolute; bottom: 26px; left: 50%; transform: translateX(-50%); white-space: nowrap; font-style: normal; font-size: 12px; font-weight: var(--gr-w-strong, 500); background: #4fd1c5; color: #0d1117; padding: 3px 9px; border-radius: 999px; }
 .gr-ov-you em::after { content: ''; position: absolute; top: 100%; left: 50%; margin-left: -5px; border: 5px solid transparent; border-top-color: #4fd1c5; }
 .gr-ov-end { position: absolute; top: 50%; transform: translateY(-50%); font-size: 11px; color: #7d8794; font-weight: 400; }
 .gr-ov-lbl { position: absolute; transform: translateX(-50%); white-space: nowrap; font-size: 12px; font-weight: 400; color: #9aa4b2; text-align: center; }
-.gr-ov-lbl b { color: #e6edf3; font-weight: 600; }
+.gr-ov-lbl b { color: #e6edf3; font-weight: var(--gr-w-medium, 450); }
 .gr-ov-lbl i { display: block; width: 1px; height: 8px; margin: 0 auto 2px; background: #7d8794; }
 .gr-ov-meta { font-size: 12px; color: #7d8794; font-weight: 400; }
 .gr-ov-key { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; color: #7d8794; margin-top: 14px; font-weight: 400; }
@@ -779,4 +784,27 @@
    on the <div> wrapping the distribution bar in the inline stats box) */
 .grade-inline-dist-wrap {
     width: 100%;
+}
+
+/* ── DESKTOP TYPOGRAPHY (Geist) ── */
+/* The info modal is appended to <body>, outside .grades-desktop-layout, so it needs its own
+   font and weight tokens. It is only opened from the desktop panel. */
+.gr-modal-overlay {
+    --gr-w-strong: 500;
+    --gr-w-medium: 450;
+    font-family: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+.gr-modal-body strong { font-weight: 500; }
+
+/* The inline performance overview inside an expanded row shares markup with the mobile list,
+   so its lighter weights are scoped to the desktop layout. */
+@media (min-width: 900px) {
+    .grades-desktop-layout .grade-inline-title { font-weight: var(--gr-w-strong, 500); }
+    .grades-desktop-layout .score-circle-text { font-weight: 300; }
+    .grades-desktop-layout .dist-tip { font-weight: var(--gr-w-strong, 500); }
+    .grades-desktop-layout .dist-legend span { font-weight: var(--gr-w-strong, 500); }
 }

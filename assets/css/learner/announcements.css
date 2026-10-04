@@ -15,12 +15,17 @@
 
 .lan-desktop-layout {
     --lan-listw: 320px;
-    /* Type weights for the whole desktop page. Tune here. */
-    --lan-w-strong: 700;  /* title, status chip, group labels, primary button */
-    --lan-w-medium: 600;  /* list rows, filter chips, values, small actions */
+    /* Type weights for the whole desktop page (Geist). Tune here. */
+    --lan-w-strong: 500;  /* title, status chip, group labels, primary button */
+    --lan-w-medium: 450;  /* list rows, filter chips, values, small actions */
     display: flex;
     gap: 0;
     min-height: 500px;
+    font-family: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-weight: 400;
+    font-variant-numeric: tabular-nums; /* marks, dates and counts line up */
+    -webkit-font-smoothing: antialiased; /* keeps light weights from looking heavy on dark */
+    -moz-osx-font-smoothing: grayscale;
 }
 
 /* ── List pane ── */
@@ -60,7 +65,7 @@
     border: 1px solid rgba(255,255,255,0.07);
     color: #e6edf3;
     font-size: 13px;
-    font-family: 'Nunito', sans-serif;
+    font-family: inherit;
     transition: border-color 0.2s;
 }
 .lan-desktop-search:focus { outline: none; border-color: #4fd1c5; }
@@ -294,7 +299,7 @@
 .lan-markall:disabled { opacity: 0.35; cursor: default; background: none; color: #9aa4b2; }
 .lan-chips { flex-wrap: wrap; row-gap: 6px; overflow: visible; }
 .lan-sidebar-item.lan-row { height: 66px; }
-.lan-row .lan-sidebar-item-title { font-weight: 600; color: #9aa4b2; }
+.lan-row .lan-sidebar-item-title { font-weight: var(--lan-w-medium, 450); color: #9aa4b2; }
 .lan-row .lan-sidebar-item-title.lan-unread { font-weight: var(--lan-w-strong, 700); color: #e6edf3; }
 .lan-ava {
     width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0; display: grid; place-items: center;
@@ -520,7 +525,7 @@
     border: 1px solid #4fd1c5;
     padding: 3px 10px;
     font-size: 11px;
-    font-weight: 800;
+    font-weight: var(--lan-w-strong, 500);
     border-radius: 6px;
     letter-spacing: 0.5px;
 }
@@ -692,4 +697,11 @@
 .an-edited-highlight {
     color: #d97757;
     font-weight: 600;
+}
+
+/* ── DESKTOP TYPOGRAPHY (Geist, 900px and up) ──
+   Scoped to .lan-desktop-layout so these shared styles keep their Nunito weights on mobile. */
+@media (min-width: 900px) {
+    .lan-desktop-layout .lan-auth b { font-weight: var(--lan-w-strong, 500); }
+    .lan-desktop-layout .lan-edited-tag { font-weight: var(--lan-w-strong, 500); }
 }

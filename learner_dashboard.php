@@ -243,12 +243,12 @@ if (!empty($joinedClassIds)) {
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
     <link rel="stylesheet" href="assets/css/learner/quiz.css?v=5.6">
     <link rel="stylesheet" href="assets/css/learner/manual.css?v=7.6">
-    <link rel="stylesheet" href="assets/css/learner/announcements.css?v=3.2">
-    <link rel="stylesheet" href="assets/css/learner/assignments.css?v=3.0">
+    <link rel="stylesheet" href="assets/css/learner/announcements.css?v=3.3">
+    <link rel="stylesheet" href="assets/css/learner/assignments.css?v=3.1">
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
-    <link rel="stylesheet" href="assets/css/learner/grades.css?v=3.3">
-    <link rel="stylesheet" href="assets/css/learner/resources.css?v=2.4">
-     <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=4.5">
+    <link rel="stylesheet" href="assets/css/learner/grades.css?v=3.4">
+    <link rel="stylesheet" href="assets/css/learner/resources.css?v=2.5">
+     <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=4.6">
      <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=13.4">
     <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=1.6">
     <link rel="stylesheet" href="assets/css/learner/mobile_menu.css?v=1.5">
@@ -271,7 +271,7 @@ if (!empty($joinedClassIds)) {
     <meta name="msapplication-navbutton-color" content="#20201f">
     <link rel="manifest" href="/manifest.php?v=1.1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Geist:wght@400..600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Geist:wght@300..600&display=swap" rel="stylesheet">
     
 <script>
 function getCsrfToken() {
@@ -3935,10 +3935,10 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/assignments.js?v=10.1"></script>
 <script src="assets/js/learner/resources.js?v=8.7"></script>
 <script src="assets/js/learner/announcements.js?v=9.3"></script>
-<script src="assets/js/learner/grades.js?v=10.1"></script>
+<script src="assets/js/learner/grades.js?v=10.2"></script>
 <script src="assets/js/learner/evaluations.js?v=7.1"></script>
 <script src="assets/js/learner/discussions.js?v=11.2"></script>
-<script src="assets/js/learner/syllabus.js?v=3.8"></script>
+<script src="assets/js/learner/syllabus.js?v=3.9"></script>
 <script src="assets/js/learner/learner_calendar.js?v=2.3"></script>
 <script src="assets/js/learner/desktop_menu.js?v=1.4"></script>
 <script src="assets/js/learner/mobile_menu.js?v=1.1"></script>

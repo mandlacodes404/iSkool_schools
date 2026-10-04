@@ -212,12 +212,17 @@ function renderSyllabusPage(data) {
 
             .syl-desktop-layout {
                 --syl-listw: 320px;
-                /* Type weights for the whole desktop page. Tune here. */
-                --syl-w-strong: 700;  /* title, status chip, group labels, primary button */
-                --syl-w-medium: 600;  /* list rows, filter chips, values, small actions */
+                /* Type weights for the whole desktop page (Geist). Tune here. */
+                --syl-w-strong: 500;  /* title, status chip, group labels, primary button */
+                --syl-w-medium: 450;  /* list rows, filter chips, values, small actions */
                 display: flex;
                 gap: 0;
                 min-height: 500px;
+                font-family: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+                font-weight: 400;
+                font-variant-numeric: tabular-nums; /* marks, dates and counts line up */
+                -webkit-font-smoothing: antialiased; /* keeps light weights from looking heavy on dark */
+                -moz-osx-font-smoothing: grayscale;
             }
 
             /* ── List pane ── */
@@ -257,7 +262,7 @@ function renderSyllabusPage(data) {
                 border: 1px solid rgba(255,255,255,0.07);
                 color: #e6edf3;
                 font-size: 13px;
-                font-family: 'Nunito', sans-serif;
+                font-family: inherit;
                 transition: border-color 0.2s;
             }
             .syl-desktop-search:focus { outline: none; border-color: #4fd1c5; }

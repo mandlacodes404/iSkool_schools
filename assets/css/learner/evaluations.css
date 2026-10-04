@@ -379,12 +379,17 @@
 
 .lev-desktop-layout {
     --lev-listw: 320px;
-    /* Type weights for the whole desktop page. Tune here. */
-    --lev-w-strong: 700;  /* title, status chip, group labels, primary button */
-    --lev-w-medium: 600;  /* list rows, filter chips, values, small actions */
+    /* Type weights for the whole desktop page (Geist). Tune here. */
+    --lev-w-strong: 500;  /* title, status chip, group labels, primary button */
+    --lev-w-medium: 450;  /* list rows, filter chips, values, small actions */
     display: flex;
     gap: 0;
     min-height: 500px;
+    font-family: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-weight: 400;
+    font-variant-numeric: tabular-nums; /* marks, dates and counts line up */
+    -webkit-font-smoothing: antialiased; /* keeps light weights from looking heavy on dark */
+    -moz-osx-font-smoothing: grayscale;
 }
 
 /* ── List pane ── */
@@ -424,7 +429,7 @@
     border: 1px solid rgba(255,255,255,0.07);
     color: #e6edf3;
     font-size: 13px;
-    font-family: 'Nunito', sans-serif;
+    font-family: inherit;
     transition: border-color 0.2s;
 }
 .lev-desktop-search:focus { outline: none; border-color: #4fd1c5; }
@@ -652,7 +657,7 @@
 .lev-gh { display: flex; justify-content: space-between; }
 .lev-gh i { font-style: normal; font-weight: var(--lev-w-medium, 600); color: #7d8794; }
 .lev-sidebar-item.lev-row { height: 66px; }
-.lev-row .lev-sidebar-item-title { font-weight: 600; color: #9aa4b2; }
+.lev-row .lev-sidebar-item-title { font-weight: var(--lev-w-medium, 450); color: #9aa4b2; }
 .lev-row .lev-sidebar-item-title.lev-unread { font-weight: var(--lev-w-strong, 700); color: #e6edf3; }
 .lev-ava { width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0; display: grid; place-items: center; background: #1c222b; color: #9aa4b2; font-size: 12px; font-weight: var(--lev-w-medium, 600); }
 .lev-rr { display: flex; flex-direction: column; align-items: flex-end; gap: 7px; flex-shrink: 0; min-width: 40px; }
@@ -668,7 +673,7 @@
 .lev-desc { color: #c9d1d9; line-height: 1.7; margin: 0 0 20px; font-size: 14px; white-space: pre-line; }
 .lev-qb { border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; background: #12161c; padding: 16px; margin-bottom: 12px; }
 .lev-qh { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 14px; }
-.lev-qn { width: 24px; height: 24px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.18); display: grid; place-items: center; font-size: 12px; font-weight: 600; color: #9aa4b2; flex-shrink: 0; }
+.lev-qn { width: 24px; height: 24px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.18); display: grid; place-items: center; font-size: 12px; font-weight: var(--lev-w-medium, 450); color: #9aa4b2; flex-shrink: 0; }
 .lev-qn.done { background: #4fd1c5; border-color: #4fd1c5; color: #0d1117; }
 .lev-qt { font-size: 15px; line-height: 1.5; color: #e6edf3; padding-top: 1px; }
 .lev-lk { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
@@ -698,10 +703,10 @@
 .lev-cmt textarea:focus { border-color: #4fd1c5; }
 .lev-fin { text-align: center; padding: 70px 20px; color: #9aa4b2; font-size: 14px; }
 .lev-fin svg { width: 52px; height: 52px; stroke: #22c55e; stroke-width: 1.5; fill: none; }
-.lev-fin b { display: block; font-size: 18px; font-weight: 600; color: #e6edf3; margin: 14px 0 6px; }
+.lev-fin b { display: block; font-size: 18px; font-weight: var(--lev-w-strong, 500); color: #e6edf3; margin: 14px 0 6px; }
 .lev-help { font-size: 12px; line-height: 1.6; color: #7d8794; margin: 20px 0 0; }
 .lev-more { display: block; width: 100%; text-align: left; padding: 9px 0; cursor: pointer; background: none; border: 0; border-bottom: 1px solid rgba(255,255,255,0.07); font-family: inherit; }
-.lev-more b { display: block; font-size: 13px; font-weight: 600; color: #e6edf3; }
+.lev-more b { display: block; font-size: 13px; font-weight: var(--lev-w-medium, 450); color: #e6edf3; }
 .lev-more small { color: #7d8794; font-size: 12px; }
 .lev-more:hover b { color: #4fd1c5; }
 .lev-rail h4.lev-rail-sub { margin: 28px 0 4px; }
