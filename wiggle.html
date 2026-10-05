@@ -17,7 +17,7 @@
   --pad:64px; --gutter:max(var(--pad),calc((100% - 1160px)/2 + var(--pad)));
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth;scroll-padding-top:16px}
+html{scroll-behavior:smooth;scroll-padding-top:96px}
 body{margin:0;overflow-x:hidden;min-width:320px;color:var(--ink);font-family:var(--font);-webkit-font-smoothing:antialiased;
   background:radial-gradient(circle at 8% 0,rgba(255,255,255,.98),transparent 34rem),radial-gradient(circle at 92% 38%,rgba(255,246,232,.5),transparent 30rem),var(--paper)}
 body.menu-open{overflow:hidden}
@@ -29,8 +29,9 @@ button{font:inherit;color:inherit}
 .site{position:relative}
 
 /* header */
-header{height:88px;padding:0 var(--gutter);display:flex;align-items:center;justify-content:space-between;position:relative;z-index:20}
-.logo{display:block;width:113px;height:auto}
+header{position:sticky;top:0;z-index:20;height:96px;padding:0 var(--gutter);display:flex;align-items:center;justify-content:space-between}
+header::before{content:"";position:absolute;inset:0 0 -22px;z-index:-1;pointer-events:none;background:rgba(250,249,245,.82);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);-webkit-mask-image:linear-gradient(#000 62%,transparent);mask-image:linear-gradient(#000 62%,transparent)}
+.logo{display:block;width:142px;height:auto}
 .head-right{display:flex;align-items:center;gap:34px}
 .desktop-nav{display:flex;gap:34px;font-size:14px;font-weight:500}
 .desktop-nav a{transition:opacity .2s}.desktop-nav a:hover{opacity:.5}
@@ -108,7 +109,7 @@ header{height:88px;padding:0 var(--gutter);display:flex;align-items:center;justi
 .about-link{font-size:14px;font-weight:500}
 
 footer{height:86px;margin:0 var(--gutter);display:flex;align-items:center;gap:28px}
-footer .logo{width:72px;flex:none}
+footer .logo{width:88px;flex:none}
 .footer-line{flex:1;height:1px;background:var(--line)}
 .footer-nav{display:flex;gap:30px;color:#738095;font-size:13px}
 .footer-nav a:hover{color:var(--ink)}
@@ -121,9 +122,9 @@ footer .logo{width:72px;flex:none}
 @media (max-width:800px){
   :root{--pad:24px}
   .site{width:calc(100% - 12px);margin:6px auto 10px;border-radius:10px}
-  header{height:72px}
+  header{height:76px}
   .menu-button{display:flex}
-  .logo{width:92px}
+  .logo{width:118px}
   .desktop-nav{display:none}
   .hero{display:block;min-height:0;padding:30px var(--gutter) 8px;overflow:hidden}
   .hero-copy{position:relative;z-index:2}
@@ -148,7 +149,7 @@ footer .logo{width:72px;flex:none}
   .about-body.open{grid-template-rows:1fr}
   .about-body p{margin-top:16px}
   footer{height:70px;gap:14px}
-  footer .logo{width:62px}
+  footer .logo{width:70px}
   .footer-line{display:none}
   .footer-nav{margin-left:auto;gap:14px;font-size:12px}
 }
@@ -165,7 +166,7 @@ footer .logo{width:72px;flex:none}
     <a href="#top" aria-label="Wiggle home"><img class="logo" src="enthropy/wiggle_colored.svg" alt="Wiggle" /></a>
     <div class="head-right">
       <nav class="desktop-nav" aria-label="Primary">
-        <a href="#products">Products</a><a href="#about">About</a><a href="#careers">Careers</a><a href="#contact">Contact</a>
+        <a href="#products">Products</a><a href="about.html">About</a><a href="#careers">Careers</a><a href="#contact">Contact</a>
       </nav>
       <button class="menu-button" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-panel"><span></span><span></span></button>
     </div>
@@ -173,7 +174,7 @@ footer .logo{width:72px;flex:none}
 
   <div class="mobile-panel" id="mobile-panel" aria-hidden="true">
     <nav class="mobile-links" aria-label="Mobile">
-      <a href="#products">Products</a><a href="#about">About</a><a href="#careers">Careers</a><a href="#contact">Contact</a>
+      <a href="#products">Products</a><a href="about.html">About</a><a href="#careers">Careers</a><a href="#contact">Contact</a>
     </nav>
   </div>
 
@@ -235,7 +236,7 @@ footer .logo{width:72px;flex:none}
     <div class="about-body" id="about-body">
       <div>
         <p>We’re a technology company based in South Africa, building products that create real value for schools, people and the communities we serve.</p>
-        <a class="about-link" href="#">Learn more about us →</a>
+        <a class="about-link" href="about.html">Learn more about us →</a>
       </div>
     </div>
   </section>
@@ -243,7 +244,7 @@ footer .logo{width:72px;flex:none}
   <footer id="contact">
     <a href="#top" aria-label="Back to top"><img class="logo" src="enthropy/wiggle_colored.svg" alt="Wiggle" /></a>
     <span class="footer-line"></span>
-    <nav class="footer-nav" aria-label="Footer"><a href="#products">Products</a><a href="#about">About</a><a href="#careers" id="careers">Careers</a><a href="#contact">Contact</a></nav>
+    <nav class="footer-nav" aria-label="Footer"><a href="#products">Products</a><a href="about.html">About</a><a href="#careers" id="careers">Careers</a><a href="#contact">Contact</a></nav>
   </footer>
 </main>
 
