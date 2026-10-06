@@ -1305,62 +1305,109 @@ button#login-btn.is-loading .btn-spinner {
         }
     }
 
-/* ══ Mobile guided design (login + 3-step register). Desktop (>=900px) untouched. ══ */
+/* ══ Mobile guided design (login + 3-step register). Desktop (>=900px) untouched. ══
+   Colour: no accent colour. Everything is a tonal step of the page colour #20201f,
+   so the surface stays calm and the logo + iSkool wordmark are the only brand colour.
+     --m-low    #181817  one step below the page  -> inputs, role cards
+     --m-line   #2e2e2c  hairlines, progress track
+     --m-lift   #3a3a38  one step above the page  -> primary buttons
+     --m-lift2  #454543  hover / pressed
+     --m-on     #c4c3be  progress fill, checkbox
+   Role icons (Learner / Teacher / Parent / School admin) each get their own hue below. */
 .m-only, .reg-back, .reg-next, .role-cards { display: none; }
 @media (max-width: 899px) {
+    /* Phone browsers: 100vh = the tallest the viewport can get (address bar hidden), so
+       anything sized with it runs under the browser bars. 100dvh = what is visible now. */
+    html, body { min-height: 100vh; min-height: 100dvh; }
+    .container { min-height: 100vh; min-height: 100dvh; }
     .m-only { display: block; }
-    .form-panel { position: relative; justify-content: flex-start; padding: 20px 24px 28px; }
+    .form-panel {
+        --m-low: #181817; --m-line: #2e2e2c; --m-lift: #3a3a38; --m-lift2: #454543; --m-on: #c4c3be;
+        position: relative; justify-content: flex-start;
+        min-height: 100vh; min-height: 100dvh; max-height: 100vh; max-height: 100dvh;
+        padding: calc(20px + env(safe-area-inset-top, 0px)) 24px calc(28px + env(safe-area-inset-bottom, 0px));
+    }
     .form-panel > .form-box { max-width: 400px; }
+    /* Login + register fill the screen so their last row (Continue / Register link) sits at the bottom */
+    #login-form.active, #register-form.active { display: flex; flex-direction: column; flex: 1 0 auto; }
+    #login-form-el, #register-form-el { flex: 1 0 auto; }
     /* Header row: your existing logo + wordmark (left), school (right) */
     .form-panel #iskool-brand, .form-panel #register-iskool-brand { display: flex; justify-content: flex-start; align-items: center; gap: 8px; width: auto; height: 44px; margin: 0; padding: 0; transform: none; max-width: none; }
     .form-panel #iskool-brand img, .form-panel #register-iskool-brand img { width: 32px; height: 32px; }
     .form-panel .iskool-brand-wordmark, .form-panel #iskool-brand-wordmark { display: block; font-size: 20px; }
-    .form-panel #form-top-brand { display: flex; position: absolute; top: 20px; right: 24px; height: 44px; margin: 0; width: auto; max-width: 52%; }
+    .form-panel #form-top-brand { display: flex; position: absolute; top: calc(20px + env(safe-area-inset-top, 0px)); right: 24px; height: 44px; margin: 0; width: auto; max-width: 52%; }
     .form-panel #form-school-badge { background: none; border: 0; padding: 0; }
     .form-panel #form-school-name { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #9a9994; }
+    .form-panel #form-school-dot { background: #6b6a66; box-shadow: none; animation: none; }
     .m-head h3 { font: 800 30px/1.2 'Nunito', sans-serif; margin: 24px 0 6px; color: #ecebe8; }
     .form-box .m-head p { margin: 0 0 24px; color: #9a9994; font-size: 15px; text-align: left; }
     .form-box .field-label { font-size: 13px; color: #c4c3be; }
     .form-box .field input, .form-box .field select { height: 48px; box-sizing: border-box; background: #181817; border: 1px solid #2e2e2c; border-radius: 10px; padding: 0 14px; font-size: 16px; }
     .form-box .password-wrapper input { padding-right: 44px; }
+    .form-panel input[type="checkbox"] { accent-color: var(--m-on); }
+    .remember-me-row label { margin: 0; }
+    /* Buttons: primary = one step above the page, secondary = outline only */
     #login-btn, #register-btn, .reg-next, .reg-back { height: 52px; margin: 0; border-radius: 12px; font: 800 16px 'Nunito', sans-serif; }
-    #login-btn, #register-btn, .reg-next { background: #3ecf8e; color: #06281a; }
+    #login-btn, #register-btn, .reg-next { background: var(--m-lift); color: #ecebe8; border: 1px solid #4b4b48; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06); }
     .reg-back { background: none; color: #ecebe8; border: 1px solid #3a3a37; padding: 0 24px; }
+    /* The global button:hover turns buttons white, and on touch screens hover sticks after a tap */
+    #login-btn:hover, #register-btn:hover, .reg-next:hover { background: var(--m-lift2); }
+    #login-btn:active, #register-btn:active, .reg-next:active { background: #4e4e4b; }
+    .reg-back:hover { background: rgba(255, 255, 255, .04); }
+    .reg-back:active { background: rgba(255, 255, 255, .08); }
+    #register-btn:disabled { opacity: .55; cursor: default; }
+    button#login-btn .btn-spinner span { background: #ecebe8; }
     /* Login */
-    #login-form.active #login-form-el { display: grid; grid-template-columns: 1fr auto; align-items: center; }
+    #login-form.active #login-form-el { display: grid; grid-template-columns: 1fr auto; grid-template-rows: repeat(10, auto) 1fr auto; align-items: center; }
     #login-form-el > * { grid-column: 1 / -1; }
     #login-form-el .remember-me-row { display: flex !important; grid-column: 1; order: 5; margin: 2px 0 22px !important; }
     #login-form-el .forgot-p { grid-column: 2; order: 5; margin: 2px 0 22px; }
     #login-form-el .forgot-p a { color: #9a9994 !important; font-size: 13px; }
     #login-btn { order: 6; }
     .m-note { order: 7; margin-top: 20px; padding: 12px 14px; border: 1px solid #2e2e2c; border-radius: 10px; color: #9a9994; font-size: 13px; }
-    #login-form-el .reg-link { order: 8; margin-top: 28px; }
+    #login-form-el .reg-link { order: 8; grid-row: 12; margin: 28px 0 0; }
     /* Register */
     #register-form h2 { display: none; }
-    #register-form.active #register-form-el { display: grid; grid-template-columns: 1fr 1fr; column-gap: 12px; align-content: start; }
-    #register-form-el > * { grid-column: 1 / -1; }
+    #register-form.active #register-form-el { display: flex; flex-direction: column; }
+    #register-form-el .reg-fields { display: grid; grid-template-columns: 1fr 1fr; column-gap: 12px; align-content: start; }
+    #register-form-el .reg-fields > * { grid-column: 1 / -1; }
     #register-form-el .name-row { display: contents; }
     #register-form-el .field, #register-form-el [data-step="3"]:not(.field) { margin: 0 0 16px; }
+    #register-form-el .field:not([data-half]) { grid-column: 1 / -1; }
     #register-form-el [data-half] { grid-column: auto; }
     #register-form-el [data-o="1"] { order: 1; } #register-form-el [data-o="2"] { order: 2; } #register-form-el [data-o="3"] { order: 3; }
     #register-form-el [data-o="4"] { order: 4; } #register-form-el [data-o="5"] { order: 5; } #register-form-el [data-o="6"] { order: 6; }
     .reg-prog { display: flex; align-items: center; gap: 14px; margin-top: 24px; color: #9a9994; font-size: 13px; }
     .reg-prog div { flex: 1; display: flex; gap: 6px; }
-    .reg-prog b { flex: 1; height: 4px; border-radius: 2px; background: #2e2e2c; }
-    .reg-prog b.on { background: #3ecf8e; }
+    .reg-prog b { flex: 1; height: 4px; border-radius: 2px; background: var(--m-line); }
+    .reg-prog b.on { background: var(--m-on); }
     #register-form .m-head h3 { margin-top: 20px; }
     .role-select-field > select, .role-cards ~ select, #register-form [data-step="1"] > select, #register-form [data-step="1"] > label { display: none; }
     #register-form [data-step="1"] .role-cards { display: block; }
-    .role-card { all: unset; box-sizing: border-box; display: flex; align-items: center; gap: 14px; width: 100%; min-height: 72px; padding: 12px 16px; margin-bottom: 10px; border: 1px solid #2e2e2c; border-radius: 14px; background: #181817; color: #ecebe8; cursor: pointer; }
-    .role-card.on { border-color: #3ecf8e; background: rgba(62,207,142,.08); }
-    .role-card:focus-visible { outline: 2px solid #3ecf8e; outline-offset: 2px; }
-    .role-card svg { flex: none; color: #3ecf8e; }
+    /* Role cards: one hue per role (--rc is an r,g,b triple) */
+    .role-card { all: unset; box-sizing: border-box; position: relative; display: flex; align-items: center; gap: 14px; width: 100%; min-height: 72px; padding: 12px 16px; margin-bottom: 10px; border: 1px solid var(--m-line); border-radius: 14px; background: var(--m-low); color: #ecebe8; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background .15s ease, border-color .15s ease; --rc: 154, 153, 148; }
+    .role-card[data-role="learner"] { --rc: 232, 180, 79; }
+    .role-card[data-role="teacher"] { --rc: 106, 174, 230; }
+    .role-card[data-role="parent"] { --rc: 232, 138, 166; }
+    .role-card[data-role="school_admin"] { --rc: 168, 151, 236; }
+    .role-card.on { border-color: rgba(var(--rc), .7); background: #2a2a28; }
+    .role-card:focus-visible { outline: 2px solid #ecebe8; outline-offset: 2px; }
+    .role-card svg { flex: none; box-sizing: content-box; width: 26px; height: 26px; padding: 9px; border-radius: 12px; background: rgba(var(--rc), .14); color: rgb(var(--rc)); }
+    .role-card > span { min-width: 0; }
     .role-card strong { display: block; font: 800 16px 'Nunito', sans-serif; }
     .role-card em { font-style: normal; color: #9a9994; font-size: 13px; }
-    .reg-nav { order: 99; display: flex; gap: 10px; margin-top: 8px; }
-    .reg-nav button { flex: 1; }
+    /* Selected state is also shown by the tick, not by colour alone */
+    .role-card::after { content: ""; flex: none; margin-left: auto; width: 20px; height: 20px; box-sizing: border-box; border: 1.5px solid #55554f; border-radius: 50%; }
+    .role-card.on::after { border-color: rgb(var(--rc)); background: rgb(var(--rc)) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.6 6.2l2.3 2.3 4.5-5' fill='none' stroke='%2320201f' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 12px no-repeat; }
+    /* Back / Continue / Register: the global button{width:100%} used to make Back fill the whole row
+       and shove Continue off the right edge. Back = natural width, Continue = the rest. */
+    /* Sticky: on short phones the bar stays on screen while the fields scroll under it */
+    .form-panel:has(#register-form.active) { padding-bottom: 0; }
+    .reg-nav { position: sticky; bottom: 0; z-index: 2; display: flex; gap: 10px; margin-top: auto; padding: 16px 0 calc(14px + env(safe-area-inset-bottom, 0px)); background: linear-gradient(to bottom, rgba(32, 32, 31, 0), #20201f 16px); }
+    .reg-nav button { flex: 1 1 0; width: auto; min-width: 0; }
     .reg-nav .reg-back { flex: 0 0 auto; }
     .reg-back, .reg-next { display: grid; place-items: center; }
+    #register-form-el > p { margin: 0; padding: 4px 0 calc(28px + env(safe-area-inset-bottom, 0px)); color: #9a9994; }
     #register-form[data-cur="1"] .reg-back, #register-form[data-cur="3"] .reg-next, #register-form[data-cur="1"] #register-btn, #register-form[data-cur="2"] #register-btn { display: none; }
     #register-form[data-cur="1"] [data-step="2"], #register-form[data-cur="1"] [data-step="3"], #register-form[data-cur="2"] [data-step="1"],
     #register-form[data-cur="2"] [data-step="3"], #register-form[data-cur="3"] [data-step="1"], #register-form[data-cur="3"] [data-step="2"] { display: none; }

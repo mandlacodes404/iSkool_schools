@@ -65,7 +65,7 @@ if ($result && $row = $result->fetch_assoc()) {
 <head>
     <meta charset="UTF-8" />
 <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Login - <?= htmlspecialchars($schoolName) ?></title>
 
 <link rel="manifest" href="/manifest.php?v=1.1">
@@ -81,7 +81,7 @@ if ($result && $row = $result->fetch_assoc()) {
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/index.css?v=9.1">
+    <link rel="stylesheet" href="assets/css/index.css?v=9.2">
 
 <?php if (isset($_SESSION['email']) && isset($_SESSION['role'])): ?>
     <!-- ──────────────────────────────────────────────────────────────────
@@ -547,6 +547,7 @@ function getCsrfToken() {
                 <!-- AJAX error message box (hidden until an error occurs) -->
                 <div id="register-error-box" style="display:none;background:rgba(255,77,77,0.10);border:1px solid rgba(255,77,77,0.3);color:#ff6b6b;font-size:14px;padding:11px 16px;border-radius:12px;margin-bottom:16px;text-align:center;"></div>
 
+                <div class="reg-fields">
                 <!-- Title + First Name + Second Name + Surname -->
                 <div class="name-row">
                     <div class="field field-title">
@@ -632,6 +633,8 @@ function getCsrfToken() {
                         <span>I agree to receive notifications for important updates, replies, announcements, and grades.</span>
                     </label>
                 </div>
+
+                </div><!-- /.reg-fields -->
 
                 <div class="reg-nav"><button type="button" class="reg-back">Back</button><button type="button" class="reg-next">Continue</button><button type="submit" id="register-btn">Register</button></div>
                 <p>Already have an account? 
