@@ -154,6 +154,14 @@ footer .logo{width:88px;flex:none}
   .footer-line{display:none}
   .footer-nav{margin-left:auto;gap:14px;font-size:12px}
 }
+/* mobile: hero holds still while the blobs colour in, then the page moves on */
+.blob{opacity:calc(.07 + .93*var(--q,1));transition:opacity .12s linear}
+@media (max-width:800px) and (prefers-reduced-motion:no-preference){
+  body:not(.no-js) .blob{--q:0}
+  body:not(.no-js) .hero-pin{min-height:calc(100vh - 92px + 85vh);min-height:calc(100svh - 92px + 85svh)}
+  body:not(.no-js) .hero{position:sticky;top:76px;min-height:calc(100vh - 92px);min-height:calc(100svh - 92px)}
+  body:not(.no-js) .orbital{bottom:36px;right:-2px;transform:scale(.72)}
+}
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
   *,*::before,*::after{animation:none!important;transition-duration:.01ms!important}
@@ -178,6 +186,7 @@ footer .logo{width:88px;flex:none}
     </nav>
   </div>
 
+  <div class="hero-pin">
   <section class="hero">
     <div class="hero-copy">
       <h1>We make<br>things.</h1>
@@ -186,6 +195,7 @@ footer .logo{width:88px;flex:none}
     </div>
     <div class="orbital" aria-hidden="true"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span><span class="blob b4"></span></div>
   </section>
+  </div>
 
   <section class="products reveal" id="products">
     <p class="eyebrow">Our products</p>
@@ -282,6 +292,25 @@ footer .logo{width:88px;flex:none}
       const co = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); co.unobserve(e.target); } }), { threshold: .6 });
       cards.forEach(c => co.observe(c));
     } else cards.forEach(c => c.classList.add('in'));
+  }
+
+  // mobile: hero holds still while the blobs colour in, then the page moves on
+  const pin = document.querySelector('.hero-pin'), hero = document.querySelector('.hero'), blobs = [...document.querySelectorAll('.blob')];
+  if (pin && hero && blobs.length) {
+    const mq = matchMedia('(max-width:800px)'), rm = matchMedia('(prefers-reduced-motion:reduce)');
+    const starts = [0, .15, .3, .45];
+    let tick = 0;
+    const paint = () => {
+      tick = 0;
+      if (!mq.matches || rm.matches) { blobs.forEach(b => b.style.removeProperty('--q')); return; }
+      const span = pin.offsetHeight - hero.offsetHeight;
+      const p = span > 0 ? Math.min(1, Math.max(0, ((parseFloat(getComputedStyle(hero).top) || 0) - pin.getBoundingClientRect().top) / span)) : 1;
+      blobs.forEach((b, i) => { const t = Math.min(1, Math.max(0, (p - starts[i]) / .55)); b.style.setProperty('--q', (t * t * (3 - 2 * t)).toFixed(3)); });
+    };
+    const queue = () => { if (!tick) { tick = 1; requestAnimationFrame(paint); } };
+    addEventListener('scroll', queue, { passive: true });
+    addEventListener('resize', queue);
+    paint();
   }
 })();
 </script>
