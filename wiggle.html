@@ -89,11 +89,14 @@ header::before{content:"";position:absolute;inset:0 0 -22px;z-index:-1;pointer-e
 .iskool .art-word,.iskool .card-title,.iskool .card-meta,.iskool .card-meta span{color:#000}
 .laura{--tint:#f1ebf8}
 .stories{padding-top:72px}
-.s1{--tint:#e8f1ea}.s2{--tint:#f5ece0}.s3{--tint:#e8edf4}
-.art-stat{position:absolute;left:9cqw;top:9cqw;right:9cqw}
-.art-stat b{display:block;font-size:19cqw;line-height:1;letter-spacing:-.05em;font-weight:700}
-.art-stat span{display:block;margin-top:5cqw;font-size:4.6cqw;line-height:1.35;font-weight:500;color:var(--muted)}
-@media (min-width:801px){.cards.three{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.story-list{margin:0;padding:0;list-style:none;border-bottom:1px solid var(--line)}
+.story-row{display:grid;grid-template-columns:150px 1fr auto 28px;grid-template-areas:"cat ttl meta arr";gap:24px;align-items:baseline;padding:28px 0;border-top:1px solid var(--line)}
+.story-row .cat{grid-area:cat;font-size:14px;font-weight:500}
+.story-row .ttl{grid-area:ttl;font-size:clamp(19px,2vw,24px);line-height:1.3;letter-spacing:-.03em;font-weight:500;transition:opacity .2s}
+.story-row .meta{grid-area:meta;color:var(--muted);font-size:14px;white-space:nowrap}
+.story-row .arr{grid-area:arr;font-size:20px;transition:transform .25s var(--ease)}
+.story-row:hover .ttl{opacity:.55}
+.story-row:hover .arr{transform:translateX(4px)}
 
 /* about */
 .about{margin:38px var(--gutter) 0;padding:24px 0 36px;display:grid;grid-template-columns:1fr 1fr;gap:40px;border-top:1px solid var(--line)}
@@ -128,6 +131,8 @@ footer .logo{width:88px;flex:none}
   .hero{padding-bottom:70px}
   .products{padding-top:28px}
   .stories{padding-top:48px}
+  .story-row{grid-template-columns:1fr auto;grid-template-areas:"cat meta" "ttl arr";gap:8px 16px;padding:22px 0}
+  .story-row .cat{color:var(--muted)}
   .section-title{font-size:24px}
   .cards{--ratio:1/1;--radius:12px;grid-template-columns:1fr;gap:36px}
   .card-title{margin-top:16px;font-size:17px}
@@ -205,31 +210,11 @@ footer .logo{width:88px;flex:none}
   <section class="products stories reveal" id="stories">
     <p class="eyebrow">Stories</p>
     <h2 class="section-title">What we are learning<br>about South African schools.</h2>
-    <div class="cards three">
-      <a class="card s1" href="story-dropout-crisis.html">
-        <div class="card-media">
-          <div class="art-stat" aria-hidden="true"><b>50.25%</b><span>Real pass rate, Grade 1 to matric</span></div>
-        </div>
-        <h3 class="card-title">South Africa's silent dropout crisis: what happens between Grade 1 and matric</h3>
-        <p class="card-meta"><span>Research</span><span>22 min read</span></p>
-      </a>
-
-      <a class="card s2" href="story-infrastructure.html">
-        <div class="card-media">
-          <div class="art-stat" aria-hidden="true"><b>3,000+</b><span>Schools still using pit latrines</span></div>
-        </div>
-        <h3 class="card-title">Over 3,000 schools still lack basic sanitation. The digital divide runs just as deep.</h3>
-        <p class="card-meta"><span>Infrastructure</span><span>17 min read</span></p>
-      </a>
-
-      <a class="card s3" href="story-teacher-workload.html">
-        <div class="card-media">
-          <div class="art-stat" aria-hidden="true"><b>31,462</b><span>Vacant teacher posts in state schools</span></div>
-        </div>
-        <h3 class="card-title">The invisible workload: how admin is stealing teaching time in South African schools</h3>
-        <p class="card-meta"><span>Teacher Support</span><span>15 min read</span></p>
-      </a>
-    </div>
+    <ul class="story-list">
+      <li><a class="story-row" href="story-dropout-crisis.html"><span class="cat">Research</span><span class="ttl">South Africa's silent dropout crisis: what happens between Grade 1 and matric</span><span class="meta">22 min read</span><span class="arr" aria-hidden="true">→</span></a></li>
+      <li><a class="story-row" href="story-infrastructure.html"><span class="cat">Infrastructure</span><span class="ttl">Over 3,000 schools still lack basic sanitation. The digital divide runs just as deep.</span><span class="meta">17 min read</span><span class="arr" aria-hidden="true">→</span></a></li>
+      <li><a class="story-row" href="story-teacher-workload.html"><span class="cat">Teacher Support</span><span class="ttl">The invisible workload: how admin is stealing teaching time in South African schools</span><span class="meta">15 min read</span><span class="arr" aria-hidden="true">→</span></a></li>
+    </ul>
   </section>
 
   <section class="about reveal" id="about">
