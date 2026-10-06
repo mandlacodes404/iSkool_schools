@@ -81,7 +81,7 @@ if ($result && $row = $result->fetch_assoc()) {
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/index.css?v=9.3">
+    <link rel="stylesheet" href="assets/css/index.css?v=9.4">
 
 <?php if (isset($_SESSION['email']) && isset($_SESSION['role'])): ?>
     <!-- ──────────────────────────────────────────────────────────────────
@@ -1084,7 +1084,7 @@ function getCsrfToken() {
         }
     });
 
-    // ── Mobile guided register (3 steps). Desktop ignores all of this via CSS. ──
+    // ── Guided register (3 steps). Shared by mobile + desktop; CSS decides the layout. ──
     (function () {
         const f = document.getElementById('register-form'), fe = document.getElementById('register-form-el');
         const eb = document.getElementById('register-error-box'), sel = document.getElementById('register-role');
@@ -1098,7 +1098,7 @@ function getCsrfToken() {
             f.querySelectorAll('.reg-prog b').forEach((b, i) => b.className = i < k ? 'on' : '');
             document.getElementById('reg-prog-t').textContent = 'Step ' + k + ' of 3';
             document.getElementById('reg-h').textContent = T[k - 1][0]; document.getElementById('reg-sub').textContent = T[k - 1][1];
-            f.querySelector('.form-panel, #register-form').scrollIntoView({ block: 'start' });
+            const pnl = document.querySelector('.form-panel'); if (pnl) pnl.scrollTo({ top: 0 });
         };
         const sync = () => f.querySelectorAll('.role-card').forEach(c => c.classList.toggle('on', c.dataset.role === sel.value));
         f.querySelectorAll('.role-card').forEach(c => c.addEventListener('click', () => { sel.value = c.dataset.role; sync(); eb.style.display = 'none'; }));

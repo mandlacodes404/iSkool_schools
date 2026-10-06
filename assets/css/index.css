@@ -1413,3 +1413,83 @@ button#login-btn.is-loading .btn-spinner {
     #register-form[data-cur="1"] [data-step="2"], #register-form[data-cur="1"] [data-step="3"], #register-form[data-cur="2"] [data-step="1"],
     #register-form[data-cur="2"] [data-step="3"], #register-form[data-cur="3"] [data-step="1"], #register-form[data-cur="3"] [data-step="2"] { display: none; }
 }
+
+/* ══ Desktop guided design (>=900px): lives in the RIGHT form panel only. The left brand panel
+   + feature-preview animation are untouched. Same neutral palette and per-role icon hues as the
+   mobile guided design above: no accent colour, the logo + wordmark are the only brand colour. ══ */
+@media (min-width: 900px) {
+    .m-only { display: block; }
+    .form-panel { --m-low: #1b1b1a; --m-line: #2e2e2c; --m-lift: #3a3a38; --m-lift2: #454543; --m-on: #c4c3be; position: relative; background: #141413; border-color: #2a2a28; padding: 76px 48px 28px; justify-content: center; }
+    .form-panel:has(#register-form.active) { justify-content: center; }
+    .form-panel > #register-form { max-width: 480px; padding: 0; }
+    .form-panel input[type="checkbox"] { accent-color: var(--m-on); }
+    /* Top bar: school (right) / account link on Register. No logo here, the left brand panel carries it. */
+    .form-panel #form-top-brand { position: absolute; top: 20px; right: 28px; height: 34px; width: auto; max-width: 50%; margin: 0; }
+    .form-panel:has(#register-form.active) #form-top-brand { display: none; }
+    .form-panel #form-school-badge { background: none; border: 0; padding: 0; min-width: 0; }
+    .form-panel #form-school-dot { background: #9a9994; box-shadow: none; animation: none; }
+    .form-panel #form-school-name { color: #9a9994; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    #register-form-el > p { position: absolute; top: 26px; right: 28px; margin: 0; font-size: 13px; color: #9a9994; text-align: right; }
+    #register-form-el > p a { color: #ecebe8; font-weight: 500; }
+    /* Headings */
+    .m-head h3 { font: 800 28px/1.2 'Nunito', sans-serif; margin: 0 0 6px; color: #ecebe8; }
+    .form-box .m-head p { margin: 0 0 26px; color: #9a9994; font-size: 14px; text-align: left; }
+    /* Fields */
+    .form-box .field input, .form-box .field select { height: 44px; box-sizing: border-box; background: var(--m-low); border: 1px solid var(--m-line); border-radius: 10px; padding: 0 14px; font-size: 15px; }
+    .form-box .password-wrapper input { padding-right: 44px; }
+    /* Buttons */
+    #login-btn, #register-btn, .reg-next, #forgot-btn, .reg-back { height: 46px; margin: 0; border-radius: 10px; font: 800 15px 'Nunito', sans-serif; }
+    #login-btn, #register-btn, .reg-next, #forgot-btn { background: var(--m-lift); color: #ecebe8; border: 1px solid #4b4b48; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06); }
+    #login-btn:hover, #register-btn:hover, .reg-next:hover, #forgot-btn:hover { background: var(--m-lift2); }
+    .reg-back { background: none; color: #ecebe8; border: 1px solid #333331; padding: 0 20px; }
+    .reg-back:hover { background: rgba(255, 255, 255, .04); }
+    #register-btn:disabled { opacity: .55; cursor: default; }
+    button#login-btn .btn-spinner span { background: #ecebe8; }
+    /* Login */
+    #login-form.active #login-form-el { display: flex; flex-direction: column; }
+    #login-form-el .field { order: 1; }
+    #login-form-el .forgot-p { order: 2; margin: -4px 0 20px; text-align: left; }
+    #login-form-el .forgot-p a { color: #9a9994 !important; font-size: 13px; }
+    #login-btn { order: 3; }
+    .m-note { order: 4; margin-top: 22px; padding: 12px 14px; border: 1px solid var(--m-line); border-radius: 10px; color: #9a9994; font-size: 13px; }
+    #login-form-el .reg-link { order: 5; margin: 22px 0 0; color: #9a9994; }
+    /* Register */
+    #register-form h2 { display: none; }
+    #register-form-el .reg-fields { display: grid; grid-template-columns: 1fr 1fr; column-gap: 12px; align-content: start; }
+    #register-form-el .reg-fields > * { grid-column: 1 / -1; }
+    #register-form-el .name-row { display: contents; }
+    #register-form-el .field, #register-form-el [data-step="3"]:not(.field) { margin: 0 0 16px; }
+    #register-form-el [data-half], #register-form-el .field:has(#register-first-name), #register-form-el .field:has(#register-surname),
+    #register-form-el .field:has(#register-password), #register-form-el .field:has(#confirm-password) { grid-column: auto; }
+    #register-form-el [data-o="1"] { order: 1; } #register-form-el [data-o="2"] { order: 2; } #register-form-el [data-o="3"] { order: 3; }
+    #register-form-el [data-o="4"] { order: 4; } #register-form-el [data-o="5"] { order: 5; } #register-form-el [data-o="6"] { order: 6; }
+    .reg-prog { display: flex; align-items: center; gap: 14px; margin: 0 0 26px; color: #9a9994; font-size: 13px; }
+    .reg-prog div { flex: 1; display: flex; gap: 6px; }
+    .reg-prog b { flex: 1; height: 4px; border-radius: 2px; background: var(--m-line); }
+    .reg-prog b.on { background: var(--m-on); }
+    /* Who is joining: 2x2 cards, one hue per role (--rc is an r,g,b triple) */
+    #register-form [data-step="1"] > select, #register-form [data-step="1"] > label { display: none; }
+    #register-form [data-step="1"] .role-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .role-card { all: unset; box-sizing: border-box; position: relative; display: block; padding: 18px; border: 1px solid var(--m-line); border-radius: 14px; background: var(--m-low); color: #ecebe8; cursor: pointer; transition: background .15s ease, border-color .15s ease; --rc: 154, 153, 148; }
+    .role-card[data-role="learner"] { --rc: 232, 180, 79; }
+    .role-card[data-role="teacher"] { --rc: 106, 174, 230; }
+    .role-card[data-role="parent"] { --rc: 232, 138, 166; }
+    .role-card[data-role="school_admin"] { --rc: 168, 151, 236; }
+    .role-card:hover { border-color: #3a3a37; }
+    .role-card.on { border-color: rgba(var(--rc), .7); background: #222221; }
+    .role-card:focus-visible { outline: 2px solid #ecebe8; outline-offset: 2px; }
+    .role-card svg { display: block; box-sizing: content-box; width: 26px; height: 26px; padding: 9px; margin-bottom: 12px; border-radius: 12px; background: rgba(var(--rc), .14); color: rgb(var(--rc)); }
+    .role-card strong { display: block; font: 800 16px 'Nunito', sans-serif; margin-bottom: 2px; }
+    .role-card em { display: block; font-style: normal; color: #9a9994; font-size: 13px; line-height: 1.4; }
+    /* Selected is also shown by the tick, not by colour alone */
+    .role-card::after { content: ""; position: absolute; top: 14px; right: 14px; width: 20px; height: 20px; box-sizing: border-box; border: 1.5px solid #55554f; border-radius: 50%; }
+    .role-card.on::after { border-color: rgb(var(--rc)); background: rgb(var(--rc)) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.6 6.2l2.3 2.3 4.5-5' fill='none' stroke='%2320201f' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 12px no-repeat; }
+    /* Back / Continue / Register */
+    .reg-nav { display: flex; gap: 10px; margin-top: 22px; }
+    .reg-nav button { flex: 1 1 0; width: auto; min-width: 0; }
+    .reg-nav .reg-back { flex: 0 0 auto; }
+    .reg-back, .reg-next { display: grid; place-items: center; }
+    #register-form[data-cur="1"] .reg-back, #register-form[data-cur="3"] .reg-next, #register-form[data-cur="1"] #register-btn, #register-form[data-cur="2"] #register-btn { display: none; }
+    #register-form[data-cur="1"] [data-step="2"], #register-form[data-cur="1"] [data-step="3"], #register-form[data-cur="2"] [data-step="1"],
+    #register-form[data-cur="2"] [data-step="3"], #register-form[data-cur="3"] [data-step="1"], #register-form[data-cur="3"] [data-step="2"] { display: none; }
+}
