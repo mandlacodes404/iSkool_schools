@@ -1335,10 +1335,9 @@ button#login-btn.is-loading .btn-spinner {
     .form-panel #iskool-brand, .form-panel #register-iskool-brand { display: flex; justify-content: flex-start; align-items: center; gap: 8px; width: auto; height: 44px; margin: 0; padding: 0; transform: none; max-width: none; }
     .form-panel #iskool-brand img, .form-panel #register-iskool-brand img { width: 32px; height: 32px; }
     .form-panel .iskool-brand-wordmark, .form-panel #iskool-brand-wordmark { display: block; font-size: 20px; }
-    .form-panel #form-top-brand { display: flex; position: absolute; top: calc(20px + env(safe-area-inset-top, 0px)); right: 24px; height: 44px; margin: 0; width: auto; max-width: 52%; }
-    .form-panel #form-school-badge { background: none; border: 0; padding: 0; }
-    .form-panel #form-school-name { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #9a9994; }
-    .form-panel #form-school-dot { background: #6b6a66; box-shadow: none; animation: none; }
+    .form-panel #form-top-brand { display: flex; position: absolute; top: calc(20px + env(safe-area-inset-top, 0px)); right: 24px; height: 44px; margin: 0; width: auto; max-width: calc(100% - 160px); }
+    .form-panel #form-school-badge { display: flex; align-items: center; min-width: 0; max-width: 100%; background: none; border: 0; padding: 0; }
+    .form-panel #form-school-name { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #9a9994; }
     .m-head h3 { font: 800 30px/1.2 'Nunito', sans-serif; margin: 24px 0 6px; color: #ecebe8; }
     .form-box .m-head p { margin: 0 0 24px; color: #9a9994; font-size: 15px; text-align: left; }
     .form-box .field-label { font-size: 13px; color: #c4c3be; }
@@ -1358,14 +1357,16 @@ button#login-btn.is-loading .btn-spinner {
     #register-btn:disabled { opacity: .55; cursor: default; }
     button#login-btn .btn-spinner span { background: #ecebe8; }
     /* Login */
-    #login-form.active #login-form-el { display: grid; grid-template-columns: 1fr auto; grid-template-rows: repeat(10, auto) 1fr auto; align-items: center; }
+    #login-form.active #login-form-el { display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto minmax(0, 1fr) repeat(9, auto) minmax(0, 1.5fr) auto; align-items: center; }
+    #login-form-el #iskool-brand { order: -2; }
+    #login-form-el::before { content: ""; grid-column: 1 / -1; order: -1; }
     #login-form-el > * { grid-column: 1 / -1; }
     #login-form-el .remember-me-row { display: flex !important; grid-column: 1; order: 5; margin: 2px 0 22px !important; }
     #login-form-el .forgot-p { grid-column: 2; order: 5; margin: 2px 0 22px; }
     #login-form-el .forgot-p a { color: #9a9994 !important; font-size: 13px; }
     #login-btn { order: 6; }
     .m-note { order: 7; margin-top: 20px; padding: 12px 14px; border: 1px solid #2e2e2c; border-radius: 10px; color: #9a9994; font-size: 13px; }
-    #login-form-el .reg-link { order: 8; grid-row: 12; margin: 28px 0 0; }
+    #login-form-el .reg-link { order: 8; grid-row: 13; margin: 28px 0 0; }
     /* Register */
     #register-form h2 { display: none; }
     #register-form.active #register-form-el { display: flex; flex-direction: column; }
