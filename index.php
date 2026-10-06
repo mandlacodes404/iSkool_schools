@@ -81,7 +81,7 @@ if ($result && $row = $result->fetch_assoc()) {
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/index.css?v=9.0">
+    <link rel="stylesheet" href="assets/css/index.css?v=9.1">
 
 <?php if (isset($_SESSION['email']) && isset($_SESSION['role'])): ?>
     <!-- ──────────────────────────────────────────────────────────────────
@@ -500,6 +500,7 @@ function getCsrfToken() {
                    <span id="iskool-brand-wordmark" class="iskool-brand-wordmark">iSkool</span>
                 </div>
                 <!-- AJAX error message box (hidden until an error occurs) -->
+                <div class="m-head m-only"><h3>Log in</h3><p>Good to see you. Pick up where you left off.</p></div>
                 <div id="login-error-box" style="display:none;background:rgba(255,77,77,0.10);border:1px solid rgba(255,77,77,0.3);color:#ff6b6b;font-size:14px;padding:11px 16px;border-radius:12px;margin-bottom:16px;text-align:center;"></div>
                 <div class="field">
                     <label class="field-label" for="login-email">Email</label>
@@ -523,16 +524,17 @@ function getCsrfToken() {
                         <span></span><span></span><span></span><span></span>
                     </span>
                 </button>
-                <p>Don't have an account? 
+                <div class="m-note m-only">One login for learners, teachers, parents and school admins.</div>
+                <p class="reg-link">Don't have an account? 
                    <a href="#" onclick="showForm('register-form'); return false;">Register</a>
                 </p>
-                <p style="text-align:center; margin-top: 8px;">
+                <p class="forgot-p" style="text-align:center; margin-top: 8px;">
                     <a href="#" onclick="showForm('forgot-form'); return false;" style="color:#888;">Forgot your password?</a>
                 </p>
             </form><!-- /#login-form-el -->
         </div>
         <!-- REGISTER FORM -->
-        <div class="form-box <?= isActiveForm('register', $activeForm); ?>" id="register-form">
+        <div class="form-box <?= isActiveForm('register', $activeForm); ?>" id="register-form" data-cur="1">
             <form id="register-form-el" novalidate>
                 <!-- iSkool brand text (mobile only — see #register-iskool-brand in CSS) -->
                 <div id="register-iskool-brand" class="iskool-brand-lockup">
@@ -540,6 +542,8 @@ function getCsrfToken() {
                    <span class="iskool-brand-wordmark">iSkool</span>
                 </div>
                 <h2>Register</h2>
+                <div class="reg-prog m-only"><div><b class="on"></b><b></b><b></b></div><span id="reg-prog-t">Step 1 of 3</span></div>
+                <div class="m-head m-only"><h3 id="reg-h">Who is joining?</h3><p id="reg-sub">Choose the option that fits you best.</p></div>
                 <!-- AJAX error message box (hidden until an error occurs) -->
                 <div id="register-error-box" style="display:none;background:rgba(255,77,77,0.10);border:1px solid rgba(255,77,77,0.3);color:#ff6b6b;font-size:14px;padding:11px 16px;border-radius:12px;margin-bottom:16px;text-align:center;"></div>
 
@@ -594,6 +598,7 @@ function getCsrfToken() {
 
                 <div class="field">
                     <label class="field-label" for="register-role">Role</label>
+                    <div class="role-cards m-only"><button type="button" class="role-card" data-role="learner"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg><span><strong>Learner</strong><em>See classes, quizzes and grades</em></span></button><button type="button" class="role-card" data-role="teacher"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg><span><strong>Teacher</strong><em>Run classes and assessments</em></span></button><button type="button" class="role-card" data-role="parent"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 5.6a5.2 5.2 0 0 0-7.4 0L12 7l-1.4-1.4a5.2 5.2 0 0 0-7.4 7.4L12 21.8l8.8-8.8a5.2 5.2 0 0 0 0-7.4z"/></svg><span><strong>Parent</strong><em>Follow your child's progress</em></span></button><button type="button" class="role-card" data-role="school_admin"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span><strong>School admin</strong><em>Manage the school's account</em></span></button></div>
                     <select name="role" id="register-role" required>
                         <option value="">-- Select Role --</option>
                         <option value="learner">Learner</option>
@@ -628,7 +633,7 @@ function getCsrfToken() {
                     </label>
                 </div>
 
-                <button type="submit" id="register-btn">Register</button>
+                <div class="reg-nav"><button type="button" class="reg-back">Back</button><button type="button" class="reg-next">Continue</button><button type="submit" id="register-btn">Register</button></div>
                 <p>Already have an account? 
                    <a href="#" onclick="showForm('login-form'); return false;">Login</a>
                 </p>
@@ -1075,6 +1080,35 @@ function getCsrfToken() {
             btn.textContent = 'Register';
         }
     });
+
+    // ── Mobile guided register (3 steps). Desktop ignores all of this via CSS. ──
+    (function () {
+        const f = document.getElementById('register-form'), fe = document.getElementById('register-form-el');
+        const eb = document.getElementById('register-error-box'), sel = document.getElementById('register-role');
+        const T = [['Who is joining?', 'Choose the option that fits you best.'], ['Tell us about you', 'We use this to set up your profile.'], ['Set up your login', 'Last step. Your school gave you an access key.']];
+        const tag = (id, step, order, half) => { const el = document.getElementById(id).closest('.field'); el.dataset.step = step; el.dataset.o = order; if (half) el.dataset.half = 1; };
+        tag('register-role', 1, 1); tag('register-title', 2, 1, 1); tag('gender', 2, 2, 1); tag('register-first-name', 2, 3); tag('register-surname', 2, 4); tag('register-second-name', 2, 5, 1); tag('age', 2, 6, 1);
+        tag('register-email', 3, 1); tag('register-password', 3, 2); tag('confirm-password', 3, 3); tag('register-access-key', 3, 4);
+        const ag = fe.querySelector('input[name="agree_notifications"]').closest('div'); ag.dataset.step = 3; ag.dataset.o = 5;
+        const go = k => {
+            f.dataset.cur = k; eb.style.display = 'none';
+            f.querySelectorAll('.reg-prog b').forEach((b, i) => b.className = i < k ? 'on' : '');
+            document.getElementById('reg-prog-t').textContent = 'Step ' + k + ' of 3';
+            document.getElementById('reg-h').textContent = T[k - 1][0]; document.getElementById('reg-sub').textContent = T[k - 1][1];
+            f.querySelector('.form-panel, #register-form').scrollIntoView({ block: 'start' });
+        };
+        const sync = () => f.querySelectorAll('.role-card').forEach(c => c.classList.toggle('on', c.dataset.role === sel.value));
+        f.querySelectorAll('.role-card').forEach(c => c.addEventListener('click', () => { sel.value = c.dataset.role; sync(); eb.style.display = 'none'; }));
+        const bad = msg => { eb.textContent = msg; eb.style.display = 'block'; };
+        f.querySelector('.reg-next').addEventListener('click', () => {
+            const k = +f.dataset.cur;
+            if (k === 1 && !sel.value) return bad('Please choose who is joining.');
+            if (k === 2 && !['register-title', 'gender', 'register-first-name', 'register-surname', 'age'].every(i => document.getElementById(i).value.trim())) return bad('Please fill in your title, gender, name, surname and age.');
+            go(k + 1);
+        });
+        f.querySelector('.reg-back').addEventListener('click', () => go(Math.max(1, +f.dataset.cur - 1)));
+        fe.addEventListener('reset', () => setTimeout(() => { sync(); go(1); }));
+    })();
 
     // ── Inline registration success (no page reload) ─────────────────────────
     function showRegistrationSuccess() {
