@@ -1,481 +1,163 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Privacy Policy \ iSkool</title>
-<link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.2">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="iskool_footer.css?v=1.2" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#faf9f5" />
+<title>Privacy Policy — iSkool</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 <style>
-:root {
-  --teal: #4fd1c5;
-  --teal2: #00e5a0;
-  --gold: #f5c842;
-  --dark: #0f0f12;
+:root{
+  --paper:#faf9f5; --ink:#0a1b31; --muted:#5b697d;
+  --font:Manrope,Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --pad:64px; --gutter:max(var(--pad),calc((100% - 1160px)/2 + var(--pad)));
 }
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-body { font-family: 'DM Sans', system-ui, sans-serif; background: #f5f0eb; color: #111; line-height: 1.6; }
+*{box-sizing:border-box}
+body{margin:0;min-width:320px;min-height:100vh;display:flex;flex-direction:column;color:var(--ink);font-family:var(--font);-webkit-font-smoothing:antialiased;
+  background:radial-gradient(circle at 8% 0,rgba(255,255,255,.98),transparent 34rem),radial-gradient(circle at 92% 38%,rgba(255,246,232,.5),transparent 30rem),var(--paper)}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid rgba(74,126,206,.6);outline-offset:5px;border-radius:4px}
+::selection{background:rgba(119,164,232,.22)}
 
-/* ── NAV ── */
-nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-  background: rgba(245,240,235,0.97); backdrop-filter: blur(12px);
-  padding: 14px 5%;
-  display: flex; align-items: center; justify-content: space-between;
-}
-.nav-logo {
-  display: flex; align-items: center; gap: 11px;
-  font-family: 'DM Sans', sans-serif; font-size: 21px; font-weight: 600;
-  text-decoration: none; color: #111;
-}
-.nav-logo svg { width: 40px; height: 40px; }
-.nav-back {
-  display: inline-flex; align-items: center; gap: 8px;
-  font-size: 14px; font-weight: 400; color: #555;
-  text-decoration: none; transition: color 0.2s;
-}
-.nav-back:hover { color: var(--gold); }
-.nav-back svg { width: 16px; height: 16px; }
+header{position:sticky;top:0;z-index:20;height:96px;padding:0 var(--gutter);display:flex;align-items:center;justify-content:space-between;background:rgba(250,249,245,.92)}
+.logo{display:block;width:142px;height:auto}
+.back{font-size:14px;font-weight:500}
+.back:hover{opacity:.5}
 
-/* ── HERO BANNER ── */
-.legal-hero {
-  background: #f5f0eb;
-  padding: 90px 5% 56px;
-  position: relative;
-  overflow: hidden;
-}
-.legal-hero::before {
-  content: '';
-  position: absolute; inset: 0;
-  background-image: radial-gradient(circle, #ddd 1px, transparent 1px);
-  background-size: 28px 28px;
-  opacity: 0.45;
-  pointer-events: none;
-}
-.legal-hero-inner { max-width: 860px; margin: 0 auto; position: relative; }
-.legal-badge {
-  display: inline-flex; align-items: center; gap: 8px;
-  background: #fef9e6;
-  border: 1px solid rgba(245,200,66,0.4);
-  color: #d97706;
-  padding: 6px 18px; border-radius: 8px;
-  font-size: 12px; font-weight: 600;
-  letter-spacing: 1px; text-transform: uppercase;
-  margin-bottom: 24px;
-}
-.legal-hero h1 {
-  font-family: 'DM Sans', sans-serif;
-  font-size: clamp(36px, 5vw, 60px);
-  font-weight: 600; line-height: 1.06;
-  letter-spacing: -0.03em; color: #111;
-  margin-bottom: 16px;
-}
-.legal-hero h1 span { color: #d4a800; }
-.legal-meta {
-  display: flex; flex-wrap: wrap; gap: 24px;
-  margin-top: 28px;
-}
-.legal-meta-item {
-  font-size: 13px; color: #888;
-}
-.legal-meta-item strong { color: #444; font-weight: 600; }
+main{flex:1;padding:56px var(--gutter) 96px}
+.legal{max-width:680px}
+.legal h1{margin:0 0 20px;font-size:28px;line-height:1.2;letter-spacing:-.03em;font-weight:600}
+.legal h2{margin:56px 0 18px;font-size:22px;line-height:1.25;letter-spacing:-.025em;font-weight:600}
+.legal p,.legal li{font-size:17px;line-height:1.6;letter-spacing:-.01em}
+.legal p{margin:0 0 18px}
+.legal .sub{margin-bottom:6px;font-weight:600}
+.legal .note{font-weight:600}
+.legal ul{margin:0 0 18px;padding-left:24px}
+.legal li{margin:0 0 12px}
+.legal strong{font-weight:600}
+.legal a{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+.legal a:hover{opacity:.6}
 
-/* ── CONTENT LAYOUT ── */
-.legal-wrap {
-  max-width: 860px;
-  margin: 0 auto;
-  padding: 72px 5% 100px;
-  display: grid;
-  grid-template-columns: 220px 1fr;
-  gap: 64px;
-  align-items: start;
-}
+footer{padding:0 var(--gutter) 28px;color:#738095;font-size:13px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px 28px}
+footer nav{display:flex;gap:28px}
+footer a:hover{color:var(--ink)}
 
-/* Sticky TOC */
-.legal-toc {
-  position: sticky;
-  top: 88px;
-}
-.toc-title {
-  font-size: 10px; font-weight: 600;
-  letter-spacing: 2px; text-transform: uppercase;
-  color: #aaa; margin-bottom: 16px;
-}
-.toc-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
-.toc-list a {
-  display: block;
-  font-size: 13.5px; color: #777;
-  text-decoration: none; padding: 5px 0 5px 12px;
-  border-left: 2px solid #eee;
-  transition: color 0.2s, border-color 0.2s;
-  line-height: 1.4;
-}
-.toc-list a:hover { color: var(--gold); border-color: var(--gold); }
-.toc-list a.active { color: var(--gold); border-color: var(--gold); font-weight: 600; }
-
-/* Content */
-.legal-content { min-width: 0; }
-
-.legal-section {
-  margin-bottom: 56px;
-  padding-bottom: 56px;
-  border-bottom: 1px solid #f0f0f0;
-}
-.legal-section:last-child { border-bottom: none; margin-bottom: 0; }
-
-.legal-section-num {
-  font-size: 11px; font-weight: 600;
-  letter-spacing: 1.5px; text-transform: uppercase;
-  color: var(--teal); margin-bottom: 10px;
-}
-.legal-section h2 {
-  font-family: 'DM Sans', sans-serif;
-  font-size: clamp(20px, 2.5vw, 26px);
-  font-weight: 600; line-height: 1.2;
-  letter-spacing: -0.015em; color: #111;
-  margin-bottom: 18px;
-}
-.legal-section p {
-  font-size: 15.5px; color: #444;
-  line-height: 1.8; margin-bottom: 16px;
-}
-.legal-section p:last-child { margin-bottom: 0; }
-.legal-section strong { color: #111; font-weight: 600; }
-
-.legal-list {
-  list-style: none; padding: 0;
-  display: flex; flex-direction: column; gap: 10px;
-  margin: 16px 0;
-}
-.legal-list li {
-  display: block;
-  font-size: 15px; color: #444; line-height: 1.7;
-  padding-left: 18px;
-  position: relative;
-}
-.legal-list li::before {
-  content: '';
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--gold);
-  position: absolute;
-  left: 0;
-  top: 9px;
-}
-
-.legal-highlight {
-  background: #f8fffe;
-  border: 1px solid rgba(79,209,197,0.2);
-  border-left: 4px solid var(--gold);
-  border-radius: 0 12px 12px 0;
-  padding: 18px 20px;
-  margin: 20px 0;
-  font-size: 15px; color: #333; line-height: 1.7;
-}
-
-.legal-contact-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px; margin-top: 20px;
-}
-.legal-contact-card {
-  background: #f8f9fa;
-  border-radius: 14px; padding: 18px 20px;
-}
-.legal-contact-card-label {
-  font-size: 10px; font-weight: 600;
-  letter-spacing: 1.5px; text-transform: uppercase;
-  color: #aaa; margin-bottom: 6px;
-}
-.legal-contact-card a {
-  color: var(--gold); text-decoration: none;
-  font-weight: 600; font-size: 14.5px;
-}
-.legal-contact-card p { font-size: 14px; color: #555; margin: 0; }
-
-/* ── RESPONSIVE ── */
-@media (max-width: 768px) {
-  .legal-wrap { grid-template-columns: 1fr; gap: 40px; }
-  .legal-toc { position: static; display: none; }
-  .legal-hero { padding: 80px 5% 40px; }
-}
-@media (max-width: 480px) {
-  .legal-hero h1 { letter-spacing: -0.02em; }
-}
-
-/* ── PARAGRAPH & BOLD FIX ── */
-/* Remove bottom margin from standalone label paragraphs (bold-only <p>) */
-.legal-section p:has(> strong:only-child) {
-  margin-bottom: 6px;
-}
-/* Explicit class for label paragraphs — full browser support fallback */
-.legal-section p.legal-label {
-  margin-bottom: 6px;
-  margin-top: 18px;
-  font-weight: 600;
-  color: #111;
-  font-size: 15px;
-}
-/* First label in a section has no top margin */
-.legal-section h2 + .legal-list,
-.legal-section h2 + p.legal-label {
-  margin-top: 0;
-}
-/* Tighten gap when a label <p> is immediately followed by a list or paragraph */
-.legal-section p.legal-label + .legal-list,
-.legal-section p + .legal-list {
-  margin-top: 0;
-}
-/* Tighten gap when a label <p> is immediately followed by a body <p> */
-.legal-section p.legal-label + p {
-  margin-top: 0;
-}
-/* Bold text inside list items: keep inline, don't break alignment */
-.legal-list li strong {
-  display: inline;
-  font-weight: 600;
-  color: #111;
-}
-/* Mobile content padding so text doesn't hug screen edges */
-@media (max-width: 600px) {
-  .legal-content {
-    padding: 0 2px;
-  }
-  .legal-wrap {
-    padding-left: 5%;
-    padding-right: 5%;
-  }
-  .legal-section p,
-  .legal-list li {
-    font-size: 15px;
-    line-height: 1.75;
-  }
+@media (max-width:800px){
+  :root{--pad:24px}
+  header{height:76px}
+  .logo{width:118px}
+  main{padding:40px var(--gutter) 72px}
+  .legal h1{font-size:24px}
+  .legal h2{margin-top:44px;font-size:20px}
+  .legal p,.legal li{font-size:16px}
 }
 </style>
 </head>
 <body>
+<header>
+  <a href="wiggle.html" aria-label="Wiggle home"><img class="logo" src="enthropy/wiggle_colored.svg" alt="Wiggle" /></a>
+  <a class="back" href="iskool.html">Back to iSkool</a>
+</header>
 
-<!-- NAV -->
-<nav>
-  <a href="website-clone.html" class="nav-logo">
-    <svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="37" height="37" viewBox="0 0 1254.000000 1254.000000" preserveAspectRatio="xMidYMid meet"><g transform="translate(0.000000,1254.000000) scale(0.100000,-0.100000)" fill="#e53e3e" stroke="none"><path d="M6200 11494 c-273 -46 -467 -196 -557 -433 -131 -347 15 -731 337 -886 41 -19 80 -35 87 -35 11 0 13 -187 13 -959 l0 -959 -47 -7 c-217 -31 -457 -125 -649 -254 l-91 -60 -390 392 c-667 670 -968 979 -966 991 1 6 13 43 28 83 92 257 25 548 -172 740 -125 123 -284 186 -463 186 -258 0 -486 -144 -601 -379 -49 -101 -69 -191 -69 -314 0 -119 19 -201 72 -310 53 -110 176 -237 285 -293 177 -92 390 -102 579 -26 l50 20 335 -338 c183 -186 490 -495 680 -688 l347 -350 -54 -80 c-68 -101 -154 -274 -192 -390 -25 -74 -57 -204 -78 -322 l-4 -23 -1004 0 -1004 0 -22 68 c-59 184 -182 332 -340 409 -457 224 -971 -108 -973 -627 0 -58 5 -127 12 -155 52 -222 189 -399 376 -486 109 -50 171 -63 300 -62 93 0 123 5 195 29 169 56 314 184 392 344 l43 89 170 1 c584 3 1848 1 1851 -3 3 -3 15 -56 28 -118 13 -63 37 -152 52 -199 37 -111 150 -338 209 -418 l46 -63 -593 -602 c-326 -331 -632 -642 -679 -691 l-85 -88 -72 26 c-102 36 -231 51 -329 36 -161 -25 -276 -84 -387 -200 -319 -334 -237 -885 164 -1099 133 -71 325 -95 470 -58 195 50 357 181 443 358 58 118 76 203 72 339 -2 88 -8 120 -34 195 -18 50 -33 100 -34 112 -2 16 121 146 493 525 272 277 573 583 669 681 96 97 179 177 185 177 5 0 19 -9 30 -19 42 -39 223 -142 327 -186 96 -41 290 -95 392 -110 l37 -6 0 -1015 0 -1016 -22 -6 c-13 -3 -59 -24 -103 -46 -93 -46 -209 -156 -263 -248 -155 -262 -121 -603 81 -823 137 -151 293 -218 502 -216 119 1 191 18 302 71 66 31 100 56 166 122 189 189 250 445 168 708 -48 155 -184 315 -328 387 -43 22 -88 42 -101 45 l-22 6 0 1016 0 1015 38 6 c235 35 464 124 662 256 l94 63 240 -247 c133 -135 435 -442 671 -682 256 -260 429 -444 428 -453 -1 -10 -16 -57 -34 -107 -62 -175 -48 -394 36 -554 121 -231 340 -364 595 -364 121 0 183 14 295 68 250 120 399 375 382 655 -11 183 -76 329 -202 456 -116 117 -218 168 -390 194 -94 14 -215 1 -313 -35 l-67 -25 -321 323 c-570 573 -1034 1048 -1034 1057 0 6 15 31 34 57 120 168 248 481 271 664 4 31 10 61 14 68 8 12 490 15 1651 12 l385 -2 43 -89 c72 -151 195 -266 356 -330 244 -98 523 -41 711 144 102 101 157 200 196 353 38 155 14 338 -68 503 -56 112 -180 234 -293 288 -115 54 -174 67 -310 66 -102 0 -125 -3 -201 -30 -205 -72 -355 -226 -424 -435 l-27 -79 -1008 0 -1009 0 -6 38 c-16 92 -67 288 -94 359 -39 99 -108 233 -172 334 -35 54 -48 83 -42 93 5 8 152 161 328 338 176 178 477 482 669 676 l348 353 62 -24 c223 -89 498 -47 680 103 108 89 197 229 232 365 23 89 23 245 0 338 -47 198 -192 376 -374 459 -184 84 -408 81 -585 -9 -308 -155 -455 -549 -326 -872 l30 -75 -273 -275 c-150 -152 -457 -461 -681 -688 l-409 -412 -98 65 c-183 120 -416 213 -612 244 l-78 13 0 958 0 957 49 17 c165 55 336 229 396 405 41 119 51 207 37 317 -23 181 -80 300 -202 423 -83 84 -191 147 -295 173 -63 16 -203 28 -245 21z"/></g></svg>
-    iSkool
-  </a>
- 
-</nav>
-
-<!-- HERO BANNER -->
-<div class="legal-hero">
-  <div class="legal-hero-inner">
-    <h1>Privacy <span>Policy</span></h1>
-    <div class="legal-meta">
-      <div class="legal-meta-item"><strong>Effective Date:</strong> 16 May 2026</div>
-      <div class="legal-meta-item"><strong>Last Updated:</strong> 20 July 2026</div>
-     
-    </div>
-  </div>
-</div>
-
-<!-- MAIN CONTENT -->
-<div class="legal-wrap">
-
-  <!-- Sticky Table of Contents -->
-  <aside class="legal-toc">
-    <div class="toc-title">On this page</div>
-    <ul class="toc-list">
-      <li><a href="#s1">1. Who We Are</a></li>
-      <li><a href="#s2">2. Our Commitment</a></li>
-      <li><a href="#s3">3. What We Collect</a></li>
-      <li><a href="#s4">4. How We Use It</a></li>
-      <li><a href="#s5">5. Storage & Security</a></li>
-      <li><a href="#s6">6. Sharing</a></li>
-      <li><a href="#s7">7. Children's Privacy</a></li>
-      <li><a href="#s8">8. Your Rights (POPIA)</a></li>
-      <li><a href="#s9">9. Cookies</a></li>
-      <li><a href="#s10">10. Policy Changes</a></li>
-      <li><a href="#s11">11. Contact Us</a></li>
+<main>
+  <article class="legal">
+    <h1>Privacy Policy</h1>
+    <p class="meta">Effective Date: 16 May 2026<br>Last Updated: 20 July 2026</p>
+    <h2>Who We Are</h2>
+    <p>iSkool is a cloud-based Learning Management System (LMS) developed and operated by <strong>Wiggle (Pty) Ltd</strong> (Registration No. 2023/260831/07). iSkool is a product of Wiggle (Pty) Ltd, a company registered in the Republic of South Africa, with its registered address at 2047 Mandisa Street, Tokoza, 1426.</p>
+    <p>iSkool is purpose-built for South African high schools and serves learners, teachers, school administrators, and principals. For the purposes of this Privacy Policy, "iSkool" or "the platform" refers to the software product itself, and "Wiggle", "we", "us", and "our" refer to Wiggle (Pty) Ltd, the company responsible for it.</p>
+    <p>Our platform is accessible at iskool.xyz and through any school-specific access point provided to your institution.</p>
+    <h2>Our Commitment to Your Privacy</h2>
+    <p>We take privacy seriously — especially because many of our users are minors. iSkool is fully committed to complying with the <strong>Protection of Personal Information Act, 2013 (POPIA)</strong>, South Africa's primary data protection law.</p>
+    <p>This Privacy Policy explains what personal information we collect, why we collect it, how we use it, and what rights you have over your data.</p>
+    <p class="note">iSkool will never sell, rent, or trade your personal information to any third party for commercial purposes. This is an absolute commitment.</p>
+    <h2>What Personal Information We Collect</h2>
+    <p>We collect only the information necessary to provide the iSkool platform. This includes:</p>
+    <p class="sub"><strong>From Schools and Administrators:</strong></p>
+    <p>School name, contact details, administrator names and email addresses. We do not require a school's physical address to create an account.</p>
+    <p class="sub"><strong>From Teachers:</strong></p>
+    <p>Full name, staff email address, subject and grade assignments, and profile information entered during onboarding.</p>
+    <p class="sub"><strong>From Learners:</strong></p>
+    <p>Full name, grade, class group, and learner number if provided by the school. We also record academic activity on the platform including quiz attempts, assignment submissions, scores, and any content submitted through the platform.</p>
+    <p class="sub"><strong>From Parents (where applicable):</strong></p>
+    <p>Name, email address, and relationship to the learner, for the purpose of accessing learner progress reports only.</p>
+    <p class="sub"><strong>Automatically Collected Platform Data:</strong></p>
+    <p>As part of normal platform operation, iSkool's backend systems record standard activity data including login events, feature usage, and system performance metrics. This data is stored on iSkool's own servers, is used solely to maintain and improve the platform, and is never shared with third parties.</p>
+    <p class="sub"><strong>AI Invigilator Data (during live quiz sessions only):</strong></p>
+    <p>When a learner sits a quiz with the AI Invigilator enabled, the following events are recorded in real time:</p>
+    <ul>
+      <li><strong>Tab switch events</strong> — recorded when a learner switches to another browser tab during an active quiz, including which question they were on at the time.</li>
+      <li><strong>Quiz exit events</strong> — recorded when a learner navigates away from or closes the quiz, including which question they were on at the time.</li>
+      <li><strong>Rapid navigation events</strong> — recorded when a learner moves through questions at an unusually fast pace.</li>
     </ul>
-  </aside>
+    <p>Each event is time-stamped and linked to the learner's email address and quiz ID. This data is visible only to the teacher who administered the quiz. The AI Invigilator does not take screenshots, access the learner's camera or microphone, record keystrokes, or monitor what the learner was doing outside of the iSkool platform.</p>
+    <h2>How We Use Your Information</h2>
+    <p>We use the personal information we collect strictly for the following purposes:</p>
+    <ul>
+      <li>To create and manage user accounts for learners, teachers, and administrators.</li>
+      <li>To deliver platform features including quizzes, assignments, gradebooks, analytics, announcements, discussions, and syllabus tracking.</li>
+      <li>To generate academic reports and performance analytics for teachers and school administrators.</li>
+      <li>To operate the AI Invigilator feature, which monitors quiz session integrity in real time.</li>
+      <li>To communicate important platform updates, scheduled maintenance, or changes to these policies.</li>
+      <li>To provide customer support and respond to queries from schools.</li>
+      <li>To maintain and improve the iSkool platform using internal platform activity data collected by our own backend systems. This data is anonymised and aggregated and is never shared with third parties.</li>
+    </ul>
+    <p class="note">We do not use your personal information for advertising, profiling for commercial purposes, or sale to third parties under any circumstances.</p>
+    <h2>How We Store and Protect Your Data</h2>
+    <p>iSkool data is hosted by <strong>Namecheap, Inc.</strong>, our hosting provider, on servers located in the <strong>United States of America</strong>. We have selected Namecheap based on their security standards and data protection commitments. By using iSkool, you acknowledge that your data is processed and stored outside of South Africa.</p>
+    <p>This cross-border transfer is carried out in accordance with POPIA Section 72. Namecheap is contractually bound by their own privacy policy and terms of service, which govern the security and handling of data on their infrastructure.</p>
+    <ul>
+      <li>All data transmitted between your device and the iSkool platform is encrypted using industry-standard TLS/HTTPS protocols.</li>
+      <li>Access to personal data is restricted to authorised iSkool personnel on a strict need-to-know basis.</li>
+      <li>iSkool takes reasonable measures to ensure data integrity and availability, including maintaining backup and recovery processes through our hosting provider.</li>
+      <li>We retain school and user data for the duration of the school's active subscription or pilot period, plus a 12-month grace period after termination. After this period, all data is permanently and irreversibly deleted.</li>
+    </ul>
+    <p class="note">If you have concerns about cross-border data storage, or wish to understand more about how Namecheap protects your data, you may contact us at <a href="mailto:policy@iskool.xyz">policy@iskool.xyz</a>.</p>
+    <h2>Sharing of Personal Information</h2>
+    <p>iSkool does not sell, rent, or trade personal information. We only share data in the following limited circumstances:</p>
+    <ul>
+      <li>With the school itself — teachers can see learner data for their own classes only, and administrators can see school-wide data for their institution only.</li>
+      <li>With <strong>Namecheap, Inc.</strong>, our hosting provider, solely for the purpose of storing and serving the platform. Namecheap does not have access to your data for any commercial purpose and is bound by their own data protection commitments.</li>
+      <li>Where required by South African law, a valid court order, or a lawful request from a recognised regulatory authority.</li>
+    </ul>
+    <p class="note">We do not use any third-party advertising networks, analytics platforms, or data brokers. Your data stays within the iSkool ecosystem.</p>
+    <h2>Children's Privacy</h2>
+    <p>Many iSkool users are learners under the age of 18. We treat all learner data with the highest level of care. Learner accounts are created by the school or by teachers — learners do not self-register.</p>
+    <p>We do not collect any unnecessary personal information from minors and do not expose learner data to any commercial or marketing activity.</p>
+    <p class="note">Schools are responsible for obtaining appropriate consent from parents or guardians where required by applicable law before enrolling learners on the platform.</p>
+    <h2>Your Rights Under POPIA</h2>
+    <p>As a data subject under POPIA, you have the following rights:</p>
+    <ul>
+      <li>The right to know what personal information we hold about you.</li>
+      <li>The right to request access to your personal information.</li>
+      <li>The right to request correction of inaccurate or outdated information.</li>
+      <li>The right to request deletion of your personal information where legally permissible.</li>
+      <li>The right to object to the processing of your personal information in certain circumstances.</li>
+      <li>The right to lodge a complaint with the Information Regulator of South Africa if you believe your rights have been violated.</li>
+    </ul>
+    <p>To exercise any of these rights, contact us at <strong><a href="mailto:policy@iskool.xyz">policy@iskool.xyz</a></strong>.</p>
+    <h2>Cookies and Tracking</h2>
+    <p>iSkool uses session cookies strictly to maintain your logged-in state while using the platform. We do not use advertising cookies, third-party tracking cookies, or any form of cross-site tracking.</p>
+    <h2>Changes to This Policy</h2>
+    <p>We may update this Privacy Policy from time to time to reflect changes in the platform, legal requirements, or our practices. When we do, the updated policy will be posted on the platform with a revised effective date.</p>
+    <p>Schools will be notified of material changes through a notice displayed on the platform. Where possible, we will also notify schools directly. Continued use of iSkool after an updated policy takes effect constitutes acceptance of the revised terms.</p>
+    <p>We encourage schools and users to review this policy periodically. The current version will always be available at iskool.xyz.</p>
+    <h2>Contact Us</h2>
+    <p>For any privacy-related queries, requests, or complaints, please contact our Information Officer:</p>
+    <p><strong>Information Officer</strong><br>Mandla Simphiwe Mahlangu</p>
+    <p><strong>IO Registration No.</strong><br>2026-062547 (registered 20 July 2026)</p>
+    <p><strong>Privacy Email</strong><br><a href="mailto:policy@iskool.xyz">policy@iskool.xyz</a></p>
+    <p><strong>Address</strong><br>Wiggle (Pty) Ltd<br/>2047 Mandisa Street<br/>Tokoza, 1426<br/>South Africa</p>
+    <p><strong>Information Regulator</strong><br><a href="https://www.inforegulator.org.za" target="_blank">inforegulator.org.za</a></p>
+    <p>Our Information Officer is registered with the Information Regulator of South Africa under registration number <strong>2026-062547</strong>. Schools may verify this registration directly via the Regulator's <a href="https://eservices.inforegulator.org.za" rel="noopener" target="_blank">eServices Portal</a>.</p>
+  </article>
+</main>
 
-  <!-- Content -->
-  <main class="legal-content">
-
-    <div class="legal-section" id="s1">
-      <div class="legal-section-num">Section 01</div>
-      <h2>Who We Are</h2>
-      <p>iSkool is a cloud-based Learning Management System (LMS) developed and operated by <strong>Enthropy (Pty) Ltd</strong> (Registration No. 2023/260831/07). iSkool is a product of Enthropy (Pty) Ltd, a company registered in the Republic of South Africa, with its registered address at 2047 Mandisa Street, Tokoza, 1426.</p>
-      <p>iSkool is purpose-built for South African high schools and serves learners, teachers, school administrators, and principals. For the purposes of this Privacy Policy, "iSkool" or "the platform" refers to the software product itself, and "Enthropy", "we", "us", and "our" refer to Enthropy (Pty) Ltd, the company responsible for it.</p>
-      <p>Our platform is accessible at iskool.xyz and through any school-specific access point provided to your institution.</p>
-    </div>
-
-    <div class="legal-section" id="s2">
-      <div class="legal-section-num">Section 02</div>
-      <h2>Our Commitment to Your Privacy</h2>
-      <p>We take privacy seriously — especially because many of our users are minors. iSkool is fully committed to complying with the <strong>Protection of Personal Information Act, 2013 (POPIA)</strong>, South Africa's primary data protection law.</p>
-      <p>This Privacy Policy explains what personal information we collect, why we collect it, how we use it, and what rights you have over your data.</p>
-      <div class="legal-highlight">iSkool will never sell, rent, or trade your personal information to any third party for commercial purposes. This is an absolute commitment.</div>
-    </div>
-
-    <div class="legal-section" id="s3">
-      <div class="legal-section-num">Section 03</div>
-      <h2>What Personal Information We Collect</h2>
-      <p>We collect only the information necessary to provide the iSkool platform. This includes:</p>
-
-      <p class="legal-label"><strong>From Schools and Administrators:</strong></p>
-      <p>School name, contact details, administrator names and email addresses. We do not require a school's physical address to create an account.</p>
-
-      <p class="legal-label"><strong>From Teachers:</strong></p>
-      <p>Full name, staff email address, subject and grade assignments, and profile information entered during onboarding.</p>
-
-      <p class="legal-label"><strong>From Learners:</strong></p>
-      <p>Full name, grade, class group, and learner number if provided by the school. We also record academic activity on the platform including quiz attempts, assignment submissions, scores, and any content submitted through the platform.</p>
-
-      <p class="legal-label"><strong>From Parents (where applicable):</strong></p>
-      <p>Name, email address, and relationship to the learner, for the purpose of accessing learner progress reports only.</p>
-
-      <p class="legal-label"><strong>Automatically Collected Platform Data:</strong></p>
-      <p>As part of normal platform operation, iSkool's backend systems record standard activity data including login events, feature usage, and system performance metrics. This data is stored on iSkool's own servers, is used solely to maintain and improve the platform, and is never shared with third parties.</p>
-
-      <p class="legal-label"><strong>AI Invigilator Data (during live quiz sessions only):</strong></p>
-      <p>When a learner sits a quiz with the AI Invigilator enabled, the following events are recorded in real time:</p>
-      <ul class="legal-list">
-        <li><strong>Tab switch events</strong> — recorded when a learner switches to another browser tab during an active quiz, including which question they were on at the time.</li>
-        <li><strong>Quiz exit events</strong> — recorded when a learner navigates away from or closes the quiz, including which question they were on at the time.</li>
-        <li><strong>Rapid navigation events</strong> — recorded when a learner moves through questions at an unusually fast pace.</li>
-      </ul>
-      <p>Each event is time-stamped and linked to the learner's email address and quiz ID. This data is visible only to the teacher who administered the quiz. The AI Invigilator does not take screenshots, access the learner's camera or microphone, record keystrokes, or monitor what the learner was doing outside of the iSkool platform.</p>
-    </div>
-
-    <div class="legal-section" id="s4">
-      <div class="legal-section-num">Section 04</div>
-      <h2>How We Use Your Information</h2>
-      <p>We use the personal information we collect strictly for the following purposes:</p>
-      <ul class="legal-list">
-        <li>To create and manage user accounts for learners, teachers, and administrators.</li>
-        <li>To deliver platform features including quizzes, assignments, gradebooks, analytics, announcements, discussions, and syllabus tracking.</li>
-        <li>To generate academic reports and performance analytics for teachers and school administrators.</li>
-        <li>To operate the AI Invigilator feature, which monitors quiz session integrity in real time.</li>
-        <li>To communicate important platform updates, scheduled maintenance, or changes to these policies.</li>
-        <li>To provide customer support and respond to queries from schools.</li>
-        <li>To maintain and improve the iSkool platform using internal platform activity data collected by our own backend systems. This data is anonymised and aggregated and is never shared with third parties.</li>
-      </ul>
-      <div class="legal-highlight">We do not use your personal information for advertising, profiling for commercial purposes, or sale to third parties under any circumstances.</div>
-    </div>
-
-    <div class="legal-section" id="s5">
-      <div class="legal-section-num">Section 05</div>
-      <h2>How We Store and Protect Your Data</h2>
-      <p>iSkool data is hosted by <strong>Namecheap, Inc.</strong>, our hosting provider, on servers located in the <strong>United States of America</strong>. We have selected Namecheap based on their security standards and data protection commitments. By using iSkool, you acknowledge that your data is processed and stored outside of South Africa.</p>
-      <p>This cross-border transfer is carried out in accordance with POPIA Section 72. Namecheap is contractually bound by their own privacy policy and terms of service, which govern the security and handling of data on their infrastructure.</p>
-      <ul class="legal-list">
-        <li>All data transmitted between your device and the iSkool platform is encrypted using industry-standard TLS/HTTPS protocols.</li>
-        <li>Access to personal data is restricted to authorised iSkool personnel on a strict need-to-know basis.</li>
-        <li>iSkool takes reasonable measures to ensure data integrity and availability, including maintaining backup and recovery processes through our hosting provider.</li>
-        <li>We retain school and user data for the duration of the school's active subscription or pilot period, plus a 12-month grace period after termination. After this period, all data is permanently and irreversibly deleted.</li>
-      </ul>
-      <div class="legal-highlight">If you have concerns about cross-border data storage, or wish to understand more about how Namecheap protects your data, you may contact us at <a href="mailto:policy@iskool.xyz" style="color:var(--gold);font-weight:600;text-decoration:none;">policy@iskool.xyz</a>.</div>
-    </div>
-
-    <div class="legal-section" id="s6">
-      <div class="legal-section-num">Section 06</div>
-      <h2>Sharing of Personal Information</h2>
-      <p>iSkool does not sell, rent, or trade personal information. We only share data in the following limited circumstances:</p>
-      <ul class="legal-list">
-        <li>With the school itself — teachers can see learner data for their own classes only, and administrators can see school-wide data for their institution only.</li>
-        <li>With <strong>Namecheap, Inc.</strong>, our hosting provider, solely for the purpose of storing and serving the platform. Namecheap does not have access to your data for any commercial purpose and is bound by their own data protection commitments.</li>
-        <li>Where required by South African law, a valid court order, or a lawful request from a recognised regulatory authority.</li>
-      </ul>
-      <div class="legal-highlight">We do not use any third-party advertising networks, analytics platforms, or data brokers. Your data stays within the iSkool ecosystem.</div>
-    </div>
-
-    <div class="legal-section" id="s7">
-      <div class="legal-section-num">Section 07</div>
-      <h2>Children's Privacy</h2>
-      <p>Many iSkool users are learners under the age of 18. We treat all learner data with the highest level of care. Learner accounts are created by the school or by teachers — learners do not self-register.</p>
-      <p>We do not collect any unnecessary personal information from minors and do not expose learner data to any commercial or marketing activity.</p>
-      <div class="legal-highlight">Schools are responsible for obtaining appropriate consent from parents or guardians where required by applicable law before enrolling learners on the platform.</div>
-    </div>
-
-    <div class="legal-section" id="s8">
-      <div class="legal-section-num">Section 08</div>
-      <h2>Your Rights Under POPIA</h2>
-      <p>As a data subject under POPIA, you have the following rights:</p>
-      <ul class="legal-list">
-        <li>The right to know what personal information we hold about you.</li>
-        <li>The right to request access to your personal information.</li>
-        <li>The right to request correction of inaccurate or outdated information.</li>
-        <li>The right to request deletion of your personal information where legally permissible.</li>
-        <li>The right to object to the processing of your personal information in certain circumstances.</li>
-        <li>The right to lodge a complaint with the Information Regulator of South Africa if you believe your rights have been violated.</li>
-      </ul>
-      <p>To exercise any of these rights, contact us at <strong><a href="mailto:policy@iskool.xyz">policy@iskool.xyz</a></strong>.</p>
-    </div>
-
-    <div class="legal-section" id="s9">
-      <div class="legal-section-num">Section 09</div>
-      <h2>Cookies and Tracking</h2>
-      <p>iSkool uses session cookies strictly to maintain your logged-in state while using the platform. We do not use advertising cookies, third-party tracking cookies, or any form of cross-site tracking.</p>
-    </div>
-
-    <div class="legal-section" id="s10">
-      <div class="legal-section-num">Section 10</div>
-      <h2>Changes to This Policy</h2>
-      <p>We may update this Privacy Policy from time to time to reflect changes in the platform, legal requirements, or our practices. When we do, the updated policy will be posted on the platform with a revised effective date.</p>
-      <p>Schools will be notified of material changes through a notice displayed on the platform. Where possible, we will also notify schools directly. Continued use of iSkool after an updated policy takes effect constitutes acceptance of the revised terms.</p>
-      <p>We encourage schools and users to review this policy periodically. The current version will always be available at iskool.xyz.</p>
-    </div>
-
-    <div class="legal-section" id="s11">
-      <div class="legal-section-num">Section 11</div>
-      <h2>Contact Us</h2>
-      <p>For any privacy-related queries, requests, or complaints, please contact our Information Officer:</p>
-      <div class="legal-contact-grid">
-        <div class="legal-contact-card">
-          <div class="legal-contact-card-label">Information Officer</div>
-          <p>Mandla Simphiwe Mahlangu</p>
-        </div>
-        <div class="legal-contact-card">
-          <div class="legal-contact-card-label">IO Registration No.</div>
-          <p>2026-062547 (registered 20 July 2026)</p>
-        </div>
-        <div class="legal-contact-card">
-          <div class="legal-contact-card-label">Privacy Email</div>
-          <a href="mailto:policy@iskool.xyz">policy@iskool.xyz</a>
-        </div>
-        <div class="legal-contact-card">
-          <div class="legal-contact-card-label">Address</div>
-          <p>Enthropy (Pty) Ltd<br>2047 Mandisa Street<br>Tokoza, 1426<br>South Africa</p>
-        </div>
-        <div class="legal-contact-card">
-          <div class="legal-contact-card-label">Information Regulator</div>
-          <a href="https://www.inforegulator.org.za" target="_blank">inforegulator.org.za</a>
-        </div>
-      </div>
-      <p style="margin-top:24px;">Our Information Officer is registered with the Information Regulator of South Africa under registration number <strong>2026-062547</strong>. Schools may verify this registration directly via the Regulator's <a href="https://eservices.inforegulator.org.za" target="_blank" rel="noopener" style="color:var(--gold);font-weight:600;text-decoration:none;">eServices Portal</a>.</p>
-    </div>
-
-  </main>
-</div>
-
-<!-- FOOTER -->
-<div id="iskool-footer"></div>
-<script src="iskool_footer.js?v=1.1"></script>
-
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-/* Active TOC link on scroll */
-const sections = document.querySelectorAll('.legal-section');
-const tocLinks = document.querySelectorAll('.toc-list a');
-const observer = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      tocLinks.forEach(l => l.classList.remove('active'));
-      const link = document.querySelector('.toc-list a[href="#' + entry.target.id + '"]');
-      if (link) link.classList.add('active');
-    }
-  });
-}, { rootMargin: '-20% 0px -70% 0px' });
-sections.forEach(s => observer.observe(s));
-</script>
+<footer>
+  <span>Copyright © 2026 Wiggle</span>
+  <nav aria-label="Legal"><a href="privacy-policy.html">Privacy policy</a><a href="terms-of-service.html">Terms of service</a></nav>
+</footer>
 </body>
 </html>

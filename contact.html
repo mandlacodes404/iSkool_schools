@@ -1,523 +1,107 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Contact \ iSkool</title>
-<link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="iskool_footer.css?v=1.2" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#faf9f5" />
+<meta name="description" content="Get in touch with Wiggle: iSkool support, privacy queries and our address." />
+<title>Contact — Wiggle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 <style>
-:root {
-  --teal: #4fd1c5;
-  --teal2: #00e5a0;
-  --gold: #f5c842;
-  --gold-dark: #d4a800;
+:root{
+  --paper:#faf9f5; --ink:#0a1b31; --muted:#5b697d; --line:rgba(12,29,51,.1);
+  --font:Manrope,Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --pad:64px; --gutter:max(var(--pad),calc((100% - 1160px)/2 + var(--pad)));
 }
+*{box-sizing:border-box}
+body{margin:0;min-width:320px;min-height:100vh;display:flex;flex-direction:column;color:var(--ink);font-family:var(--font);-webkit-font-smoothing:antialiased;
+  background:radial-gradient(circle at 8% 0,rgba(255,255,255,.98),transparent 34rem),radial-gradient(circle at 92% 38%,rgba(255,246,232,.5),transparent 30rem),var(--paper)}
+body.menu-open{overflow:hidden}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid rgba(74,126,206,.6);outline-offset:5px;border-radius:4px}
+::selection{background:rgba(119,164,232,.22)}
 
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+/* top nav (same as the home page, no motion) */
+header{position:sticky;top:0;z-index:20;height:96px;padding:0 var(--gutter);display:flex;align-items:center;justify-content:space-between;background:rgba(250,249,245,.92)}
+.logo{display:block;width:142px;height:auto}
+.desktop-nav{display:flex;gap:34px;font-size:14px;font-weight:500}
+.desktop-nav a:hover{opacity:.5}
+.menu-button{width:24px;height:20px;padding:0;border:0;background:none;display:none;flex-direction:column;justify-content:center;gap:7px;cursor:pointer}
+.menu-button span{display:block;height:1.5px;width:100%;background:#526278}
+.menu-button[aria-expanded=true] span:first-child{transform:translateY(4.25px) rotate(45deg)}
+.menu-button[aria-expanded=true] span:last-child{transform:translateY(-4.25px) rotate(-45deg)}
+.mobile-panel{position:fixed;inset:0;z-index:15;display:none;place-items:center;padding:90px 34px 34px;background:rgba(250,249,245,.985)}
+.mobile-panel.open{display:grid}
+.mobile-links{width:min(420px,100%);display:grid}
+.mobile-links a{padding:14px 0;font-size:34px;letter-spacing:-1.5px;border-bottom:1px solid var(--line)}
 
-body {
-  font-family: 'DM Sans', system-ui, sans-serif;
-  background: #f5f0eb;
-  color: #111;
-  line-height: 1.6;
-  min-height: 100vh;
-}
+/* text only */
+main{flex:1;padding:72px var(--gutter) 96px}
+.copy{max-width:640px}
+.copy p{margin:0 0 26px;font-size:24px;line-height:1.38;letter-spacing:-.02em;font-weight:400}
+.copy .lead{font-weight:600}
+.copy .go{margin-top:72px;font-weight:600}
+.copy .go a{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:6px}
+.copy strong{font-weight:600}
+.copy p a{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:6px}
+footer{padding:0 var(--gutter) 28px;color:#738095;font-size:13px}
 
-/* ── DOT GRID BACKGROUND ── */
-body::before {
-  content: '';
-  position: fixed; inset: 0;
-  background-image: radial-gradient(circle, #ddd 1px, transparent 1px);
-  background-size: 28px 28px;
-  opacity: 0.45;
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* ── PAGE WRAPPER ── */
-.page {
-  position: relative;
-  z-index: 1;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 30px 5%;
-}
-
-/* ── TOP LOGO BAR ── */
-.top-bar {
-  position: fixed; top: 0; left: 0; right: 0;
-  background: rgba(245,240,235,0.97);
-  backdrop-filter: blur(12px);
-  padding: 14px 5%;
-  display: flex; align-items: center; justify-content: space-between;
-  z-index: 100;
-}
-.top-logo {
-  display: flex; align-items: center; gap: 11px;
-  font-family: 'DM Sans', sans-serif; font-size: 21px; font-weight: 600;
-  text-decoration: none; color: #111;
-}
-.top-logo svg { width: 40px; height: 40px; }
-.top-back {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 8px 18px; border-radius: 8px;
-  border: 1.5px solid #e0e0e0;
-  color: #555; font-size: 13.5px; font-weight: 600;
-  text-decoration: none;
-  transition: border-color 0.2s, color 0.2s;
-}
-.top-back:hover { border-color: var(--teal); color: var(--teal); }
-
-/* ── HEADER ── */
-.contact-header {
-  text-align: center;
-  margin-bottom: 56px;
-  padding-top: 40px;
-}
-.contact-badge {
-  display: inline-flex; align-items: center; gap: 8px;
-  background: #fef9e6;
-  border: 1px solid rgba(245,200,66,0.4);
-  color: var(--gold-dark);
-  padding: 6px 18px; border-radius: 8px;
-  font-size: 11.5px; font-weight: 600;
-  letter-spacing: 1px; text-transform: uppercase;
-  margin-bottom: 20px;
-}
-.contact-badge-dot {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: var(--gold);
-  animation: pulse 2s ease-in-out infinite;
-}
-@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.7)} }
-
-.contact-header h1 {
-  font-family: 'DM Sans', sans-serif;
-  font-size: clamp(32px, 5vw, 56px);
-  font-weight: 600; line-height: 1.06;
-  letter-spacing: -0.03em; color: #111;
-  margin-bottom: 12px;
-}
-.contact-header h1 span { color: var(--gold-dark); }
-.contact-header p {
-  font-size: 17px; color: #777;
-  max-width: 460px; margin: 0 auto;
-  line-height: 1.7;
-}
-
-/* ── GOLD DIVIDER ── */
-.gold-line {
-  width: 48px; height: 3px;
-  background: var(--gold);
-  border-radius: 8px;
-  margin: 20px auto 0;
-}
-
-/* ── CONTACT CARDS ── */
-.contact-cards {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  width: 100%;
-  max-width: 860px;
-  margin-bottom: 40px;
-}
-.contact-card {
-  background: #ffffff;
-  border: 1.5px solid #ebebeb;
-  border-radius: 20px;
-  padding: 24px 22px;
-  display: flex; flex-direction: column; gap: 8px;
-  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
-  text-decoration: none; color: inherit;
-}
-.contact-card:hover {
-  border-color: var(--gold);
-  box-shadow: 0 8px 32px rgba(245,200,66,0.15);
-  transform: translateY(-3px);
-}
-.contact-card-icon {
-  width: 42px; height: 42px; border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  margin-bottom: 4px;
-}
-.icon-gold   { background: #fef9e6; }
-.icon-teal   { background: rgba(79,209,197,0.1); }
-.icon-neutral{ background: #f4f4f4; }
-.contact-card-icon svg { width: 20px; height: 20px; }
-.contact-card-title {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 13.5px; font-weight: 600; color: #111;
-}
-.contact-card-val {
-  font-size: 13.5px; font-weight: 600;
-  text-decoration: none;
-  word-break: break-all;
-}
-.val-gold { color: var(--gold-dark); }
-.val-teal { color: #0d9488; }
-.val-dark { color: #333; }
-.contact-card-sub {
-  font-size: 12px; color: #aaa; margin-top: 1px;
-}
-
-/* ── RESPONSE BADGE ── */
-.response-badge {
-  display: inline-flex; align-items: center; gap: 10px;
-  background: #f0fdfb;
-  border: 1px solid rgba(79,209,197,0.25);
-  border-radius: 8px;
-  padding: 8px 18px;
-  margin-bottom: 40px;
-  font-size: 13px; color: #0d9488;
-  font-weight: 600;
-}
-.response-dot {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: var(--teal);
-  animation: pulse 1.6s ease-in-out infinite;
-}
-
-/* ── FORM WRAP ── */
-.form-wrap {
-  width: 100%;
-  max-width: 860px;
-  background: #ffffff;
-  border: 1.5px solid #ebebeb;
-  border-radius: 28px;
-  padding: 40px 44px 44px;
-  box-shadow: 0 4px 40px rgba(0,0,0,0.05);
-  position: relative;
-  overflow: hidden;
-}
-
-/* Gold accent line on top of form */
-.form-wrap::before {
-  content: '';
-  position: absolute; top: 0; left: 0; right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, var(--gold), #f5a623, var(--gold));
-}
-
-.form-title {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 17px; font-weight: 600;
-  color: #111; margin-bottom: 4px;
-  letter-spacing: -0.015em;
-}
-.form-sub {
-  font-size: 14.5px; color: #888; margin-bottom: 28px;
-}
-
-/* Grid row */
-.cf-row {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-.cf-field { margin-bottom: 18px; }
-.cf-label {
-  display: block;
-  font-size: 11.5px; font-weight: 600;
-  letter-spacing: 0.5px; text-transform: uppercase;
-  color: #555; margin-bottom: 7px;
-}
-.cf-input, .cf-select, .cf-textarea {
-  width: 100%;
-  border: 1.5px solid #e5e5e5;
-  border-radius: 12px;
-  padding: 12px 14px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 15px; color: #111;
-  background: white; outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  appearance: none; -webkit-appearance: none;
-}
-.cf-input:focus, .cf-select:focus, .cf-textarea:focus {
-  border-color: var(--gold);
-  box-shadow: 0 0 0 3px rgba(245,200,66,0.15);
-}
-.cf-input.error, .cf-select.error, .cf-textarea.error {
-  border-color: #f85149;
-  box-shadow: 0 0 0 3px rgba(248,81,73,0.1);
-}
-.cf-select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 14px center;
-  padding-right: 36px; cursor: pointer;
-}
-.cf-textarea { resize: none; min-height: 110px; line-height: 1.6; }
-.cf-error {
-  font-size: 12px; color: #f85149;
-  margin-top: 5px; display: none;
-}
-.cf-error.show { display: block; }
-
-/* Submit button */
-.cf-submit {
-  width: 100%;
-  padding: 15px 24px;
-  border-radius: 8px;
-  border: none;
-  background: var(--gold);
-  color: #111;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 16px; font-weight: 600;
-  cursor: pointer;
-  transition: box-shadow 0.2s, transform 0.2s;
-  margin-top: 4px;
-}
-.cf-submit:hover {
-  box-shadow: 0 8px 28px rgba(245,200,66,0.45);
-  transform: translateY(-1px);
-}
-
-/* Success state */
-.cf-success {
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 20px 0 10px;
-}
-.cf-success-icon {
-  width: 72px; height: 72px;
-  background: linear-gradient(135deg, var(--gold), #f5a623);
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 30px;
-  margin-bottom: 20px;
-  animation: popIn 0.5s cubic-bezier(0.34,1.4,0.64,1);
-}
-@keyframes popIn { from{transform:scale(0)} to{transform:scale(1)} }
-.cf-success h3 {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 24px; font-weight: 600;
-  color: #111; margin-bottom: 10px;
-}
-.cf-success p {
-  font-size: 15px; color: #666;
-  max-width: 360px; line-height: 1.65;
-  margin-bottom: 24px;
-}
-.cf-success-reset {
-  padding: 12px 28px; border-radius: 8px;
-  border: 1.5px solid #e0e0e0;
-  background: white; color: #555;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 14px; font-weight: 400;
-  cursor: pointer;
-  transition: border-color 0.2s, color 0.2s;
-}
-.cf-success-reset:hover { border-color: var(--gold); color: var(--gold-dark); }
-
-/* ── RESPONSIVE ── */
-@media (max-width: 720px) {
-  .contact-cards { grid-template-columns: 1fr; max-width: 480px; }
-  .cf-row { grid-template-columns: 1fr; }
-  .form-wrap { padding: 28px 22px 32px; }
-  .contact-header { margin-bottom: 40px; }
-}
-@media (max-width: 500px) {
-  .contact-header h1 { letter-spacing: -0.02em; }
-  .form-title { font-size: 19px; }
+@media (max-width:800px){
+  :root{--pad:24px}
+  header{height:76px}
+  .logo{width:118px}
+  .desktop-nav{display:none}
+  .menu-button{display:flex}
+  main{padding:56px var(--gutter) 72px}
+  .copy p{font-size:20px;line-height:1.4;margin-bottom:22px}
+  .copy .go{margin-top:56px}
 }
 </style>
 </head>
 <body>
+<header>
+  <a href="wiggle.html" aria-label="Wiggle home"><img class="logo" src="enthropy/wiggle_colored.svg" alt="Wiggle" /></a>
+  <nav class="desktop-nav" aria-label="Primary">
+    <a href="wiggle.html#products">Products</a><a href="about.html">About</a><a href="contact.html">Contact</a>
+  </nav>
+  <button class="menu-button" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-panel"><span></span><span></span></button>
+</header>
 
-<!-- TOP BAR -->
-<div class="top-bar">
-  <a href="website-clone.html" class="top-logo">
-    <svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="37" height="37" viewBox="0 0 1254.000000 1254.000000" preserveAspectRatio="xMidYMid meet"><g transform="translate(0.000000,1254.000000) scale(0.100000,-0.100000)" fill="#e53e3e" stroke="none"><path d="M6200 11494 c-273 -46 -467 -196 -557 -433 -131 -347 15 -731 337 -886 41 -19 80 -35 87 -35 11 0 13 -187 13 -959 l0 -959 -47 -7 c-217 -31 -457 -125 -649 -254 l-91 -60 -390 392 c-667 670 -968 979 -966 991 1 6 13 43 28 83 92 257 25 548 -172 740 -125 123 -284 186 -463 186 -258 0 -486 -144 -601 -379 -49 -101 -69 -191 -69 -314 0 -119 19 -201 72 -310 53 -110 176 -237 285 -293 177 -92 390 -102 579 -26 l50 20 335 -338 c183 -186 490 -495 680 -688 l347 -350 -54 -80 c-68 -101 -154 -274 -192 -390 -25 -74 -57 -204 -78 -322 l-4 -23 -1004 0 -1004 0 -22 68 c-59 184 -182 332 -340 409 -457 224 -971 -108 -973 -627 0 -58 5 -127 12 -155 52 -222 189 -399 376 -486 109 -50 171 -63 300 -62 93 0 123 5 195 29 169 56 314 184 392 344 l43 89 170 1 c584 3 1848 1 1851 -3 3 -3 15 -56 28 -118 13 -63 37 -152 52 -199 37 -111 150 -338 209 -418 l46 -63 -593 -602 c-326 -331 -632 -642 -679 -691 l-85 -88 -72 26 c-102 36 -231 51 -329 36 -161 -25 -276 -84 -387 -200 -319 -334 -237 -885 164 -1099 133 -71 325 -95 470 -58 195 50 357 181 443 358 58 118 76 203 72 339 -2 88 -8 120 -34 195 -18 50 -33 100 -34 112 -2 16 121 146 493 525 272 277 573 583 669 681 96 97 179 177 185 177 5 0 19 -9 30 -19 42 -39 223 -142 327 -186 96 -41 290 -95 392 -110 l37 -6 0 -1015 0 -1016 -22 -6 c-13 -3 -59 -24 -103 -46 -93 -46 -209 -156 -263 -248 -155 -262 -121 -603 81 -823 137 -151 293 -218 502 -216 119 1 191 18 302 71 66 31 100 56 166 122 189 189 250 445 168 708 -48 155 -184 315 -328 387 -43 22 -88 42 -101 45 l-22 6 0 1016 0 1015 38 6 c235 35 464 124 662 256 l94 63 240 -247 c133 -135 435 -442 671 -682 256 -260 429 -444 428 -453 -1 -10 -16 -57 -34 -107 -62 -175 -48 -394 36 -554 121 -231 340 -364 595 -364 121 0 183 14 295 68 250 120 399 375 382 655 -11 183 -76 329 -202 456 -116 117 -218 168 -390 194 -94 14 -215 1 -313 -35 l-67 -25 -321 323 c-570 573 -1034 1048 -1034 1057 0 6 15 31 34 57 120 168 248 481 271 664 4 31 10 61 14 68 8 12 490 15 1651 12 l385 -2 43 -89 c72 -151 195 -266 356 -330 244 -98 523 -41 711 144 102 101 157 200 196 353 38 155 14 338 -68 503 -56 112 -180 234 -293 288 -115 54 -174 67 -310 66 -102 0 -125 -3 -201 -30 -205 -72 -355 -226 -424 -435 l-27 -79 -1008 0 -1009 0 -6 38 c-16 92 -67 288 -94 359 -39 99 -108 233 -172 334 -35 54 -48 83 -42 93 5 8 152 161 328 338 176 178 477 482 669 676 l348 353 62 -24 c223 -89 498 -47 680 103 108 89 197 229 232 365 23 89 23 245 0 338 -47 198 -192 376 -374 459 -184 84 -408 81 -585 -9 -308 -155 -455 -549 -326 -872 l30 -75 -273 -275 c-150 -152 -457 -461 -681 -688 l-409 -412 -98 65 c-183 120 -416 213 -612 244 l-78 13 0 958 0 957 49 17 c165 55 336 229 396 405 41 119 51 207 37 317 -23 181 -80 300 -202 423 -83 84 -191 147 -295 173 -63 16 -203 28 -245 21z"/></g></svg>
-    iSkool
-  </a>
- 
+<div class="mobile-panel" id="mobile-panel" aria-hidden="true">
+  <nav class="mobile-links" aria-label="Mobile">
+    <a href="wiggle.html#products">Products</a><a href="about.html">About</a><a href="contact.html">Contact</a>
+  </nav>
 </div>
 
-<!-- PAGE -->
-<div class="page">
-
-  <!-- HEADER -->
-  <div class="contact-header">
-    <div class="contact-badge">
-      <div class="contact-badge-dot"></div>
-      Get in Touch
-    </div>
-    <h1>We'd love to <span>hear from you</span></h1>
-    <p>Questions about iSkool? Reach out and our team will get back to you within one business day.</p>
-    <div class="gold-line"></div>
+<main>
+  <div class="copy">
+    <p class="lead">Questions about iSkool, Laura or Wiggle? Send us an email and we will get back to you.</p>
+    <p><strong>iSkool support</strong><br><a href="mailto:support@iskool.xyz">support@iskool.xyz</a></p>
+    <p><strong>Privacy</strong><br><a href="mailto:policy@iskool.xyz">policy@iskool.xyz</a></p>
+    <p><strong>Address</strong><br>Wiggle (Pty) Ltd<br>2047 Mandisa Street<br>Tokoza, 1426<br>South Africa</p>
   </div>
+</main>
 
-  <!-- CONTACT CARDS -->
-  <div class="contact-cards">
+<footer>Copyright © 2026 Wiggle</footer>
 
-    <!-- Email -->
-    <div class="contact-card">
-      <div class="contact-card-icon icon-gold">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#d4a800" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-          <polyline points="22,6 12,13 2,6"/>
-        </svg>
-      </div>
-      <div class="contact-card-title">Email Us</div>
-      <a href="mailto:inquiries@iskool.xyz" class="contact-card-val val-gold">inquiries@iskool.xyz</a>
-      <div class="contact-card-sub">For general enquiries</div>
-    </div>
-
-    <!-- Phone -->
-    <div class="contact-card">
-      <div class="contact-card-icon icon-teal">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.7a16 16 0 0 0 6 6l.86-.86a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21.5 16z"/>
-        </svg>
-      </div>
-      <div class="contact-card-title">Call Us</div>
-      <a href="tel:+27110001234" class="contact-card-val val-teal">+27 11 000 1234</a>
-      <div class="contact-card-sub">Mon – Fri · 08:00 – 17:00 SAST</div>
-    </div>
-
-    <!-- Location -->
-    <div class="contact-card">
-      <div class="contact-card-icon icon-neutral">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-          <circle cx="12" cy="10" r="3"/>
-        </svg>
-      </div>
-      <div class="contact-card-title">Based In</div>
-      <div class="contact-card-val val-dark">Johannesburg, Gauteng</div>
-      <div class="contact-card-sub">Serving all 9 provinces</div>
-    </div>
-
-  </div>
-
-  <!-- RESPONSE BADGE -->
-  <div class="response-badge">
-    <div class="response-dot"></div>
-    We respond within 24 hours — Mon to Fri, business hours SAST
-  </div>
-
-  <!-- FORM -->
-  <div class="form-wrap">
-    <div id="cfForm">
-      <div class="form-title">Send us a message</div>
-      <p class="form-sub">Fill in the form below and we'll be in touch within one business day.</p>
-
-      <div class="cf-row">
-        <div class="cf-field">
-          <label class="cf-label">First Name *</label>
-          <input class="cf-input" id="cf-fname" type="text" placeholder="Thabo" autocomplete="given-name">
-          <div class="cf-error" id="cfe-fname">Required</div>
-        </div>
-        <div class="cf-field">
-          <label class="cf-label">Last Name *</label>
-          <input class="cf-input" id="cf-lname" type="text" placeholder="Nkosi" autocomplete="family-name">
-          <div class="cf-error" id="cfe-lname">Required</div>
-        </div>
-      </div>
-
-      <div class="cf-field">
-        <label class="cf-label">School Name *</label>
-        <input class="cf-input" id="cf-school" type="text" placeholder="e.g. Greenwood High School" autocomplete="organization">
-        <div class="cf-error" id="cfe-school">Required</div>
-      </div>
-
-      <div class="cf-row">
-        <div class="cf-field">
-          <label class="cf-label">Email Address *</label>
-          <input class="cf-input" id="cf-email" type="email" placeholder="you@school.co.za" autocomplete="email">
-          <div class="cf-error" id="cfe-email">Enter a valid email</div>
-        </div>
-        <div class="cf-field">
-          <label class="cf-label">Phone Number</label>
-          <input class="cf-input" id="cf-phone" type="tel" placeholder="071 234 5678" autocomplete="tel">
-        </div>
-      </div>
-
-      <div class="cf-field">
-        <label class="cf-label">What can we help you with? *</label>
-        <select class="cf-select" id="cf-subject">
-          <option value="">Select a topic</option>
-          <option>Apply for the Free Pilot</option>
-          <option>Learn more about iSkool</option>
-          <option>Technical support</option>
-          <option>Pricing &amp; subscriptions</option>
-          <option>Privacy or data query</option>
-          <option>Partnership enquiry</option>
-          <option>Something else</option>
-        </select>
-        <div class="cf-error" id="cfe-subject">Please select a topic</div>
-      </div>
-
-      <div class="cf-field">
-        <label class="cf-label">Your Message *</label>
-        <textarea class="cf-textarea" id="cf-message" placeholder="Tell us more about your school, what you're looking for, or any questions you have..."></textarea>
-        <div class="cf-error" id="cfe-message">Please add a message</div>
-      </div>
-
-      <button class="cf-submit" onclick="cfSubmit()">Send Message →</button>
-    </div>
-
-    <!-- Success -->
-    <div class="cf-success" id="cfSuccess">
-      <div class="cf-success-icon">✉️</div>
-      <h3>Message Sent!</h3>
-      <p>Thanks for reaching out. We'll get back to you at <strong id="cfEmailBack"></strong> within one business day.</p>
-      <button class="cf-success-reset" onclick="cfReset()">Send another message</button>
-    </div>
-  </div>
-
-</div><!-- end .page -->
-
-<!-- FOOTER -->
-<div id="iskool-footer"></div>
-<script src="iskool_footer.js?v=1.2"></script>
-
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-function cfSubmit() {
-  let valid = true;
-  const fields = [
-    { id: 'cf-fname',   err: 'cfe-fname',   check: v => v.trim().length > 0 },
-    { id: 'cf-lname',   err: 'cfe-lname',   check: v => v.trim().length > 0 },
-    { id: 'cf-school',  err: 'cfe-school',  check: v => v.trim().length > 0 },
-    { id: 'cf-email',   err: 'cfe-email',   check: v => /^[^@]+@[^@]+\.[^@]+$/.test(v) },
-    { id: 'cf-subject', err: 'cfe-subject', check: v => v !== '' },
-    { id: 'cf-message', err: 'cfe-message', check: v => v.trim().length > 5 },
-  ];
-  fields.forEach(({ id, err, check }) => {
-    const el = document.getElementById(id);
-    const errEl = document.getElementById(err);
-    const ok = check(el.value);
-    el.classList.toggle('error', !ok);
-    errEl.classList.toggle('show', !ok);
-    if (!ok) valid = false;
-  });
-  if (!valid) return;
-  document.getElementById('cfEmailBack').textContent = document.getElementById('cf-email').value;
-  document.getElementById('cfForm').style.display = 'none';
-  const s = document.getElementById('cfSuccess');
-  s.style.display = 'flex';
-  setTimeout(() => s.style.opacity = '1', 10);
-}
-
-function cfReset() {
-  document.getElementById('cfForm').style.display = '';
-  document.getElementById('cfSuccess').style.display = 'none';
-  ['cf-fname','cf-lname','cf-school','cf-email','cf-phone','cf-subject','cf-message']
-    .forEach(id => {
-      const el = document.getElementById(id);
-      if (el) { el.value = ''; el.classList.remove('error'); }
-    });
-  ['cfe-fname','cfe-lname','cfe-school','cfe-email','cfe-subject','cfe-message']
-    .forEach(id => document.getElementById(id)?.classList.remove('show'));
-}
+<script>
+(() => {
+  const btn = document.querySelector('.menu-button'), panel = document.getElementById('mobile-panel');
+  const setMenu = open => {
+    document.body.classList.toggle('menu-open', open);
+    panel.classList.toggle('open', open);
+    panel.setAttribute('aria-hidden', String(!open));
+    btn.setAttribute('aria-expanded', String(open));
+    btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+  };
+  btn.addEventListener('click', () => setMenu(btn.getAttribute('aria-expanded') !== 'true'));
+  panel.querySelectorAll('a').forEach(a => a.addEventListener('click', () => setMenu(false)));
+  matchMedia('(min-width:801px)').addEventListener('change', e => { if (e.matches) setMenu(false); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') setMenu(false); });
+})();
 </script>
 </body>
 </html>
