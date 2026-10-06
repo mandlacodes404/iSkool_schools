@@ -88,6 +88,12 @@ header::before{content:"";position:absolute;inset:0 0 -22px;z-index:-1;pointer-e
 .iskool{--tint:#e6eefa}
 .iskool .art-word,.iskool .card-title,.iskool .card-meta,.iskool .card-meta span{color:#000}
 .laura{--tint:#f1ebf8}
+.stories{padding-top:72px}
+.s1{--tint:#e8f1ea}.s2{--tint:#f5ece0}.s3{--tint:#e8edf4}
+.art-stat{position:absolute;left:9cqw;top:9cqw;right:9cqw}
+.art-stat b{display:block;font-size:19cqw;line-height:1;letter-spacing:-.05em;font-weight:700}
+.art-stat span{display:block;margin-top:5cqw;font-size:4.6cqw;line-height:1.35;font-weight:500;color:var(--muted)}
+@media (min-width:801px){.cards.three{grid-template-columns:repeat(3,minmax(0,1fr))}}
 
 /* about */
 .about{margin:38px var(--gutter) 0;padding:24px 0 36px;display:grid;grid-template-columns:1fr 1fr;gap:40px;border-top:1px solid var(--line)}
@@ -121,6 +127,7 @@ footer .logo{width:88px;flex:none}
   .orbital{position:absolute;right:-6px;bottom:6px;margin:0;transform:scale(.5);transform-origin:100% 100%}
   .hero{padding-bottom:70px}
   .products{padding-top:28px}
+  .stories{padding-top:48px}
   .section-title{font-size:24px}
   .cards{--ratio:1/1;--radius:12px;grid-template-columns:1fr;gap:36px}
   .card-title{margin-top:16px;font-size:17px}
@@ -150,7 +157,7 @@ footer .logo{width:88px;flex:none}
     <a href="#top" aria-label="Wiggle home"><img class="logo" src="enthropy/wiggle_colored.svg" alt="Wiggle" /></a>
     <div class="head-right">
       <nav class="desktop-nav" aria-label="Primary">
-        <a href="#products">Products</a><a href="about.html">About</a><a href="contact.html">Contact</a>
+        <a href="#products">Products</a><a href="#stories">Stories</a><a href="about.html">About</a><a href="contact.html">Contact</a>
       </nav>
       <button class="menu-button" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-panel"><span></span><span></span></button>
     </div>
@@ -158,7 +165,7 @@ footer .logo{width:88px;flex:none}
 
   <div class="mobile-panel" id="mobile-panel" aria-hidden="true">
     <nav class="mobile-links" aria-label="Mobile">
-      <a href="#products">Products</a><a href="about.html">About</a><a href="contact.html">Contact</a>
+      <a href="#products">Products</a><a href="#stories">Stories</a><a href="about.html">About</a><a href="contact.html">Contact</a>
     </nav>
   </div>
 
@@ -195,6 +202,36 @@ footer .logo{width:88px;flex:none}
     </div>
   </section>
 
+  <section class="products stories reveal" id="stories">
+    <p class="eyebrow">Stories</p>
+    <h2 class="section-title">What we are learning<br>about South African schools.</h2>
+    <div class="cards three">
+      <a class="card s1" href="story-dropout-crisis.html">
+        <div class="card-media">
+          <div class="art-stat" aria-hidden="true"><b>50.25%</b><span>Real pass rate, Grade 1 to matric</span></div>
+        </div>
+        <h3 class="card-title">South Africa's silent dropout crisis: what happens between Grade 1 and matric</h3>
+        <p class="card-meta"><span>Research</span><span>22 min read</span></p>
+      </a>
+
+      <a class="card s2" href="story-infrastructure.html">
+        <div class="card-media">
+          <div class="art-stat" aria-hidden="true"><b>3,000+</b><span>Schools still using pit latrines</span></div>
+        </div>
+        <h3 class="card-title">Over 3,000 schools still lack basic sanitation. The digital divide runs just as deep.</h3>
+        <p class="card-meta"><span>Infrastructure</span><span>17 min read</span></p>
+      </a>
+
+      <a class="card s3" href="story-teacher-workload.html">
+        <div class="card-media">
+          <div class="art-stat" aria-hidden="true"><b>31,462</b><span>Vacant teacher posts in state schools</span></div>
+        </div>
+        <h3 class="card-title">The invisible workload: how admin is stealing teaching time in South African schools</h3>
+        <p class="card-meta"><span>Teacher Support</span><span>15 min read</span></p>
+      </a>
+    </div>
+  </section>
+
   <section class="about reveal" id="about">
     <div class="about-head">
       <div>
@@ -214,7 +251,7 @@ footer .logo{width:88px;flex:none}
   <footer>
     <a href="#top" aria-label="Back to top"><img class="logo" src="enthropy/wiggle_colored.svg" alt="Wiggle" /></a>
     <span class="footer-line"></span>
-    <nav class="footer-nav" aria-label="Footer"><a href="#products">Products</a><a href="about.html">About</a><a href="contact.html">Contact</a></nav>
+    <nav class="footer-nav" aria-label="Footer"><a href="#products">Products</a><a href="#stories">Stories</a><a href="about.html">About</a><a href="contact.html">Contact</a></nav>
   </footer>
 </main>
 
