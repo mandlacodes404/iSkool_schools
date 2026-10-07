@@ -31,6 +31,7 @@ $learnerClassStmt = $conn->prepare("
 $learnerClassStmt->bind_param('is', $classId, $learnerEmail);
 $learnerClassStmt->execute();
 if ($learnerClassStmt->get_result()->num_rows === 0) {
+    http_response_code(403);
     echo json_encode(['success' => false, 'error' => 'Learner not in class']);
     exit;
 }
@@ -45,6 +46,7 @@ $chk = $conn->prepare("
 $chk->bind_param('is', $classId, $parentEmail);
 $chk->execute();
 if ($chk->get_result()->num_rows === 0) {
+    http_response_code(403);
     echo json_encode(['success' => false, 'error' => 'Parent not in class']);
     exit;
 }
