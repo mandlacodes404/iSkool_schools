@@ -31,7 +31,12 @@ if (!isset($_GET['result_id'])) {
 
 $resultId = intval($_GET['result_id']);
 $loggedInEmail = $_SESSION['email'];
-$userRole = $_SESSION['role'] ?? 'learner';
+$userRole = $_SESSION['role'] ?? '';
+if ($userRole !== 'learner') {
+    http_response_code(403);
+    echo json_encode(['error' => 'access_denied', 'message' => 'Access denied.']);
+    exit();
+}
 
 // 2. Optimized Data Fetch (Combined results, quiz info, questions, and choices)
 // -- identical to review_quiz.php --
