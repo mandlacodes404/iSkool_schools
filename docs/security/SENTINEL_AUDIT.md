@@ -168,65 +168,55 @@ Minimum regression cases:
 **Category:** Authorization / Sensitive Data Exposure / IDOR
 
 **Location:**
-- `get_quiz_review.php:15-34`
-- `get_quiz_review.php:38-60`
-- `get_quiz_review.php:247-266`
+- `get_quiz_review.php`
+- `assets/js/learner/grades.js`
+- `api/teacher/get_quiz_review.php`
 
 **Status:** REMEDIATED
 
-**Description:**
+**Product behavior verified:**
 
-The endpoint requires an authenticated session and reads `result_id` from the request.
+The JSON endpoint `get_quiz_review.php` is intentionally **learner-only**.
 
-The result query retrieves the referenced quiz result without initially scoping it to the current user or role.
+Current consumers/usages were inspected across the active application tree:
 
-The later access-control block applies a result-owner check only when:
+- `assets/js/learner/grades.js` calls `get_quiz_review.php?result_id=...` for the learner's "Review answers" flow.
+- The teacher quiz UI does **not** consume the root `get_quiz_review.php` endpoint. Teacher review requests use the separate `api/teacher/get_quiz_review.php` endpoint.
+- The standalone `review_quiz.php` page remains a separate legacy/standalone surface and supports role-specific behavior independently.
+- No other active application consumer of the root `get_quiz_review.php` endpoint was found during repository-wide usage inspection.
 
-`$userRole === 'learner'`
+Therefore, blocking non-learner roles on this endpoint matches the current product usage rather than removing a legitimate teacher/parent capability.
 
-For authenticated non-learners, there is no equivalent ownership or authorization check.
+**Authorization implemented:**
 
-The response can contain:
+The endpoint now rejects any authenticated session whose role is not `learner` before querying the requested result.
 
-- learner result score;
-- quiz information;
-- question text;
-- answer choices;
-- correct-answer indicators;
-- learner answers;
-- open-ended grades;
-- grader identity;
-- feedback.
+For learners, the existing object-level authorization remains in place: after fetching the result, the endpoint verifies that `quiz_results.user_email` matches the authenticated learner's email before returning review data.
 
-**Potential exploitation scenario:**
+The existing `publish_marks` check also remains in place for learners.
 
-An authenticated teacher, parent, or other non-learner account supplies another valid `result_id` and receives the review data even when that result is outside the account's legitimate relationship.
+**Impact addressed:**
 
-**Impact:**
+This closes the previously confirmed path where an authenticated non-learner could supply an arbitrary `result_id` and receive learner quiz-review information.
 
-- Student grade disclosure.
-- Disclosure of quiz answers/correct answers.
-- Disclosure of open-ended feedback.
-- Potential cross-class privacy breach.
-- Potential cross-role information disclosure.
+**Confidence:** CONFIRMED from source and consumer inspection.
 
-**Confidence:** CONFIRMED from source inspection.
+**Regression requirement:**
 
-**Recommended fix:**
+The existing `tests/SentinelSecurityTest.php` contains static source assertions only; these are **not runtime authorization tests**.
 
-Define explicit access rules for each role and enforce them against the referenced result:
+A runtime/integration test was not added to this PR because the repository has only minimal PHPUnit scaffolding and no existing database fixture/bootstrap infrastructure suitable for safely exercising these authenticated MySQL endpoints without introducing unrelated testing architecture.
 
-- Learner → own result only.
-- Teacher → results for quizzes/classes they are authorized to manage.
-- Parent → results belonging to explicitly linked children.
-- School admin → school-authorized results.
-- Super-admin → only where explicitly required.
+**Account 6 runtime tests to implement:**
 
-Do not treat "authenticated" as sufficient authorization.
+1. Authenticate as learner A; request learner A's published `result_id` → **HTTP 200** and review JSON returned.
+2. Authenticate as learner A; request learner B's `result_id` → **HTTP 403**.
+3. Authenticate as teacher; request a valid learner `result_id` from the root `get_quiz_review.php` endpoint → **HTTP 403**.
+4. Authenticate as parent/school-admin (where those roles exist in the deployed auth model); request a valid learner `result_id` → **HTTP 403**.
+5. Authenticate as learner A; request a valid result whose `publish_marks = 0` → **HTTP 200** with `published:false` and no review data.
+6. Authenticate as an unauthenticated client; request any `result_id` → **HTTP 401**.
 
-**Test required:** Yes.
-
----
+These tests should use an isolated test database/fixture containing at least two learners, one teacher, one quiz, and two result records. They should exercise the actual HTTP endpoint and session state rather than inspecting source strings.
 
 ## SEC-003 — Learner can create a parent link without proving membership in the submitted class
 
