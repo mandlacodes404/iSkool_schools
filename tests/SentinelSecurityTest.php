@@ -1,5 +1,5 @@
 <?php
-use PHPUnit\\Framework\\TestCase;
+use PHPUnit\Framework\TestCase;
 
 final class SentinelSecurityTest extends TestCase
 {
@@ -19,9 +19,9 @@ final class SentinelSecurityTest extends TestCase
     public function test_quiz_review_rejects_non_learners_before_result_fetch(): void
     {
         $source = $this->source('get_quiz_review.php');
-        $this->assertStringContainsString("$userRole = $_SESSION['role'] ?? '';", $source);
-        $this->assertStringContainsString("$userRole !== 'learner'", $source);
-        $this->assertStringContainsString("http_response_code(403)", $source);
+        $this->assertStringContainsString('$userRole = $_SESSION[\'role\'] ?? \'\';', $source);
+        $this->assertStringContainsString('$userRole !== \'learner\'', $source);
+        $this->assertStringContainsString('http_response_code(403)', $source);
     }
 
     public function test_link_parent_requires_learner_class_membership(): void
