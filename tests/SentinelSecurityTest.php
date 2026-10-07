@@ -22,6 +22,8 @@ final class SentinelSecurityTest extends TestCase
         $this->assertStringContainsString('$userRole = $_SESSION[\'role\'] ?? \'\';', $source);
         $this->assertStringContainsString('$userRole !== \'learner\'', $source);
         $this->assertStringContainsString('http_response_code(403)', $source);
+        $this->assertStringContainsString("quizInfo['user_email'] !== $loggedInEmail", $source);
+        $this->assertStringContainsString('You can only view your own results.', $source);
     }
 
     public function test_link_parent_requires_learner_class_membership(): void
