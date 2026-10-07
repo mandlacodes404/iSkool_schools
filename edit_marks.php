@@ -26,12 +26,34 @@ $fullName = ($userData) ? $userData['name'] . ' ' . $userData['surname'] : $user
 $userStmt->close();
 
 // 2. Fetch Quiz Title
-$quizStmt = $conn->prepare("SELECT title FROM quizzes WHERE id = ?");
-$quizStmt->bind_param("i", $quizId);
+$quizStmt = $conn->prepare("SELECT title, class_id FROM quizzes WHERE id = ? AND created_by = ?");
+$quizStmt->bind_param("is", $quizId, $_SESSION['email']);
 $quizStmt->execute();
 $quiz = $quizStmt->get_result()->fetch_assoc();
-$quizTitle = $quiz['title'] ?? 'Unknown Quiz';
 $quizStmt->close();
+
+if (!$quiz) {
+    http_response_code(403);
+    exit('Access denied.');
+}
+
+$learnerStmt = $conn->prepare("
+    SELECT 1
+    FROM class_students
+    WHERE class_id = ? AND student_email = ?
+    LIMIT 1
+");
+$learnerStmt->bind_param("is", $quiz['class_id'], $userEmail);
+$learnerStmt->execute();
+$isLearnerInQuizClass = $learnerStmt->get_result()->num_rows > 0;
+$learnerStmt->close();
+
+if (!$isLearnerInQuizClass) {
+    http_response_code(403);
+    exit('Access denied.');
+}
+
+$quizTitle = $quiz['title'];
 
 // 3. Fetch Existing Marks (to pre-fill the form)
 $existingScore = "";

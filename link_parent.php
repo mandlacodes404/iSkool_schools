@@ -21,6 +21,22 @@ if (!$parentEmail || !$classId) {
     exit;
 }
 
+// Verify the learner belongs to the submitted class.
+$learnerClassStmt = $conn->prepare("
+    SELECT 1
+    FROM class_students
+    WHERE class_id = ? AND student_email = ?
+    LIMIT 1
+");
+$learnerClassStmt->bind_param('is', $classId, $learnerEmail);
+$learnerClassStmt->execute();
+if ($learnerClassStmt->get_result()->num_rows === 0) {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'error' => 'Learner not in class']);
+    exit;
+}
+$learnerClassStmt->close();
+
 // Verify parent is in the same class
 $chk = $conn->prepare("
     SELECT 1 FROM parent_classes pc
@@ -30,6 +46,7 @@ $chk = $conn->prepare("
 $chk->bind_param('is', $classId, $parentEmail);
 $chk->execute();
 if ($chk->get_result()->num_rows === 0) {
+    http_response_code(403);
     echo json_encode(['success' => false, 'error' => 'Parent not in class']);
     exit;
 }
