@@ -706,27 +706,21 @@ These include various combinations of size, extension, MIME, filename, and CSRF 
 
 # Recommended Remediation Order
 
-## P0 — Immediate
+## P0 — Completed
 
-1. **SEC-001** — Lock `edit_marks.php` to quiz ownership and learner/class authorization.
-2. **SEC-002** — Add explicit role/object authorization to `get_quiz_review.php`.
-3. **SEC-003** — Require the learner to belong to the submitted class before creating a parent link.
-4. **SEC-004** — Harden the super-admin authentication boundary and protect school creation with CSRF.
+1. **SEC-001** — Remediated: `edit_marks.php` now scopes the quiz to the authenticated teacher and verifies the learner belongs to the quiz class.
+2. **SEC-002** — Remediated: `get_quiz_review.php` now denies non-learner roles before fetching result data; learner ownership remains enforced by the existing check.
+3. **SEC-003** — Remediated: `link_parent.php` now verifies the logged-in learner belongs to the submitted class before creating the link.
+4. **SEC-004** — Remediated: the super-admin panel now uses CSRF protection, login throttling, and session ID regeneration on successful authentication.
 
-## P1 — Security architecture
+No database schema changes were made. SEC-005 through SEC-008 were intentionally not modified.
 
-5. **SEC-005** — Make the centralized session guard the only protected-session bootstrap.
-6. **SEC-006** — Establish an authorized file-download boundary for sensitive uploads.
-7. Confirm the teacher/class authorization model and then resolve **SEC-007**.
+## P1 — Deferred
 
-## P2 — Hardening
-
-8. Remove raw database errors from user-facing responses.
-9. Rotate remember-me tokens after successful restoration.
-10. Add security regression tests for all confirmed findings.
-11. Review high-value administrative accounts for MFA.
-
----
+5. **SEC-005** — Deferred.
+6. **SEC-006** — Deferred.
+7. **SEC-007** — Deferred pending authorization-policy confirmation.
+8. **SEC-008** — Deferred.
 
 # Coordination Required
 
