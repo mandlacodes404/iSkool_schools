@@ -110,7 +110,7 @@ This follows the project's own authorization direction and standard object-level
 - `edit_marks.php:29-40`
 - `edit_marks.php:51-69`
 
-**Status:** OPEN
+**Status:** REMEDIATED
 
 **Description:**
 
@@ -172,7 +172,7 @@ Minimum regression cases:
 - `get_quiz_review.php:38-60`
 - `get_quiz_review.php:247-266`
 
-**Status:** OPEN
+**Status:** REMEDIATED
 
 **Description:**
 
@@ -239,7 +239,7 @@ Do not treat "authenticated" as sufficient authorization.
 - `link_parent.php:24-35`
 - `link_parent.php:38-44`
 
-**Status:** OPEN
+**Status:** REMEDIATED
 
 **Description:**
 
@@ -296,7 +296,7 @@ Also ensure the parent-child relationship is consistent with the product's inten
 - `superadmin/index.php:574-596`
 - `superadmin/index.php:817-866`
 
-**Status:** OPEN
+**Status:** REMEDIATED
 
 **Description:**
 
@@ -790,10 +790,12 @@ Where these limitations materially affect confidence, findings are marked as pot
 
 # Status
 
-**Audit completed.**
+**Audit + P0 remediation completed.**
 
-No application-code remediation was performed during this phase.
+SEC-001, SEC-002, SEC-003, and SEC-004 were remediated on `security/sentinel-audit` using the smallest application-code changes consistent with the findings. Regression coverage was added in `tests/SentinelSecurityTest.php`.
 
-The next step is review and prioritization of the findings before security fixes are implemented.
+SEC-005, SEC-006, SEC-007, and SEC-008 remain OPEN by explicit instruction and were not modified. No database schema changes were made.
+
+Automated PHPUnit execution was not available through the GitHub connector environment; the added regression test file was reviewed for syntax/logic, but no claim of a passing runtime test suite is made here.
 
 **Account 2 — SENTINEL**
