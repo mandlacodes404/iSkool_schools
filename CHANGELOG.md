@@ -1,6 +1,8 @@
 # iSkool Changelog
 
 ## [Unreleased]
+
+## [v1.2.8] - 2026-10-08
 ### Added
 - Register Page (Mobile): The "Who is joining?" role cards now show a radio ring on the right, so the chosen role is not shown by colour alone. The ring fills with the role's own colour and a dark tick when the card is selected (`.role-card::after`, `.role-card.on::after`). The `.on` class that `index.php` already toggles drives it, so no script changed (`index.css`).
 - Register Page (Mobile): The Back / Continue / Register bar now stays on screen. When a step is shorter than the screen the bar sits at the bottom, so Continue is in the same place on every step. When a step is taller than the screen (step 3 on a 640–667px-high phone) the bar is `position: sticky; bottom: 0` with a short fade above it, and the fields scroll underneath. To make that possible the register fields are wrapped in one new `<div class="reg-fields">` in `index.php`; `#register-form-el` is now a flex column and the field grid (`1fr 1fr`, `12px` column gap) lives on the wrapper. Desktop is unaffected (the wrapper is a plain block there) and the JavaScript is unchanged (`index.php`, `index.css`).
