@@ -21,7 +21,23 @@ $academic_id = $yearRes->fetch_assoc()['id'];
 $classStmt = $conn->prepare("SELECT class_id FROM class_students WHERE student_email = ? AND academic_year_id = ?");
 $classStmt->bind_param("si", $learner_email, $academic_id);
 $classStmt->execute();
-$class_id = $classStmt->get_result()->fetch_assoc()['class_id'];
+$classResult = $classStmt->get_result()->fetch_assoc();
+$classStmt->close();
+$class_id = $classResult['class_id'] ?? null;
+
+if ($class_id === null) {
+    echo json_encode(['success' => false, 'message' => 'Class enrollment not found.']); exit;
+}
+
+// Verify that the evaluation belongs to the learner's current class.
+$evalStmt = $conn->prepare("SELECT id FROM teacher_evaluations WHERE id = ? AND class_id = ? LIMIT 1");
+$evalStmt->bind_param("ii", $eval_id, $class_id);
+$evalStmt->execute();
+if ($evalStmt->get_result()->num_rows === 0) {
+    $evalStmt->close();
+    echo json_encode(['success' => false, 'message' => 'Evaluation not available for your class.']); exit;
+}
+$evalStmt->close();
 
 $hash = hash('sha256', $learner_email . $eval_id . 'salt123');
 
