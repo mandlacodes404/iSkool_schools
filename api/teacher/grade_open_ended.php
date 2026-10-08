@@ -188,6 +188,7 @@ try {
                     ? $multipleAnswerRow['scoring_mode']
                     : 'exact_match',
                 'submitted_choice_ids' => [],
+                'valid_choice_ids' => [],
                 'correct_choice_ids' => [],
             ];
 
@@ -200,13 +201,21 @@ try {
         }
 
         $choiceId = (int)$multipleAnswerRow['choice_id'];
+        if ($choiceId > 0) {
+            $multipleAnswerQuestions[$multipleQuestionId]['valid_choice_ids'][$choiceId] = true;
+        }
         if ((int)$multipleAnswerRow['is_correct'] === 1) {
             $multipleAnswerQuestions[$multipleQuestionId]['correct_choice_ids'][$choiceId] = true;
         }
     }
 
     foreach ($multipleAnswerQuestions as $multipleAnswerQuestion) {
-        $selectedSet = $multipleAnswerQuestion['submitted_choice_ids'];
+        $selectedSet = [];
+        foreach ($multipleAnswerQuestion['submitted_choice_ids'] as $choiceId => $_) {
+            if (isset($multipleAnswerQuestion['valid_choice_ids'][$choiceId])) {
+                $selectedSet[$choiceId] = true;
+            }
+        }
         $correctSet = $multipleAnswerQuestion['correct_choice_ids'];
 
         if ($multipleAnswerQuestion['scoring_mode'] === 'exact_match') {
