@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../../auth/session_guard.php';
 require_once __DIR__ . '/../../auth/csrf_helper.php';
 require_once dirname(__DIR__, 2) . '/config.php';
+require_once dirname(__DIR__, 2) . '/includes/multiple_answer_scoring.php';
 
 header('Content-Type: application/json');
 
@@ -210,12 +211,10 @@ try {
     }
 
     foreach ($multipleAnswerQuestions as $multipleAnswerQuestion) {
-        $selectedSet = [];
-        foreach ($multipleAnswerQuestion['submitted_choice_ids'] as $choiceId => $_) {
-            if (isset($multipleAnswerQuestion['valid_choice_ids'][$choiceId])) {
-                $selectedSet[$choiceId] = true;
-            }
-        }
+        $selectedSet = filter_valid_multiple_answer_choices(
+            $multipleAnswerQuestion['submitted_choice_ids'],
+            $multipleAnswerQuestion['valid_choice_ids']
+        );
         $correctSet = $multipleAnswerQuestion['correct_choice_ids'];
 
         if ($multipleAnswerQuestion['scoring_mode'] === 'exact_match') {
