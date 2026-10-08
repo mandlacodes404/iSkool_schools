@@ -333,7 +333,7 @@ try {
             user_email, quiz_id, attempt_id, score, total, time_taken, submitted_at, academic_year_id
         ) VALUES (?, ?, ?, ?, ?, ?, NOW(), ?)
     ");
-    $insRes->bind_param("siiddii", $userEmail, $quizId, $attemptId, $earnedScore, $totalPointsAvailable, $timeTaken, $current_academic_year_id);
+    $insRes->bind_param("siiddii", $userEmail, $quizId, $attemptId, $earnedScore, $totalPointsAvailable, $timeTaken, $quizAcademicYearId);
     $insRes->execute();
     $resultId = $insRes->insert_id;
 
