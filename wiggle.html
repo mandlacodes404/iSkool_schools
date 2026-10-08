@@ -112,8 +112,7 @@ header::before{content:"";position:absolute;inset:0 0 -22px;z-index:-1;pointer-e
 footer{height:86px;margin:0 var(--gutter);display:flex;align-items:center;gap:28px}
 footer .logo{width:88px;flex:none}
 .footer-line{flex:1;height:1px;background:var(--line)}
-.footer-nav{display:flex;gap:30px;color:#738095;font-size:13px}
-.footer-nav a:hover{color:var(--ink)}
+.footer-copy{margin:0;color:#738095;font-size:13px;white-space:nowrap}
 
 .reveal{opacity:0;transform:translateY(16px);transition:opacity .8s ease,transform .8s var(--ease)}
 .reveal.visible{opacity:1;transform:none}
@@ -152,7 +151,7 @@ footer .logo{width:88px;flex:none}
   footer{height:70px;gap:14px}
   footer .logo{width:70px}
   .footer-line{display:none}
-  .footer-nav{margin-left:auto;gap:14px;font-size:12px}
+  .footer-copy{margin-left:auto;font-size:12px}
 }
 /* mobile: hero holds still while the blobs colour in, then the page moves on */
 .blob{opacity:calc(.07 + .93*var(--q,1));transition:opacity .12s linear}
@@ -252,7 +251,7 @@ footer .logo{width:88px;flex:none}
   <footer>
     <a href="#top" aria-label="Back to top"><img class="logo" src="enthropy/wiggle_colored.svg" alt="Wiggle" /></a>
     <span class="footer-line"></span>
-    <nav class="footer-nav" aria-label="Footer"><a href="#products">Products</a><a href="#stories">Stories</a><a href="about.html">About</a><a href="contact.html">Contact</a></nav>
+    <p class="footer-copy">Copyright &copy; 2026 Wiggle</p>
   </footer>
 </main>
 
