@@ -678,6 +678,8 @@ async function grSaveRow(email) {
     fd.append('user_email', email);
     fd.append('score',      score);
     fd.append('total',      total);
+    const learner = (data.learners || []).find(l => String(l.email) === String(email));
+    if (learner && learner.result_id) fd.append('result_id', learner.result_id);
 
     const saveBtn = document.querySelector('#gr-std-rows [data-gr="save"]');
     const hideLoader = window.showTeacherButtonLoader(saveBtn);

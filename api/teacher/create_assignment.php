@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../../auth/session_guard.php';
 require_once __DIR__ . '/../../auth/csrf_helper.php';
 require_once dirname(__DIR__, 2) . '/config.php';
+require_once dirname(__DIR__, 2) . '/includes/teacher_class_access.php';
 require_once dirname(__DIR__, 2) . '/school_upload_helper.php';  // ← NEW
 
 header('Content-Type: application/json');
@@ -62,6 +63,11 @@ $force_email = isset($_POST['force_email']);
 
 if (!$title || !$description || !$due_date || $class_id < 1) {
     echo json_encode(['error' => 'All required fields must be filled.']);
+    exit();
+}
+if (!teacher_has_class_access($conn, $email, $class_id)) {
+    http_response_code(403);
+    echo json_encode(['error' => 'You do not have access to this class.']);
     exit();
 }
 

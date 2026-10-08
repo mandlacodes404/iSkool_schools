@@ -8,13 +8,18 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
     exit();
 }
 
-if (!isset($_GET['quiz_id']) || !isset($_GET['user_email'])) {
-    echo "Missing quiz ID or user email.";
+if (!isset($_GET['quiz_id'], $_GET['user_email'], $_GET['result_id'])) {
+    echo "Missing quiz, learner, or result ID.";
     exit();
 }
 
 $quizId = intval($_GET['quiz_id']);
 $userEmail = $_GET['user_email'];
+$resultId = intval($_GET['result_id']);
+if ($quizId <= 0 || $resultId <= 0) {
+    http_response_code(400);
+    exit('Invalid grade request.');
+}
 
 // 1. Fetch Student Name and Surname
 $userStmt = $conn->prepare("SELECT name, surname FROM users WHERE email = ?");
@@ -26,7 +31,7 @@ $fullName = ($userData) ? $userData['name'] . ' ' . $userData['surname'] : $user
 $userStmt->close();
 
 // 2. Fetch Quiz Title
-$quizStmt = $conn->prepare("SELECT title, class_id FROM quizzes WHERE id = ? AND created_by = ?");
+$quizStmt = $conn->prepare("SELECT title, class_id, academic_year_id FROM quizzes WHERE id = ? AND created_by = ?");
 $quizStmt->bind_param("is", $quizId, $_SESSION['email']);
 $quizStmt->execute();
 $quiz = $quizStmt->get_result()->fetch_assoc();
@@ -40,10 +45,10 @@ if (!$quiz) {
 $learnerStmt = $conn->prepare("
     SELECT 1
     FROM class_students
-    WHERE class_id = ? AND student_email = ?
+    WHERE class_id = ? AND student_email = ? AND academic_year_id = ?
     LIMIT 1
 ");
-$learnerStmt->bind_param("is", $quiz['class_id'], $userEmail);
+$learnerStmt->bind_param("isi", $quiz['class_id'], $userEmail, $quiz['academic_year_id']);
 $learnerStmt->execute();
 $isLearnerInQuizClass = $learnerStmt->get_result()->num_rows > 0;
 $learnerStmt->close();
@@ -58,8 +63,8 @@ $quizTitle = $quiz['title'];
 // 3. Fetch Existing Marks (to pre-fill the form)
 $existingScore = "";
 $existingTotal = 100; 
-$scoreStmt = $conn->prepare("SELECT score, total FROM quiz_results WHERE quiz_id = ? AND user_email = ?");
-$scoreStmt->bind_param("is", $quizId, $userEmail);
+$scoreStmt = $conn->prepare("SELECT score, total FROM quiz_results WHERE id = ? AND quiz_id = ? AND user_email = ? AND academic_year_id = ?");
+$scoreStmt->bind_param("iisi", $resultId, $quizId, $userEmail, $quiz['academic_year_id']);
 $scoreStmt->execute();
 $scoreRes = $scoreStmt->get_result();
 if ($row = $scoreRes->fetch_assoc()) {
@@ -75,21 +80,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $score = floatval($_POST['score']);
     $total = floatval($_POST['total']);
+    if ($score < 0 || $total <= 0 || $score > $total) {
+        http_response_code(400);
+        exit('Score must be between 0 and the total.');
+    }
 
-    $checkStmt = $conn->prepare("SELECT id FROM quiz_results WHERE quiz_id = ? AND user_email = ?");
-    $checkStmt->bind_param("is", $quizId, $userEmail);
-    $checkStmt->execute();
-    
-    if ($checkStmt->get_result()->num_rows > 0) {
-        $updateStmt = $conn->prepare("UPDATE quiz_results SET score = ?, total = ?, submitted_at = NOW() WHERE quiz_id = ? AND user_email = ?");
-        $updateStmt->bind_param("ddis", $score, $total, $quizId, $userEmail);
-        $updateStmt->execute();
+    $updateStmt = $conn->prepare("\n        UPDATE quiz_results SET score = ?, total = ?, submitted_at = NOW()\n        WHERE id = ? AND quiz_id = ? AND user_email = ? AND academic_year_id = ?\n    ");
+    $updateStmt->bind_param("ddiisi", $score, $total, $resultId, $quizId, $userEmail, $quiz['academic_year_id']);
+    if ($updateStmt->execute() && $updateStmt->affected_rows >= 0) {
         $success = "Marks updated successfully.";
     } else {
-        $insertStmt = $conn->prepare("INSERT INTO quiz_results (quiz_id, user_email, score, total, submitted_at, time_taken) VALUES (?, ?, ?, ?, NOW(), 0)");
-        $insertStmt->bind_param("isdd", $quizId, $userEmail, $score, $total);
-        $insertStmt->execute();
-        $success = "Marks added successfully.";
+        http_response_code(404);
+        exit('Result not found.');
     }
     // Update local variables to show new marks in form immediately
     $existingScore = $score;

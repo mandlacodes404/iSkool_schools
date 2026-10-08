@@ -26,6 +26,18 @@ if (empty($subject_name)) {
     exit();
 }
 
+// Teachers may link themselves to an existing class, but a tampered request
+// must not create an orphaned teacher_subjects relationship.
+$classStmt = $conn->prepare('SELECT 1 FROM classes WHERE id = ? LIMIT 1');
+$classStmt->bind_param('i', $class_id);
+$classStmt->execute();
+$classExists = $classStmt->get_result()->num_rows === 1;
+$classStmt->close();
+if (!$classExists) {
+    echo json_encode(['success' => false, 'message' => 'Class not found']);
+    exit();
+}
+
 $stmt = $conn->prepare("
     INSERT INTO teacher_subjects (teacher_email, class_id, subject_name)
     VALUES (?, ?, ?)

@@ -57,7 +57,7 @@ try {
         JOIN classes c ON q.class_id = c.id
         LEFT JOIN class_students cs
             ON cs.class_id = q.class_id
-            AND (cs.academic_year_id = q.academic_year_id OR cs.academic_year_id IS NULL)
+            AND cs.academic_year_id = q.academic_year_id
         LEFT JOIN users u
             ON cs.student_email = u.email
             AND u.role = 'learner'

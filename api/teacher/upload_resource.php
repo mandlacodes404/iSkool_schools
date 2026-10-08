@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../../auth/session_guard.php';
 require_once __DIR__ . '/../../auth/csrf_helper.php';
 require_once dirname(__DIR__, 2) . '/config.php';
+require_once dirname(__DIR__, 2) . '/includes/teacher_class_access.php';
 require_once dirname(__DIR__, 2) . '/school_upload_helper.php';  // ← NEW
 require_once dirname(__DIR__, 2) . '/push_functions.php';
 require dirname(__DIR__, 2) . '/vendor/autoload.php';
@@ -181,6 +182,11 @@ if (empty($title)) {
 }
 if ($classId <= 0) {
     echo json_encode(['success' => false, 'error' => 'Please select a class.']);
+    exit();
+}
+if (!teacher_has_class_access($conn, $email, $classId)) {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'error' => 'You do not have access to this class.']);
     exit();
 }
 

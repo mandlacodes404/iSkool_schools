@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../../auth/session_guard.php';
 require_once __DIR__ . '/../../auth/csrf_helper.php';
 require_once dirname(__DIR__, 2) . '/config.php';
+require_once dirname(__DIR__, 2) . '/includes/teacher_class_access.php';
 require_once dirname(__DIR__, 2) . '/push_functions.php';
 require dirname(__DIR__, 2) . '/vendor/autoload.php';
 
@@ -62,6 +63,11 @@ $forceEmail = isset($_POST['force_email']);
 
 if (empty($title) || empty($msg) || $class_id <= 0) {
     echo json_encode(['success' => false, 'error' => 'Please fill in all fields.']);
+    exit();
+}
+if (!teacher_has_class_access($conn, $email, $class_id)) {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'error' => 'You do not have access to this class.']);
     exit();
 }
 

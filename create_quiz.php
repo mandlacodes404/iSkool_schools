@@ -8,6 +8,7 @@ ini_set('error_log', 'php_errors.log');
 require_once __DIR__ . '/auth/session_guard.php';
 require_once __DIR__ . '/auth/csrf_helper.php';
 include("config.php");
+require_once __DIR__ . '/includes/teacher_class_access.php';
 
 require 'vendor/autoload.php';
 use PHPMailer\PHPMailer\PHPMailer;
@@ -117,8 +118,9 @@ if ($result && $row = $result->fetch_assoc()) {
 }
 $termStmt->close();
 
-// Fetch classes 
-$stmt = $conn->prepare("SELECT id, name FROM classes ORDER BY name ASC");
+// A teacher may create a quiz only in a class they have linked to themselves.
+$stmt = $conn->prepare("\n    SELECT c.id, c.name, c.subject\n    FROM classes c\n    INNER JOIN teacher_subjects ts ON ts.class_id = c.id\n    WHERE ts.teacher_email = ?\n    ORDER BY c.name ASC\n");
+$stmt->bind_param("s", $email);
 $stmt->execute();
 $classResult = $stmt->get_result();
 
@@ -233,12 +235,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
     if ($class_id > 0) {
-        $classCheckStmt = $conn->prepare("SELECT id FROM classes WHERE id = ? LIMIT 1");
-        $classCheckStmt->bind_param("i", $class_id);
-        $classCheckStmt->execute();
-        $classExists = $classCheckStmt->get_result()->num_rows > 0;
-        $classCheckStmt->close();
-        if (!$classExists) $errors[] = "Invalid class selected.";
+        if (!teacher_has_class_access($conn, $email, $class_id)) {
+            $errors[] = "You do not have access to the selected class.";
+        }
     }
 
     if (!empty($errors)) {

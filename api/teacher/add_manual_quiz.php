@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../../auth/session_guard.php';
 require_once __DIR__ . '/../../auth/csrf_helper.php';
 require_once dirname(__DIR__, 2) . '/config.php';
+require_once dirname(__DIR__, 2) . '/includes/teacher_class_access.php';
 
 header('Content-Type: application/json');
 
@@ -45,12 +46,17 @@ if (!$classExists) {
     echo json_encode(['status' => 'error', 'message' => 'Invalid class selected.', 'success' => false, 'error' => 'Invalid class selected.']);
     exit();
 }
+if (!teacher_has_class_access($conn, $email, $class_id)) {
+    http_response_code(403);
+    echo json_encode(['status' => 'error', 'message' => 'You do not have access to this class.', 'success' => false, 'error' => 'You do not have access to this class.']);
+    exit();
+}
 
 $insert = $conn->prepare("
     INSERT INTO quizzes 
     (title, class_id, created_by, is_summative, weight_percent, duration, publish_marks,
-     academic_year_id, term_number, created_at, status)
-    VALUES (?, ?, ?, ?, ?, 0, 0, ?, ?, NOW(), 'Closed')
+     is_manual, academic_year_id, term_number, created_at, status)
+    VALUES (?, ?, ?, ?, ?, 0, 0, 1, ?, ?, NOW(), 'Closed')
 ");
 $insert->bind_param(
     "sisidii",

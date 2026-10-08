@@ -2,6 +2,7 @@
 require_once __DIR__ . '/auth/session_guard.php';
 require_once __DIR__ . '/auth/csrf_helper.php';
 include("config.php");
+require_once __DIR__ . '/includes/teacher_class_access.php';
 
 if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
     header("Location: index.php");
@@ -48,7 +49,8 @@ if ($termRow = $termResult->fetch_assoc()) {
  * 3. FETCH CLASSES
  * Removed school_id filter.
  */
-$classStmt = $conn->prepare("SELECT id, name FROM classes ORDER BY name");
+$classStmt = $conn->prepare("\n    SELECT c.id, c.name\n    FROM classes c\n    INNER JOIN teacher_subjects ts ON ts.class_id = c.id\n    WHERE ts.teacher_email = ?\n    ORDER BY c.name\n");
+$classStmt->bind_param("s", $email);
 $classStmt->execute();
 $classResult = $classStmt->get_result();
 
@@ -60,12 +62,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $is_summative = isset($_POST['is_summative']) ? 1 : 0;
     $weight_percent = $is_summative && !empty($_POST['weight_percent']) ? floatval($_POST['weight_percent']) : null;
 
-    if ($title && $class_id > 0) {
+    if ($title && $class_id > 0 && teacher_has_class_access($conn, $email, $class_id)) {
         $insert = $conn->prepare("
             INSERT INTO quizzes 
             (title, class_id, created_by, is_summative, weight_percent, duration, publish_marks,
-             academic_year_id, term_number, created_at, status)
-            VALUES (?, ?, ?, ?, ?, 0, 0, ?, ?, NOW(), 'Closed')
+             is_manual, academic_year_id, term_number, created_at, status)
+            VALUES (?, ?, ?, ?, ?, 0, 0, 1, ?, ?, NOW(), 'Closed')
         ");
         $insert->bind_param(
             "sisidii", 
@@ -88,7 +90,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         $insert->close();
     } else {
-        $message = "Please fill all required fields.";
+        $message = $class_id > 0
+            ? "You do not have access to the selected class."
+            : "Please fill all required fields.";
     }
 }
 ?>

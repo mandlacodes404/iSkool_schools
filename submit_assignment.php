@@ -62,9 +62,11 @@ if (!$isInAssignmentClass) {
 }
 
 // Check due date using the actual current time in SAST.
-$now = new DateTime('now', new DateTimeZone('SAST'));
-$due = new DateTime($assignment['due_date'], new DateTimeZone('SAST'));
+$now = new DateTime('now', new DateTimeZone('Africa/Johannesburg'));
+$due = new DateTime($assignment['due_date'], new DateTimeZone('Africa/Johannesburg'));
 $past_due = $now > $due;
+$allow_late = (int)($assignment['allow_late'] ?? 0) === 1;
+$is_late = $past_due ? 1 : 0;
 
 // Check if submission already exists
 $subStmt = $conn->prepare("SELECT * FROM submissions WHERE assignment_id = ? AND student_email = ?");
@@ -76,7 +78,7 @@ $subStmt->execute();
 $submission = $subStmt->get_result()->fetch_assoc();
 $subStmt->close();
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$past_due) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && (!$past_due || $allow_late)) {
     header('Content-Type: application/json'); // Ensure the browser knows this is JSON
     verify_csrf_token();
     
@@ -135,27 +137,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$past_due) {
         }
     }
 
-    // 2. Database Operations
-    if ($submission) {
-        // UPDATE: Changed submission_text to text_answer to match your DB
-        $updateStmt = $conn->prepare("UPDATE submissions SET text_answer = ?, file_url = ?, submitted_at = NOW() WHERE id = ?");
-        if (!$updateStmt) {
-            echo json_encode(['success' => false, 'error' => "Prepare failed: " . $conn->error]);
-            exit();
-        }
-        $updateStmt->bind_param("ssi", $submission_text, $fileUrl, $submission['id']);
-        $execute = $updateStmt->execute();
-        $updateStmt->close();
-    } else {
-        // INSERT: Already using text_answer
-        $insertStmt = $conn->prepare("INSERT INTO submissions (assignment_id, student_email, text_answer, file_url) VALUES (?, ?, ?, ?)");
-        if (!$insertStmt) {
-            echo json_encode(['success' => false, 'error' => "Prepare failed: " . $conn->error]);
-            exit();
-        }
-        $insertStmt->bind_param("isss", $assignment_id, $email, $submission_text, $fileUrl);
-        $execute = $insertStmt->execute();
-        $insertStmt->close();
+    // 2. A unique database key makes this one write safe for retries and
+    // double-clicks. It is added by migrations/20261008_core_audit_integrity.sql.
+    $saveStmt = $conn->prepare("\n        INSERT INTO submissions (assignment_id, student_email, text_answer, file_url, is_late)\n        VALUES (?, ?, ?, ?, ?)\n        ON DUPLICATE KEY UPDATE\n+            text_answer = VALUES(text_answer),\n+            file_url = COALESCE(VALUES(file_url), file_url),\n+            is_late = VALUES(is_late),\n+            submitted_at = NOW()\n+    ");
+    if (!$saveStmt) {
+        echo json_encode(['success' => false, 'error' => 'Unable to save submission.']);
+        exit();
+    }
+    $newFileUrl = isset($_FILES['submission_file']) && $_FILES['submission_file']['error'] === UPLOAD_ERR_OK
+        ? $fileUrl
+        : null;
+    $saveStmt->bind_param("isssi", $assignment_id, $email, $submission_text, $newFileUrl, $is_late);
+    $execute = $saveStmt->execute();
+    $saveStmt->close();
+
+    if ($execute) {
+        $savedSubmissionStmt = $conn->prepare("SELECT file_url FROM submissions WHERE assignment_id = ? AND student_email = ? LIMIT 1");
+        $savedSubmissionStmt->bind_param("is", $assignment_id, $email);
+        $savedSubmissionStmt->execute();
+        $fileUrl = $savedSubmissionStmt->get_result()->fetch_assoc()['file_url'] ?? null;
+        $savedSubmissionStmt->close();
     }
 
     // 3. Final Response
@@ -543,9 +544,12 @@ function getCsrfToken() {
             <?php endif; ?>
         </div>
 
-        <?php if ($past_due): ?>
+        <?php if ($past_due && !$allow_late): ?>
             <p class="error">Sorry, the due date for this assignment has passed. You cannot submit anymore.</p>
         <?php else: ?>
+            <?php if ($past_due): ?>
+                <p class="error">The due date has passed. Your submission will be marked late.</p>
+            <?php endif; ?>
             <form method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
                 <label for="submission_text">Submission Text (optional):</label>

@@ -22,27 +22,26 @@ $learner_email = $_SESSION['email'];
 
 // 1. Get Current Academic Year
 $yearRes = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
-$current_academic_year_id = $yearRes->fetch_assoc()['id'];
+$yearRow = $yearRes ? $yearRes->fetch_assoc() : null;
+$current_academic_year_id = (int)($yearRow['id'] ?? 0);
 
-// 2. Get learner's class
-$classStmt = $conn->prepare("SELECT class_id FROM class_students WHERE student_email = ? AND academic_year_id = ?");
-$classStmt->bind_param("si", $learner_email, $current_academic_year_id);
-$classStmt->execute();
-$class_id = $classStmt->get_result()->fetch_assoc()['class_id'] ?? null;
-
-if (!$class_id) {
+if (!$current_academic_year_id) {
     echo json_encode(['status' => 'no_class']); exit;
 }
 
-// 3. Get Active Evaluations
+// 2. Get active current-year evaluations for every class the learner attends.
 $stmt = $conn->prepare("
-    SELECT te.*, u.name AS teacher_name, CONCAT(COALESCE(u.title,''), ' ', u.surname) AS teacher_full 
+    SELECT DISTINCT te.*, u.name AS teacher_name, CONCAT(COALESCE(u.title,''), ' ', u.surname) AS teacher_full
     FROM teacher_evaluations te
     JOIN users u ON te.created_by = u.email
-    WHERE te.class_id = ? AND te.is_active = 1
+    JOIN class_students cs ON cs.class_id = te.class_id
+    WHERE cs.student_email = ?
+      AND cs.academic_year_id = ?
+      AND te.academic_year_id = ?
+      AND te.is_active = 1
     ORDER BY te.created_at DESC
 ");
-$stmt->bind_param("i", $class_id);
+$stmt->bind_param("sii", $learner_email, $current_academic_year_id, $current_academic_year_id);
 $stmt->execute();
 $evals = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 

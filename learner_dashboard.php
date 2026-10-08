@@ -107,27 +107,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['join_class'])) {
 
     $classId = (int)$_POST['class_id'];
 
-    // Prevent duplicate join
-    $check = $conn->prepare("SELECT 1 FROM class_students WHERE student_email = ? AND class_id = ?");
-    if ($currentYearId > 0) {
-        $check = $conn->prepare("SELECT 1 FROM class_students WHERE student_email = ? AND class_id = ? AND academic_year_id = ?");
-        $check->bind_param("sii", $learnerEmail, $classId, $currentYearId);
-    } else {
-        $check->bind_param("si", $learnerEmail, $classId);
+    if ($currentYearId <= 0) {
+        http_response_code(400);
+        exit('No active academic year.');
     }
+
+    $classCheck = $conn->prepare("SELECT 1 FROM classes WHERE id = ? LIMIT 1");
+    $classCheck->bind_param("i", $classId);
+    $classCheck->execute();
+    if ($classCheck->get_result()->num_rows === 0) {
+        http_response_code(400);
+        exit('Invalid class.');
+    }
+    $classCheck->close();
+
+    // Learners have one active class per academic year. A transfer must be
+    // handled explicitly instead of changing class through a second join.
+    $check = $conn->prepare("SELECT class_id FROM class_students WHERE student_email = ? AND academic_year_id = ? LIMIT 1");
+    $check->bind_param("si", $learnerEmail, $currentYearId);
     $check->execute();
-    if ($check->get_result()->num_rows === 0) {
-        if ($currentYearId > 0) {
-            $insert = $conn->prepare("INSERT INTO class_students (student_email, class_id, academic_year_id) VALUES (?, ?, ?)");
-            $insert->bind_param("sii", $learnerEmail, $classId, $currentYearId);
-        } else {
-            $insert = $conn->prepare("INSERT INTO class_students (student_email, class_id) VALUES (?, ?)");
-            $insert->bind_param("si", $learnerEmail, $classId);
-        }
-        $insert->execute();
-        $insert->close();
-    }
+    $existing = $check->get_result()->fetch_assoc();
     $check->close();
+    if (!$existing) {
+        $insert = $conn->prepare("INSERT INTO class_students (student_email, class_id, academic_year_id) VALUES (?, ?, ?)");
+        $insert->bind_param("sii", $learnerEmail, $classId, $currentYearId);
+        if (!$insert->execute()) {
+            if ($conn->errno !== 1062) {
+                http_response_code(500);
+                exit('Unable to join class.');
+            }
+            $raceCheck = $conn->prepare("SELECT class_id FROM class_students WHERE student_email = ? AND academic_year_id = ? LIMIT 1");
+            $raceCheck->bind_param("si", $learnerEmail, $currentYearId);
+            $raceCheck->execute();
+            $raceRow = $raceCheck->get_result()->fetch_assoc();
+            $raceCheck->close();
+            if (!$raceRow || (int)$raceRow['class_id'] !== $classId) {
+                http_response_code(409);
+                exit('You are already enrolled in a class for this academic year.');
+            }
+        }
+        $insert->close();
+    } elseif ((int)$existing['class_id'] !== $classId) {
+        http_response_code(409);
+        exit('You are already enrolled in a class for this academic year.');
+    }
     header("Location: learner_dashboard.php");
     exit();
 }

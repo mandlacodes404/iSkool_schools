@@ -51,7 +51,8 @@ try {
         SELECT q.title, AVG((r.score / r.total) * 100) AS avg_percent
         FROM quizzes q
         JOIN quiz_results r ON q.id = r.quiz_id
-        JOIN class_students cs ON r.user_email = cs.student_email AND cs.class_id = q.class_id
+        JOIN class_students cs ON r.user_email = cs.student_email
+            AND cs.class_id = q.class_id AND cs.academic_year_id = q.academic_year_id
         JOIN users u ON cs.student_email = u.email AND u.is_deleted = 0
         WHERE q.created_by = ? AND q.class_id = ? AND q.academic_year_id = ?
           AND q.term_number = ? AND q.is_summative = 1 AND q.publish_marks = 1 AND r.total > 0
@@ -71,7 +72,8 @@ try {
         FROM quizzes q
         JOIN quiz_results r ON q.id = r.quiz_id
         JOIN users u ON r.user_email = u.email AND u.is_deleted = 0 AND u.gender IN ('male','female')
-        JOIN class_students cs ON u.email = cs.student_email AND cs.class_id = q.class_id
+        JOIN class_students cs ON u.email = cs.student_email
+            AND cs.class_id = q.class_id AND cs.academic_year_id = q.academic_year_id
         WHERE q.created_by = ? AND q.class_id = ? AND q.academic_year_id = ?
           AND q.term_number = ? AND q.is_summative = 1 AND q.publish_marks = 1 AND r.total > 0
         GROUP BY q.id, u.gender ORDER BY q.start_time
@@ -104,7 +106,8 @@ try {
         FROM quiz_results r
         JOIN quizzes q ON r.quiz_id = q.id
         JOIN users u ON r.user_email = u.email AND u.is_deleted = 0 AND u.gender = ?
-        JOIN class_students cs ON u.email = cs.student_email AND cs.class_id = q.class_id
+        JOIN class_students cs ON u.email = cs.student_email
+            AND cs.class_id = q.class_id AND cs.academic_year_id = q.academic_year_id
         WHERE q.created_by = ? AND q.class_id = ? AND q.academic_year_id = ?
           AND q.term_number = ? AND q.is_summative = 1 AND q.publish_marks = 1 AND r.total > 0
         GROUP BY u.email ORDER BY avg_percent DESC LIMIT 5
@@ -136,7 +139,8 @@ try {
         FROM quizzes q
         JOIN quiz_results r ON q.id = r.quiz_id
         JOIN users u ON r.user_email = u.email AND u.is_deleted = 0 AND u.gender IN ('male','female')
-        JOIN class_students cs ON u.email = cs.student_email AND cs.class_id = q.class_id
+        JOIN class_students cs ON u.email = cs.student_email
+            AND cs.class_id = q.class_id AND cs.academic_year_id = q.academic_year_id
         WHERE q.created_by = ? AND q.class_id = ? AND q.academic_year_id = ?
           AND q.is_summative = 1 AND q.publish_marks = 1 AND r.total > 0
         GROUP BY q.term_number, u.gender ORDER BY q.term_number
@@ -161,7 +165,8 @@ try {
         SELECT q.term_number, AVG((r.score / r.total) * 100) AS avg_percent
         FROM quizzes q
         JOIN quiz_results r ON q.id = r.quiz_id
-        JOIN class_students cs ON r.user_email = cs.student_email AND cs.class_id = q.class_id
+        JOIN class_students cs ON r.user_email = cs.student_email
+            AND cs.class_id = q.class_id AND cs.academic_year_id = q.academic_year_id
         JOIN users u ON cs.student_email = u.email AND u.is_deleted = 0
         WHERE q.created_by = ? AND q.class_id = ? AND q.academic_year_id = ?
           AND q.is_summative = 1 AND q.publish_marks = 1 AND r.total > 0
@@ -185,7 +190,8 @@ try {
         FROM quiz_results r
         JOIN quizzes q ON r.quiz_id = q.id
         JOIN users u ON r.user_email = u.email AND u.is_deleted = 0
-        JOIN class_students cs ON u.email = cs.student_email AND cs.class_id = q.class_id
+        JOIN class_students cs ON u.email = cs.student_email
+            AND cs.class_id = q.class_id AND cs.academic_year_id = q.academic_year_id
         WHERE q.created_by = ? AND q.class_id = ? AND q.academic_year_id = ?
           AND q.term_number = ? AND q.is_summative = 1 AND q.publish_marks = 1 AND r.total > 0
         GROUP BY u.email

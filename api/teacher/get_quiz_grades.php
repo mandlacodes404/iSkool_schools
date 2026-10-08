@@ -15,8 +15,9 @@ if ($quiz_id <= 0) {
     exit();
 }
 
-// Get quiz title and class_id
-$quizStmt = $conn->prepare("SELECT title, class_id FROM quizzes WHERE id = ? AND created_by = ?");
+// A result inherits its academic year from its quiz. Never read the global
+// current year here: teachers must be able to review historical assessments.
+$quizStmt = $conn->prepare("SELECT title, class_id, academic_year_id, is_manual FROM quizzes WHERE id = ? AND created_by = ?");
 $quizStmt->bind_param("is", $quiz_id, $_SESSION['email']);
 $quizStmt->execute();
 $quiz = $quizStmt->get_result()->fetch_assoc();
@@ -28,26 +29,32 @@ if (!$quiz) {
     exit();
 }
 
-// Get current academic year
-$yearResult      = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
-if ($yearResult->num_rows === 0) {
-    $yearResult  = $conn->query("SELECT id FROM academic_years ORDER BY id DESC LIMIT 1");
-}
-$current_year_id = (int)$yearResult->fetch_assoc()['id'];
-
-// Get all learners in the class with their scores
+// Get all learners in the quiz-year roster with one explicit result identity.
+// Manual assessments use their single no-attempt result; normal assessments
+// expose the latest attempt only, and edits carry that exact result ID.
 $stmt = $conn->prepare("
     SELECT u.name, u.surname, u.email,
-           qr.score, qr.total
+           qr.id AS result_id, qr.score, qr.total
     FROM users u
     JOIN class_students cs ON cs.student_email = u.email
-    LEFT JOIN quiz_results qr ON qr.user_email = u.email AND qr.quiz_id = ?
+    LEFT JOIN quiz_results qr ON qr.id = (
+        SELECT qri.id
+        FROM quiz_results qri
+        WHERE qri.user_email = u.email
+          AND qri.quiz_id = ?
+          AND qri.academic_year_id = ?
+          AND (qri.attempt_id IS NULL OR ? = 0)
+        ORDER BY qri.submitted_at DESC, qri.id DESC
+        LIMIT 1
+    )
     WHERE cs.class_id = ?
       AND cs.academic_year_id = ?
       AND u.role = 'learner'
     ORDER BY u.surname ASC, u.name ASC
 ");
-$stmt->bind_param("iii", $quiz_id, $quiz['class_id'], $current_year_id);
+$quiz_year_id = (int)$quiz['academic_year_id'];
+$is_manual = (int)$quiz['is_manual'];
+$stmt->bind_param("iiiii", $quiz_id, $quiz_year_id, $is_manual, $quiz['class_id'], $quiz_year_id);
 $stmt->execute();
 $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
@@ -63,6 +70,7 @@ foreach ($rows as $row) {
     $learners[] = [
         'name'       => $row['name'] . ' ' . $row['surname'],
         'email'      => $row['email'],
+        'result_id'  => $row['result_id'] !== null ? (int)$row['result_id'] : null,
         'score'      => $score,
         'total'      => $total,
         'percentage' => $percentage
