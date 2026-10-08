@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../../auth/session_guard.php';
+require_once __DIR__ . '/../../auth/csrf_helper.php';
 header('Content-Type: application/json');
 require_once dirname(__DIR__, 2) . '/config.php';
 
@@ -9,6 +10,8 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
 
 $email = $_SESSION['email'];
 $input = json_decode(file_get_contents('php://input'), true);
+
+verify_csrf_token();
 
 $class_id     = isset($input['class_id']) ? (int)$input['class_id'] : 0;
 $subject_name = isset($input['subject_name']) ? trim($input['subject_name']) : '';
