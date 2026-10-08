@@ -1,6 +1,6 @@
 <?php
 // forgot_password.php
-session_start();
+require_once __DIR__ . '/../session_guard.php';
 ?>
 
 <!DOCTYPE html>
@@ -196,6 +196,7 @@ c-67 -29 -141 -109 -168 -182 -44 -117 -22 -243 58 -338 l41 -49 -27 -47 c-81
     <p class="subtitle">Enter your email and we'll send you a reset link.</p>
 
     <form method="POST" action="send_reset_link.php">
+        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
         <input type="email" name="email" placeholder="Email address" required>
         <button type="submit">Send Reset Link</button>
     </form>

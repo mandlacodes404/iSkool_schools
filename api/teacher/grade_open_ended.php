@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../../auth/session_guard.php';
 require_once __DIR__ . '/../../auth/csrf_helper.php';
 require_once dirname(__DIR__, 2) . '/config.php';
+require_once dirname(__DIR__, 2) . '/includes/multiple_answer_scoring.php';
 
 header('Content-Type: application/json');
 
@@ -162,7 +163,85 @@ try {
         $blankStmt->close();
     }
 
-    $updated_total = $mcq_score + $fitb_score + $open_score;
+    $multipleAnswerStmt = $conn->prepare("
+        SELECT qq.id AS question_id, qq.points, maq.scoring_mode, ua.answer_text,
+               c.id AS choice_id, c.is_correct
+        FROM quizquestions qq
+        INNER JOIN multiple_answer_questions maq ON maq.question_id = qq.id
+        LEFT JOIN user_answers ua ON ua.question_id = qq.id AND ua.attempt_id = ?
+        LEFT JOIN choices c ON c.question_id = qq.id
+        WHERE qq.quiz_id = ? AND qq.question_type = 'multiple_answer'
+        ORDER BY qq.id ASC, c.id ASC
+    ");
+    $multipleAnswerStmt->bind_param("ii", $attempt_id, $quiz_id);
+    $multipleAnswerStmt->execute();
+    $multipleAnswerRows = $multipleAnswerStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $multipleAnswerStmt->close();
+
+    $multiple_answer_score = 0.0;
+    $multipleAnswerQuestions = [];
+    foreach ($multipleAnswerRows as $multipleAnswerRow) {
+        $multipleQuestionId = (int)$multipleAnswerRow['question_id'];
+        if (!isset($multipleAnswerQuestions[$multipleQuestionId])) {
+            $multipleAnswerQuestions[$multipleQuestionId] = [
+                'points' => (float)$multipleAnswerRow['points'],
+                'scoring_mode' => in_array($multipleAnswerRow['scoring_mode'], ['exact_match', 'partial_penalty'], true)
+                    ? $multipleAnswerRow['scoring_mode']
+                    : 'exact_match',
+                'submitted_choice_ids' => [],
+                'valid_choice_ids' => [],
+                'correct_choice_ids' => [],
+            ];
+
+            $submittedChoices = json_decode((string)($multipleAnswerRow['answer_text'] ?? ''), true);
+            if (is_array($submittedChoices)) {
+                foreach ($submittedChoices as $choiceId) {
+                    $multipleAnswerQuestions[$multipleQuestionId]['submitted_choice_ids'][(int)$choiceId] = true;
+                }
+            }
+        }
+
+        $choiceId = (int)$multipleAnswerRow['choice_id'];
+        if ($choiceId > 0) {
+            $multipleAnswerQuestions[$multipleQuestionId]['valid_choice_ids'][$choiceId] = true;
+        }
+        if ((int)$multipleAnswerRow['is_correct'] === 1) {
+            $multipleAnswerQuestions[$multipleQuestionId]['correct_choice_ids'][$choiceId] = true;
+        }
+    }
+
+    foreach ($multipleAnswerQuestions as $multipleAnswerQuestion) {
+        $selectedSet = filter_valid_multiple_answer_choices(
+            $multipleAnswerQuestion['submitted_choice_ids'],
+            $multipleAnswerQuestion['valid_choice_ids']
+        );
+        $correctSet = $multipleAnswerQuestion['correct_choice_ids'];
+
+        if ($multipleAnswerQuestion['scoring_mode'] === 'exact_match') {
+            if (
+                count($selectedSet) === count($correctSet)
+                && empty(array_diff_key($selectedSet, $correctSet))
+                && empty(array_diff_key($correctSet, $selectedSet))
+            ) {
+                $multiple_answer_score += $multipleAnswerQuestion['points'];
+            }
+            continue;
+        }
+
+        $correctCount = count($correctSet);
+        if ($correctCount === 0) {
+            continue;
+        }
+
+        $pointsPerChoice = $multipleAnswerQuestion['points'] / $correctCount;
+        $questionScore = 0.0;
+        foreach ($selectedSet as $choiceId => $_) {
+            $questionScore += isset($correctSet[$choiceId]) ? $pointsPerChoice : -$pointsPerChoice;
+        }
+        $multiple_answer_score += max(0, $questionScore);
+    }
+
+    $updated_total = $mcq_score + $multiple_answer_score + $fitb_score + $open_score;
     $resultStmt = $conn->prepare("UPDATE quiz_results SET score = ? WHERE attempt_id = ? AND quiz_id = ?");
     $resultStmt->bind_param("dii", $updated_total, $attempt_id, $quiz_id);
     $resultStmt->execute();

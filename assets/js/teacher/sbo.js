@@ -70,10 +70,17 @@ window.fetchTeacherSyllabus = async function() {
 // Track active brief for desktop panel
 window._activeSBOBriefIndex = null;
 
+/** MySQL-style "2026-09-12 14:30:00" is not a valid date string in Safari
+ * (all iPhones); swapping the space for a "T" makes it valid everywhere. */
+function parseSBODate(raw) {
+    if (!raw) return new Date(NaN);
+    return new Date(String(raw).trim().replace(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2})/, '$1T$2'));
+}
+
 function formatSBOUpdatedDateTime(updatedAt) {
     if (!updatedAt) return '';
 
-    const date = new Date(updatedAt);
+    const date = parseSBODate(updatedAt);
     if (Number.isNaN(date.getTime())) return '';
 
     const formattedDate = date.toLocaleDateString('en-ZA', {
@@ -148,6 +155,19 @@ function renderTeacherSyllabus(data) {
         });
     }
 
+    // ── Empty-state copy for the desktop main panel ──
+    const briefCount = briefs.length;
+    const classCount = new Set(briefs.map(b => b.class_id)).size;
+    const thinCount  = briefs.filter(b => !(b.topics || []).length && !(b.assessments || []).length).length;
+    const emptyTitle = briefCount ? 'Pick a syllabus brief' : 'No syllabus briefs yet';
+    const emptyBody  = briefCount
+        ? `${briefCount} ${briefCount === 1 ? 'brief' : 'briefs'} across ${classCount} ${classCount === 1 ? 'class' : 'classes'}. ` +
+          (thinCount
+              ? `${thinCount} ${thinCount === 1 ? 'has' : 'have'} no topics or assessments yet.`
+              : 'Each one has topics and assessments.')
+        : 'Release one to a class and it will show up here, grouped by term.';
+    const emptyCta   = briefCount ? 'Release a syllabus' : 'Release your first syllabus';
+
     let html = `
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
         <div class="sbo-desktop-layout tchr-flat-layout">
@@ -172,18 +192,20 @@ function renderTeacherSyllabus(data) {
             <!-- Right Panel -->
             <div class="sbo-main-panel tchr-flat-panel" id="sbo-main-panel">
                 <div class="sbo-panel-empty">
-                    <svg viewBox="0 0 24 24" width="40" height="40" stroke="#4fd1c5" stroke-width="1.5" fill="none">
-                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-                    </svg>
-                    <p>Select a syllabus to view details</p>
+                    <h2 class="sbo-panel-empty-title">${emptyTitle}</h2>
+                    <p class="sbo-panel-empty-body">${emptyBody}</p>
+                    <button type="button" class="sbo-dp-btn sbo-dp-btn--primary" onclick="openSBOForm()">
+                        ${sboDpIcon('plus', 14)}${emptyCta}
+                    </button>
                 </div>
             </div>
 
+            <!-- railId lets selectDesktopSBO() swap this to
+                 selection-specific copy via updateInfoRail(). -->
             ${typeof buildInfoRail === 'function' ? buildInfoRail('About Syllabus', `
                 <p>Each syllabus brief is tied to one class and term — release a new one per class if you teach the same subject across grades.</p>
                 <p>Learners see topics, assessments, and notes exactly as written here, so keep entries current as the term progresses.</p>
-            `) : ''}
+            `, 'sbo-rail') : ''}
         </div>
 
         <div id="deleteSBOModal" class="teacher-modal-overlay sbo-modal-hidden">
@@ -227,13 +249,19 @@ function renderTeacherSyllabus(data) {
     window.restoreTeacherScrollState('sbo-sidebar', sidebarScrollEl);
 
     // Restore whichever syllabus brief was selected before navigating
-    // away. Re-derive its current idx from the saved stable class_id
-    // rather than storing the index itself, since order can shift.
-    const savedClassId = window.teacherSectionState.selection.sbo;
-    if (savedClassId != null) {
-        const idx = window._allSBOBriefs.findIndex(b => b.class_id == savedClassId);
-        if (idx !== -1) selectDesktopSBO(idx);
+    // away. Re-derive its current idx from the saved brief id rather than
+    // storing the index itself, since order can shift. (class_id alone is not
+    // enough: a class can have several briefs, one per subject and term, and
+    // it would always reopen the first.) Saved state from before this change
+    // only has class_id, so that remains the fallback when no brief id is saved.
+    const savedSel = window.teacherSectionState.selection;
+    let savedIdx = -1;
+    if (savedSel.sboBriefId != null) {
+        savedIdx = window._allSBOBriefs.findIndex(b => String(b.id) === String(savedSel.sboBriefId));
+    } else if (savedSel.sbo != null) {
+        savedIdx = window._allSBOBriefs.findIndex(b => b.class_id == savedSel.sbo);
     }
+    if (savedIdx !== -1) selectDesktopSBO(savedIdx);
 }
 
 function buildMobileSBOFolders(briefs) {
@@ -261,7 +289,7 @@ function buildMobileSBOFolders(briefs) {
         group.items.forEach(brief => {
             const flatIndex = briefs.findIndex(b => b.id === brief.id);
             const updatedDate = brief.updated_at
-                ? new Date(brief.updated_at).toLocaleDateString('en-ZA', { day:'numeric', month:'short', year:'numeric' })
+                ? parseSBODate(brief.updated_at).toLocaleDateString('en-ZA', { day:'numeric', month:'short', year:'numeric' })
                 : '';
 
             itemsHtml += `
@@ -309,6 +337,90 @@ function buildMobileSBOFolders(briefs) {
     return html;
 }
 
+// ── DESKTOP PANEL HELPERS ────────────────────────────────────────────────────
+// (desktop only: the mobile detail page and mobile drawer keep their own markup)
+
+function escapeSBOHtml(value) {
+    return String(value == null ? '' : value)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function sboDpIcon(name, size) {
+    const paths = { plus: '<path d="M12 5v14M5 12h14"/>' };
+    return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] || ''}</svg>`;
+}
+
+function sboDpPlural(n, word) {
+    return `${n} ${word}${n === 1 ? '' : 's'}`;
+}
+
+/** One colour per assessment, by position: the bar segment, the swatch in the
+ * list and the hover link all use the same one. Eight is more than a syllabus
+ * needs; past that the colours simply repeat. */
+const SBO_ASSESS_COLORS = ['#4fd1c5', '#a78bfa', '#f3a93c', '#60a5fa', '#f4776f', '#86d36b', '#e879a9', '#94a3b8'];
+function sboAssessColor(i) {
+    return SBO_ASSESS_COLORS[i % SBO_ASSESS_COLORS.length];
+}
+
+function formatSBOUpdatedDate(updatedAt) {
+    const d = parseSBODate(updatedAt);
+    if (Number.isNaN(d.getTime())) return '';
+    return d.toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+/** Assessment weighting: one proportional bar (a colour per assessment) + a row each. */
+function buildSBOAssessmentBlock(assessments) {
+    const esc = escapeSBOHtml;
+    if (!assessments.length) {
+        return `<div class="sbo-dp-rows"><div class="sbo-dp-none">No assessments listed.</div></div>`;
+    }
+    const weights = assessments.map(a => Number(a.weight) || 0);
+    const total = weights.reduce((n, w) => n + w, 0);
+
+    const segs = assessments.map((a, k) => `
+        <i data-k="${k}" style="--g:${weights[k]};--c:${sboAssessColor(k)};"
+           title="${esc(a.type)}: ${weights[k]}%"></i>`).join('')
+        + (total < 100 ? `<i class="is-rest" style="--g:${100 - total};" title="Not accounted for: ${100 - total}%"></i>` : '');
+
+    const rows = assessments.map((a, k) => `
+        <div class="sbo-dp-ar" data-k="${k}" style="--c:${sboAssessColor(k)};">
+            <span class="sbo-dp-sq"></span>
+            <span class="sbo-dp-ar-t">${esc(a.type)}</span>
+            <b>${weights[k]}%</b>
+        </div>`).join('');
+
+    const aria = assessments.map((a, k) => `${a.type} ${weights[k]}%`).join(', ');
+    const warn = total < 100 ? `<p class="sbo-dp-warn">These add up to ${total}%, so ${100 - total}% isn't accounted for.</p>`
+               : total > 100 ? `<p class="sbo-dp-warn">These add up to ${total}%, which is ${total - 100}% over.</p>` : '';
+
+    return `
+        <div class="sbo-dp-as">
+            <div class="sbo-dp-bar" role="img" aria-label="${esc(aria)}">${segs}</div>
+            <div class="sbo-dp-rows sbo-dp-arows">${rows}</div>
+            ${warn}
+        </div>`;
+}
+
+/** Hovering a bar segment or a row lights up that assessment in both. */
+function wireSBOHover(panel) {
+    const clear = () => {
+        panel.querySelectorAll('.sbo-dp-as.is-hl').forEach(q => {
+            q.classList.remove('is-hl');
+            q.querySelectorAll('.is-on').forEach(x => x.classList.remove('is-on'));
+        });
+    };
+    panel.onmouseover = function(e) {
+        clear();
+        const t = e.target.closest ? e.target.closest('.sbo-dp-as [data-k]') : null;
+        if (!t) return;
+        const q = t.closest('.sbo-dp-as');
+        q.classList.add('is-hl');
+        q.querySelectorAll(`[data-k="${t.dataset.k}"]`).forEach(x => x.classList.add('is-on'));
+    };
+    panel.onmouseleave = clear;
+}
+
 // ── DESKTOP PANEL: SELECT BRIEF ──────────────────────────────────────────────
 window.selectDesktopSBO = function(idx) {
     document.querySelectorAll('.sbo-sidebar-item').forEach(el => el.classList.remove('active'));
@@ -317,76 +429,95 @@ window.selectDesktopSBO = function(idx) {
     const sidebarItem = document.getElementById(`sbo-sidebar-${idx}`);
     if (sidebarItem) sidebarItem.classList.add('active');
 
-
     window._activeSBOBriefIndex = idx;
 
     const brief = (window._allSBOBriefs || [])[idx];
     if (!brief) return;
 
+    // class_id is kept for compatibility; sboBriefId is what restore uses.
     window.teacherSectionState.selection.sbo = brief.class_id;
+    window.teacherSectionState.selection.sboBriefId = brief.id;
     window.persistTeacherSectionState();
 
     const panel = document.getElementById('sbo-main-panel');
     if (!panel) return;
+    panel.onkeydown = null;   // release-form key handler, if it was set
 
-    const topicCount  = brief.topics?.length || 0;
-    const updatedDate = brief.updated_at
-        ? new Date(brief.updated_at).toLocaleDateString('en-ZA', { day:'numeric', month:'short', year:'numeric' })
-        : '';
+    const esc         = escapeSBOHtml;
+    const topics      = brief.topics || [];
+    const assessments = brief.assessments || [];
+    const topicCount  = topics.length;
+    const totalWeight = assessments.reduce((n, a) => n + (Number(a.weight) || 0), 0);
+    const updated     = formatSBOUpdatedDate(brief.updated_at);
+    const notes       = String(brief.notes || '').trim();
 
     const topicsHtml = topicCount
-        ? brief.topics.map(t => `<span class="sbo-topic-chip">${t}</span>`).join('')
-        : '<span class="sbo-topics-empty-text">No topics listed.</span>';
-
-    const assessHtml = brief.assessments?.length
-        ? brief.assessments.map(a => `
-            <div class="sbo-assess-row">
-                <span class="sbo-assess-row-type">${a.type}</span>
-                <span class="sbo-assess-row-weight">${a.weight}%</span>
-            </div>`).join('')
-        : '<p class="sbo-assess-empty-text">No assessments listed.</p>';
+        ? `<div class="sbo-dp-topics">${topics.map((t, i) => `
+            <div class="sbo-dp-topic"><span class="sbo-dp-topic-n">${String(i + 1).padStart(2, '0')}</span>${esc(t)}</div>`).join('')}</div>`
+        : `<div class="sbo-dp-rows"><div class="sbo-dp-none">No topics listed.</div></div>`;
 
     panel.innerHTML = `
-        <div class="sbo-panel-content">
-            <div class="sbo-panel-header">
-                <div>
-                    <div class="sbo-panel-title">${brief.subject}</div>
-                    <div class="sbo-panel-meta">
-                        <span>${brief.class_name}</span>
-                        ${updatedDate ? `<span>&bull;</span><span>Updated ${updatedDate}</span>` : ''}
+        <div class="sbo-dp">
+            <p class="sbo-dp-crumb">${esc(brief.class_name)}</p>
+            <h2 class="sbo-dp-title">${esc(brief.subject)}</h2>
+            <div class="sbo-dp-meta">
+                <span class="sbo-dp-pill">Term ${esc(brief.term)}</span>
+                ${updated ? `<span>Updated ${esc(updated)}</span>` : ''}
+            </div>
+            ${(!topicCount && !assessments.length) ? `<p class="sbo-dp-callout">No topics or assessment weighting have been added yet.</p>` : ''}
+
+            <section class="sbo-dp-section">
+                <div class="sbo-dp-sh">
+                    <h3 class="sbo-dp-h">Topics</h3>
+                    <span class="sbo-dp-hint">${sboDpPlural(topicCount, 'topic')}</span>
+                </div>
+                ${topicsHtml}
+            </section>
+
+            <section class="sbo-dp-section">
+                <div class="sbo-dp-sh">
+                    <h3 class="sbo-dp-h">Assessment weighting</h3>
+                    ${assessments.length ? `<span class="sbo-dp-hint${totalWeight !== 100 ? ' is-warn' : ''}">Total ${totalWeight}%</span>` : ''}
+                </div>
+                ${buildSBOAssessmentBlock(assessments)}
+            </section>
+
+            ${notes ? `
+            <section class="sbo-dp-section">
+                <h3 class="sbo-dp-h">Notes</h3>
+                <p class="sbo-dp-notes">${esc(notes)}</p>
+            </section>` : ''}
+
+            <section class="sbo-dp-section">
+                <h3 class="sbo-dp-h">Delete</h3>
+                <div class="sbo-dp-rows">
+                    <div class="sbo-dp-row">
+                        <p class="sbo-dp-rs">Permanently remove this syllabus brief. This can't be undone.</p>
+                        <button type="button" class="sbo-dp-btn sbo-dp-btn--danger" onclick="confirmDeleteSBO(${Number(brief.id)})">Delete brief</button>
                     </div>
                 </div>
-                <div class="sbo-panel-actions">
-                    <span class="sbo-term-badge">Term ${brief.term}</span>
-                    <button class="sbo-panel-delete-btn" onclick="confirmDeleteSBO(${brief.id})">
-                        <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none">
-                            <polyline points="3 6 5 6 21 6"></polyline>
-                            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
-                            <path d="M10 11v6"></path>
-                            <path d="M14 11v6"></path>
-                            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
-                        </svg>
-                        Delete
-                    </button>
-                </div>
-            </div>
-
-            <div class="sbo-topics-section">
-                <div class="sbo-section-label">Topics (${topicCount})</div>
-                <div class="sbo-topics-wrap">${topicsHtml}</div>
-            </div>
-
-            <div>
-                <div class="sbo-section-label">Assessment Weighting</div>
-                ${assessHtml}
-            </div>
-
-            ${brief.notes ? `
-            <div class="sbo-notes-block">
-                <div class="sbo-section-label">Notes</div>
-                ${brief.notes}
-            </div>` : ''}
+            </section>
         </div>`;
+
+    panel.scrollTop = 0;
+    wireSBOHover(panel);
+
+    // Swap the info rail to reflect this brief's completeness, instead
+    // of leaving it on the generic page-level copy.
+    if (typeof updateInfoRail === 'function') {
+        const assessCount = assessments.length;
+        if (topicCount === 0 && assessCount === 0) {
+            updateInfoRail('sbo-rail', 'Brief Needs Detail', `
+                <p>This syllabus brief for <strong>${esc(brief.class_name)}</strong> has no topics or assessment weighting listed yet.</p>
+                <p>Learners see this brief exactly as written, so it's worth filling in before sharing it widely.</p>
+            `);
+        } else {
+            updateInfoRail('sbo-rail', 'About This Brief', `
+                <p><strong>${esc(brief.class_name)}</strong>, Term ${esc(brief.term)} &mdash; ${topicCount} topic${topicCount !== 1 ? 's' : ''} and ${assessCount} assessment${assessCount !== 1 ? 's' : ''} listed.</p>
+                <p>Learners see this exactly as written, so keep it current as the term progresses.</p>
+            `);
+        }
+    }
 };
 
 // ─────────────────────────────────────────────
@@ -408,6 +539,7 @@ window.openMobileTeacherSBO = function(flatIndex) {
 
     sessionStorage.setItem('lastTeacherPage', 'teacher_syllabus');
     window.teacherSectionState.selection.sbo = brief.class_id;
+    window.teacherSectionState.selection.sboBriefId = brief.id;
     window.persistTeacherSectionState();
 
     window.configureTeacherHeader({
@@ -420,7 +552,7 @@ window.openMobileTeacherSBO = function(flatIndex) {
 
     const topicCount  = brief.topics?.length || 0;
     const updatedDate = brief.updated_at
-        ? new Date(brief.updated_at).toLocaleDateString('en-ZA', { day:'numeric', month:'short', year:'numeric' })
+        ? parseSBODate(brief.updated_at).toLocaleDateString('en-ZA', { day:'numeric', month:'short', year:'numeric' })
         : '';
 
     const topicsHtml = topicCount
@@ -502,58 +634,73 @@ async function openSBOPanel(panel) {
     if (newBtn) newBtn.classList.add('active');
 
     panel.innerHTML = `
-        <div class="sbo-panel-content">
-            <div class="sbo-form-header sbo-form-header--panel">
-                <div class="sbo-form-title"> Release Syllabus</div>
-                <button onclick="fetchTeacherSyllabus()" class="sbo-form-close-btn">&times;</button>
-            </div>
+        <div class="sbo-dp sbo-dp-form">
+            <p class="sbo-dp-crumb">Syllabus</p>
+            <h2 class="sbo-dp-title">Release a syllabus</h2>
+            <p class="sbo-dp-lede">Learners in the class are notified as soon as you post. They see everything exactly as you write it here.</p>
 
-            <label class="teacher-modal-label">Class</label>
-            <div id="sboClassPicker"></div>
+            <section class="sbo-dp-section">
+                <h3 class="sbo-dp-h">Details</h3>
+                <div class="sbo-dp-two">
+                    <div class="sbo-dp-fld">
+                        <span class="sbo-dp-lbl" id="sboClassLabel">Class</span>
+                        <div id="sboClassPicker" aria-labelledby="sboClassLabel"></div>
+                    </div>
+                    <div class="sbo-dp-fld">
+                        <label class="sbo-dp-lbl" for="sboTerm">Term</label>
+                        <select id="sboTerm" class="sbo-dp-in">
+                            <option value="">Choose a term</option>
+                            <option value="1">Term 1</option>
+                            <option value="2">Term 2</option>
+                            <option value="3">Term 3</option>
+                            <option value="4">Term 4</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="sbo-dp-fld">
+                    <label class="sbo-dp-lbl" for="sboSubject">Subject</label>
+                    <input type="text" id="sboSubject" class="sbo-dp-in" placeholder="e.g. Mathematics" autocomplete="off">
+                </div>
+            </section>
 
-            <label class="teacher-modal-label">Term</label>
-            <select id="sboTerm" class="teacher-modal-input">
-                <option value="">-- Select Term --</option>
-                <option value="1">Term 1</option>
-                <option value="2">Term 2</option>
-                <option value="3">Term 3</option>
-                <option value="4">Term 4</option>
-            </select>
+            <section class="sbo-dp-section">
+                <h3 class="sbo-dp-h">Topics</h3>
+                <div id="sboTopicsList" class="sbo-list-stack"></div>
+                <button type="button" class="sbo-dp-btn sbo-dp-add" onclick="addSBOTopicDesktop()">${sboDpIcon('plus', 14)}Add a topic</button>
+            </section>
 
-            <label class="teacher-modal-label">Subject Name</label>
-            <input type="text" id="sboSubject" class="teacher-modal-input"
-                placeholder="e.g. Mathematics">
+            <section class="sbo-dp-section">
+                <h3 class="sbo-dp-h">Assessment weighting</h3>
+                <div id="sboAssessmentsList" class="sbo-list-stack"></div>
+                <button type="button" class="sbo-dp-btn sbo-dp-add" onclick="addSBOAssessmentDesktop()">${sboDpIcon('plus', 14)}Add an assessment</button>
+                <div class="sbo-dp-wt">
+                    <div class="sbo-dp-wt-track"><i id="sboWeightBar"></i></div>
+                    <div class="sbo-dp-wt-text" aria-live="polite">
+                        <span id="sboWeightTotal" class="sbo-weight-total">Total: 0%</span><span id="sboWeightHint" class="sbo-dp-wt-hint"></span>
+                    </div>
+                </div>
+            </section>
 
-            <label class="teacher-modal-label">Syllabus Topics</label>
-            <div id="sboTopicsList" class="sbo-list-stack"></div>
-            <button onclick="addSBOTopic()" class="sbo-add-topic-btn">
-                + Add Topic
-            </button>
+            <section class="sbo-dp-section">
+                <h3 class="sbo-dp-h">Notes<span class="sbo-dp-opt">Optional</span></h3>
+                <textarea id="sboNotes" class="sbo-dp-in" rows="3" aria-label="Notes"
+                    placeholder="e.g. No exam this term, so the focus is on continuous assessment"></textarea>
+            </section>
 
-            <label class="teacher-modal-label sbo-form-label-spaced">Assessment Weighting</label>
-            <div id="sboAssessmentsList" class="sbo-list-stack"></div>
-            <button onclick="addSBOAssessment()" class="sbo-add-assessment-btn">
-                + Add Assessment
-            </button>
-            <div id="sboWeightTotal" class="sbo-weight-total">
-                Total: 0%
-            </div>
-
-            <label class="teacher-modal-label sbo-form-label-spaced">
-                Additional Notes <span class="sbo-form-label-hint">(optional)</span>
-            </label>
-            <textarea id="sboNotes" class="teacher-modal-input sbo-notes-textarea sbo-notes-textarea--drawer"
-                placeholder="e.g. No exam this term — focus on continuous assessment"></textarea>
-
-            <div id="sboError" class="sbo-form-error sbo-form-error--spaced"></div>
-
-            <div class="sbo-form-actions sbo-form-actions--spaced">
-                <button onclick="fetchTeacherSyllabus()"
-                    class="teacher-modal-cancel">Cancel</button>
-                <button onclick="saveSBO()"
-                    class="teacher-modal-submit">Post & Notify</button>
+            <div class="sbo-dp-actions">
+                <div id="sboError" class="sbo-dp-err" role="alert"></div>
+                <button type="button" class="sbo-dp-btn" onclick="fetchTeacherSyllabus()">Cancel</button>
+                <button type="button" class="sbo-dp-btn sbo-dp-btn--primary" id="sboSaveBtn" onclick="saveSBO()">Post &amp; notify</button>
             </div>
         </div>`;
+
+    // Enter in a topic adds the next one (a blank topic is not stacked).
+    panel.onkeydown = function(e) {
+        if (e.key === 'Enter' && e.target.classList && e.target.classList.contains('sbo-topic-input')) {
+            e.preventDefault();
+            if (e.target.value.trim()) window.addSBOTopicDesktop();
+        }
+    };
 
     // Load classes
     const hideInitialLoader = window.showTeacherScopedLoader
@@ -680,9 +827,9 @@ window.addSBOTopic = function() {
     const row = document.createElement('div');
     row.className = 'sbo-topic-row sbo-dynamic-row';
     row.innerHTML = `
-        <input type="text" placeholder="e.g. Linear Equations"
+        <input type="text" placeholder="e.g. Linear Equations" aria-label="Topic"
                class="teacher-modal-input sbo-topic-input sbo-dynamic-row-input">
-        <button onclick="this.closest('.sbo-topic-row').remove()"
+        <button onclick="this.closest('.sbo-topic-row').remove()" aria-label="Remove topic"
                 class="sbo-row-remove-btn">&times;</button>`;
     list.appendChild(row);
 };
@@ -693,15 +840,15 @@ window.addSBOAssessment = function() {
     const row = document.createElement('div');
     row.className = 'sbo-assessment-row sbo-dynamic-row';
     row.innerHTML = `
-        <input type="text" placeholder="e.g. Tests"
+        <input type="text" placeholder="e.g. Tests" aria-label="Assessment type"
                class="teacher-modal-input sbo-assess-type sbo-dynamic-row-input">
         <div class="sbo-weight-input-wrap">
-            <input type="number" placeholder="30" min="1" max="100"
+            <input type="number" placeholder="30" min="1" max="100" aria-label="Weight in percent"
                    class="teacher-modal-input sbo-assess-weight sbo-weight-input"
                    oninput="updateSBOWeightTotal()">
             <span class="sbo-weight-input-suffix">%</span>
         </div>
-        <button onclick="this.closest('.sbo-assessment-row').remove(); updateSBOWeightTotal();"
+        <button onclick="this.closest('.sbo-assessment-row').remove(); updateSBOWeightTotal();" aria-label="Remove assessment"
                 class="sbo-row-remove-btn">&times;</button>`;
     list.appendChild(row);
     updateSBOWeightTotal();
@@ -717,6 +864,36 @@ window.updateSBOWeightTotal = function() {
     el.classList.remove('is-complete', 'is-over');
     if (total === 100) el.classList.add('is-complete');
     else if (total > 100) el.classList.add('is-over');
+
+    // Desktop form only (the mobile drawer has no bar): the same total drawn
+    // as a bar, with how much is left.
+    const bar = document.getElementById('sboWeightBar');
+    if (bar) {
+        bar.style.width = Math.min(total, 100) + '%';
+        const wrap = bar.closest('.sbo-dp-wt');
+        if (wrap) {
+            wrap.classList.toggle('is-complete', total === 100);
+            wrap.classList.toggle('is-over', total > 100);
+        }
+        const hint = document.getElementById('sboWeightHint');
+        if (hint) {
+            hint.textContent = total === 100 ? ''
+                : total > 100 ? ` · ${total - 100}% over`
+                : ` · ${100 - total}% to go`;
+        }
+    }
+};
+
+// Desktop wrappers: same row builders as the mobile drawer, plus focus on the new row.
+window.addSBOTopicDesktop = function() {
+    window.addSBOTopic();
+    const inputs = document.querySelectorAll('#sboTopicsList .sbo-topic-input');
+    if (inputs.length) inputs[inputs.length - 1].focus();
+};
+window.addSBOAssessmentDesktop = function() {
+    window.addSBOAssessment();
+    const inputs = document.querySelectorAll('#sboAssessmentsList .sbo-assess-type');
+    if (inputs.length) inputs[inputs.length - 1].focus();
 };
 
 window.saveSBO = async function() {
@@ -746,7 +923,8 @@ window.saveSBO = async function() {
     if (!subject)  { err.textContent = 'Please enter a subject name.'; err.style.display = 'block'; return; }
 
     // Find submit btn in either panel or drawer
-    const btn = document.querySelector('#sbo-main-panel .teacher-modal-submit')
+    const btn = document.getElementById('sboSaveBtn')
+             || document.querySelector('#sbo-main-panel .teacher-modal-submit')
              || document.querySelector('#sboDrawer .teacher-modal-submit');
     const hideSubmitLoader = window.showTeacherButtonLoader(btn);
 

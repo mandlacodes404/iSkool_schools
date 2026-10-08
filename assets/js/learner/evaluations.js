@@ -25,7 +25,7 @@ window.prefetchEvaluations = function () {
 function saveEvaluationPageState() {
     const sidebar = document.querySelector('.lev-sidebar-scroll');
     const mainContent = document.querySelector('.main-content');
-    const panel = document.getElementById('lev-main-panel');
+    const panel = document.querySelector('.lev-body');
     const selected = (window._allLearnerEvaluationsFlat || [])[window._learnerEvaluationSelectedIdx];
     const state = {
         selectedId:    selected ? String(selected.id) : null,
@@ -44,7 +44,7 @@ function saveEvaluationPageState() {
 function wireEvaluationScrollState() {
     const mainContent = document.querySelector('.main-content');
     const sidebar = document.querySelector('.lev-sidebar-scroll');
-    const panel = document.getElementById('lev-main-panel');
+    const panel = document.querySelector('.lev-body');
     [mainContent, sidebar, panel].forEach(el => {
         if (!el || el.dataset.levScrollWired === '1') return;
         el.dataset.levScrollWired = '1';
@@ -58,6 +58,7 @@ function restoreEvaluationPageState() {
             ? window.learnerPageState.get('evaluations')
             : JSON.parse(sessionStorage.getItem('evaluationPageState') || '{}');
         if (!state || Object.keys(state).length === 0) {
+            window.levEnsureSelection();
             wireEvaluationScrollState();
             return;
         }
@@ -100,8 +101,9 @@ function restoreEvaluationPageState() {
             if (mainContent && Number.isFinite(state.mainScroll)) {
                 mainContent.scrollTop = state.mainScroll;
             }
-            const panel = document.getElementById('lev-main-panel');
+            const panel = document.querySelector('.lev-body');
             if (panel && Number.isFinite(state.panelScroll)) panel.scrollTop = state.panelScroll;
+            window.levEnsureSelection();
             wireEvaluationScrollState();
             saveEvaluationPageState();
         });
@@ -120,7 +122,7 @@ window.fetchEvaluations = async function() {
     }
 
     if (window.configureHeader) {
-        window.configureHeader({ title: 'Evaluations', mode: 'standard', color: '#4fa8fd' });
+        window.configureHeader({ title: 'Evaluations', mode: 'standard' });
     }
 
     const apiArea = document.getElementById('api-content-area');
@@ -207,20 +209,22 @@ function renderEvaluationsUI(data) {
     if (data && data.status === 'no_class') {
         apiArea.innerHTML = `
             <!-- ═══ DESKTOP EMPTY ═══ -->
-            <div class="lev-desktop-layout lqz-flat-layout">
-                <div class="lev-sidebar lqz-flat-sidebar">
-                    <div class="lev-desktop-search-wrap">
-                        <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lev-icon-crisp">
-                            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                        </svg>
-                        <input type="text" class="lev-desktop-search" id="levDesktopSearch"
-                            placeholder="Search evaluations..." oninput="levDesktopSearch(this.value)">
+            <div class="lev-desktop-layout lqz-flat-layout" id="lev-desktop-layout">
+                <div class="lev-sidebar">
+                    <div class="lev-lh">
+                        <div class="lev-desktop-search-wrap">
+                            <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lev-icon-crisp">
+                                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                            </svg>
+                            <input type="text" class="lev-desktop-search" id="levDesktopSearch" placeholder="Filter evaluations" disabled>
+                        </div>
                     </div>
-                    <div class="lev-sidebar-scroll"></div>
+                    <div class="lev-sidebar-scroll" id="lev-list"></div>
                 </div>
+                <div class="lev-split" aria-hidden="true"></div>
                 <div class="lev-main-panel lqz-flat-panel" id="lev-main-panel">
                     <div class="lev-panel-empty">
-                        <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fa8fd" stroke-width="1.5" fill="none">
+                        <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fd1c5" stroke-width="1.5" fill="none">
                             <path d="M9 11l3 3L22 4"></path>
                             <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
                         </svg>
@@ -252,20 +256,22 @@ function renderEvaluationsUI(data) {
     if (!data || data.length === 0) {
         apiArea.innerHTML = `
             <!-- ═══ DESKTOP EMPTY ═══ -->
-            <div class="lev-desktop-layout lqz-flat-layout">
-                <div class="lev-sidebar lqz-flat-sidebar">
-                    <div class="lev-desktop-search-wrap">
-                        <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lev-icon-crisp">
-                            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                        </svg>
-                        <input type="text" class="lev-desktop-search" id="levDesktopSearch"
-                            placeholder="Search evaluations..." oninput="levDesktopSearch(this.value)">
+            <div class="lev-desktop-layout lqz-flat-layout" id="lev-desktop-layout">
+                <div class="lev-sidebar">
+                    <div class="lev-lh">
+                        <div class="lev-desktop-search-wrap">
+                            <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lev-icon-crisp">
+                                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                            </svg>
+                            <input type="text" class="lev-desktop-search" id="levDesktopSearch" placeholder="Filter evaluations" disabled>
+                        </div>
                     </div>
-                    <div class="lev-sidebar-scroll"></div>
+                    <div class="lev-sidebar-scroll" id="lev-list"></div>
                 </div>
+                <div class="lev-split" aria-hidden="true"></div>
                 <div class="lev-main-panel lqz-flat-panel" id="lev-main-panel">
                     <div class="lev-panel-empty">
-                        <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fa8fd" stroke-width="1.5" fill="none">
+                        <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fd1c5" stroke-width="1.5" fill="none">
                             <path d="M9 11l3 3L22 4"></path>
                             <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
                         </svg>
@@ -305,49 +311,6 @@ function renderEvaluationsUI(data) {
         });
     });
 
-    // ── Build sidebar HTML (desktop, grouped by teacher) ──
-    let sidebarHtml = '';
-    let flatIdx = 0;
-    let desktopGroupIdx = 0;
-    teacherEntries.forEach(({ teacher, evaluations }) => {
-        const groupId = `lev-dg-${desktopGroupIdx++}`;
-        sidebarHtml += `
-            <div class="lev-desktop-teacher-group">
-                <button type="button" class="lev-desktop-teacher-header" onclick="toggleLevDesktopGroup('${groupId}', this)">
-                    <svg class="lev-desktop-teacher-chevron" viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none">
-                        <polyline points="9 18 15 12 9 6"></polyline>
-                    </svg>
-                    <svg class="lev-desktop-teacher-folder-icon" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-                    </svg>
-                    <span class="lev-desktop-teacher-name">${escapeLearnerEvaluationHtml(teacher)}</span>
-                    <span class="lev-desktop-teacher-count">${evaluations.length}</span>
-                </button>
-                <div class="lev-desktop-teacher-body collapsed" id="${groupId}">`;
-        evaluations.forEach(evaluation => {
-            sidebarHtml += `
-                <div class="lev-sidebar-item" id="lev-sidebar-${flatIdx}"
-                    data-title="${escapeLearnerEvaluationHtml(evaluation.title || '').toLowerCase()}"
-                    onclick="selectDesktopLearnerEvaluation(${flatIdx})">
-                    <div class="lev-sidebar-item-icon">
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fa8fd" stroke-width="2" fill="none">
-                            <path d="M9 11l3 3L22 4"></path>
-                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-                        </svg>
-                    </div>
-                    <div class="lev-sidebar-item-info">
-                        <div class="lev-sidebar-item-title">${escapeLearnerEvaluationHtml(evaluation.title || 'Evaluation')}</div>
-                        <div class="lev-sidebar-item-meta">${escapeLearnerEvaluationHtml(evaluation.display_date || '')}</div>
-                    </div>
-                    ${evaluation.submitted
-                        ? '<span class="lev-sidebar-done-badge">Done</span>'
-                        : '<span class="lev-sidebar-pending-dot"></span>'}
-                </div>`;
-            flatIdx++;
-        });
-        sidebarHtml += `</div></div>`;
-    });
-
     // ── Build full HTML ──
     // (Styles for this markup now live in assets/css/learner/evaluations.css,
     // appended alongside the existing rules — the inline <style> block that
@@ -355,20 +318,24 @@ function renderEvaluationsUI(data) {
     // cleanup. Nothing already in evaluations.css was changed.)
     let html = `
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
-        <div class="lev-desktop-layout lqz-flat-layout">
-            <div class="lev-sidebar lqz-flat-sidebar">
-                <div class="lev-desktop-search-wrap">
-                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lev-icon-crisp">
-                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                    </svg>
-                    <input type="text" class="lev-desktop-search" id="levDesktopSearch"
-                        placeholder="Search evaluations..." oninput="levDesktopSearch(this.value)">
+        <div class="lev-desktop-layout lqz-flat-layout" id="lev-desktop-layout">
+            <div class="lev-sidebar">
+                <div class="lev-lh">
+                    <div class="lev-desktop-search-wrap">
+                        <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lev-icon-crisp">
+                            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                        <input type="text" class="lev-desktop-search" id="levDesktopSearch"
+                            placeholder="Filter evaluations" oninput="levDesktopSearch(this.value)">
+                    </div>
+                    <div class="lev-chips" id="lev-chips"></div>
                 </div>
-                <div class="lev-sidebar-scroll">${sidebarHtml}</div>
+                <div class="lev-sidebar-scroll" id="lev-list" tabindex="0" onkeydown="levListKeydown(event)"></div>
             </div>
+            <div class="lev-split" id="lev-split" role="separator" aria-orientation="vertical" aria-label="Resize evaluation list" tabindex="0"></div>
             <div class="lev-main-panel lqz-flat-panel" id="lev-main-panel">
                 <div class="lev-panel-empty">
-                    <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fa8fd" stroke-width="1.5" fill="none">
+                    <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fd1c5" stroke-width="1.5" fill="none">
                         <path d="M9 11l3 3L22 4"></path>
                         <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
                     </svg>
@@ -445,6 +412,8 @@ function renderEvaluationsUI(data) {
 
     apiArea.innerHTML = html;
     if (typeof injectSharedDesktopLayoutStyles === 'function') injectSharedDesktopLayoutStyles();
+    levEnsureFont();
+    window.levInitDesktop();
 }
 
 // ─────────────────────────────────────────────
@@ -467,44 +436,6 @@ function recheckMobileNavAfterToggle() {
     });
 }
 
-window.levDesktopSearch = function(val) {
-    const term = val.toLowerCase().trim();
-    document.querySelectorAll('.lev-desktop-teacher-group').forEach(group => {
-        const header = group.querySelector('.lev-desktop-teacher-header');
-        const body   = group.querySelector('.lev-desktop-teacher-body');
-        const nameEl = group.querySelector('.lev-desktop-teacher-name');
-        const groupName = nameEl ? nameEl.textContent.toLowerCase() : '';
-        if (!header || !body) return;
-
-        const items = body.querySelectorAll('.lev-sidebar-item');
-        let visible = 0;
-        items.forEach(item => {
-            const title = (item.dataset.title || '');
-            const show = !term || title.includes(term) || groupName.includes(term);
-            item.style.display = show ? '' : 'none';
-            if (show) visible++;
-        });
-
-        const groupShow = visible > 0 || !term || groupName.includes(term);
-        group.style.display = groupShow ? '' : 'none';
-
-        if (term && visible) {
-            body.classList.remove('collapsed');
-            const chev = header.querySelector('.lev-desktop-teacher-chevron');
-            if (chev) chev.classList.add('open');
-        } else if (!term) {
-            body.classList.add('collapsed');
-            const chev = header.querySelector('.lev-desktop-teacher-chevron');
-            if (chev) chev.classList.remove('open');
-        }
-    });
-
-    // Desktop doesn't use the dynamic bottom-nav/header behaviour, so
-    // recheckMobileNavAfterToggle() will just no-op there — kept for
-    // consistency in case that ever changes.
-    recheckMobileNavAfterToggle();
-};
-
 window.toggleLevMobileFolder = function(id, headerEl) {
     const body = document.getElementById(id);
     if (!body) return;
@@ -520,21 +451,6 @@ window.toggleLevMobileFolder = function(id, headerEl) {
     // background (and header) never got re-checked against the new
     // height — it could stay stuck showing whatever state it was in
     // before the folder toggled.
-    recheckMobileNavAfterToggle();
-};
-
-window.toggleLevDesktopGroup = function(id, headerEl) {
-    const body = document.getElementById(id);
-    if (!body) return;
-    const isOpen = !body.classList.contains('collapsed');
-    body.classList.toggle('collapsed', isOpen);
-    const chevron = headerEl ? headerEl.querySelector('.lev-desktop-teacher-chevron') : null;
-    if (chevron) chevron.classList.toggle('open', !isOpen);
-    saveEvaluationPageState();
-
-    // Desktop doesn't have this dynamic bottom-nav/header behaviour, so
-    // window.recalcMobileScrollUI won't exist there —
-    // recheckMobileNavAfterToggle() already no-ops safely when it's missing.
     recheckMobileNavAfterToggle();
 };
 
@@ -691,41 +607,265 @@ window.openMobileLearnerEvaluationById = function(evaluationId) {
     window.openMobileLearnerEvaluation(flatIdx);
 };
 
-window.selectDesktopLearnerEvaluation = function(idx) {
+// ─────────────────────────────────────────────
+// DESKTOP LIST: To do / Completed groups, chips, search
+// ─────────────────────────────────────────────
+window._levFilter = 'all';
+window._levTerm = '';
+
+window.levRenderDesktopList = function () {
+    const list = document.getElementById('lev-list');
+    if (!list) return;
+    const keep = list.scrollTop;
+    const term = window._levTerm;
+    const items = (window._allLearnerEvaluationsFlat || []).map((ev, idx) => ({ ev, idx }));
+    const showActive = !!document.querySelector('#lev-main-panel .lev-dh');
+
+    const counts = { all: items.length, todo: 0, done: 0 };
+    items.forEach(({ ev }) => { if (ev.submitted) counts.done++; else counts.todo++; });
+    const chipsEl = document.getElementById('lev-chips');
+    if (chipsEl) {
+        chipsEl.innerHTML = [['all', 'All'], ['todo', 'To do'], ['done', 'Completed']]
+            .map(([k, label]) => `<button type="button" class="lev-chip${window._levFilter === k ? ' on' : ''}" onclick="levSetFilter('${k}')">${label} ${counts[k]}</button>`)
+            .join('');
+    }
+
+    const visible = items.filter(({ ev }) => {
+        const f = window._levFilter;
+        const ok = f === 'all' || (f === 'todo' && !ev.submitted) || (f === 'done' && ev.submitted);
+        return ok && (!term || `${ev.title || ''} ${ev.teacher || ''}`.toLowerCase().includes(term));
+    });
+
+    let html = '';
+    [['To do', false], ['Completed', true]].forEach(([label, done]) => {
+        const rows = visible.filter(({ ev }) => !!ev.submitted === done);
+        if (!rows.length) return;
+        html += `<div class="lev-gh"><span>${label}</span><i>${rows.length}</i></div>`;
+        rows.forEach(({ ev, idx }) => {
+            const teacher = ev.teacher || 'Teacher';
+            const initials = ev.teacher_initials || getLearnerEvaluationInitials(teacher);
+            const n = (ev.statements || []).length;
+            const active = showActive && idx === window._learnerEvaluationSelectedIdx ? ' active' : '';
+            html += `
+                <div class="lev-sidebar-item lev-row${active}" id="lev-sidebar-${idx}" onclick="selectDesktopLearnerEvaluation(${idx})">
+                    <span class="lev-ava">${escapeLearnerEvaluationHtml(initials)}</span>
+                    <div class="lev-sidebar-item-info">
+                        <div class="lev-sidebar-item-title${done ? '' : ' lev-unread'}">${escapeLearnerEvaluationHtml(ev.title || 'Evaluation')}</div>
+                        <div class="lev-sidebar-item-meta">${escapeLearnerEvaluationHtml(teacher)} &middot; ${n} statement${n === 1 ? '' : 's'}</div>
+                    </div>
+                    <span class="lev-rr">${done ? '<span class="lev-tm">Done</span>' : '<span class="lev-udot"></span>'}</span>
+                </div>`;
+        });
+    });
+    list.innerHTML = html || `<div class="lev-list-empty">${items.length ? 'No evaluations match.' : "Your teachers haven't posted any evaluations yet."}</div>`;
+    list.scrollTop = keep;
+};
+
+window.levSetFilter = function (key) { window._levFilter = key; window.levRenderDesktopList(); };
+window.levDesktopSearch = function (val) {
+    window._levTerm = String(val || '').toLowerCase().trim();
+    window.levRenderDesktopList();
+};
+
+window.levListKeydown = function (e) {
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    const ids = Array.from(document.querySelectorAll('#lev-list .lev-sidebar-item'))
+        .map(el => parseInt(el.id.replace('lev-sidebar-', ''), 10));
+    if (!ids.length) return;
+    e.preventDefault();
+    const cur = ids.indexOf(window._learnerEvaluationSelectedIdx);
+    const next = e.key === 'ArrowDown' ? Math.min(ids.length - 1, cur + 1) : Math.max(0, cur < 0 ? 0 : cur - 1);
+    window.selectDesktopLearnerEvaluation(ids[next]);
+    const el = document.getElementById(`lev-sidebar-${ids[next]}`);
+    if (el) el.scrollIntoView({ block: 'nearest' });
+};
+
+// Desktop never shows an empty detail pane when there's something to show
+window.levEnsureSelection = function () {
+    if (window.innerWidth < 900) return;
+    if (document.querySelector('#lev-list .lev-sidebar-item.active')) return;
+    const first = document.querySelector('#lev-list .lev-sidebar-item');
+    if (first) window.selectDesktopLearnerEvaluation(parseInt(first.id.replace('lev-sidebar-', ''), 10));
+};
+
+window.levInitSplit = function () {
+    const layout = document.getElementById('lev-desktop-layout');
+    const split = document.getElementById('lev-split');
+    if (!layout || !split) return;
+    const clamp = w => Math.max(260, Math.min(420, w));
+    const apply = w => layout.style.setProperty('--lev-listw', clamp(w) + 'px');
+    const current = () => parseInt(getComputedStyle(layout).getPropertyValue('--lev-listw'), 10) || 320;
+    const persist = () => { try { localStorage.setItem('lqz.listWidth', String(current())); } catch (e) {} };
+    try {
+        const saved = parseInt(localStorage.getItem('lqz.listWidth'), 10);
+        if (saved) apply(saved);
+    } catch (e) {}
+    split.addEventListener('mousedown', e => {
+        e.preventDefault();
+        split.classList.add('drag');
+        document.body.style.userSelect = 'none';
+        const left = layout.getBoundingClientRect().left;
+        const move = ev => apply(ev.clientX - left);
+        const up = () => {
+            split.classList.remove('drag');
+            document.body.style.userSelect = '';
+            document.removeEventListener('mousemove', move);
+            document.removeEventListener('mouseup', up);
+            persist();
+        };
+        document.addEventListener('mousemove', move);
+        document.addEventListener('mouseup', up);
+    });
+    split.addEventListener('keydown', e => {
+        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+        e.preventDefault();
+        apply(current() + (e.key === 'ArrowRight' ? 16 : -16));
+        persist();
+    });
+};
+
+window.levInitDesktop = function () {
+    if (!document.getElementById('lev-list')) return;
+    window._levFilter = 'all';
+    window._levTerm = '';
+    window.levRenderDesktopList();
+    window.levInitSplit();
+};
+
+// ─────────────────────────────────────────────
+// DESKTOP PANEL: form with live progress
+// ─────────────────────────────────────────────
+const LEV_SCALE = [
+    ['strongly_agree', 'Strongly agree'],
+    ['agree', 'Agree'],
+    ['neutral', 'Neutral'],
+    ['disagree', 'Disagree'],
+    ['strongly_disagree', 'Strongly disagree']
+];
+
+window.levUpdateProgress = function () {
+    const form = document.querySelector('.lev-form');
+    if (!form) return;
+    const total = parseInt(form.dataset.total, 10) || 0;
+    const names = new Set();
+    form.querySelectorAll('input[type="radio"]:checked').forEach(r => names.add(r.name));
+    const answered = names.size;
+    const text = document.getElementById('levPgText');
+    const bar = document.getElementById('levPgBar');
+    const btn = document.getElementById('levSubmitBtn');
+    if (text) text.textContent = `${answered} of ${total} answered`;
+    if (bar) bar.style.width = (total ? (answered / total) * 100 : 100) + '%';
+    if (btn) {
+        btn.disabled = answered < total;
+        btn.title = answered < total ? 'Answer every statement to submit' : '';
+    }
+    form.querySelectorAll('.lev-qb').forEach(qb => {
+        const done = !!qb.querySelector('input[type="radio"]:checked');
+        const badge = qb.querySelector('.lev-qn');
+        if (!badge) return;
+        badge.classList.toggle('done', done);
+        badge.textContent = done ? '\u2713' : badge.dataset.n;
+    });
+};
+
+window.selectDesktopLearnerEvaluation = function (idx) {
+    const flat = window._allLearnerEvaluationsFlat || [];
+    const ev = flat[idx];
+    if (!ev) return;
     window._learnerEvaluationSelectedIdx = idx;
     saveEvaluationPageState();
     document.querySelectorAll('.lev-sidebar-item').forEach(el => el.classList.remove('active'));
-    const sidebarItem = document.getElementById(`lev-sidebar-${idx}`);
-    if (sidebarItem) sidebarItem.classList.add('active');
-
-    const evaluation = (window._allLearnerEvaluationsFlat || [])[idx];
-    if (!evaluation) return;
+    const row = document.getElementById(`lev-sidebar-${idx}`);
+    if (row) row.classList.add('active');
 
     const panel = document.getElementById('lev-main-panel');
     if (!panel) return;
 
-    const panelContent = getLearnerEvaluationFormHtml(evaluation);
+    const teacher = ev.teacher || 'Teacher';
+    const statements = ev.statements || [];
+    const formId = `lev-form-${ev.id}`;
+    const done = !!ev.submitted;
 
-    const teacherName = evaluation.teacher || 'Teacher';
-    const initials = evaluation.teacher_initials || getLearnerEvaluationInitials(teacherName);
+    const statusChip = done
+        ? '<span class="lev-panel-status"><span class="lev-panel-status-dot" style="background:#22c55e;"></span>Completed</span>'
+        : '<span class="lev-panel-status"><span class="lev-panel-status-dot" style="background:#e67e22;"></span>To do</span>';
+    const headRight = done
+        ? '<span class="lev-muted">Submitted</span>'
+        : `<span class="lev-prog"><span id="levPgText"></span><span class="lev-pbar"><i id="levPgBar"></i></span></span>
+           <button type="submit" form="${formId}" class="lev-pri" id="levSubmitBtn" disabled>Submit feedback</button>`;
+
+    let body;
+    if (done) {
+        body = `
+            <div class="lev-fin">
+                <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                <b>Completed</b>You have already submitted this evaluation.
+            </div>`;
+    } else {
+        body = `
+            ${ev.description ? `<p class="lev-desc">${escapeLearnerEvaluationHtml(ev.description)}</p>` : ''}
+            <form id="${formId}" class="lev-form" data-total="${statements.length}" onsubmit="handleEvalSubmit(event, ${ev.id})" onchange="levUpdateProgress()">
+                <input type="hidden" name="eval_id" value="${ev.id}">
+                ${statements.map((s, i) => `
+                    <div class="lev-qb">
+                        <div class="lev-qh">
+                            <span class="lev-qn" data-n="${i + 1}">${i + 1}</span>
+                            <span class="lev-qt">${escapeLearnerEvaluationHtml(s.statement || '')}</span>
+                        </div>
+                        <div class="lev-lk">
+                            ${LEV_SCALE.map(([val, label]) => `
+                                <label class="lev-lo">
+                                    <input type="radio" name="answer[${s.id}]" value="${val}" required>
+                                    <span>${label}</span>
+                                </label>`).join('')}
+                        </div>
+                    </div>`).join('')}
+                <div class="lev-cmt">
+                    <label for="${formId}-comments">Additional comments <em>(optional)</em></label>
+                    <textarea id="${formId}-comments" name="comments"></textarea>
+                </div>
+            </form>`;
+    }
+
+    const more = flat.map((e, i) => ({ e, i }))
+        .filter(({ e, i }) => i !== idx && (e.teacher || 'Teacher') === teacher)
+        .slice(0, 3)
+        .map(({ e, i }) => `
+            <button type="button" class="lev-more" onclick="selectDesktopLearnerEvaluation(${i})">
+                <b>${escapeLearnerEvaluationHtml(e.title || 'Evaluation')}</b>
+                <small>${e.submitted ? 'Completed' : 'To do'}${e.display_date ? ' &middot; ' + escapeLearnerEvaluationHtml(e.display_date) : ''}</small>
+            </button>`).join('');
 
     panel.innerHTML = `
-        <div class="lev-panel-content">
-            <div class="lev-panel-header">
-                <div class="lev-panel-author-row">
-                    <div class="lev-panel-avatar">${escapeLearnerEvaluationHtml(initials)}</div>
-                    <div class="lev-panel-author-info">
-                        <div class="lev-panel-author-name">${escapeLearnerEvaluationHtml(teacherName)}</div>
-                        <div class="lev-panel-author-role">
-                            <span>Author</span><span class="lev-panel-role-sep">|</span><span class="lev-panel-role-badge">Teacher</span>
-                        </div>
-                        ${evaluation.display_date ? `<div class="lev-panel-posted">Posted ${escapeLearnerEvaluationHtml(evaluation.display_date)}</div>` : ''}
-                    </div>
-                </div>
-                <div class="lev-panel-title">${escapeLearnerEvaluationHtml(evaluation.title || 'Evaluation')}</div>
-            </div>
-            ${panelContent}
+        <div class="lev-dh">
+            <h2 class="lev-dh-title">${escapeLearnerEvaluationHtml(ev.title || 'Evaluation')}</h2>
+            ${statusChip}
+            <span class="lev-dsp"></span>
+            ${headRight}
+        </div>
+        <div class="lev-dbody">
+            <div class="lev-body"><div class="lev-read">${body}</div></div>
+            <aside class="lev-rail">
+                <h4>Details</h4>
+                <div class="lev-kv"><span>From</span><b>${escapeLearnerEvaluationHtml(teacher)}</b></div>
+                <div class="lev-kv"><span>Role</span><b>Teacher</b></div>
+                ${ev.display_date ? `<div class="lev-kv"><span>Posted</span><b>${escapeLearnerEvaluationHtml(ev.display_date)}</b></div>` : ''}
+                <div class="lev-kv"><span>Statements</span><b>${statements.length}</b></div>
+                <div class="lev-kv"><span>Status</span><b>${done ? 'Completed' : 'To do'}</b></div>
+                ${done ? '' : '<p class="lev-help">Rate each statement, add an optional comment, then submit. Once submitted, it is marked Completed.</p>'}
+                ${more ? `<h4 class="lev-rail-sub">More from ${escapeLearnerEvaluationHtml(teacher)}</h4>${more}` : ''}
+            </aside>
         </div>`;
+
+    if (!done) window.levUpdateProgress();
+
+    const box = document.getElementById('lev-list');
+    if (box && row) {
+        const top = row.offsetTop, bottom = top + row.offsetHeight;
+        if (top < box.scrollTop + 34) box.scrollTop = Math.max(0, top - 34);
+        else if (bottom > box.scrollTop + box.clientHeight) box.scrollTop = bottom - box.clientHeight;
+    }
+    wireEvaluationScrollState();
 };
 
 // Keep your handleEvalSubmit function exactly as it was...
@@ -756,3 +896,14 @@ window.handleEvalSubmit = async function(e, id) {
          if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
     }
 };
+
+// Nunito 400/600/700 for the desktop evaluations page. 600 is the medium weight, so load it
+// explicitly instead of letting the browser quietly fall back to 700 (or 400).
+function levEnsureFont() {
+    if (document.getElementById('lev-nunito-font')) return;
+    const link = document.createElement('link');
+    link.id = 'lev-nunito-font';
+    link.rel = 'stylesheet';
+    link.href = 'https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap';
+    document.head.appendChild(link);
+}

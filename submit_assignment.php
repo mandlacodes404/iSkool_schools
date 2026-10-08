@@ -61,9 +61,9 @@ if (!$isInAssignmentClass) {
     exit();
 }
 
-// Check due date
-$now = new DateTime('2025-08-19 18:01:00', new DateTimeZone('SAST')); // For testing, matches learner_assignments.php
-$due = new DateTime($assignment['due_date']);
+// Check due date using the actual current time in SAST.
+$now = new DateTime('now', new DateTimeZone('SAST'));
+$due = new DateTime($assignment['due_date'], new DateTimeZone('SAST'));
 $past_due = $now > $due;
 
 // Check if submission already exists

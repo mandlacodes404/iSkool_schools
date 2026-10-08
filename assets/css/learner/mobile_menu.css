@@ -1,0 +1,317 @@
+/* assets/css/learner/mobile_menu.css
+   Mobile drawer for the learner dashboard (max-width: 768px).
+   Load it AFTER learner_dashboard.css and desktop_menu.css, then mobile_menu.js.
+
+   What it does
+   - The drawer, the page, the bottom nav and the dim all move with transforms only (no `left`
+     animation, no blur), and mobile_menu.js lets a finger drag them.
+   - Your curve is kept: #mobileOverlay still carries the 35px rounded edge. Change --dmm-curve to
+     resize it. The two corner pieces below just keep the square page corner from showing.
+   - Same structure as the desktop menu: brand, search, Learning / Academics groups, My Class,
+     and the account at the bottom (it opens a sheet).
+
+   To undo it all, remove the two include lines. Nothing in learner_dashboard.css was edited. */
+
+@media (max-width: 768px) {
+
+/* -- Tokens ---------------------------------------------------------------- */
+html {
+  --dm-i-home: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8'/%3E%3Cpath d='M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'/%3E%3C/svg%3E");
+  --dm-i-quiz: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3'/%3E%3Cpath d='M12 17h.01'/%3E%3C/svg%3E");
+  --dm-i-assign: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='8' height='4' x='8' y='2' rx='1' ry='1'/%3E%3Cpath d='M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2'/%3E%3Cpath d='M12 11h4'/%3E%3Cpath d='M12 16h4'/%3E%3Cpath d='M8 11h.01'/%3E%3Cpath d='M8 16h.01'/%3E%3C/svg%3E");
+  --dm-i-folder: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z'/%3E%3C/svg%3E");
+  --dm-i-book: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 7v14'/%3E%3Cpath d='M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z'/%3E%3C/svg%3E");
+  --dm-i-chart: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 3v16a2 2 0 0 0 2 2h16'/%3E%3Cpath d='M18 17V9'/%3E%3Cpath d='M13 17V5'/%3E%3Cpath d='M8 17v-3'/%3E%3C/svg%3E");
+  --dm-i-megaphone: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3 11 18-5v12L3 14v-3z'/%3E%3Cpath d='M11.6 16.8a3 3 0 1 1-5.8-1.6'/%3E%3C/svg%3E");
+  --dm-i-star: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolygon points='12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2'/%3E%3C/svg%3E");
+  --dm-i-users: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='9' cy='7' r='4'/%3E%3Cpath d='M22 21v-2a4 4 0 0 0-3-3.87'/%3E%3Cpath d='M16 3.13a4 4 0 0 1 0 7.75'/%3E%3C/svg%3E");
+  --dm-i-plus: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M8 12h8'/%3E%3Cpath d='M12 8v8'/%3E%3C/svg%3E");
+  --dm-i-search: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E");
+  --dm-i-panel: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='18' height='18' x='3' y='3' rx='2'/%3E%3Cpath d='M9 3v18'/%3E%3C/svg%3E");
+  --dm-i-updown: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m7 15 5 5 5-5'/%3E%3Cpath d='m7 9 5-5 5 5'/%3E%3C/svg%3E");
+  --dm-i-user: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E");
+  --dm-i-sliders: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='21' x2='14' y1='4' y2='4'/%3E%3Cline x1='10' x2='3' y1='4' y2='4'/%3E%3Cline x1='21' x2='12' y1='12' y2='12'/%3E%3Cline x1='8' x2='3' y1='12' y2='12'/%3E%3Cline x1='21' x2='16' y1='20' y2='20'/%3E%3Cline x1='12' x2='3' y1='20' y2='20'/%3E%3Cline x1='14' x2='14' y1='2' y2='6'/%3E%3Cline x1='8' x2='8' y1='10' y2='14'/%3E%3Cline x1='16' x2='16' y1='18' y2='22'/%3E%3C/svg%3E");
+  --dm-i-upload: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/%3E%3Cpolyline points='17 8 12 3 7 8'/%3E%3Cline x1='12' x2='12' y1='3' y2='15'/%3E%3C/svg%3E");
+  --dm-i-keyboard: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 8h.01'/%3E%3Cpath d='M12 12h.01'/%3E%3Cpath d='M14 8h.01'/%3E%3Cpath d='M16 12h.01'/%3E%3Cpath d='M18 8h.01'/%3E%3Cpath d='M6 8h.01'/%3E%3Cpath d='M7 16h10'/%3E%3Cpath d='M8 12h.01'/%3E%3Crect width='20' height='16' x='2' y='4' rx='2'/%3E%3C/svg%3E");
+  --dm-i-x: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 6 6 18'/%3E%3Cpath d='m6 6 12 12'/%3E%3C/svg%3E");
+  --dm-i-logout: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4'/%3E%3Cpolyline points='16 17 21 12 16 7'/%3E%3Cline x1='21' x2='9' y1='12' y2='12'/%3E%3C/svg%3E");
+  --dm-i-chat: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'/%3E%3C/svg%3E");
+  --dm-i-calendar: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='18' height='18' x='3' y='4' rx='2'/%3E%3Cpath d='M16 2v4M8 2v4M3 10h18'/%3E%3C/svg%3E");
+  --dmm-w: min(79vw, 340px);       /* drawer width, unchanged from before */
+  --dmm-curve: 35px;               /* your curve */
+  --dmm-dim: .18;                  /* how dark the page gets while the menu is open (was .4) */
+  --dmm-dur: .32s;
+  --dmm-ease: cubic-bezier(.22, .8, .24, 1);
+  --dm-bg: #121211;                /* drawer colour: one token, change it here (deeper than the app's #20201f) */
+  --dm-raise: #20201f;             /* account sheet: a raised layer, same as the app */
+  --dm-hover: rgba(255,255,255,.055);
+  --dm-active: rgba(255,255,255,.09);
+  --dm-line: rgba(255,255,255,.08);
+  --dm-text: #ecece9;
+  --dm-soft: #b9b9b5;
+  --dm-muted: #8b8b87;
+  --dm-faint: #62625f;
+  --dm-accent: #4fd1c5;
+  --dm-font: 'Geist', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* -- Drawer: slides with a transform --------------------------------------- */
+html body .sidebar.dm-menu {
+  position: fixed; top: 0; bottom: 0; left: 0; height: auto;
+  width: var(--dmm-w); max-width: none; box-sizing: border-box;
+  display: flex; flex-direction: column;
+  padding: calc(env(safe-area-inset-top, 0px) + 6px) 0 0;
+  background: var(--dm-bg); color: var(--dm-soft);
+  border: 0; border-radius: 0; box-shadow: none; overflow: hidden;
+  transform: translate3d(-100%, 0, 0); visibility: hidden;
+  transition: transform var(--dmm-dur) var(--dmm-ease), visibility 0s linear var(--dmm-dur);
+}
+html body .sidebar.dm-menu.active { transform: none; visibility: visible; transition-delay: 0s; }
+
+/* -- The page, the bottom nav and the dim follow it ------------------------ */
+html body .main-content { transition: transform var(--dmm-dur) var(--dmm-ease); }
+html body .sidebar.active ~ .main-content {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+  transform: translate3d(var(--dmm-w), 0, 0); filter: none;
+}
+html body #mobileBottomNav {
+  transition: transform var(--dmm-dur) var(--dmm-ease), background .28s ease, border-color .28s ease,
+              box-shadow .28s ease, backdrop-filter .28s ease;
+}
+html body .sidebar.active ~ #mobileBottomNav {
+  transform: translate3d(var(--dmm-w), 0, 0); filter: none; pointer-events: none;
+}
+
+/* The curve. #mobileOverlay is the dim and carries the rounded edge, as before. mobile_menu.js and
+   toggleSidebar() still work, but visibility is now class-driven so closing can animate. */
+html body #mobileOverlay {
+  display: block !important; position: fixed; top: 0; left: 0; width: 100% !important; height: 100%;
+  box-sizing: border-box; z-index: 4500 !important;
+  border-style: solid; border-width: 1px 0 1px 1px; border-color: rgba(255,255,255,.14);
+  border-radius: var(--dmm-curve) 0 0 var(--dmm-curve);
+  transform: translate3d(0, 0, 0); opacity: 0; visibility: hidden; pointer-events: none;
+  background: rgba(0,0,0,var(--dmm-dim)) !important;   /* beats the inline rgba(0,0,0,.4) in the markup and the JS-created overlay */
+  transition: transform var(--dmm-dur) var(--dmm-ease), opacity var(--dmm-dur) var(--dmm-ease), visibility 0s linear var(--dmm-dur);
+}
+html body .sidebar.active ~ #mobileOverlay {
+  left: 0 !important; width: 100% !important; z-index: 4500 !important;
+  border-width: 1px 0 1px 1px; border-color: rgba(255,255,255,.14);
+  border-radius: var(--dmm-curve) 0 0 var(--dmm-curve);
+  transform: translate3d(var(--dmm-w), 0, 0); opacity: 1; visibility: visible; pointer-events: auto;
+  transition-delay: 0s;
+}
+/* The page behind the dim has square corners; these two pieces paint the corner gaps in the drawer colour. */
+html body #mobileOverlay::before, html body #mobileOverlay::after {
+  content: ''; position: absolute; left: -1px; width: var(--dmm-curve); height: var(--dmm-curve); pointer-events: none;
+}
+html body #mobileOverlay::before { top: -1px;
+  background: radial-gradient(circle at 100% 100%, transparent calc(var(--dmm-curve) - .4px), var(--dm-bg) var(--dmm-curve)); }
+html body #mobileOverlay::after { bottom: -1px;
+  background: radial-gradient(circle at 100% 0, transparent calc(var(--dmm-curve) - .4px), var(--dm-bg) var(--dmm-curve)); }
+
+/* While a finger is dragging (set by mobile_menu.js): no transitions, and the page is lifted out of the flow
+   exactly as it is when the drawer is open. */
+html.dmm-drag body .sidebar.dm-menu { visibility: visible; transition: none; will-change: transform; }
+html.dmm-drag body .sidebar ~ .main-content {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100vh; transition: none; will-change: transform;
+}
+html.dmm-drag body #mobileBottomNav { transition: none; will-change: transform; pointer-events: none; }
+html.dmm-drag body #mobileOverlay {
+  transition: none; will-change: transform, opacity; pointer-events: none; visibility: visible;
+  left: 0 !important; width: 100% !important;
+}
+
+/* -- Brand ----------------------------------------------------------------- */
+html body .sidebar.dm-menu .dm-brand {
+  order: 1; flex: none; display: flex; align-items: center; gap: 12px;
+  height: auto; margin: 0; padding: 10px 18px 14px; border: 0;
+}
+html body .sidebar.dm-menu .dm-mark { box-sizing: border-box; width: 46px; height: 46px; border-radius: 12px; object-fit: cover; flex: none; }
+html body .sidebar.dm-menu .dm-mark--initials {
+  display: grid; place-items: center; background: #1f1f1e; border: 1px solid var(--dm-line);
+  color: #cfcfcb; font: 600 17px/1 var(--dm-font); text-transform: uppercase;
+}
+html body .sidebar.dm-menu .dm-brand-text { display: flex; flex-direction: column; min-width: 0; gap: 2px; }
+html body .sidebar.dm-menu .dm-brand-name {
+  color: var(--dm-text); font: 600 17px/1.15 'Fraunces', Georgia, serif;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+html body .sidebar.dm-menu .dm-brand-sub { color: var(--dm-muted); font: 400 12.5px/1.2 var(--dm-font); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+html body .sidebar.dm-menu .dm-toggle, html body .sidebar.dm-menu .dm-kbd { display: none !important; }
+
+/* -- Search ---------------------------------------------------------------- */
+html body .sidebar.dm-menu .dm-search {
+  order: 2; flex: none; display: flex; align-items: center; gap: 10px; box-sizing: border-box;
+  width: calc(100% - 28px) !important; height: 44px; min-height: 0; margin: 0 14px 28px !important; padding: 0 12px !important;
+  border: 1px solid var(--dm-line); border-radius: 12px !important; background: rgba(255,255,255,.05);
+  color: var(--dm-muted); font: 450 16px/1 var(--dm-font); font-size: 16px !important; font-weight: 450 !important;
+  text-align: left; text-transform: none; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+html body .sidebar.dm-menu .dm-search:active { background: rgba(255,255,255,.08); }
+
+/* -- Shared mask icons (colour follows the text colour) -------------------- */
+html body .sidebar.dm-menu .dm-item::before, html body .sidebar.dm-menu .dm-search::before,
+.dm-pop-item::before, .dmm-s-field::before, .dmm-s-row::before {
+  content: ''; flex: none; display: block; width: 22px; height: 22px; background: currentColor;
+  -webkit-mask-image: var(--dm-ico); mask-image: var(--dm-ico);
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; -webkit-mask-position: center; mask-position: center;
+  -webkit-mask-size: contain; mask-size: contain;
+}
+html body .sidebar.dm-menu .dm-search { --dm-ico: var(--dm-i-search); }
+html body .sidebar.dm-menu .dm-search::before { width: 20px; height: 20px; }
+
+/* -- Navigation ------------------------------------------------------------ */
+html body .sidebar.dm-menu .sidebar-links {
+  order: 3; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 2px;
+  margin: 0 !important; padding: 4px 10px 12px; border: 0;
+  overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; scrollbar-width: none;
+}
+html body .sidebar.dm-menu .sidebar-links::-webkit-scrollbar { display: none; }
+html body .sidebar.dm-menu .dm-item {
+  position: relative; display: flex; align-items: center; gap: 14px; flex: none; box-sizing: border-box;
+  width: 100% !important; height: 48px; min-height: 0; margin: 0 !important; padding: 0 12px !important;
+  border: 0; border-radius: 12px !important; background: transparent; box-shadow: none; transform: none;
+  color: var(--dm-soft); font: 450 16.5px/1 var(--dm-font); font-size: 16.5px !important; font-weight: 450 !important;
+  letter-spacing: 0; text-align: left;
+  text-decoration: none; white-space: nowrap; overflow: hidden; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+html body .sidebar.dm-menu .dm-item > svg { display: none; }
+html body .sidebar.dm-menu .dm-item:active { background: var(--dm-hover); }
+html body .sidebar.dm-menu .dm-item.active { background: var(--dm-active); color: var(--dm-text); font-weight: 500 !important; }
+html body .sidebar.dm-menu .dm-item.active::before { background: var(--dm-accent); }
+html body .sidebar.dm-menu .dm-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+html body .sidebar.dm-menu .dm-meta {
+  display: block; flex: none; max-width: 110px; overflow: hidden; text-overflow: ellipsis;
+  color: var(--dm-muted); font-size: 13px; font-weight: 400;
+}
+
+/* Order and group headings (same groups as desktop). Home, Quiz, Assignments and Resources live in the bottom nav,
+   so they are hidden here (they carry .desktop-only in the markup). Desktop is untouched: this file is mobile only. */
+html body .sidebar.dm-menu .dm-item.desktop-only { display: none; }
+#nav-home-sidebar { order: 10; --dm-ico: var(--dm-i-home); }
+#nav-quiz-sidebar { order: 20; --dm-ico: var(--dm-i-quiz); }
+#nav-assignments-sidebar { order: 30; --dm-ico: var(--dm-i-assign); }
+#nav-resources-sidebar { order: 40; --dm-ico: var(--dm-i-folder); }
+#nav-announcements-sidebar { order: 50; --dm-ico: var(--dm-i-megaphone); }
+#nav-discussions-sidebar { order: 55; --dm-ico: var(--dm-i-chat); }
+html body .sidebar.dm-menu .dm-sep--a { order: 58; }
+#nav-syllabus-sidebar { order: 60; --dm-ico: var(--dm-i-book); }
+#nav-grades-sidebar { order: 70; --dm-ico: var(--dm-i-chart); }
+#nav-evaluations-sidebar { order: 80; --dm-ico: var(--dm-i-star); }
+#nav-calendar-sidebar { order: 85; --dm-ico: var(--dm-i-calendar); }
+html body .sidebar.dm-menu .dm-sep--b { order: 88; }
+#nav-myclass-sidebar { order: 90; --dm-ico: var(--dm-i-users); }
+#nav-joinclass-sidebar { order: 90; --dm-ico: var(--dm-i-plus); }
+html body .sidebar.dm-menu .join-class-form, html body .sidebar.dm-menu .join-status { order: 91; }
+html body .sidebar.dm-menu .sidebar-links::before { content: 'Learning'; order: 15; }
+html body .sidebar.dm-menu .dm-sep--a::before { content: 'Academics'; }
+html body .sidebar.dm-menu .sidebar-links::before, html body .sidebar.dm-menu .dm-sep--a {
+  flex: none; display: block; height: auto; margin: 16px 0 6px; padding: 0 12px; background: none;
+  color: var(--dm-muted); font: 500 12.5px/1 var(--dm-font); letter-spacing: .01em; white-space: nowrap; user-select: none;
+}
+html body .sidebar.dm-menu .dm-sep--b { display: block; flex: none; height: 1px; margin: 10px 6px; background: var(--dm-line); }
+html body .sidebar.dm-menu .dm-sep--c, html body .sidebar.dm-menu .footer { display: none; }
+
+/* -- Account row at the bottom (opens the sheet) --------------------------- */
+html body .sidebar.dm-menu .dm-account-root {
+  order: 99; flex: none; box-sizing: border-box;
+  display: grid; grid-template-columns: 36px minmax(0, 1fr) 20px; grid-template-areas: "av name chev";
+  column-gap: 12px; align-items: center; height: 56px;
+  margin: 0 10px calc(34px + env(safe-area-inset-bottom, 0px)); padding: 0 12px 0 10px;
+  border-radius: 14px; background: rgba(255,255,255,.045); cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+html body .sidebar.dm-menu .dm-account-root:active { background: rgba(255,255,255,.08); }
+html body .sidebar.dm-menu .dm-account-root::after {
+  content: ''; grid-area: chev; width: 20px; height: 20px; background: var(--dm-muted);
+  -webkit-mask-image: var(--dm-i-updown); mask-image: var(--dm-i-updown);
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; -webkit-mask-position: center; mask-position: center;
+  -webkit-mask-size: contain; mask-size: contain;
+}
+html body .sidebar.dm-menu .dm-account-root .sidebar-header { grid-area: av; display: block !important; margin: 0 !important; }
+html body .sidebar.dm-menu .dm-account-root .profile-picture-wrapper { display: block !important; pointer-events: none; }
+html body .sidebar.dm-menu .dm-account-root .desktop-close-btn { display: none !important; }
+html body .sidebar.dm-menu .dm-account-root .initials-avatar { width: 36px !important; height: 36px !important; font-size: 13px !important; letter-spacing: 0; }
+html body .sidebar.dm-menu .dm-account-root img.learner-avatar { display: block; width: 36px !important; height: 36px !important; margin: 0 !important; }
+html body .sidebar.dm-menu .learner-name {
+  grid-area: name; margin: 0; max-height: none !important; opacity: 1;
+  color: var(--dm-text); font: 500 16px/1.25 var(--dm-font); font-size: 16px !important; font-weight: 500 !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+html body .sidebar.dm-menu .learner-email { display: none; }
+
+/* -- Account sheet (reuses the desktop account menu element) --------------- */
+.dmm-sheet-bg {
+  position: fixed; inset: 0; z-index: 5500; background: rgba(0,0,0,.55);
+  opacity: 0; visibility: hidden; transition: opacity .22s ease, visibility 0s linear .22s;
+}
+.dmm-sheet-bg.on { opacity: 1; visibility: visible; transition-delay: 0s; }
+html body .dm-pop {
+  display: block !important; position: fixed; left: 0 !important; right: 0 !important; bottom: 0 !important; top: auto !important;
+  width: auto !important; max-width: none; box-sizing: border-box; z-index: 5600;
+  margin: 0; padding: 10px 12px calc(16px + env(safe-area-inset-bottom, 0px));
+  background: var(--dm-raise); border: 0; border-radius: 24px 24px 0 0; box-shadow: 0 -10px 40px rgba(0,0,0,.5);
+  transform: translate3d(0, 105%, 0); visibility: hidden; animation: none; font-family: var(--dm-font);
+  transition: transform .3s var(--dmm-ease), visibility 0s linear .3s;
+}
+html body .dm-pop.is-open { transform: none; visibility: visible; transition-delay: 0s; }
+html body .dm-pop::before { content: ''; display: block; width: 38px; height: 4px; border-radius: 2px; background: #4a4a47; margin: 0 auto 12px; }
+html body .dm-pop .dm-pop-head { display: block; padding: 2px 12px 12px; margin: 0 0 6px; border-bottom: 1px solid var(--dm-line); }
+html body .dm-pop .dm-pop-name { display: block; color: var(--dm-text); font: 500 16.5px/1.3 var(--dm-font); }
+html body .dm-pop .dm-pop-mail { display: block; color: var(--dm-muted); font: 400 13px/1.4 var(--dm-font); overflow: hidden; text-overflow: ellipsis; }
+html body .dm-pop .dm-pop-item {
+  display: flex; align-items: center; gap: 14px; width: 100%; height: 50px; box-sizing: border-box; margin: 0; padding: 0 12px;
+  border: 0; border-radius: 12px; background: none; color: var(--dm-soft); font: 450 16.5px/1 var(--dm-font);
+  text-align: left; cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+html body .dm-pop .dm-pop-item:active { background: var(--dm-hover); }
+html body .dm-pop .dm-pop-item.is-danger { color: #f08a84; }
+html body .dm-pop .dm-pop-item[data-act="keys"], html body .dm-pop .dm-pop-ver { display: none; }
+html body .dm-pop .dm-pop-sep { height: 1px; margin: 6px 12px; background: var(--dm-line); }
+
+/* -- Search (built by mobile_menu.js) -------------------------------------- */
+.dmm-s {
+  position: fixed; inset: 0; z-index: 5700; display: flex; flex-direction: column;
+  padding-top: env(safe-area-inset-top, 0px); background: var(--dm-bg); color: var(--dm-text); font-family: var(--dm-font);
+  opacity: 0; visibility: hidden; transform: translate3d(0, 10px, 0);
+  transition: opacity .2s ease, transform .2s ease, visibility 0s linear .2s;
+}
+.dmm-s.on { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
+.dmm-s-bar { display: flex; align-items: center; gap: 8px; padding: 10px 12px 8px; }
+.dmm-s-field {
+  flex: 1; min-width: 0; height: 44px; display: flex; align-items: center; gap: 10px; padding: 0 12px;
+  border: 1px solid var(--dm-line); border-radius: 12px; background: rgba(255,255,255,.06); color: var(--dm-muted);
+}
+.dmm-s-field::before { --dm-ico: var(--dm-i-search); width: 20px; height: 20px; }
+.dmm-s-field input {
+  flex: 1; min-width: 0; height: 100%; border: 0; outline: 0; background: none; padding: 0;
+  color: var(--dm-text); font: 450 16px/1 var(--dm-font); /* 16px stops iOS zooming the page */
+}
+.dmm-s-cancel { border: 0; background: none; padding: 10px 6px; color: var(--dm-soft); font: 450 16px/1 var(--dm-font); cursor: pointer; }
+.dmm-s-list { flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 4px 10px calc(16px + env(safe-area-inset-bottom, 0px)); }
+.dmm-s-head { padding: 14px 12px 6px; color: var(--dm-muted); font: 500 12.5px/1 var(--dm-font); }
+.dmm-s-row {
+  display: flex; align-items: center; gap: 14px; width: 100%; height: 50px; box-sizing: border-box; padding: 0 12px;
+  border: 0; border-radius: 12px; background: none; color: var(--dm-soft); font: 450 16.5px/1 var(--dm-font); text-align: left; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.dmm-s-row:active { background: var(--dm-hover); }
+.dmm-s-row .t { margin-left: auto; color: var(--dm-muted); font-size: 13px; }
+.dmm-s-row b { color: var(--dm-accent); font-weight: 500; }
+.dmm-s-empty { padding: 28px 16px; color: var(--dm-muted); font: 400 15px/1.5 var(--dm-font); text-align: center; }
+
+/* -- Badges: window.dmSetBadge(pageKey, count) ----------------------------- */
+.dmm-badge {
+  flex: none; min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; border-radius: 10px;
+  background: var(--dm-accent); color: #06201d; font: 600 12px/20px var(--dm-font); text-align: center;
+}
+html body .sidebar.dm-menu .dm-item .dmm-badge { margin-left: auto; }
+#mobileBottomNav [data-page] { position: relative; }
+#mobileBottomNav .dmm-badge { position: absolute; top: -4px; left: calc(50% + 7px); min-width: 18px; height: 18px; font-size: 11px; line-height: 18px; padding: 0 5px; border: 2px solid #20201f; box-sizing: content-box; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { --dmm-dur: .01s; }
+  html body .dm-pop, .dmm-s, .dmm-sheet-bg { transition-duration: .01s; }
+}
+
+}

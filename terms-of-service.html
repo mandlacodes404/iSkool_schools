@@ -1,482 +1,153 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Terms of Service \ iSkool</title>
-<link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="iskool_footer.css?v=1.2" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#faf9f5" />
+<title>Terms of Service — iSkool</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 <style>
-:root {
-  --teal: #4fd1c5;
-  --teal2: #00e5a0;
-  --gold: #f5c842;
-  --dark: #0f0f12;
+:root{
+  --paper:#faf9f5; --ink:#0a1b31; --muted:#5b697d;
+  --font:Manrope,Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --pad:64px; --gutter:max(var(--pad),calc((100% - 1160px)/2 + var(--pad)));
 }
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-body { font-family: 'DM Sans', system-ui, sans-serif; background: #f5f0eb; color: #111; line-height: 1.6; }
+*{box-sizing:border-box}
+body{margin:0;min-width:320px;min-height:100vh;display:flex;flex-direction:column;color:var(--ink);font-family:var(--font);-webkit-font-smoothing:antialiased;
+  background:radial-gradient(circle at 8% 0,rgba(255,255,255,.98),transparent 34rem),radial-gradient(circle at 92% 38%,rgba(255,246,232,.5),transparent 30rem),var(--paper)}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid rgba(74,126,206,.6);outline-offset:5px;border-radius:4px}
+::selection{background:rgba(119,164,232,.22)}
 
-/* ── NAV ── */
-nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
-  background: rgba(245,240,235,0.97); backdrop-filter: blur(12px);
-  padding: 14px 5%;
-  display: flex; align-items: center; justify-content: space-between;
-}
-.nav-logo {
-  display: flex; align-items: center; gap: 11px;
-  font-family: 'DM Sans', sans-serif; font-size: 21px; font-weight: 600;
-  text-decoration: none; color: #111;
-}
-.nav-logo svg { width: 40px; height: 40px; }
-.nav-back {
-  display: inline-flex; align-items: center; gap: 8px;
-  font-size: 14px; font-weight: 400; color: #555;
-  text-decoration: none; transition: color 0.2s;
-}
-.nav-back:hover { color: var(--gold); }
-.nav-back svg { width: 16px; height: 16px; }
+header{position:sticky;top:0;z-index:20;height:96px;padding:0 var(--gutter);display:flex;align-items:center;justify-content:space-between;background:rgba(250,249,245,.92)}
+.logo{display:block;width:142px;height:auto}
+.back{font-size:14px;font-weight:500}
+.back:hover{opacity:.5}
 
-/* ── HERO BANNER ── */
-.legal-hero {
-  background: #f5f0eb;
-  padding: 90px 5% 56px;
-  position: relative;
-  overflow: hidden;
-}
-.legal-hero::before {
-  content: '';
-  position: absolute; inset: 0;
-  background-image: radial-gradient(circle, #ddd 1px, transparent 1px);
-  background-size: 28px 28px;
-  opacity: 0.45;
-  pointer-events: none;
-}
-.legal-hero-inner { max-width: 860px; margin: 0 auto; position: relative; }
-.legal-badge {
-  display: inline-flex; align-items: center; gap: 8px;
-  background: #fef9e6;
-  border: 1px solid rgba(245,200,66,0.4);
-  color: #d97706;
-  padding: 6px 18px; border-radius: 8px;
-  font-size: 12px; font-weight: 600;
-  letter-spacing: 1px; text-transform: uppercase;
-  margin-bottom: 24px;
-}
-.legal-hero h1 {
-  font-family: 'DM Sans', sans-serif;
-  font-size: clamp(36px, 5vw, 60px);
-  font-weight: 600; line-height: 1.06;
-  letter-spacing: -0.03em; color: #111;
-  margin-bottom: 16px;
-}
-.legal-hero h1 span { color: #d4a800; }
-.legal-meta {
-  display: flex; flex-wrap: wrap; gap: 24px;
-  margin-top: 28px;
-}
-.legal-meta-item {
-  font-size: 13px; color: #888;
-}
-.legal-meta-item strong { color: #444; font-weight: 600; }
+main{flex:1;padding:56px var(--gutter) 96px}
+.legal{max-width:680px}
+.legal h1{margin:0 0 20px;font-size:28px;line-height:1.2;letter-spacing:-.03em;font-weight:600}
+.legal h2{margin:56px 0 18px;font-size:22px;line-height:1.25;letter-spacing:-.025em;font-weight:600}
+.legal p,.legal li{font-size:17px;line-height:1.6;letter-spacing:-.01em}
+.legal p{margin:0 0 18px}
+.legal .sub{margin-bottom:6px;font-weight:600}
+.legal .note{font-weight:600}
+.legal ul{margin:0 0 18px;padding-left:24px}
+.legal li{margin:0 0 12px}
+.legal strong{font-weight:600}
+.legal a{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+.legal a:hover{opacity:.6}
 
-/* ── CONTENT LAYOUT ── */
-.legal-wrap {
-  max-width: 860px;
-  margin: 0 auto;
-  padding: 72px 5% 100px;
-  display: grid;
-  grid-template-columns: 220px 1fr;
-  gap: 64px;
-  align-items: start;
-}
+footer{padding:0 var(--gutter) 28px;color:#738095;font-size:13px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px 28px}
+footer nav{display:flex;gap:28px}
+footer a:hover{color:var(--ink)}
 
-/* Sticky TOC */
-.legal-toc {
-  position: sticky;
-  top: 88px;
-}
-.toc-title {
-  font-size: 10px; font-weight: 600;
-  letter-spacing: 2px; text-transform: uppercase;
-  color: #aaa; margin-bottom: 16px;
-}
-.toc-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
-.toc-list a {
-  display: block;
-  font-size: 13.5px; color: #777;
-  text-decoration: none; padding: 5px 0 5px 12px;
-  border-left: 2px solid #eee;
-  transition: color 0.2s, border-color 0.2s;
-  line-height: 1.4;
-}
-.toc-list a:hover { color: var(--gold); border-color: var(--gold); }
-.toc-list a.active { color: var(--gold); border-color: var(--gold); font-weight: 600; }
-
-/* Content */
-.legal-content { min-width: 0; }
-
-.legal-section {
-  margin-bottom: 56px;
-  padding-bottom: 56px;
-  border-bottom: 1px solid #f0f0f0;
-}
-.legal-section:last-child { border-bottom: none; margin-bottom: 0; }
-
-.legal-section-num {
-  font-size: 11px; font-weight: 600;
-  letter-spacing: 1.5px; text-transform: uppercase;
-  color: var(--gold); margin-bottom: 10px;
-}
-.legal-section h2 {
-  font-family: 'DM Sans', sans-serif;
-  font-size: clamp(20px, 2.5vw, 26px);
-  font-weight: 600; line-height: 1.2;
-  letter-spacing: -0.015em; color: #111;
-  margin-bottom: 18px;
-}
-.legal-section p {
-  font-size: 15.5px; color: #444;
-  line-height: 1.8; margin-bottom: 16px;
-}
-.legal-section p:last-child { margin-bottom: 0; }
-.legal-section strong { color: #111; font-weight: 600; }
-
-.legal-list {
-  list-style: none; padding: 0;
-  display: flex; flex-direction: column; gap: 10px;
-  margin: 16px 0;
-}
-.legal-list li {
-  display: block;
-  font-size: 15px; color: #444; line-height: 1.7;
-  padding-left: 18px;
-  position: relative;
-}
-.legal-list li::before {
-  content: '';
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--gold);
-  position: absolute;
-  left: 0;
-  top: 9px;
-}
-
-.legal-highlight {
-  background: #fffdf0;
-  border: 1px solid rgba(245,200,66,0.25);
-  border-left: 4px solid var(--gold);
-  border-radius: 0 12px 12px 0;
-  padding: 18px 20px;
-  margin: 20px 0;
-  font-size: 15px; color: #333; line-height: 1.7;
-}
-
-.legal-contact-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px; margin-top: 20px;
-}
-.legal-contact-card {
-  background: #f8f9fa;
-  border-radius: 14px; padding: 18px 20px;
-}
-.legal-contact-card-label {
-  font-size: 10px; font-weight: 600;
-  letter-spacing: 1.5px; text-transform: uppercase;
-  color: #aaa; margin-bottom: 6px;
-}
-.legal-contact-card a {
-  color: var(--gold); text-decoration: none;
-  font-weight: 600; font-size: 14.5px;
-}
-.legal-contact-card p { font-size: 14px; color: #555; margin: 0; }
-
-/* ── RESPONSIVE ── */
-@media (max-width: 768px) {
-  .legal-wrap { grid-template-columns: 1fr; gap: 40px; }
-  .legal-toc { position: static; display: none; }
-  .legal-hero { padding: 80px 5% 40px; }
-}
-@media (max-width: 480px) {
-  .legal-hero h1 { letter-spacing: -0.02em; }
-}
-
-/* ── PARAGRAPH & BOLD FIX ── */
-/* Remove bottom margin from standalone label paragraphs (bold-only <p>) */
-.legal-section p:has(> strong:only-child) {
-  margin-bottom: 6px;
-}
-/* Explicit class for label paragraphs — full browser support fallback */
-.legal-section p.legal-label {
-  margin-bottom: 6px;
-  margin-top: 18px;
-  font-weight: 600;
-  color: #111;
-  font-size: 15px;
-}
-/* First label in a section has no top margin */
-.legal-section h2 + .legal-list,
-.legal-section h2 + p.legal-label {
-  margin-top: 0;
-}
-/* Tighten gap when a label <p> is immediately followed by a list or paragraph */
-.legal-section p.legal-label + .legal-list,
-.legal-section p + .legal-list {
-  margin-top: 0;
-}
-/* Tighten gap when a label <p> is immediately followed by a body <p> */
-.legal-section p.legal-label + p {
-  margin-top: 0;
-}
-/* Bold text inside list items: keep inline, don't break alignment */
-.legal-list li strong {
-  display: inline;
-  font-weight: 600;
-  color: #111;
-}
-/* Mobile content padding so text doesn't hug screen edges */
-@media (max-width: 600px) {
-  .legal-content {
-    padding: 0 2px;
-  }
-  .legal-wrap {
-    padding-left: 5%;
-    padding-right: 5%;
-  }
-  .legal-section p,
-  .legal-list li {
-    font-size: 15px;
-    line-height: 1.75;
-  }
+@media (max-width:800px){
+  :root{--pad:24px}
+  header{height:76px}
+  .logo{width:118px}
+  main{padding:40px var(--gutter) 72px}
+  .legal h1{font-size:24px}
+  .legal h2{margin-top:44px;font-size:20px}
+  .legal p,.legal li{font-size:16px}
 }
 </style>
 </head>
 <body>
+<header>
+  <a href="wiggle.html" aria-label="Wiggle home"><img class="logo" src="enthropy/wiggle_colored.svg" alt="Wiggle" /></a>
+  <a class="back" href="iskool.html">Back to iSkool</a>
+</header>
 
-<!-- NAV -->
-<nav>
-  <a href="website-clone.html" class="nav-logo">
-    <svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="37" height="37" viewBox="0 0 1254.000000 1254.000000" preserveAspectRatio="xMidYMid meet"><g transform="translate(0.000000,1254.000000) scale(0.100000,-0.100000)" fill="#e53e3e" stroke="none"><path d="M6200 11494 c-273 -46 -467 -196 -557 -433 -131 -347 15 -731 337 -886 41 -19 80 -35 87 -35 11 0 13 -187 13 -959 l0 -959 -47 -7 c-217 -31 -457 -125 -649 -254 l-91 -60 -390 392 c-667 670 -968 979 -966 991 1 6 13 43 28 83 92 257 25 548 -172 740 -125 123 -284 186 -463 186 -258 0 -486 -144 -601 -379 -49 -101 -69 -191 -69 -314 0 -119 19 -201 72 -310 53 -110 176 -237 285 -293 177 -92 390 -102 579 -26 l50 20 335 -338 c183 -186 490 -495 680 -688 l347 -350 -54 -80 c-68 -101 -154 -274 -192 -390 -25 -74 -57 -204 -78 -322 l-4 -23 -1004 0 -1004 0 -22 68 c-59 184 -182 332 -340 409 -457 224 -971 -108 -973 -627 0 -58 5 -127 12 -155 52 -222 189 -399 376 -486 109 -50 171 -63 300 -62 93 0 123 5 195 29 169 56 314 184 392 344 l43 89 170 1 c584 3 1848 1 1851 -3 3 -3 15 -56 28 -118 13 -63 37 -152 52 -199 37 -111 150 -338 209 -418 l46 -63 -593 -602 c-326 -331 -632 -642 -679 -691 l-85 -88 -72 26 c-102 36 -231 51 -329 36 -161 -25 -276 -84 -387 -200 -319 -334 -237 -885 164 -1099 133 -71 325 -95 470 -58 195 50 357 181 443 358 58 118 76 203 72 339 -2 88 -8 120 -34 195 -18 50 -33 100 -34 112 -2 16 121 146 493 525 272 277 573 583 669 681 96 97 179 177 185 177 5 0 19 -9 30 -19 42 -39 223 -142 327 -186 96 -41 290 -95 392 -110 l37 -6 0 -1015 0 -1016 -22 -6 c-13 -3 -59 -24 -103 -46 -93 -46 -209 -156 -263 -248 -155 -262 -121 -603 81 -823 137 -151 293 -218 502 -216 119 1 191 18 302 71 66 31 100 56 166 122 189 189 250 445 168 708 -48 155 -184 315 -328 387 -43 22 -88 42 -101 45 l-22 6 0 1016 0 1015 38 6 c235 35 464 124 662 256 l94 63 240 -247 c133 -135 435 -442 671 -682 256 -260 429 -444 428 -453 -1 -10 -16 -57 -34 -107 -62 -175 -48 -394 36 -554 121 -231 340 -364 595 -364 121 0 183 14 295 68 250 120 399 375 382 655 -11 183 -76 329 -202 456 -116 117 -218 168 -390 194 -94 14 -215 1 -313 -35 l-67 -25 -321 323 c-570 573 -1034 1048 -1034 1057 0 6 15 31 34 57 120 168 248 481 271 664 4 31 10 61 14 68 8 12 490 15 1651 12 l385 -2 43 -89 c72 -151 195 -266 356 -330 244 -98 523 -41 711 144 102 101 157 200 196 353 38 155 14 338 -68 503 -56 112 -180 234 -293 288 -115 54 -174 67 -310 66 -102 0 -125 -3 -201 -30 -205 -72 -355 -226 -424 -435 l-27 -79 -1008 0 -1009 0 -6 38 c-16 92 -67 288 -94 359 -39 99 -108 233 -172 334 -35 54 -48 83 -42 93 5 8 152 161 328 338 176 178 477 482 669 676 l348 353 62 -24 c223 -89 498 -47 680 103 108 89 197 229 232 365 23 89 23 245 0 338 -47 198 -192 376 -374 459 -184 84 -408 81 -585 -9 -308 -155 -455 -549 -326 -872 l30 -75 -273 -275 c-150 -152 -457 -461 -681 -688 l-409 -412 -98 65 c-183 120 -416 213 -612 244 l-78 13 0 958 0 957 49 17 c165 55 336 229 396 405 41 119 51 207 37 317 -23 181 -80 300 -202 423 -83 84 -191 147 -295 173 -63 16 -203 28 -245 21z"/></g></svg>
-    iSkool
-  </a>
- 
-</nav>
-
-<!-- HERO BANNER -->
-<div class="legal-hero">
-  <div class="legal-hero-inner">
-    <h1>Terms of <span>Service</span></h1>
-    <div class="legal-meta">
-      <div class="legal-meta-item"><strong>Effective Date:</strong> 16 May 2026</div>
-      <div class="legal-meta-item"><strong>Last Updated:</strong> 16 May 2026</div>
-      <div class="legal-meta-item"><strong>Applies to:</strong> Pilot Schools &amp; Paying Clients</div>
-    </div>
-  </div>
-</div>
-
-<!-- MAIN CONTENT -->
-<div class="legal-wrap">
-
-  <!-- Sticky Table of Contents -->
-  <aside class="legal-toc">
-    <div class="toc-title">On this page</div>
-    <ul class="toc-list">
-      <li><a href="#s1">1. Acceptance of Terms</a></li>
-      <li><a href="#s2">2. Description of Service</a></li>
-      <li><a href="#s3">3. Accounts & Access</a></li>
-      <li><a href="#s4">4. Acceptable Use</a></li>
-      <li><a href="#s5">5. Pilot Programme</a></li>
-      <li><a href="#s5b">6. Paying Clients</a></li>
-      <li><a href="#s6">7. Intellectual Property</a></li>
-      <li><a href="#s7">8. AI Invigilator</a></li>
-      <li><a href="#s8">9. Data & Privacy</a></li>
-      <li><a href="#s9">10. Service Availability</a></li>
-      <li><a href="#s10">11. Limitation of Liability</a></li>
-      <li><a href="#s11">12. Termination</a></li>
-      <li><a href="#s12">13. Changes to Terms</a></li>
-      <li><a href="#s13">14. Governing Law</a></li>
-      <li><a href="#s14">15. Contact Us</a></li>
+<main>
+  <article class="legal">
+    <h1>Terms of Service</h1>
+    <p class="meta">Effective Date: 16 May 2026<br>Last Updated: 16 May 2026<br>Applies to: Pilot Schools &amp; Paying Clients</p>
+    <h2>Acceptance of Terms</h2>
+    <p>By accessing or using the iSkool platform — whether as a school administrator, teacher, learner, or parent — you agree to be bound by these Terms of Service. If you do not agree to these terms, you may not use the platform.</p>
+    <p>iSkool is a software product developed and operated by <strong>Wiggle (Pty) Ltd</strong> (Registration No. 2023/260831/07). In these Terms, "iSkool" or "the platform" refers to the software product itself, and "Wiggle", "we", "us", and "our" refer to Wiggle (Pty) Ltd, the company that owns and operates it. These terms govern your use of the iSkool platform regardless of whether your institution is participating in the free pilot programme or is a paying subscriber.</p>
+    <p>Schools that enter into a pilot agreement or paid subscription with iSkool are also bound by the specific terms outlined in their agreement, which take precedence over these general terms in the event of any conflict.</p>
+    <h2>Description of Service</h2>
+    <p>iSkool is a cloud-based Learning Management System designed for South African high schools. The platform provides tools for running quizzes and assignments, tracking learner performance, managing the CAPS syllabus, communicating with learners and parents, and generating academic reports.</p>
+    <p>iSkool is provided as a Software-as-a-Service (SaaS) product and is accessed via a web browser without the need to install any software.</p>
+    <h2>Accounts and Access</h2>
+    <p>Schools are responsible for managing access to the iSkool platform within their institution. The school administrator is the primary account holder and is responsible for creating and managing teacher and learner accounts.</p>
+    <ul>
+      <li>Each user must have a unique login and must not share their credentials with anyone else.</li>
+      <li>Schools are responsible for ensuring that all users within their institution comply with these Terms of Service.</li>
+      <li>iSkool reserves the right to suspend or terminate any account that violates these terms.</li>
     </ul>
-  </aside>
+    <h2>Acceptable Use</h2>
+    <p>You agree to use iSkool only for its intended educational purpose. You must not:</p>
+    <ul>
+      <li>Upload, share, or distribute any content that is unlawful, harmful, abusive, defamatory, obscene, or otherwise objectionable.</li>
+      <li>Attempt to gain unauthorised access to any part of the platform, other users' accounts, or iSkool's servers and infrastructure.</li>
+      <li>Use the platform to collect personal information about other users without authorisation.</li>
+      <li>Reverse-engineer, decompile, or attempt to extract the source code of the iSkool platform.</li>
+      <li>Attempt to circumvent the AI Invigilator or any other integrity monitoring feature during assessments.</li>
+    </ul>
+    <p class="note">Violation of acceptable use policies may result in immediate suspension or permanent termination of your account without notice.</p>
+    <h2>The Free Pilot Programme</h2>
+    <p>iSkool offers qualifying South African high schools a free pilot period, the duration of which is agreed upon in writing at the time of onboarding. During the pilot period, schools receive full access to the iSkool platform at no cost, with the same features available to paying subscribers.</p>
+    <ul>
+      <li>The pilot period is intended to allow schools to evaluate iSkool in a real classroom environment before making any financial commitment.</li>
+      <li>iSkool reserves the right to conclude the pilot at any time with reasonable written notice to the school.</li>
+      <li>At the end of the pilot period, the school may choose to transition to a paid subscription to continue using the platform.</li>
+      <li>If a school does not subscribe after the pilot, their account will be deactivated. All school data will be retained for <strong>12 months</strong> from the date of deactivation, during which the school may request an export of their data. After 12 months, all data will be permanently and irreversibly deleted.</li>
+      <li>iSkool will notify the school by email at least 30 days before permanent deletion occurs.</li>
+    </ul>
+    <p class="note">Pilot schools have access to the same platform features as paying clients. The only difference is that no payment is required during the agreed pilot period.</p>
+    <h2>Paying Clients</h2>
+    <p>Schools that transition from the pilot programme to a paid subscription, or that onboard directly as paying clients, are governed by the following additional terms:</p>
+    <ul>
+      <li>Subscription fees, billing cycles, and payment terms are agreed upon in writing at the time of subscription and form part of the school's service agreement with iSkool.</li>
+      <li>Subscriptions are invoiced in advance for the agreed period (monthly, termly, or annually as specified in the service agreement).</li>
+      <li>iSkool reserves the right to suspend access to the platform if payment is not received within the agreed payment period. The school will be notified in writing before any suspension takes effect.</li>
+      <li>Paying clients who wish to cancel their subscription must provide written notice as specified in their service agreement. Data will be retained for <strong>12 months</strong> after subscription end, after which it will be permanently deleted.</li>
+      <li>iSkool will not issue refunds for unused portions of a subscription period unless otherwise agreed in writing.</li>
+    </ul>
+    <p class="note">If you are a paying client and have a query about your invoice, subscription, or payment, contact us at <a href="mailto:support@iskool.xyz">support@iskool.xyz</a>.</p>
+    <h2>Intellectual Property</h2>
+    <p>All content, design, code, features, and functionality of the iSkool platform are the exclusive intellectual property of <strong>Wiggle (Pty) Ltd</strong> (Reg. No. 2023/260831/07) and are protected by applicable South African and international intellectual property laws.</p>
+    <p>Schools and users retain ownership of all content they upload to the platform, including questions, resources, and assignments. By uploading content, you grant iSkool a limited, non-exclusive licence to host and display that content solely for the purpose of providing the service to your institution.</p>
+    <h2>AI Invigilator</h2>
+    <p>The AI Invigilator feature monitors learner behaviour during live quiz sessions to protect academic integrity. It records events such as tab switching, browser exits, and focus loss. This data is accessible to the relevant teacher and school administrator.</p>
+    <p class="note">Schools are responsible for informing learners that monitoring takes place during assessments. iSkool does not use Invigilator data for any purpose other than providing the integrity monitoring feature to the school.</p>
+    <h2>Data and Privacy</h2>
+    <p>Your use of iSkool is also governed by our <a href="privacy-policy.html">Privacy Policy</a>, which is incorporated into these Terms of Service by reference. By using iSkool, you confirm that you have read and understood our Privacy Policy.</p>
+    <h2>Service Availability</h2>
+    <p>iSkool will make reasonable efforts to maintain platform availability. The platform is built and maintained to production standards, with capacity measures and monitoring in place to support uninterrupted use by schools.</p>
+    <p>During the pilot period and beyond, scheduled and unscheduled maintenance may occur from time to time. Schools will be notified of planned downtime where possible, with as much advance notice as is practical.</p>
+    <p>iSkool is not liable for any interruption to service caused by circumstances beyond our reasonable control, including but not limited to internet infrastructure failures, third-party hosting provider outages, or force majeure events.</p>
+    <h2>Limitation of Liability</h2>
+    <p>To the maximum extent permitted by South African law, <strong>Wiggle (Pty) Ltd</strong> shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of or inability to use the platform.</p>
+    <p>iSkool's total liability to any school or user for any claim arising out of or relating to these Terms shall not exceed the total fees paid by that school to iSkool in the three months preceding the claim. For pilot schools paying no fees, liability is limited to the maximum extent permitted by law.</p>
+    <h2>Termination</h2>
+    <p>iSkool reserves the right to suspend or terminate your access to the platform at any time if:</p>
+    <ul>
+      <li>You breach these Terms of Service.</li>
+      <li>Your institution's subscription or pilot period expires without renewal.</li>
+      <li>iSkool ceases operations.</li>
+    </ul>
+    <p>Upon termination, you will lose access to the platform. Your data will be retained for <strong>12 months</strong> from the date of termination, during which you may request a full export of your school's data by contacting <a href="mailto:support@iskool.xyz">support@iskool.xyz</a>. After 12 months, all data will be permanently and irreversibly deleted. iSkool will notify the school by email at least 30 days before permanent deletion occurs.</p>
+    <h2>Changes to These Terms</h2>
+    <p>iSkool may update these Terms of Service from time to time. Schools will be notified of material changes via email at least <strong>14 days</strong> before they take effect. Continued use of the platform after that date constitutes acceptance of the updated terms.</p>
+    <h2>Governing Law</h2>
+    <p>These Terms of Service are governed by the laws of the <strong>Republic of South Africa</strong>. Any disputes arising from these terms shall be subject to the jurisdiction of the South African courts.</p>
+    <h2>Contact Us</h2>
+    <p>For any queries regarding these Terms of Service, please contact our Information Officer:</p>
+    <p><strong>Information Officer</strong><br>Mandla Simphiwe Mahlangu</p>
+    <p><strong>Email</strong><br><a href="mailto:support@iskool.xyz">support@iskool.xyz</a></p>
+    <p><strong>Address</strong><br>Wiggle (Pty) Ltd<br/>2047 Mandisa Street<br/>Tokoza, 1426<br/>South Africa</p>
+    <p><strong>Also see</strong><br><a href="privacy-policy.html">Privacy Policy →</a></p>
+  </article>
+</main>
 
-  <!-- Content -->
-  <main class="legal-content">
-
-    <div class="legal-section" id="s1">
-      <div class="legal-section-num">Section 01</div>
-      <h2>Acceptance of Terms</h2>
-      <p>By accessing or using the iSkool platform — whether as a school administrator, teacher, learner, or parent — you agree to be bound by these Terms of Service. If you do not agree to these terms, you may not use the platform.</p>
-      <p>iSkool is a software product developed and operated by <strong>Enthropy (Pty) Ltd</strong> (Registration No. 2023/260831/07). In these Terms, "iSkool" or "the platform" refers to the software product itself, and "Enthropy", "we", "us", and "our" refer to Enthropy (Pty) Ltd, the company that owns and operates it. These terms govern your use of the iSkool platform regardless of whether your institution is participating in the free pilot programme or is a paying subscriber.</p>
-      <p>Schools that enter into a pilot agreement or paid subscription with iSkool are also bound by the specific terms outlined in their agreement, which take precedence over these general terms in the event of any conflict.</p>
-    </div>
-
-    <div class="legal-section" id="s2">
-      <div class="legal-section-num">Section 02</div>
-      <h2>Description of Service</h2>
-      <p>iSkool is a cloud-based Learning Management System designed for South African high schools. The platform provides tools for running quizzes and assignments, tracking learner performance, managing the CAPS syllabus, communicating with learners and parents, and generating academic reports.</p>
-      <p>iSkool is provided as a Software-as-a-Service (SaaS) product and is accessed via a web browser without the need to install any software.</p>
-    </div>
-
-    <div class="legal-section" id="s3">
-      <div class="legal-section-num">Section 03</div>
-      <h2>Accounts and Access</h2>
-      <p>Schools are responsible for managing access to the iSkool platform within their institution. The school administrator is the primary account holder and is responsible for creating and managing teacher and learner accounts.</p>
-      <ul class="legal-list">
-        <li>Each user must have a unique login and must not share their credentials with anyone else.</li>
-        <li>Schools are responsible for ensuring that all users within their institution comply with these Terms of Service.</li>
-        <li>iSkool reserves the right to suspend or terminate any account that violates these terms.</li>
-      </ul>
-    </div>
-
-    <div class="legal-section" id="s4">
-      <div class="legal-section-num">Section 04</div>
-      <h2>Acceptable Use</h2>
-      <p>You agree to use iSkool only for its intended educational purpose. You must not:</p>
-      <ul class="legal-list">
-        <li>Upload, share, or distribute any content that is unlawful, harmful, abusive, defamatory, obscene, or otherwise objectionable.</li>
-        <li>Attempt to gain unauthorised access to any part of the platform, other users' accounts, or iSkool's servers and infrastructure.</li>
-        <li>Use the platform to collect personal information about other users without authorisation.</li>
-        <li>Reverse-engineer, decompile, or attempt to extract the source code of the iSkool platform.</li>
-        <li>Attempt to circumvent the AI Invigilator or any other integrity monitoring feature during assessments.</li>
-      </ul>
-      <div class="legal-highlight">Violation of acceptable use policies may result in immediate suspension or permanent termination of your account without notice.</div>
-    </div>
-
-    <div class="legal-section" id="s5">
-      <div class="legal-section-num">Section 05</div>
-      <h2>The Free Pilot Programme</h2>
-      <p>iSkool offers qualifying South African high schools a free pilot period, the duration of which is agreed upon in writing at the time of onboarding. During the pilot period, schools receive full access to the iSkool platform at no cost, with the same features available to paying subscribers.</p>
-      <ul class="legal-list">
-        <li>The pilot period is intended to allow schools to evaluate iSkool in a real classroom environment before making any financial commitment.</li>
-        <li>iSkool reserves the right to conclude the pilot at any time with reasonable written notice to the school.</li>
-        <li>At the end of the pilot period, the school may choose to transition to a paid subscription to continue using the platform.</li>
-        <li>If a school does not subscribe after the pilot, their account will be deactivated. All school data will be retained for <strong>12 months</strong> from the date of deactivation, during which the school may request an export of their data. After 12 months, all data will be permanently and irreversibly deleted.</li>
-        <li>iSkool will notify the school by email at least 30 days before permanent deletion occurs.</li>
-      </ul>
-      <div class="legal-highlight">Pilot schools have access to the same platform features as paying clients. The only difference is that no payment is required during the agreed pilot period.</div>
-    </div>
-
-    <div class="legal-section" id="s5b">
-      <div class="legal-section-num">Section 06</div>
-      <h2>Paying Clients</h2>
-      <p>Schools that transition from the pilot programme to a paid subscription, or that onboard directly as paying clients, are governed by the following additional terms:</p>
-      <ul class="legal-list">
-        <li>Subscription fees, billing cycles, and payment terms are agreed upon in writing at the time of subscription and form part of the school's service agreement with iSkool.</li>
-        <li>Subscriptions are invoiced in advance for the agreed period (monthly, termly, or annually as specified in the service agreement).</li>
-        <li>iSkool reserves the right to suspend access to the platform if payment is not received within the agreed payment period. The school will be notified in writing before any suspension takes effect.</li>
-        <li>Paying clients who wish to cancel their subscription must provide written notice as specified in their service agreement. Data will be retained for <strong>12 months</strong> after subscription end, after which it will be permanently deleted.</li>
-        <li>iSkool will not issue refunds for unused portions of a subscription period unless otherwise agreed in writing.</li>
-      </ul>
-      <div class="legal-highlight">If you are a paying client and have a query about your invoice, subscription, or payment, contact us at <a href="mailto:support@iskool.xyz" style="color:var(--gold);font-weight:600;text-decoration:none;">support@iskool.xyz</a>.</div>
-    </div>
-
-    <div class="legal-section" id="s6">
-      <div class="legal-section-num">Section 07</div>
-      <h2>Intellectual Property</h2>
-      <p>All content, design, code, features, and functionality of the iSkool platform are the exclusive intellectual property of <strong>Enthropy (Pty) Ltd</strong> (Reg. No. 2023/260831/07) and are protected by applicable South African and international intellectual property laws.</p>
-      <p>Schools and users retain ownership of all content they upload to the platform, including questions, resources, and assignments. By uploading content, you grant iSkool a limited, non-exclusive licence to host and display that content solely for the purpose of providing the service to your institution.</p>
-    </div>
-
-    <div class="legal-section" id="s7">
-      <div class="legal-section-num">Section 08</div>
-      <h2>AI Invigilator</h2>
-      <p>The AI Invigilator feature monitors learner behaviour during live quiz sessions to protect academic integrity. It records events such as tab switching, browser exits, and focus loss. This data is accessible to the relevant teacher and school administrator.</p>
-      <div class="legal-highlight">Schools are responsible for informing learners that monitoring takes place during assessments. iSkool does not use Invigilator data for any purpose other than providing the integrity monitoring feature to the school.</div>
-    </div>
-
-    <div class="legal-section" id="s8">
-      <div class="legal-section-num">Section 09</div>
-      <h2>Data and Privacy</h2>
-      <p>Your use of iSkool is also governed by our <a href="privacy-policy.html" style="color:var(--gold);font-weight:600;text-decoration:none;">Privacy Policy</a>, which is incorporated into these Terms of Service by reference. By using iSkool, you confirm that you have read and understood our Privacy Policy.</p>
-    </div>
-
-    <div class="legal-section" id="s9">
-      <div class="legal-section-num">Section 10</div>
-      <h2>Service Availability</h2>
-      <p>iSkool will make reasonable efforts to maintain platform availability. The platform is built and maintained to production standards, with capacity measures and monitoring in place to support uninterrupted use by schools.</p>
-      <p>During the pilot period and beyond, scheduled and unscheduled maintenance may occur from time to time. Schools will be notified of planned downtime where possible, with as much advance notice as is practical.</p>
-      <p>iSkool is not liable for any interruption to service caused by circumstances beyond our reasonable control, including but not limited to internet infrastructure failures, third-party hosting provider outages, or force majeure events.</p>
-    </div>
-
-    <div class="legal-section" id="s10">
-      <div class="legal-section-num">Section 11</div>
-      <h2>Limitation of Liability</h2>
-      <p>To the maximum extent permitted by South African law, <strong>Enthropy (Pty) Ltd</strong> shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of or inability to use the platform.</p>
-      <p>iSkool's total liability to any school or user for any claim arising out of or relating to these Terms shall not exceed the total fees paid by that school to iSkool in the three months preceding the claim. For pilot schools paying no fees, liability is limited to the maximum extent permitted by law.</p>
-    </div>
-
-    <div class="legal-section" id="s11">
-      <div class="legal-section-num">Section 12</div>
-      <h2>Termination</h2>
-      <p>iSkool reserves the right to suspend or terminate your access to the platform at any time if:</p>
-      <ul class="legal-list">
-        <li>You breach these Terms of Service.</li>
-        <li>Your institution's subscription or pilot period expires without renewal.</li>
-        <li>iSkool ceases operations.</li>
-      </ul>
-      <p>Upon termination, you will lose access to the platform. Your data will be retained for <strong>12 months</strong> from the date of termination, during which you may request a full export of your school's data by contacting <a href="mailto:support@iskool.xyz" style="color:var(--gold);font-weight:600;text-decoration:none;">support@iskool.xyz</a>. After 12 months, all data will be permanently and irreversibly deleted. iSkool will notify the school by email at least 30 days before permanent deletion occurs.</p>
-    </div>
-
-    <div class="legal-section" id="s12">
-      <div class="legal-section-num">Section 13</div>
-      <h2>Changes to These Terms</h2>
-      <p>iSkool may update these Terms of Service from time to time. Schools will be notified of material changes via email at least <strong>14 days</strong> before they take effect. Continued use of the platform after that date constitutes acceptance of the updated terms.</p>
-    </div>
-
-    <div class="legal-section" id="s13">
-      <div class="legal-section-num">Section 14</div>
-      <h2>Governing Law</h2>
-      <p>These Terms of Service are governed by the laws of the <strong>Republic of South Africa</strong>. Any disputes arising from these terms shall be subject to the jurisdiction of the South African courts.</p>
-    </div>
-
-    <div class="legal-section" id="s14">
-      <div class="legal-section-num">Section 15</div>
-      <h2>Contact Us</h2>
-      <p>For any queries regarding these Terms of Service, please contact our Information Officer:</p>
-      <div class="legal-contact-grid">
-        <div class="legal-contact-card">
-          <div class="legal-contact-card-label">Information Officer</div>
-          <p>Mandla Simphiwe Mahlangu</p>
-        </div>
-        <div class="legal-contact-card">
-          <div class="legal-contact-card-label">Email</div>
-          <a href="mailto:support@iskool.xyz">support@iskool.xyz</a>
-        </div>
-        <div class="legal-contact-card">
-          <div class="legal-contact-card-label">Address</div>
-          <p>Enthropy (Pty) Ltd<br>2047 Mandisa Street<br>Tokoza, 1426<br>South Africa</p>
-        </div>
-        <div class="legal-contact-card">
-          <div class="legal-contact-card-label">Also see</div>
-          <a href="privacy-policy.html">Privacy Policy →</a>
-        </div>
-      </div>
-    </div>
-
-  </main>
-</div>
-
-<!-- FOOTER -->
-<div id="iskool-footer"></div>
-<script src="iskool_footer.js?v=1.2"></script>
-
-<script>
-/* Active TOC link on scroll */
-const sections = document.querySelectorAll('.legal-section');
-const tocLinks = document.querySelectorAll('.toc-list a');
-const observer = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      tocLinks.forEach(l => l.classList.remove('active'));
-      const link = document.querySelector('.toc-list a[href="#' + entry.target.id + '"]');
-      if (link) link.classList.add('active');
-    }
-  });
-}, { rootMargin: '-20% 0px -70% 0px' });
-sections.forEach(s => observer.observe(s));
-</script>
+<footer>
+  <span>Copyright © 2026 Wiggle</span>
+  <nav aria-label="Legal"><a href="privacy-policy.html">Privacy policy</a><a href="terms-of-service.html">Terms of service</a></nav>
+</footer>
 </body>
 </html>

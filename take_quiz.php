@@ -1213,6 +1213,137 @@ function build_word_bank(array $fitb): array {
 
         .step-dot.done    { background: var(--green); }
         .step-dot.active  { background: var(--teal); }
+
+        /* ═══════════════════════════════════════════════
+           DESKTOP REDESIGN — flat, exam-style (769px and up)
+           Mobile rules above are untouched.
+        ═══════════════════════════════════════════════ */
+        .q-hint { color: #8b949e; font-size: 13px; font-weight: 700; margin-bottom: 12px; }
+        .timer-text small { display: none; }
+
+        @media (min-width: 769px) {
+            :root {
+                --bg: #0b0f14; --surface: #10151c; --surface-2: #10151c;
+                --border: rgba(255,255,255,0.08); --border-strong: rgba(255,255,255,0.16);
+                --text-1: #e6edf3; --text-2: #8b98a8; --text-3: #5b6675;
+                --radius: 8px; --radius-sm: 6px; --sidebar-w: 240px; --timer-h: 56px;
+            }
+            body { font-size: 14px; font-weight: 400; }
+
+            /* Top bar */
+            .topbar { padding: 0 24px 0 16px; }
+            .back-btn { width: 32px; height: 32px; background: none; border-radius: 6px; }
+            .topbar-title { font-size: 14px; font-weight: 600; }
+            .topbar-meta { margin-top: 1px; }
+            .timer-pill { border-radius: 6px; background: none; padding: 6px 12px 6px 10px; }
+            .timer-ring, .timer-ring svg { width: 22px; height: 22px; }
+            .timer-ring circle { stroke-width: 2.5; }
+            .timer-text small { display: block; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--text-3); line-height: 1.2; }
+            #timer-display { display: block; font-size: 16px; font-weight: 600; min-width: 0; letter-spacing: .02em; line-height: 1.2; }
+
+            /* Sidebar */
+            .sidebar { padding: 22px 18px; gap: 22px; }
+            .sidebar-progress { background: none; border: 0; border-radius: 0; padding: 0; }
+            .sidebar-progress-label, .sidebar-section-label { font-size: 11px; font-weight: 600; letter-spacing: .08em; color: var(--text-3); margin-bottom: 10px; }
+            /* progress bar becomes a hairline under the top bar */
+            .progress-bar-track { position: fixed; top: var(--timer-h); left: 0; right: 0; height: 2px; margin: 0; border-radius: 0; background: var(--border); z-index: 1001; }
+            .progress-bar-fill { background: var(--teal); border-radius: 0; }
+            .progress-fraction { font-size: 13px; font-weight: 400; color: var(--text-2); }
+            .progress-fraction span { color: var(--text-2); font-weight: 400; }
+            .progress-fraction #answeredCount { color: var(--text-1); font-weight: 600; }
+            .sidebar-legend { flex-direction: row; flex-wrap: wrap; gap: 6px 14px; }
+            .legend-item { gap: 6px; }
+            .legend-dot { width: 8px; height: 8px; border-radius: 2px; }
+            .ld-unanswered { background: none; border: 1px solid var(--border-strong); }
+            .ld-answered   { background: rgba(255,255,255,0.14); border: 0; }
+            .ld-current    { background: none; border: 1px solid var(--teal); }
+            .ld-flagged    { background: var(--orange); border: 0; border-radius: 50%; }
+            .palette-grid { grid-template-columns: repeat(4, 1fr); }
+            .p-item { aspect-ratio: auto; height: 36px; position: relative; border-radius: 6px; font-size: 13px; font-weight: 500; background: none; border: 1px solid var(--border); font-variant-numeric: tabular-nums; }
+            .p-item:hover { transform: none; background: none; border-color: var(--border-strong); color: var(--text-1); }
+            .p-item.answered { background: rgba(255,255,255,0.06); border-color: transparent; color: var(--text-1); }
+            .p-item.current, .p-item.answered.current { background: rgba(79,209,197,0.09); border-color: var(--teal); color: var(--teal); box-shadow: none; }
+            .p-item.flagged { border-color: var(--border) !important; color: var(--text-2) !important; }
+            .p-item.flagged.answered { border-color: transparent !important; color: var(--text-1) !important; }
+            .p-item.flagged.current { border-color: var(--teal) !important; color: var(--teal) !important; }
+            .p-item.flagged::after { content: ''; position: absolute; top: 4px; right: 4px; width: 6px; height: 6px; border-radius: 50%; background: var(--orange); }
+            .sidebar-note { font-size: 11.5px; color: var(--text-3); text-align: center; margin-top: -12px; }
+
+            /* Main column */
+            .main-content { max-width: none; padding: 44px 32px 112px; }
+            .main-content > form { max-width: 720px; margin: 0 auto; }
+            .step-indicator { display: none; }
+
+            /* Question (flat, no panel) */
+            .question-card { background: none; border: 0; border-bottom: 1px solid var(--border); border-radius: 0; padding: 0 0 32px; margin-bottom: 32px; animation: none; }
+            .question-card:hover, .question-card.active-card, .question-card.card-answered { border-color: var(--border); box-shadow: none; }
+            .multi-page-mode .question-card { border-bottom: 0; padding-bottom: 0; margin-bottom: 0; }
+            .q-toprow { margin-bottom: 22px; }
+            .q-number { font-size: 12px; font-weight: 500; letter-spacing: .08em; color: var(--text-3); }
+            .pts-badge { background: none; color: var(--text-2); border: 1px solid var(--border); padding: 2px 8px; font-size: 11.5px; font-weight: 400; }
+            .flag-btn { width: auto; height: auto; padding: 5px 10px; gap: 6px; border-radius: 6px; font-family: var(--font); font-size: 12px; color: var(--text-2); background: none; border: 1px solid var(--border); }
+            .flag-btn::after { content: 'Flag for review'; }
+            .flag-btn.flagged::after { content: 'Flagged'; }
+            .flag-btn:hover { border-color: var(--border-strong); color: var(--text-1); background: none; }
+            .flag-btn.flagged, .flag-btn.flagged:hover { color: var(--orange); border-color: rgba(245,158,11,0.45); background: rgba(245,158,11,0.07); }
+            .flag-btn.flagged svg { fill: currentColor; }
+            .q-text { font-size: 18px; font-weight: 500; line-height: 1.55; margin-bottom: 26px; }
+            .q-hint { font-size: 12.5px; font-weight: 400; color: var(--text-2); margin: -14px 0 18px; }
+            .q-image { border-radius: 8px; margin-bottom: 24px; }
+            .q-image:hover { transform: none; }
+
+            /* Options: lettered keys A, B, C… */
+            .choices-list { gap: 8px; counter-reset: opt; }
+            .choice-item { counter-increment: opt; padding: 13px 16px; background: none; border: 1px solid var(--border); border-radius: 8px; transition: border-color .12s, background .12s; }
+            .choice-item:hover { background: rgba(255,255,255,0.02); border-color: var(--border-strong); transform: none; }
+            .choice-radio { width: 26px; height: 26px; border-radius: 6px; border: 1px solid var(--border-strong); font-size: 12px; font-weight: 600; color: var(--text-2); }
+            .choice-radio::before { content: counter(opt, upper-alpha); }
+            .choice-radio::after { display: none; }
+            .choice-checkbox { border-radius: 5px; }
+            .choice-item.selected { background: rgba(79,209,197,0.09); border-color: var(--teal); }
+            .choice-item.selected .choice-radio { background: var(--teal); border-color: var(--teal); color: #06201d; }
+            .choice-item.selected .choice-checkbox::before { content: '\2713'; }
+            .choice-text { font-size: 15px; font-weight: 400; line-height: 1.45; }
+            .choice-item.selected .choice-text { color: var(--text-1); font-weight: 400; }
+
+            /* Open answer + fill-in-the-blank */
+            .open-answer-box { min-height: 200px; background: none; border: 1px solid var(--border); border-radius: 8px; }
+            .open-answer-box:focus { background: none; border-color: var(--teal); }
+            .open-answer-counter { color: var(--text-3); }
+            .fitb-sentence { font-size: 17px; }
+            .fitb-input { background: rgba(255,255,255,0.03); border-radius: 6px; }
+            .fitb-chip { background: none; border-color: var(--border-strong); color: var(--text-1); font-weight: 500; border-radius: 6px; }
+            .fitb-chip:hover:not(.used) { border-color: var(--teal); color: var(--teal); }
+            .fitb-chip.used { background: none; color: var(--text-3); border-color: var(--border); }
+
+            /* Footer navigation bar */
+            .nav-bar { position: fixed; left: var(--sidebar-w); right: 0; bottom: 0; height: 64px; margin: 0; padding: 0 max(32px, calc((100% - var(--sidebar-w) - 720px) / 2)); background: var(--surface); border-top: 1px solid var(--border); align-items: center; justify-content: space-between; z-index: 50; }
+            .nav-btn { flex: none; padding: 9px 18px; font-size: 13px; font-weight: 500; border-radius: 6px; gap: 6px; background: none; border: 1px solid var(--border-strong); color: var(--text-1); }
+            #prevBtn { background: none; color: var(--text-1); }
+            #prevBtn:hover { background: rgba(255,255,255,0.04); color: var(--text-1); }
+            #nextBtn { background: var(--teal); border-color: var(--teal); color: #06201d; font-weight: 600; margin-left: auto; }
+            #nextBtn:hover { background: var(--teal); filter: brightness(1.08); }
+
+            /* Submit */
+            .submit-btn { background: var(--teal); box-shadow: none; border-radius: 6px; padding: 10px 20px; font-size: 13px; font-weight: 600; letter-spacing: 0; }
+            .submit-btn:hover { opacity: 1; transform: none; box-shadow: none; filter: brightness(1.08); }
+            .sidebar .submit-btn { width: 100%; }
+            #mainSubmitAlt { width: fit-content; margin: 0 0 0 auto; }
+            #mainSubmit { position: fixed; bottom: 12px; right: max(32px, calc((100% - var(--sidebar-w) - 720px) / 2)); width: auto; margin: 0; z-index: 60; }
+
+            /* Modals + toast */
+            .modal-overlay { background: rgba(0,0,0,0.6); backdrop-filter: none; }
+            .modal-box { border-radius: 10px; padding: 24px; max-width: 380px; text-align: left; box-shadow: none; border-color: var(--border-strong); animation: none; }
+            .modal-icon { display: none; }
+            .modal-title { font-size: 16px; font-weight: 600; }
+            .modal-body { font-size: 13px; margin-bottom: 20px; }
+            .modal-actions { justify-content: flex-end; }
+            .modal-btn { flex: none; padding: 9px 18px; border-radius: 6px; font-size: 13px; font-weight: 500; }
+            .modal-btn.primary { background: var(--teal); color: #06201d; font-weight: 600; }
+            .modal-btn.primary:hover { background: var(--teal); filter: brightness(1.08); }
+            .modal-btn.secondary { background: none; border: 1px solid var(--border-strong); }
+            .toast { border-radius: 6px; font-size: 13px; font-weight: 600; box-shadow: none; }
+        }
     </style>
 <script>
 function getCsrfToken() {
@@ -1243,7 +1374,7 @@ function getCsrfToken() {
                 <circle class="ring-fill" id="ringFill" cx="16" cy="16" r="13"/>
             </svg>
         </div>
-        <span id="timer-display">--:--</span>
+        <div class="timer-text"><small>Time remaining</small><span id="timer-display">--:--</span></div>
     </div>
 </header>
 
@@ -1292,6 +1423,7 @@ function getCsrfToken() {
             </svg>
             Submit Quiz
         </button>
+        <div class="sidebar-note">Answers save automatically</div>
     </aside>
 
     <!-- ─── MAIN CONTENT ─── -->
@@ -1370,7 +1502,7 @@ function getCsrfToken() {
                     $selectExactly = (int)($q['multiple_answer']['select_exactly'] ?? 0);
                 ?>
                 <p class="q-text"><?= htmlspecialchars($q['text']) ?></p>
-                <div style="color:#8b949e;font-size:13px;font-weight:700;margin-bottom:12px;">
+                <div class="q-hint">
                     <?= $selectExactly > 0 ? 'Select exactly ' . $selectExactly . ' answers.' : 'Select all that apply.' ?>
                 </div>
                 <div class="choices-list">

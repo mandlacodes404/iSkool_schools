@@ -241,15 +241,29 @@ if (!empty($joinedClassIds)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dashboard - <?= htmlspecialchars($schoolName) ?></title>
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
-    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=5.5">
-    <link rel="stylesheet" href="assets/css/learner/manual.css?v=7.3">
-    <link rel="stylesheet" href="assets/css/learner/announcements.css?v=2.8">
-    <link rel="stylesheet" href="assets/css/learner/assignments.css?v=2.8">
+    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=5.6">
+    <link rel="stylesheet" href="assets/css/learner/manual.css?v=7.6">
+    <link rel="stylesheet" href="assets/css/learner/announcements.css?v=3.3">
+    <link rel="stylesheet" href="assets/css/learner/assignments.css?v=3.1">
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
-    <link rel="stylesheet" href="assets/css/learner/grades.css?v=2.9">
-    <link rel="stylesheet" href="assets/css/learner/resources.css?v=2.1">
-     <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=4.2">
-     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=13.2">
+    <link rel="stylesheet" href="assets/css/learner/grades.css?v=3.4">
+    <link rel="stylesheet" href="assets/css/learner/resources.css?v=2.5">
+     <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=4.6">
+     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=13.4">
+    <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=1.6">
+    <link rel="stylesheet" href="assets/css/learner/mobile_menu.css?v=1.5">
+    <link rel="stylesheet" href="assets/css/learner/mobile_settings.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/learner/desktop_settings.css?v=1.0">   <!-- new -->
+    <script>
+    // Desktop sidebar: restore the saved collapsed state BEFORE first paint (no flash).
+    // With no saved choice, screens narrower than 1100px start as a rail.
+    (function () {
+        try {
+            var s = localStorage.getItem('iskoolMenuCollapsed');
+            if (s === '1' || (s === null && window.innerWidth < 1100)) document.documentElement.classList.add('dm-collapsed');
+        } catch (e) {}
+    })();
+    </script>
     <meta name="theme-color" content="#20201f">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="iSkool">
@@ -258,7 +272,7 @@ if (!empty($joinedClassIds)) {
     <meta name="msapplication-navbutton-color" content="#20201f">
     <link rel="manifest" href="/manifest.php?v=1.1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Geist:wght@300..600&display=swap" rel="stylesheet">
     
 <script>
 function getCsrfToken() {
@@ -299,7 +313,7 @@ function getCsrfToken() {
         <img src="/icon.svg?v=1.4" width="180" height="180" alt="iSkool logo">
         <span id="dash-splash-wordmark">iSkool</span>
     </div>
-    <img src="enthropy/enthropy_wordmark.svg" alt="ENTHROPY" id="dash-splash-brand-wordmark">
+    <img src="enthropy/wiggle_colored.svg" alt="ENTHROPY" id="dash-splash-brand-wordmark">
 </div>
 <script>
 // ──────── SPLASH HANDOFF: hide once home is actually ready ────────
@@ -380,11 +394,41 @@ if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.wasLockedAtLoad
 </script>
 <?php $currentPage = basename($_SERVER['PHP_SELF']); ?>
 
-<div class="sidebar">
-    
+<?php
+// Desktop menu: name of the learner's class, shown beside "My Class".
+$dmClassName = '';
+if (!empty($joinedClassIds)) {
+    foreach ($classes as $dmC) {
+        if ((int)$dmC['id'] === (int)$joinedClassIds[0]) { $dmClassName = $dmC['name']; break; }
+    }
+}
+?>
+<div class="sidebar dm-menu" id="dmSidebar">
+
+    <!-- ══ DESKTOP ONLY: brand row + quick search (hidden on mobile by CSS) ══ -->
+    <div class="dm-brand">
+        <?php if ($schoolLogo): ?>
+            <img class="dm-mark" src="<?= htmlspecialchars($schoolLogo) ?>" alt="">
+        <?php else: ?>
+            <span class="dm-mark dm-mark--initials" aria-hidden="true"><?= htmlspecialchars($schoolInitials) ?></span>
+        <?php endif; ?>
+        <div class="dm-brand-text">
+            <span class="dm-brand-name" title="<?= htmlspecialchars($schoolName) ?>"><?= htmlspecialchars($schoolName) ?></span>
+            <?php if ($currentYearId > 0): ?><span class="dm-brand-sub"><?= htmlspecialchars($currentYearName) ?></span><?php endif; ?>
+        </div>
+        <button type="button" class="dm-toggle" id="dmToggle" aria-controls="dmSidebar" aria-expanded="true" aria-label="Collapse sidebar"></button>
+    </div>
+
+    <button type="button" class="dm-search" id="dmSearchBtn" aria-label="Search pages and actions">
+        <span class="dm-label">Search</span><kbd class="dm-kbd" id="dmSearchKbd"></kbd>
+    </button>
+
+    <!-- Profile block. Mobile: avatar, name and email at the top of the menu.
+         Desktop: the same three elements become the account button at the bottom. -->
+    <div class="dm-account-root" id="dmAccount">
     <div class="sidebar-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
         
-        <div class="profile-picture-wrapper" style="position:relative; display:inline-block; cursor:pointer;" onclick="if(typeof loadLearnerSettings === 'function') loadLearnerSettings(); if(typeof toggleSidebar === 'function') toggleSidebar(true);">
+        <div class="profile-picture-wrapper" style="position:relative; display:inline-block; cursor:pointer;" onclick="if(window.innerWidth <= 768){ if(typeof loadLearnerSettings === 'function') loadLearnerSettings(); if(typeof toggleSidebar === 'function') toggleSidebar(true); }">
             <?php if ($learnerProfilePicture && $learnerProfilePicture !== 'default.png'): ?>
                 <img src="uploads/learners/<?= htmlspecialchars($learnerProfilePicture) ?>" 
                      alt="Profile Picture" 
@@ -409,48 +453,49 @@ if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.wasLockedAtLoad
 
     <div class="learner-name"><?= htmlspecialchars($learnerFullName) ?></div>  
     <div class="learner-email"><?= htmlspecialchars($learnerEmail ?: '') ?></div>
+    </div>
 
     <div class="sidebar-links" style="margin-top:50px;">
-      <a href="javascript:void(0)" class="desktop-only" onclick="loadManual();" data-page="partials/manual.html" id="nav-home-sidebar">
+      <a href="javascript:void(0)" class="dm-item desktop-only" onclick="loadManual();" data-page="partials/manual.html" id="nav-home-sidebar">
            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px; height:20px; margin-right:10px;">
     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
     <polyline points="9 22 9 12 15 12 15 22"/>
-</svg><span>Home</span>
+</svg><span class="dm-label">Home</span>
         </a>
 
-        <a href="javascript:void(0)" onclick="fetchQuizzes(); updateHeaderTitle('Quizzes')" data-page="quiz_list.php" class="desktop-only" id="nav-quiz-sidebar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg><span>Quiz</span>
+        <a href="javascript:void(0)" onclick="fetchQuizzes(); updateHeaderTitle('Quizzes')" data-page="quiz_list.php" class="dm-item desktop-only" id="nav-quiz-sidebar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg><span class="dm-label">Quiz</span>
         </a>
 
-        <a href="javascript:void(0)" onclick="fetchAssignments(); updateHeaderTitle('Assignments')" data-page="assignment_list.php" class="desktop-only" id="nav-assignments-sidebar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6"/><path d="M9 16h6"/><rect x="4" y="4" width="16" height="16" rx="2"/></svg><span>Assignments</span>
+        <a href="javascript:void(0)" onclick="fetchAssignments(); updateHeaderTitle('Assignments')" data-page="assignment_list.php" class="dm-item desktop-only" id="nav-assignments-sidebar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6"/><path d="M9 16h6"/><rect x="4" y="4" width="16" height="16" rx="2"/></svg><span class="dm-label">Assignments</span>
         </a>
 
-       <a href="javascript:void(0)" onclick="fetchResources(); updateHeaderTitle('Resources')" data-page="resource_list.php" class="desktop-only" id="nav-resources-sidebar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span>Resources</span>
+       <a href="javascript:void(0)" onclick="fetchResources(); updateHeaderTitle('Resources')" data-page="resource_list.php" class="dm-item desktop-only" id="nav-resources-sidebar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span class="dm-label">Resources</span>
         </a>
 
         <a href="javascript:void(0)"
    onclick="fetchGrades(); updateHeaderTitle('Gradebook')"
-   data-page="grades" id="nav-grades-sidebar">
+   data-page="grades" id="nav-grades-sidebar" class="dm-item">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
          stroke-linecap="round" stroke-linejoin="round">
         <line x1="18" y1="20" x2="18" y2="10"/>
         <line x1="12" y1="20" x2="12" y2="4"/>
         <line x1="6"  y1="20" x2="6"  y2="14"/>
     </svg>
-    <span>Gradebook</span>
+    <span class="dm-label">Gradebook</span>
 </a>
 
-        <a href="javascript:void(0)" onclick="fetchAnnouncements(); updateHeaderTitle('Announcements')" data-page="announcement_list.php" id="nav-announcements-sidebar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>Announcements</span>
+        <a href="javascript:void(0)" onclick="fetchAnnouncements(); updateHeaderTitle('Announcements')" data-page="announcement_list.php" id="nav-announcements-sidebar" class="dm-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="dm-label">Announcements</span>
         </a>
 
-        <a href="javascript:void(0)" onclick="fetchEvaluations(); updateHeaderTitle('Evaluations')" data-page="evaluation_list.php" id="nav-evaluations-sidebar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 8 21 9 17 14 18 21 12 18 6 21 7 14 3 9 9 8 12 2"/></svg><span>Evaluations</span>
+        <a href="javascript:void(0)" onclick="fetchEvaluations(); updateHeaderTitle('Evaluations')" data-page="evaluation_list.php" id="nav-evaluations-sidebar" class="dm-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 8 21 9 17 14 18 21 12 18 6 21 7 14 3 9 9 8 12 2"/></svg><span class="dm-label">Evaluations</span>
         </a>
 
-        <a href="javascript:void(0)" onclick="fetchSyllabus()" data-page="syllabus" id="nav-syllabus-sidebar">
+        <a href="javascript:void(0)" onclick="fetchSyllabus()" data-page="syllabus" id="nav-syllabus-sidebar" class="dm-item">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
          stroke-linecap="round" stroke-linejoin="round">
         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
@@ -459,30 +504,31 @@ if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.wasLockedAtLoad
         <line x1="12" y1="10" x2="16" y2="10"/>
         <line x1="12" y1="14" x2="16" y2="14"/>
     </svg>
-    <span>Syllabus</span>
+    <span class="dm-label">Syllabus</span>
 </a>
-        <a href="javascript:void(0)" onclick="fetchDiscussions(); updateHeaderTitle('Discussions')" data-page="discussion_list.php" class="mobile-only-discussions" id="nav-discussions-sidebar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Discussions</span>
+        <a href="javascript:void(0)" onclick="fetchDiscussions(); updateHeaderTitle('Discussions')" data-page="discussion_list.php" class="dm-item mobile-only-discussions" id="nav-discussions-sidebar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="dm-label">Discussions</span>
         </a>
 
-        <a href="javascript:void(0)" onclick="return openLearnerCalendar(event)" data-page="learner_calendar" class="mobile-only-calendar" id="nav-calendar-sidebar">
+        <a href="javascript:void(0)" onclick="return openLearnerCalendar(event)" data-page="learner_calendar" class="dm-item mobile-only-calendar" id="nav-calendar-sidebar">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="3" y="4" width="18" height="18" rx="2"></rect>
                 <line x1="16" y1="2" x2="16" y2="6"></line>
                 <line x1="8" y1="2" x2="8" y2="6"></line>
                 <line x1="3" y1="10" x2="21" y2="10"></line>
             </svg>
-            <span>Calendar</span>
+            <span class="dm-label">Calendar</span>
         </a>
-
+        <div class="dm-sep dm-sep--a" aria-hidden="true"></div>
+        <div class="dm-sep dm-sep--b" aria-hidden="true"></div>
         <?php if (empty($joinedClassIds)): ?>
             <button type="button" onclick="toggleJoinClassForm()" data-page="join-class" id="nav-joinclass-sidebar"
-                    class="<?= $currentPage === 'learner_dashboard.php' && !empty($_GET['join']) ? 'active' : '' ?>">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg><span>Join a Class</span>
+                    class="dm-item <?= $currentPage === 'learner_dashboard.php' && !empty($_GET['join']) ? 'active' : '' ?>">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg><span class="dm-label">Join a Class</span>
             </button>
             <div class="join-class-form" id="joinClassForm" style="display: none;">
-                <p style="color: var(--warning-color); font-weight: bold; font-size: 14px;">
-                    Warning: You can only choose your class *once*. Make sure you select the correct one.
+                <p class="dm-note" style="color: var(--warning-color); font-weight: bold; font-size: 14px;">
+                    Warning: You can only choose your class <strong>once</strong>. Make sure you select the correct one.
                 </p>
                 <form method="POST">
                     <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
@@ -496,8 +542,8 @@ if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.wasLockedAtLoad
                 </form>
             </div>
         <?php else: ?>
-            <button type="button" onclick="showMyClass()" data-page="my-class" class="my-class-btn" id="nav-myclass-sidebar">
-               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><span>My Class</span>
+            <button type="button" onclick="showMyClass()" data-page="my-class" class="my-class-btn dm-item" id="nav-myclass-sidebar">
+               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><span class="dm-label">My Class</span><?php if ($dmClassName !== ''): ?><span class="dm-meta"><?= htmlspecialchars($dmClassName) ?></span><?php endif; ?>
             </button>
             <div class="join-status">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -508,7 +554,41 @@ if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.wasLockedAtLoad
         <?php endif; ?>
     </div>
 
+    <div class="dm-sep dm-sep--c" aria-hidden="true"></div>
+
     <div class="footer" style="font-size:15px;"><span><strong><?= htmlspecialchars(iskool_app_version_label()) ?></strong></span></div>
+</div>
+
+<!-- ══ DESKTOP ONLY: floating pieces. They sit outside .sidebar so its overflow can't clip them. ══ -->
+<div class="dm-tip" id="dmTip" role="tooltip"><span id="dmTipText"></span><kbd id="dmTipKbd"></kbd></div>
+
+<div class="dm-pop" id="dmAccountMenu" role="menu" aria-label="Account">
+    <div class="dm-pop-head">
+        <span class="dm-pop-name"><?= htmlspecialchars($learnerFullName) ?></span>
+        <span class="dm-pop-mail"><?= htmlspecialchars($learnerEmail ?: '') ?></span>
+    </div>
+    <button type="button" class="dm-pop-item" role="menuitem" data-act="profile" style="--dm-ico: var(--dm-i-user)">Personal information</button>
+    <button type="button" class="dm-pop-item" role="menuitem" data-act="settings" style="--dm-ico: var(--dm-i-sliders)">Settings</button>
+    <button type="button" class="dm-pop-item" role="menuitem" data-act="photo" style="--dm-ico: var(--dm-i-upload)">Upload photo</button>
+    <div class="dm-pop-sep" role="separator"></div>
+    <button type="button" class="dm-pop-item is-danger" role="menuitem" data-act="signout" style="--dm-ico: var(--dm-i-logout)">Sign out</button>
+    <div class="dm-pop-ver"><?= htmlspecialchars(iskool_app_version_label()) ?></div>
+</div>
+
+<div class="dm-palette" id="dmPalette" aria-hidden="true">
+    <div class="dm-palette-panel" role="dialog" aria-modal="true" aria-label="Search pages and actions">
+        <div class="dm-palette-field">
+            <input id="dmPaletteInput" type="text" placeholder="Jump to a page or action" autocomplete="off" spellcheck="false"
+                   role="combobox" aria-expanded="true" aria-controls="dmPaletteList" aria-autocomplete="list" aria-label="Search pages and actions">
+        </div>
+        <ul id="dmPaletteList" role="listbox"></ul>
+        <p class="dm-palette-empty" id="dmPaletteEmpty" hidden></p>
+        <div class="dm-palette-foot">
+            <span><kbd>&uarr;</kbd><kbd>&darr;</kbd>Move</span>
+            <span><kbd>&crarr;</kbd>Open</span>
+            <span><kbd>Esc</kbd>Close</span>
+        </div>
+    </div>
 </div>
 
 <div class="main-content">
@@ -1526,12 +1606,12 @@ if (fullPage &&
             .ls-desktop {
                 display: grid;
                 grid-template-columns: 200px minmax(0, 1fr);
-                min-height: calc(100vh - 62px);
+                min-height: calc(100vh - var(--dm-chrome, 62px));
                 font-family: 'Nunito', sans-serif;
             }
             .ls-rail {
                 padding: 28px 12px;
-                background: #0d1117;
+                background: var(--dm-card, #0d1117);
                 border-right: 1px solid rgba(255,255,255,0.07);
                 display: flex;
                 flex-direction: column;
@@ -1567,8 +1647,8 @@ if (fullPage &&
             .ls-panel {
                 padding: 32px 40px 56px;
                 overflow-y: auto;
-                max-height: calc(100vh - 62px);
-                background: #0a0e14;
+                max-height: calc(100vh - var(--dm-chrome, 62px));
+                background: var(--dm-page, #0a0e14);
             }
             .ls-panel-section {
                 display: none;
@@ -1894,11 +1974,11 @@ window.loadLearnerPersonalInfo = async function() {
                 border: 1px solid rgba(255,255,255,0.07);
                 border-radius: 14px;
                 overflow: hidden;
-                background: #0d1117;
+                background: var(--dm-card, #0d1117);
             }
             .learner-personal-rail {
                 padding: 24px 22px;
-                background: #0d1117;
+                background: var(--dm-card, #0d1117);
                 border-right: 1px solid rgba(255,255,255,0.07);
             }
             .learner-personal-main {
@@ -2089,30 +2169,71 @@ if (avatarWrapper && profileInput) {
         const file = e.target.files[0];
         if (!file) return;
 
-        // Show instant preview BEFORE upload completes (no loader needed)
+        // Remember how the avatar looked, so a failed upload can put it back
+        const prevImg  = avatarWrapper.querySelector('img.learner-avatar');
+        const prevSrc  = prevImg ? prevImg.src : null;
+        const initials = '<?= htmlspecialchars($initials) ?>';
+
+        // Instant preview BEFORE the upload completes
         const previewUrl = URL.createObjectURL(file);
         window.updateAvatarUI(previewUrl);
 
-        const fd = new FormData();
-        fd.append("profile", file);
+        // Upload failed: put the old avatar back and say why (a preview that was never saved looks like it worked)
+        const undo = (msg) => {
+            if (prevSrc) window.updateAvatarUI(prevSrc); else window.resetAvatarUI(initials);
+            URL.revokeObjectURL(previewUrl);
+            profileInput.value = '';   // so the same file can be picked again
+            alert(msg);
+        };
 
-        fetch("upload_profile.php", { method: "POST", headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) {
-                    // Swap blob preview with real permanent server URL
-                    const serverUrl = "uploads/learners/" + data.file + "?t=" + Date.now();
-                    window.updateAvatarUI(serverUrl);
-                     loadLearnerSettings(); // ← ADDED
+        // Phone photos are often 3-8 MB, which is over many servers' upload limit and slow on mobile data.
+        // An avatar never needs more than ~800px, so anything over 1 MB (or not jpg/png/gif) is shrunk to a JPEG first.
+        // If the browser can't decode the file, the original is sent unchanged.
+        const prepare = () => new Promise((resolve) => {
+            const okType = /\.(jpe?g|png|gif)$/i.test(file.name);
+            if (file.size <= 1024 * 1024 && okType) return resolve({ blob: file, name: file.name });
+            const img = new Image();
+            img.onload = () => {
+                const scale  = Math.min(1, 800 / Math.max(img.naturalWidth, img.naturalHeight));
+                const canvas = document.createElement('canvas');
+                canvas.width  = Math.max(1, Math.round(img.naturalWidth  * scale));
+                canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#fff';                         // JPEG has no transparency
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                canvas.toBlob(b => resolve(b ? { blob: b, name: 'profile.jpg' } : { blob: file, name: file.name }), 'image/jpeg', 0.85);
+            };
+            img.onerror = () => resolve({ blob: file, name: file.name });
+            img.src = previewUrl;
+        });
+
+        prepare()
+            .then(({ blob, name }) => {
+                const fd = new FormData();
+                fd.append("profile", blob, name);
+                return fetch("upload_profile.php", { method: "POST", headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd });
+            })
+            .then(r => r.text().then(text => ({ ok: r.ok, status: r.status, text })))
+            .then(({ ok, status, text }) => {
+                let data = null;
+                try { data = JSON.parse(text); } catch (_) { /* not JSON: PHP error page, 413 from the web server, etc. */ }
+
+                if (ok && data && data.success) {
+                    // Swap the blob preview for the real saved file
+                    window.updateAvatarUI("uploads/learners/" + data.file + "?t=" + Date.now());
+                    URL.revokeObjectURL(previewUrl);
+                    profileInput.value = '';
+                    loadLearnerSettings();
+                } else if (data && data.error) {
+                    undo(data.error);
                 } else {
-                    alert(data.error || "Upload failed");
+                    undo("Upload failed (HTTP " + status + "): " + text.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160));
                 }
-                profileInput.value = ''; // Reset so same file can be picked again
             })
             .catch(err => {
                 console.error("Upload Error:", err);
-                alert("A connection error occurred during upload.");
-                profileInput.value = '';
+                undo("A connection error occurred during upload.");
             });
     });
 }
@@ -3139,9 +3260,170 @@ if (desktopToggle) {
     // ─────────────────────────────────────────────────────────────────────
 });
 
+// ────────────────────────────────────────────────────────────────────────
+// JOIN A CLASS: BOTTOM SHEET (phones, <= 768px)
+// Same #joinClassForm the menu has always had (same CSRF token, same POST,
+// same PHP handler). On a phone it is lifted out of the slide-in menu into a
+// bottom sheet while it is open and put back when it closes, so it can never
+// be squeezed or hidden by the menu. Picking a class asks for one more tap
+// first, because a learner can only choose their class once.
+// Desktop has its own dialog in desktop_menu.js.
+// ────────────────────────────────────────────────────────────────────────
+window.joinSheet = (function () {
+    var YES = 'Yes, join this class';
+    var phone = window.matchMedia('(max-width: 768px)');
+    var wrap, formEl, select, submit;
+    var root, panel, head, body, xBtn, yesBtn, backBtn, askEl, confirmEl;
+    var mark = null, sent = false;
+
+    function mk(tag, cls, text) {
+        var n = document.createElement(tag);
+        if (cls) n.className = cls;
+        if (text) n.textContent = text;
+        return n;
+    }
+    function isOpen() { return !!root && root.classList.contains('is-open'); }
+    function targets() {
+        var t = panel.classList.contains('is-confirming') ? [xBtn, yesBtn, backBtn] : [xBtn, select, submit];
+        return t.filter(function (n) { return n && !n.disabled; });
+    }
+    function ask() {
+        var opt = select.options[select.selectedIndex];
+        askEl.textContent = '';
+        askEl.appendChild(document.createTextNode('Join '));
+        askEl.appendChild(mk('strong', '', opt ? opt.textContent.trim() : ''));
+        askEl.appendChild(document.createTextNode('? You can only choose your class once, so make sure this is the right one.'));
+        panel.classList.add('is-confirming');
+    }
+
+    function build() {
+        if (root) return true;
+        wrap = document.getElementById('joinClassForm');
+        formEl = wrap && wrap.querySelector('form');
+        select = formEl && formEl.querySelector('select');
+        submit = formEl && formEl.querySelector('.join-class-btn');
+        if (!select || !submit) return false;
+        select.setAttribute('aria-label', 'Class');
+
+        root = mk('div', 'jcs'); root.id = 'joinSheet'; root.setAttribute('aria-hidden', 'true');
+        panel = mk('div', 'jcs-panel');
+        panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-modal', 'true');
+        panel.setAttribute('aria-labelledby', 'jcsTitle'); panel.tabIndex = -1;
+        head = mk('div', 'jcs-head');
+        var grip = mk('span', 'jcs-grip'); grip.setAttribute('aria-hidden', 'true');
+        var h = mk('h2', '', 'Join a class'); h.id = 'jcsTitle';
+        xBtn = mk('button', 'jcs-x'); xBtn.type = 'button'; xBtn.setAttribute('aria-label', 'Close');
+        xBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
+        head.appendChild(grip); head.appendChild(h); head.appendChild(xBtn);
+        body = mk('div', 'jcs-body');
+        confirmEl = mk('div', 'jcs-confirm');
+        askEl = mk('p', 'jcs-ask');
+        var row = mk('div', 'jcs-actions');
+        yesBtn = mk('button', 'jcs-btn jcs-btn--go', YES); yesBtn.type = 'button';
+        backBtn = mk('button', 'jcs-btn', 'Go back'); backBtn.type = 'button';
+        row.appendChild(yesBtn); row.appendChild(backBtn);
+        confirmEl.appendChild(askEl); confirmEl.appendChild(row);
+        body.appendChild(confirmEl);
+        panel.appendChild(head); panel.appendChild(body);
+        root.appendChild(panel);
+        document.body.appendChild(root);
+
+        xBtn.addEventListener('click', close);
+        root.addEventListener('click', function (e) { if (e.target === root) close(); });
+        backBtn.addEventListener('click', function () { panel.classList.remove('is-confirming'); });
+        yesBtn.addEventListener('click', function () {
+            if (sent) return;
+            sent = true;
+            yesBtn.disabled = true; backBtn.disabled = true; yesBtn.textContent = 'Joining\u2026';
+            // form.submit() leaves the clicked button out of the POST, and the PHP handler looks for join_class.
+            var flag = formEl.querySelector('input[name="join_class"]');
+            if (!flag) { flag = mk('input'); flag.type = 'hidden'; flag.name = 'join_class'; flag.value = '1'; formEl.appendChild(flag); }
+            formEl.submit();
+        });
+        // The form's own button now opens the confirmation instead of posting straight away.
+        formEl.addEventListener('submit', function (e) {
+            if (!isOpen() || sent) return;
+            e.preventDefault();
+            if (select.value) ask();
+        });
+        document.addEventListener('keydown', function (e) {
+            if (!isOpen()) return;
+            if (e.key === 'Escape') { e.preventDefault(); close(); return; }
+            if (e.key !== 'Tab') return;
+            var t = targets(), a = document.activeElement;
+            if (!t.length) { e.preventDefault(); panel.focus(); return; }
+            if (e.shiftKey && (a === t[0] || a === panel)) { e.preventDefault(); t[t.length - 1].focus(); }
+            else if (!e.shiftKey && a === t[t.length - 1]) { e.preventDefault(); t[0].focus(); }
+        });
+
+        // Keep the menu's edge-swipe handlers (document level) from seeing touches that start in the sheet.
+        ['touchstart', 'touchmove', 'touchend'].forEach(function (ev) {
+            root.addEventListener(ev, function (e) { e.stopPropagation(); }, { passive: true });
+        });
+        // Drag the header down to dismiss.
+        var y0 = null, dy = 0;
+        head.addEventListener('touchstart', function (e) {
+            y0 = e.touches[0].clientY; dy = 0;
+            panel.style.animation = 'none'; panel.style.transition = 'none';
+        }, { passive: true });
+        head.addEventListener('touchmove', function (e) {
+            if (y0 === null) return;
+            dy = Math.max(0, e.touches[0].clientY - y0);
+            panel.style.transform = 'translateY(' + dy + 'px)';
+        }, { passive: true });
+        head.addEventListener('touchend', function () {
+            if (y0 === null) return;
+            y0 = null;
+            panel.style.transition = '';
+            if (dy > 90) { panel.style.transform = 'translateY(100%)'; setTimeout(close, 180); }
+            else panel.style.transform = '';
+        }, { passive: true });
+        head.addEventListener('touchcancel', function () {
+            y0 = null; panel.style.transition = ''; panel.style.transform = '';
+        }, { passive: true });
+
+        if (phone.addEventListener) phone.addEventListener('change', function (e) { if (!e.matches) close(); });
+        else phone.addListener(function (e) { if (!e.matches) close(); });
+        return true;
+    }
+
+    // Returns true when the sheet took over, so the caller knows not to fall back to the inline form.
+    function open() {
+        if (!phone.matches || !build()) return false;
+        if (isOpen()) return true;
+        // The slide-in menu closes first, like every other item in it does.
+        if (document.querySelector('.sidebar.active') && typeof window.toggleSidebar === 'function') window.toggleSidebar(true);
+        mark = document.createComment('jcs');
+        wrap.parentNode.insertBefore(mark, wrap);
+        body.insertBefore(wrap, confirmEl);
+        wrap.style.display = 'block';
+        root.classList.add('is-open');
+        root.setAttribute('aria-hidden', 'false');
+        panel.focus();
+        return true;
+    }
+    function close() {
+        if (!isOpen()) return;
+        root.classList.remove('is-open');
+        root.setAttribute('aria-hidden', 'true');
+        wrap.style.display = 'none';
+        if (mark && mark.parentNode) { mark.parentNode.insertBefore(wrap, mark); mark.parentNode.removeChild(mark); }
+        mark = null;
+        panel.classList.remove('is-confirming');
+        panel.style.transform = ''; panel.style.transition = ''; panel.style.animation = '';
+        sent = false; yesBtn.disabled = false; backBtn.disabled = false; yesBtn.textContent = YES;
+        select.value = '';
+    }
+    return { open: open, close: close, isOpen: isOpen };
+})();
+
 function toggleJoinClassForm() {
     const form = document.getElementById("joinClassForm");
-    if (form) form.style.display = form.style.display === "none" ? "block" : "none";
+    if (!form) return;
+    // Phones get the bottom sheet above. Desktop wraps this function in desktop_menu.js and
+    // opens its own dialog, so the inline toggle below is only the last-resort fallback.
+    if (window.innerWidth <= 768 && window.joinSheet && window.joinSheet.open()) return;
+    form.style.display = form.style.display === "none" ? "block" : "none";
 }
 
 // --- DYNAMIC UI COMMAND CENTER ---
@@ -3649,16 +3931,21 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 <script src="assets/js/learner/main.js?v=1.2"></script>
-<script src="assets/js/learner/manual.js?v=10.10"></script>
-<script src="assets/js/learner/quiz.js?v=11.8"></script>
-<script src="assets/js/learner/assignments.js?v=9.9"></script>
-<script src="assets/js/learner/resources.js?v=8.5"></script>
-<script src="assets/js/learner/announcements.js?v=9.1"></script>
-<script src="assets/js/learner/grades.js?v=9.6"></script>
-<script src="assets/js/learner/evaluations.js?v=6.9"></script>
+<script src="assets/js/learner/manual.js?v=11.0"></script>
+<script src="assets/js/learner/quiz.js?v=12.3"></script>
+<script src="assets/js/learner/assignments.js?v=10.1"></script>
+<script src="assets/js/learner/resources.js?v=8.7"></script>
+<script src="assets/js/learner/announcements.js?v=9.3"></script>
+<script src="assets/js/learner/grades.js?v=10.2"></script>
+<script src="assets/js/learner/evaluations.js?v=7.1"></script>
 <script src="assets/js/learner/discussions.js?v=11.2"></script>
-<script src="assets/js/learner/syllabus.js?v=3.6"></script>
+<script src="assets/js/learner/syllabus.js?v=3.9"></script>
 <script src="assets/js/learner/learner_calendar.js?v=2.3"></script>
+<script src="assets/js/learner/desktop_menu.js?v=1.4"></script>
+<script src="assets/js/learner/mobile_menu.js?v=1.1"></script>
+<script src="assets/js/learner/mobile_settings.js?v=1.2"></script>
+<script src="assets/js/learner/desktop_settings.js?v=1.0"></script>
+<script>window.ISKOOL_SETTINGS = { sendResetUrl: 'auth/password/send_reset_link.php' };</script>
 <?php include 'includes/global_viewer.php'; ?>
 </body>
 </html>

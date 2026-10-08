@@ -4,41 +4,98 @@ require_once __DIR__ . '/../csrf_helper.php';
 require __DIR__ . '/../../config.php';
 
 $token = $_GET['token'] ?? '';
-$password_reset_complete = false; // Toggle for the UI
+$token_hash = is_string($token) && preg_match('/\A[a-f0-9]{64}\z/i', $token) ? hash('sha256', $token) : '';
+$password_reset_complete = false;
+$password_reset_error = '';
 
-if (!$token) {
-    die("<style>body{background:#0E0E0E;color:#888;display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;}</style><div>Invalid token.</div>");
-}
-
-// 1. Check if token is valid
-$stmt = $conn->prepare("SELECT * FROM password_resets WHERE token = ? AND expires_at > NOW()");
-$stmt->bind_param("s", $token);
-$stmt->execute();
-$result = $stmt->get_result();
-
-if ($result->num_rows === 0 && $_SERVER['REQUEST_METHOD'] !== 'POST') {
+if (!$token_hash) {
     die("<style>body{background:#0E0E0E;color:#888;display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;}</style><div>This reset link is invalid or has expired.</div>");
 }
 
-// 2. Handle Password Update
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    $stmt = $conn->prepare("SELECT id FROM password_resets WHERE token = ? AND expires_at > NOW()");
+    $stmt->bind_param("s", $token_hash);
+    $stmt->execute();
+    $stmt->store_result();
+    $valid_token = $stmt->num_rows === 1;
+    $stmt->close();
+
+    if (!$valid_token) {
+        die("<style>body{background:#0E0E0E;color:#888;display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;}</style><div>This reset link is invalid or has expired.</div>");
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verify_csrf_token();
+    $plain_password = $_POST['password'] ?? '';
 
-    $newPassword = password_hash($_POST['password'], PASSWORD_DEFAULT);
-    $row = $result->fetch_assoc();
-    $email = $row['email'];
+    if (strlen($plain_password) < 8) {
+        $password_reset_error = 'Password must be at least 8 characters long.';
+    } else {
+        try {
+            if (!$conn->begin_transaction()) {
+                throw new RuntimeException('Could not start password reset transaction.');
+            }
 
-    // Update password
-    $update = $conn->prepare("UPDATE users SET password = ? WHERE email = ?");
-    $update->bind_param("ss", $newPassword, $email);
-    $update->execute();
+            // Row locking makes a reset token usable only once, even with concurrent requests.
+            $stmt = $conn->prepare("SELECT email FROM password_resets WHERE token = ? AND expires_at > NOW() FOR UPDATE");
+            if (!$stmt) {
+                throw new RuntimeException('Could not prepare reset token lookup.');
+            }
+            $stmt->bind_param("s", $token_hash);
+            if (!$stmt->execute()) {
+                throw new RuntimeException('Could not check reset token.');
+            }
+            $stmt->bind_result($email);
+            $valid_token = $stmt->fetch();
+            $stmt->close();
 
-    // Delete token
-    $delete = $conn->prepare("DELETE FROM password_resets WHERE email = ?");
-    $delete->bind_param("s", $email);
-    $delete->execute();
+            if (!$valid_token) {
+                throw new RuntimeException('Reset token is invalid or expired.');
+            }
 
-    $password_reset_complete = true; // Show the success UI instead of the form
+            $new_password = password_hash($plain_password, PASSWORD_DEFAULT);
+            $update = $conn->prepare("UPDATE users SET password = ? WHERE email = ?");
+            if (!$update) {
+                throw new RuntimeException('Could not prepare password update.');
+            }
+            $update->bind_param("ss", $new_password, $email);
+            if (!$update->execute()) {
+                throw new RuntimeException('Could not update password.');
+            }
+            $update->close();
+
+            // Invalidate every reset link and every remembered device for this account.
+            $delete_resets = $conn->prepare("DELETE FROM password_resets WHERE email = ?");
+            if (!$delete_resets) {
+                throw new RuntimeException('Could not prepare reset-token invalidation.');
+            }
+            $delete_resets->bind_param("s", $email);
+            if (!$delete_resets->execute()) {
+                throw new RuntimeException('Could not invalidate reset tokens.');
+            }
+            $delete_resets->close();
+
+            $delete_tokens = $conn->prepare("DELETE FROM user_tokens WHERE user_email = ?");
+            if (!$delete_tokens) {
+                throw new RuntimeException('Could not prepare remembered-device invalidation.');
+            }
+            $delete_tokens->bind_param("s", $email);
+            if (!$delete_tokens->execute()) {
+                throw new RuntimeException('Could not invalidate remembered devices.');
+            }
+            $delete_tokens->close();
+
+            if (!$conn->commit()) {
+                throw new RuntimeException('Could not complete password reset.');
+            }
+            $password_reset_complete = true;
+        } catch (Throwable $e) {
+            $conn->rollback();
+            error_log('[password_reset] Password reset failed: ' . $e->getMessage());
+            $password_reset_error = 'This reset link is invalid, expired, or could not be used. Please request a new one.';
+        }
+    }
 }
 ?>
 
@@ -165,6 +222,10 @@ c-150 -152 -457 -461 -681 -688 l-409 -412 -98 65 c-183 120 -416 213 -612
     <?php else: ?>
         <h2>Reset Password</h2>
         <p class="subtitle">Secure your account by choosing a new password below.</p>
+
+        <?php if ($password_reset_error): ?>
+            <p class="subtitle" style="color:#ff6b6b;"><?php echo htmlspecialchars($password_reset_error); ?></p>
+        <?php endif; ?>
 
         <form method="POST">
             <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">

@@ -45,6 +45,8 @@ window.fetchSyllabus = async function() {
     if (window.syllabusCache) {
         apiArea.innerHTML = renderSyllabusPage(window.syllabusCache);
         if (typeof injectSharedDesktopLayoutStyles === 'function') injectSharedDesktopLayoutStyles();
+        sylEnsureFont();
+        if (typeof window.sylInitDesktop === 'function') window.sylInitDesktop();
         restoreSyllabusPageState();
         if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
         if (loader) loader.style.display = 'none';
@@ -63,6 +65,8 @@ window.fetchSyllabus = async function() {
         window.syllabusCache = data;
         apiArea.innerHTML = renderSyllabusPage(data);
         if (typeof injectSharedDesktopLayoutStyles === 'function') injectSharedDesktopLayoutStyles();
+        sylEnsureFont();
+        if (typeof window.sylInitDesktop === 'function') window.sylInitDesktop();
         restoreSyllabusPageState();
 
     } catch (err) {
@@ -90,10 +94,11 @@ window.fetchSyllabus = async function() {
 // ─────────────────────────────────────────────
 function saveSyllabusPageState() {
     const mainContent = document.querySelector('.main-content');
-    const sidebar = document.querySelector('.syl-dt-sidebar-scroll');
-    const panel = document.querySelector('.syl-dt-main-panel');
+    const sidebar = document.querySelector('.syl-sidebar-scroll');
+    const panel = document.querySelector('.syl-body');
     const state = {
         activeTerm:  window._syllabusActiveTerm ?? null,
+        selectedKey: (typeof sylKey === 'function' && window._sylBriefs && window._sylSelectedIdx !== null && window._sylBriefs[window._sylSelectedIdx]) ? sylKey(window._sylBriefs[window._sylSelectedIdx]) : null,
         scrollTop:   mainContent ? mainContent.scrollTop : 0,
         sidebarScroll: sidebar ? sidebar.scrollTop : 0,
         panelScroll: panel ? panel.scrollTop : 0,
@@ -114,11 +119,15 @@ function restoreSyllabusPageState() {
         if (state.activeTerm !== null && state.activeTerm !== undefined) {
             requestAnimationFrame(() => {
                 const tab = document.getElementById(`syl-mob-tab-${state.activeTerm}`)
-                    || document.getElementById(`syl-dt-tab-${state.activeTerm}`);
+                    || document.getElementById(`syl-chip-${state.activeTerm}`);
                 if (tab) tab.click();
+                if (state.selectedKey && document.getElementById('syl-list')) {
+                    const i = (window._sylBriefs || []).findIndex(b => sylKey(b) === state.selectedKey);
+                    if (i >= 0 && Number(window._sylBriefs[i].term) === Number(window._syllabusActiveTerm)) window.selectDesktopSyllabusBrief(i);
+                }
                 const mainContent = document.querySelector('.main-content');
-                const sidebar = document.querySelector('.syl-dt-sidebar-scroll');
-                const panel = document.querySelector('.syl-dt-main-panel');
+                const sidebar = document.querySelector('.syl-sidebar-scroll');
+                const panel = document.querySelector('.syl-body');
                 if (mainContent && Number.isFinite(state.scrollTop)) mainContent.scrollTop = state.scrollTop;
                 if (sidebar && Number.isFinite(state.sidebarScroll)) sidebar.scrollTop = state.sidebarScroll;
                 if (panel && Number.isFinite(state.panelScroll)) panel.scrollTop = state.panelScroll;
@@ -133,8 +142,8 @@ function restoreSyllabusPageState() {
 
 function wireSyllabusScrollState() {
     const mainContent = document.querySelector('.main-content');
-    const sidebar = document.querySelector('.syl-dt-sidebar-scroll');
-    const panel = document.querySelector('.syl-dt-main-panel');
+    const sidebar = document.querySelector('.syl-sidebar-scroll');
+    const panel = document.querySelector('.syl-body');
     [mainContent, sidebar, panel].forEach(el => {
         if (!el || el.dataset.sylScrollWired === '1') return;
         el.dataset.sylScrollWired = '1';
@@ -172,33 +181,12 @@ function renderSyllabusPage(data) {
     const terms      = Object.keys(byTerm).map(Number).sort();
     const activeTerm = terms.includes(currentTerm) ? currentTerm : terms[0];
 
-    // ── Desktop sidebar: term list ──
-    const desktopSidebarHtml = terms.map(t => `
-        <div class="syl-dt-term-item ${t === activeTerm ? 'active' : ''}"
-             id="syl-dt-tab-${t}"
-             onclick="switchSylTab(${t})">
-            <div class="syl-dt-term-name">
-                Term ${t}
-                ${t === currentTerm ? '<span class="syl-current-badge">Current</span>' : ''}
-            </div>
-            <div class="syl-dt-term-count">${byTerm[t].length} subject${byTerm[t].length !== 1 ? 's' : ''}</div>
-        </div>`).join('');
-
-    // ── Desktop panel: panels per term ──
-    const desktopPanelsHtml = terms.map(t => `
-        <div class="syl-dt-panel" id="syl-panel-${t}"
-             style="display:${t === activeTerm ? 'block' : 'none'};">
-            <div class="syl-dt-panel-header">
-                <h2 class="syl-dt-panel-title">
-                    Term ${t}
-                    ${t === currentTerm ? '<span class="syl-current-badge" style="font-size:11px;">Current Term</span>' : ''}
-                </h2>
-                <p class="syl-dt-panel-sub">${byTerm[t].length} subject brief${byTerm[t].length !== 1 ? 's' : ''} posted</p>
-            </div>
-            <div class="syl-cards-grid">
-                ${byTerm[t].map(b => renderBriefCard(b)).join('')}
-            </div>
-        </div>`).join('');
+    // Desktop state (list + detail are rendered client-side by sylRenderDesktopList / selectDesktopSyllabusBrief)
+    window._sylBriefs = briefs;
+    window._sylCurrentTerm = currentTerm;
+    window._syllabusActiveTerm = activeTerm;
+    window._sylTerm = '';
+    window._sylSelectedIdx = null;
 
     // ── Mobile: term tabs ──
     const mobileTabsHtml = terms.map(t => `
@@ -222,96 +210,317 @@ function renderSyllabusPage(data) {
                 .syl-mobile-layout  { display: block !important; }
             }
 
-            /* Outer container */
             .syl-desktop-layout {
+                --syl-listw: 320px;
+                /* Type weights for the whole desktop page (Geist). Tune here. */
+                --syl-w-strong: 500;  /* title, status chip, group labels, primary button */
+                --syl-w-medium: 450;  /* list rows, filter chips, values, small actions */
                 display: flex;
                 gap: 0;
                 min-height: 500px;
+                font-family: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+                font-weight: 400;
+                font-variant-numeric: tabular-nums; /* marks, dates and counts line up */
+                -webkit-font-smoothing: antialiased; /* keeps light weights from looking heavy on dark */
+                -moz-osx-font-smoothing: grayscale;
             }
 
-            /* ── Left sidebar ── */
-            .syl-dt-sidebar {
-                width: 220px;
-                min-width: 200px;
-                max-width: 240px;
+            /* ── List pane ── */
+            .syl-sidebar {
+                width: var(--syl-listw);
+                min-width: 260px;
+                max-width: 420px;
+                flex-shrink: 0;
+                min-height: 0;
                 display: flex;
                 flex-direction: column;
                 overflow: hidden;
-                flex-shrink: 0;
+                background: #12161c;
+                border-right: 1px solid rgba(255,255,255,0.07);
             }
-            .syl-dt-sidebar-header {
-                padding: 16px;
+            .syl-lh {
+                padding: 12px 12px 10px;
                 border-bottom: 1px solid rgba(255,255,255,0.07);
-                font-size: 11px;
-                font-weight: 800;
-                letter-spacing: 1.5px;
-                color: #4fd1c5;
-                text-transform: uppercase;
                 flex-shrink: 0;
             }
-            .syl-dt-sidebar-scroll {
-                flex: 1;
-                overflow-y: auto;
-                padding: 8px 0;
+            .syl-desktop-search-wrap { position: relative; }
+            .syl-desktop-search-wrap svg {
+                position: absolute;
+                left: 11px;
+                top: 50%;
+                transform: translateY(-50%);
+                pointer-events: none;
+                color: #7d8794;
             }
-            .syl-dt-sidebar-scroll::-webkit-scrollbar { width: 8px; }
-            .syl-dt-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
-            .syl-dt-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; transition: background 0.15s ease; }
-            .syl-dt-sidebar-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
-
-            .syl-dt-term-item {
-                padding: 14px 16px;
+            .syl-desktop-search {
+                width: 100%;
+                box-sizing: border-box;
+                height: 34px;
+                padding: 0 10px 0 33px;
+                border-radius: 8px;
+                background: rgba(255,255,255,0.05);
+                border: 1px solid rgba(255,255,255,0.07);
+                color: #e6edf3;
+                font-size: 13px;
+                font-family: inherit;
+                transition: border-color 0.2s;
+            }
+            .syl-desktop-search:focus { outline: none; border-color: #4fd1c5; }
+            .syl-desktop-search::placeholder { color: #7d8794; }
+            .syl-chips { display: flex; gap: 6px; margin-top: 10px; overflow: hidden; }
+            .syl-chip {
+                height: 26px;
+                padding: 0 10px;
+                border-radius: 999px;
+                border: 1px solid rgba(255,255,255,0.07);
+                background: none;
+                color: #9aa4b2;
+                font-family: inherit;
+                font-size: 12px;
+                font-weight: var(--syl-w-medium, 600);
+                white-space: nowrap;
                 cursor: pointer;
-                border-left: 3px solid transparent;
-                transition: all 0.15s ease;
             }
-            .syl-dt-term-item:hover { background: rgba(255,255,255,0.04); }
-            .syl-dt-term-item.active {
-                background: rgba(79,209,197,0.08);
-                border-left-color: #4fd1c5;
+            .syl-chip:hover { color: #e6edf3; }
+            .syl-chip.on {
+                background: rgba(79,209,197,0.1);
+                border-color: rgba(79,209,197,0.4);
+                color: #4fd1c5;
             }
-            .syl-dt-term-name {
-                font-size: 14px;
-                font-weight: 700;
-                color: #c9d1d9;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                margin-bottom: 3px;
-            }
-            .syl-dt-term-item.active .syl-dt-term-name { color: #e2e8f0; }
-            .syl-dt-term-count {
-                font-size: 11px;
-                color: #555e6a;
-            }
-
-            /* ── Right panel ── */
-            .syl-dt-main-panel {
+            .syl-sidebar-scroll {
                 flex: 1;
+                min-height: 0;
                 overflow-y: auto;
+                position: relative;
+                outline: none;
             }
-            .syl-dt-main-panel::-webkit-scrollbar { width: 8px; }
-            .syl-dt-main-panel::-webkit-scrollbar-track { background: transparent; }
-            .syl-dt-main-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; transition: background 0.15s ease; }
-            .syl-dt-main-panel::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
-
-            .syl-dt-panel { padding: 28px 32px; }
-
-            .syl-dt-panel-header { margin-bottom: 24px; }
-            .syl-dt-panel-title {
-                font-size: 20px;
-                font-weight: 900;
-                color: #e2e8f0;
-                margin: 0 0 4px;
+            .syl-sidebar-scroll:focus-visible { outline: 2px solid #4fd1c5; outline-offset: -2px; }
+            .syl-sidebar-scroll::-webkit-scrollbar { width: 8px; }
+            .syl-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+            .syl-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; transition: background 0.15s ease; }
+            .syl-sidebar-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
+            .syl-gh {
+                position: sticky;
+                top: 0;
+                z-index: 1;
+                background: #12161c;
+                font-size: 11px;
+                font-weight: var(--syl-w-strong, 700);
+                letter-spacing: 0.6px;
+                text-transform: uppercase;
+                color: #7d8794;
+                padding: 12px 14px 6px;
+            }
+            .syl-sidebar-item {
                 display: flex;
                 align-items: center;
                 gap: 10px;
+                height: 52px;
+                padding: 0 14px;
+                cursor: pointer;
+                border-left: 3px solid transparent;
             }
-            .syl-dt-panel-sub {
+            .syl-sidebar-item:hover { background: rgba(255,255,255,0.04); }
+            .syl-sidebar-item.active {
+                background: rgba(79,209,197,0.1);
+                border-left-color: #4fd1c5;
+            }
+            .syl-sidebar-status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+            .syl-sidebar-item-info { flex: 1; min-width: 0; }
+            .syl-sidebar-item-title {
                 font-size: 13px;
-                color: #8b949e;
-                margin: 0;
+                font-weight: var(--syl-w-medium, 600);
+                color: #e6edf3;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
+            .syl-sidebar-item-meta {
+                font-size: 12px;
+                color: #7d8794;
+                margin-top: 1px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .syl-row-badge { font-size: 12px; font-weight: var(--syl-w-medium, 600); flex-shrink: 0; }
+            /* the selected row keeps one step more weight so it still reads as current */
+            .syl-sidebar-item.active .syl-sidebar-item-title { font-weight: var(--syl-w-strong, 700); }
+            .syl-list-empty { padding: 40px 20px; text-align: center; color: #7d8794; font-size: 13px; }
+
+            /* ── Resize handle ── */
+            .syl-split {
+                width: 6px;
+                margin-left: -3px;
+                flex-shrink: 0;
+                cursor: col-resize;
+                position: relative;
+                z-index: 2;
+                outline: none;
+            }
+            .syl-split:hover, .syl-split.drag, .syl-split:focus-visible {
+                background: linear-gradient(90deg, transparent 2px, #4fd1c5 2px, #4fd1c5 4px, transparent 4px);
+            }
+
+            /* ── Detail pane ── */
+            .syl-main-panel {
+                flex: 1;
+                min-width: 0;
+                min-height: 0;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+                container-type: inline-size;
+            }
+            .syl-panel-empty {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                color: #555e6a;
+                gap: 12px;
+                padding: 40px;
+            }
+            .syl-panel-empty svg { opacity: 0.3; }
+            .syl-panel-empty p { font-size: 14px; margin: 0; }
+
+            .syl-dh {
+                height: 64px;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 0 28px;
+                border-bottom: 1px solid rgba(255,255,255,0.07);
+                flex-shrink: 0;
+            }
+
+            .syl-dh, .syl-dh *, .syl-dh *::before, .syl-dh *::after { box-sizing: border-box; }
+            /* id prefix so a host-level #api-content-area h2 rule cannot recolour the title */
+            #syl-main-panel .syl-dh-title {
+                margin: 0;
+                min-width: 0;
+                font-family: inherit;
+                font-size: 18px;
+                font-weight: var(--syl-w-strong, 700);
+                line-height: 1.25;
+                color: #e6edf3;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            /* Fixed height + line-height:1 so the chip is the same 23px tall whatever
+               line-height the host page sets, and sits centred on the title. */
+            .syl-panel-status {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                flex-shrink: 0;
+                height: 23px;
+                padding: 0 8px;
+                border-radius: 6px;
+                border: 1px solid rgba(255,255,255,0.07);
+                font-size: 11px;
+                font-weight: var(--syl-w-strong, 700);
+                line-height: 1;
+                letter-spacing: 0.5px;
+                text-transform: uppercase;
+                white-space: nowrap;
+                color: #9aa4b2;
+            }
+            .syl-panel-status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+            .syl-dsp { flex: 1; }
+            .syl-act-text { font-weight: var(--syl-w-medium, 600); font-size: 13px; flex-shrink: 0; }
+            .syl-pri {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                line-height: 1;
+                height: 34px;
+                padding: 0 18px;
+                border-radius: 8px;
+                background: #4fd1c5;
+                color: #0d1117;
+                font-weight: var(--syl-w-strong, 700);
+                font-size: 13px;
+                text-decoration: none;
+                flex-shrink: 0;
+                cursor: pointer;
+            }
+            .syl-pri:hover { background: #38b2ac; }
+            .syl-pri--warn { background: #e67e22; }
+            .syl-pri--warn:hover { background: #d06f1c; }
+            .syl-dbody { flex: 1; min-height: 0; display: flex; }
+            .syl-body { flex: 1; min-width: 0; overflow-y: auto; padding: 28px; }
+            .syl-body::-webkit-scrollbar { width: 8px; }
+            .syl-body::-webkit-scrollbar-track { background: transparent; }
+            .syl-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+            .syl-body::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
+            .syl-read { max-width: 760px; }
+            .syl-lead { color: #c9d1d9; line-height: 1.7; margin: 0 0 20px; font-size: 14px; }
+
+            /* ── Context rail (hides when the detail pane is under 900px wide) ── */
+            .syl-rail {
+                width: 280px;
+                flex-shrink: 0;
+                border-left: 1px solid rgba(255,255,255,0.07);
+                padding: 24px 20px;
+                overflow-y: auto;
+            }
+            .syl-rail h4 {
+                margin: 0 0 14px;
+                font-size: 12px;
+                font-weight: var(--syl-w-strong, 700);
+                letter-spacing: 0.6px;
+                text-transform: uppercase;
+                color: #7d8794;
+            }
+            .syl-kv {
+                display: flex;
+                justify-content: space-between;
+                gap: 10px;
+                padding: 10px 0;
+                border-bottom: 1px solid rgba(255,255,255,0.07);
+                font-size: 13px;
+            }
+            .syl-kv span { color: #9aa4b2; }
+            .syl-kv b { font-weight: var(--syl-w-medium, 600); text-align: right; color: #e6edf3; }
+            @container (max-width: 899px) { .syl-rail { display: none; } }
+
+            /* ── Syllabus: rows, topics, assessment bar, rail ── */
+            .syl-chips { flex-wrap: wrap; row-gap: 6px; overflow: visible; }
+            .syl-chip .syl-cd { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #4fd1c5; margin-right: 6px; vertical-align: 1px; }
+            .syl-gh { display: flex; justify-content: space-between; }
+            .syl-gh i { font-style: normal; font-weight: var(--syl-w-medium, 600); color: #7d8794; }
+            .syl-ft {
+                width: 34px; height: 34px; border-radius: 8px; flex-shrink: 0; display: grid; place-items: center;
+                font-size: 11px; font-weight: var(--syl-w-strong, 700); background: rgba(79,209,197,0.1); color: #4fd1c5;
+            }
+            .syl-tm { font-size: 12px; color: #7d8794; flex-shrink: 0; }
+            .syl-muted { color: #7d8794; font-size: 13px; flex-shrink: 0; }
+            .syl-panel-status--cur { background: rgba(79,209,197,0.1); border-color: rgba(79,209,197,0.35); color: #4fd1c5; }
+            .syl-note2 {
+                border-left: 3px solid rgba(79,209,197,0.4); background: rgba(255,255,255,0.03); border-radius: 8px;
+                padding: 12px 14px; color: #c9d1d9; line-height: 1.65; font-size: 14px; margin-bottom: 8px; white-space: pre-line;
+            }
+            .syl-note2 small { display: block; font-size: 11px; font-weight: var(--syl-w-strong, 700); letter-spacing: 0.6px; text-transform: uppercase; color: #7d8794; margin-bottom: 4px; }
+            .syl-h3 { font-size: 12px; font-weight: var(--syl-w-strong, 700); letter-spacing: 0.6px; text-transform: uppercase; color: #7d8794; margin: 26px 0 10px; }
+            .syl-tl { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 0 28px; }
+            .syl-tl li { display: flex; gap: 14px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.07); font-size: 14px; color: #c9d1d9; }
+            .syl-tl li span { color: #7d8794; font-weight: var(--syl-w-strong, 700); font-size: 12px; width: 18px; flex-shrink: 0; padding-top: 2px; }
+            .syl-stack { display: flex; height: 10px; border-radius: 5px; overflow: hidden; gap: 2px; margin: 4px 0 14px; }
+            .syl-wrow { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.07); font-size: 14px; color: #c9d1d9; }
+            .syl-wrow i { width: 9px; height: 9px; border-radius: 3px; flex-shrink: 0; }
+            .syl-wrow b { margin-left: auto; font-weight: var(--syl-w-strong, 700); }
+            .syl-more {
+                display: block; width: 100%; text-align: left; padding: 9px 0; cursor: pointer;
+                background: none; border: 0; border-bottom: 1px solid rgba(255,255,255,0.07); font-family: inherit;
+            }
+            .syl-more b { display: block; font-size: 13px; font-weight: var(--syl-w-medium, 600); color: #e6edf3; }
+            .syl-more small { color: #7d8794; font-size: 12px; }
+            .syl-more:hover b { color: #4fd1c5; }
+            .syl-rail h4.syl-rail-sub { margin: 28px 0 4px; }
+
 
             /* ══════════════════════════════════════════
                SHARED STYLES
@@ -487,19 +696,29 @@ function renderSyllabusPage(data) {
         </style>
 
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
-        <div class="syl-desktop-layout lqz-flat-layout">
-
-            <!-- Left Sidebar: term list -->
-            <div class="syl-dt-sidebar lqz-flat-sidebar">
-                <div class="syl-dt-sidebar-header">Terms</div>
-                <div class="syl-dt-sidebar-scroll">
-                    ${desktopSidebarHtml}
+        <div class="syl-desktop-layout lqz-flat-layout" id="syl-desktop-layout">
+            <div class="syl-sidebar">
+                <div class="syl-lh">
+                    <div class="syl-desktop-search-wrap">
+                        <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
+                            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                        <input type="text" class="syl-desktop-search" id="sylDesktopSearch"
+                            placeholder="Filter subjects or topics" oninput="sylDesktopSearch(this.value)">
+                    </div>
+                    <div class="syl-chips" id="syl-chips"></div>
                 </div>
+                <div class="syl-sidebar-scroll" id="syl-list" tabindex="0" onkeydown="sylListKeydown(event)"></div>
             </div>
-
-            <!-- Right Panel: subject cards -->
-            <div class="syl-dt-main-panel lqz-flat-panel">
-                ${desktopPanelsHtml}
+            <div class="syl-split" id="syl-split" role="separator" aria-orientation="vertical" aria-label="Resize subject list" tabindex="0"></div>
+            <div class="syl-main-panel lqz-flat-panel" id="syl-main-panel">
+                <div class="syl-panel-empty">
+                    <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fd1c5" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                    </svg>
+                    <p>Select a subject from the left</p>
+                </div>
             </div>
         </div>
 
@@ -587,13 +806,14 @@ function renderBriefCard(brief) {
 window.switchSylTab = function(term) {
     window._syllabusActiveTerm = term;
     saveSyllabusPageState();
-    // ── Desktop panels ──
-    document.querySelectorAll('.syl-dt-panel').forEach(p => p.style.display = 'none');
-    document.querySelectorAll('.syl-dt-term-item').forEach(t => t.classList.remove('active'));
-    const dtPanel = document.getElementById(`syl-panel-${term}`);
-    const dtTab   = document.getElementById(`syl-dt-tab-${term}`);
-    if (dtPanel) dtPanel.style.display = 'block';
-    if (dtTab)   dtTab.classList.add('active');
+    // ── Desktop list + detail ──
+    if (document.getElementById('syl-list')) {
+        window._sylTerm = '';
+        const searchEl = document.getElementById('sylDesktopSearch');
+        if (searchEl) searchEl.value = '';
+        window.sylRenderDesktopList();
+        window.sylSelectFirst();
+    }
 
     // ── Mobile panels ──
     document.querySelectorAll('.syl-mob-panel').forEach(p => p.style.display = 'none');
@@ -603,3 +823,206 @@ window.switchSylTab = function(term) {
     if (mobPanel) mobPanel.style.display = 'block';
     if (mobTab)   mobTab.classList.add('syl-tab-active');
 };
+
+
+// ─────────────────────────────────────────────
+// DESKTOP: list (term chips + search), detail, resize
+// ─────────────────────────────────────────────
+function sylEsc(v) {
+    return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+function sylKey(b) { return `${b.term}|${b.subject}|${b.teacher}`; }
+function sylAbbr(subject) {
+    const w = String(subject || '').trim().split(/\s+/).filter(Boolean);
+    if (!w.length) return '?';
+    return (w.length > 1 ? w[0][0] + w[1][0] : w[0].slice(0, 2)).toUpperCase();
+}
+function sylShortDate(v) {
+    const d = new Date(v);
+    return isNaN(d) ? '' : d.getDate() + ' ' + d.toLocaleString('en-GB', { month: 'short' });
+}
+function sylFullDate(v) {
+    const d = new Date(v);
+    return isNaN(d) ? '' : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+window.sylRenderDesktopList = function () {
+    const list = document.getElementById('syl-list');
+    if (!list) return;
+    const keepScroll = list.scrollTop;
+    const briefs = window._sylBriefs || [];
+    const active = Number(window._syllabusActiveTerm);
+    const cur = Number(window._sylCurrentTerm);
+    const term = window._sylTerm || '';
+    const showActive = !!document.querySelector('#syl-main-panel .syl-dh');
+
+    const terms = [...new Set(briefs.map(b => Number(b.term)))].sort((a, b) => a - b);
+    const chipsEl = document.getElementById('syl-chips');
+    if (chipsEl) {
+        chipsEl.innerHTML = terms.map(t =>
+            `<button type="button" class="syl-chip${t === active ? ' on' : ''}" id="syl-chip-${t}" onclick="switchSylTab(${t})">${t === cur ? '<span class="syl-cd"></span>' : ''}Term ${t}</button>`
+        ).join('');
+    }
+
+    const visible = briefs.map((b, idx) => ({ b, idx })).filter(({ b }) =>
+        Number(b.term) === active &&
+        (!term || `${b.subject || ''} ${b.teacher || ''} ${(b.topics || []).join(' ')}`.toLowerCase().includes(term))
+    );
+
+    let html = `<div class="syl-gh"><span>Term ${active}${active === cur ? ' &middot; Current' : ''}</span><i>${visible.length}</i></div>`;
+    visible.forEach(({ b, idx }) => {
+        const n = (b.topics || []).length;
+        html += `
+            <div class="syl-sidebar-item${showActive && idx === window._sylSelectedIdx ? ' active' : ''}" id="syl-sidebar-${idx}" onclick="selectDesktopSyllabusBrief(${idx})">
+                <span class="syl-ft">${sylEsc(sylAbbr(b.subject))}</span>
+                <div class="syl-sidebar-item-info">
+                    <div class="syl-sidebar-item-title">${sylEsc(b.subject)}</div>
+                    <div class="syl-sidebar-item-meta">${sylEsc(b.teacher)} &middot; ${n} topic${n === 1 ? '' : 's'}</div>
+                </div>
+                <span class="syl-tm">${sylEsc(sylShortDate(b.updated_at))}</span>
+            </div>`;
+    });
+    list.innerHTML = visible.length ? html : `<div class="syl-list-empty">No subjects match.</div>`;
+    list.scrollTop = keepScroll;
+};
+
+window.sylDesktopSearch = function (val) {
+    window._sylTerm = String(val || '').toLowerCase().trim();
+    window.sylRenderDesktopList();
+};
+
+window.sylSelectFirst = function () {
+    const first = document.querySelector('#syl-list .syl-sidebar-item');
+    if (first) window.selectDesktopSyllabusBrief(parseInt(first.id.replace('syl-sidebar-', ''), 10));
+};
+
+window.sylListKeydown = function (e) {
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    const ids = Array.from(document.querySelectorAll('#syl-list .syl-sidebar-item'))
+        .map(el => parseInt(el.id.replace('syl-sidebar-', ''), 10));
+    if (!ids.length) return;
+    e.preventDefault();
+    const cur = ids.indexOf(window._sylSelectedIdx);
+    const next = e.key === 'ArrowDown' ? Math.min(ids.length - 1, cur + 1) : Math.max(0, cur < 0 ? 0 : cur - 1);
+    window.selectDesktopSyllabusBrief(ids[next]);
+    const el = document.getElementById(`syl-sidebar-${ids[next]}`);
+    if (el) el.scrollIntoView({ block: 'nearest' });
+};
+
+window.sylInitSplit = function () {
+    const layout = document.getElementById('syl-desktop-layout');
+    const split = document.getElementById('syl-split');
+    if (!layout || !split) return;
+    const clamp = w => Math.max(260, Math.min(420, w));
+    const apply = w => layout.style.setProperty('--syl-listw', clamp(w) + 'px');
+    const current = () => parseInt(getComputedStyle(layout).getPropertyValue('--syl-listw'), 10) || 320;
+    const persist = () => { try { localStorage.setItem('lqz.listWidth', String(current())); } catch (e) {} };
+    try {
+        const saved = parseInt(localStorage.getItem('lqz.listWidth'), 10);
+        if (saved) apply(saved);
+    } catch (e) {}
+
+    split.addEventListener('mousedown', e => {
+        e.preventDefault();
+        split.classList.add('drag');
+        document.body.style.userSelect = 'none';
+        const left = layout.getBoundingClientRect().left;
+        const move = ev => apply(ev.clientX - left);
+        const up = () => {
+            split.classList.remove('drag');
+            document.body.style.userSelect = '';
+            document.removeEventListener('mousemove', move);
+            document.removeEventListener('mouseup', up);
+            persist();
+        };
+        document.addEventListener('mousemove', move);
+        document.addEventListener('mouseup', up);
+    });
+    split.addEventListener('keydown', e => {
+        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+        e.preventDefault();
+        apply(current() + (e.key === 'ArrowRight' ? 16 : -16));
+        persist();
+    });
+};
+
+window.sylInitDesktop = function () {
+    if (!document.getElementById('syl-list')) return;
+    window._sylTerm = '';
+    window.sylRenderDesktopList();
+    window.sylInitSplit();
+    window.sylSelectFirst();
+};
+
+window.selectDesktopSyllabusBrief = function (idx) {
+    const b = (window._sylBriefs || [])[idx];
+    const panel = document.getElementById('syl-main-panel');
+    if (!b || !panel) return;
+    window._sylSelectedIdx = idx;
+    saveSyllabusPageState();
+    document.querySelectorAll('.syl-sidebar-item').forEach(el => el.classList.remove('active'));
+    const row = document.getElementById(`syl-sidebar-${idx}`);
+    if (row) row.classList.add('active');
+
+    const isCur = Number(b.term) === Number(window._sylCurrentTerm);
+    const topics = b.topics || [];
+    const assess = b.assessments || [];
+    const COL = ['#4fd1c5', '#a78bfa', '#f28c38', '#f472b6', '#fdd663', '#34d399'];
+
+    const noteHtml = b.notes
+        ? `<div class="syl-note2"><small>Note from ${sylEsc(b.teacher)}</small>${sylEsc(b.notes)}</div>` : '';
+    const topicsHtml = topics.length
+        ? `<div class="syl-h3">Syllabus topics</div><ul class="syl-tl">${topics.map((t, i) => `<li><span>${i < 9 ? '0' : ''}${i + 1}</span>${sylEsc(t)}</li>`).join('')}</ul>` : '';
+    const assessHtml = assess.length
+        ? `<div class="syl-h3">Assessment weighting</div>
+           <div class="syl-stack">${assess.map((a, i) => `<div style="flex:${Number(a.weight) || 0};background:${COL[i % COL.length]};"></div>`).join('')}</div>
+           ${assess.map((a, i) => `<div class="syl-wrow"><i style="background:${COL[i % COL.length]};"></i>${sylEsc(a.type)}<b>${sylEsc(a.weight)}%</b></div>`).join('')}` : '';
+    const empty = (!noteHtml && !topicsHtml && !assessHtml) ? `<p class="syl-lead">No details have been posted for this subject yet.</p>` : '';
+
+    const others = (window._sylBriefs || [])
+        .map((x, i) => ({ x, i }))
+        .filter(({ x, i }) => i !== idx && Number(x.term) === Number(b.term))
+        .slice(0, 4)
+        .map(({ x, i }) => `<button type="button" class="syl-more" onclick="selectDesktopSyllabusBrief(${i})"><b>${sylEsc(x.subject)}</b><small>${sylEsc(x.teacher)}</small></button>`)
+        .join('');
+
+    panel.innerHTML = `
+        <div class="syl-dh">
+            <h2 class="syl-dh-title">${sylEsc(b.subject)}</h2>
+            <span class="syl-panel-status">Term ${sylEsc(b.term)}</span>
+            ${isCur ? '<span class="syl-panel-status syl-panel-status--cur">Current</span>' : ''}
+            <span class="syl-dsp"></span>
+            <span class="syl-muted">Updated ${sylEsc(sylFullDate(b.updated_at))}</span>
+        </div>
+        <div class="syl-dbody">
+            <div class="syl-body"><div class="syl-read">${noteHtml}${topicsHtml}${assessHtml}${empty}</div></div>
+            <aside class="syl-rail">
+                <h4>Details</h4>
+                <div class="syl-kv"><span>Teacher</span><b>${sylEsc(b.teacher)}</b></div>
+                <div class="syl-kv"><span>Term</span><b>Term ${sylEsc(b.term)}${isCur ? ' (current)' : ''}</b></div>
+                <div class="syl-kv"><span>Topics</span><b>${topics.length}</b></div>
+                <div class="syl-kv"><span>Assessments</span><b>${assess.length}</b></div>
+                <div class="syl-kv"><span>Updated</span><b>${sylEsc(sylFullDate(b.updated_at))}</b></div>
+                ${others ? `<h4 class="syl-rail-sub">Other subjects in Term ${sylEsc(b.term)}</h4>${others}` : ''}
+            </aside>
+        </div>`;
+
+    const listBox = document.getElementById('syl-list');
+    if (listBox && row) {
+        const top = row.offsetTop, bottom = top + row.offsetHeight;
+        if (top < listBox.scrollTop + 34) listBox.scrollTop = Math.max(0, top - 34);
+        else if (bottom > listBox.scrollTop + listBox.clientHeight) listBox.scrollTop = bottom - listBox.clientHeight;
+    }
+    if (window.learnerPageState) wireSyllabusScrollState();
+};
+
+// Nunito 400/600/700 for the desktop syllabus page. 600 is the medium weight, so load it
+// explicitly instead of letting the browser quietly fall back to 700 (or 400).
+function sylEnsureFont() {
+    if (document.getElementById('syl-nunito-font')) return;
+    const link = document.createElement('link');
+    link.id = 'syl-nunito-font';
+    link.rel = 'stylesheet';
+    link.href = 'https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap';
+    document.head.appendChild(link);
+}

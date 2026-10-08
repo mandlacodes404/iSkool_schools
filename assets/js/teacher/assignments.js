@@ -148,6 +148,18 @@ function renderTeacherAssignments(data) {
         });
     }
 
+    // ── Empty-state copy for the desktop main panel ──
+    const assignmentCount = (data || []).length;
+    const waitingCount = (data || []).filter(a => (a.submitted_count || 0) < (a.total_learners || 0)).length;
+    const emptyTitle = assignmentCount ? 'Pick an assignment' : 'No assignments yet';
+    const emptyBody = assignmentCount
+        ? `${assignmentCount} ${assignmentCount === 1 ? 'assignment' : 'assignments'} across your classes. ` +
+          (waitingCount
+              ? `${waitingCount} ${waitingCount === 1 ? 'is' : 'are'} still waiting on submissions.`
+              : 'Every learner has submitted.')
+        : 'Create one and it will show up in the list, grouped by class.';
+    const emptyCta = assignmentCount ? 'Create an assignment' : 'Create your first assignment';
+
     // ── Build full HTML ──
     let html = `
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
@@ -171,20 +183,20 @@ function renderTeacherAssignments(data) {
             <!-- Right Main Panel -->
             <div class="as-main-panel tchr-flat-panel" id="as-main-panel">
                 <div class="as-panel-empty">
-                    <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fd1c5" stroke-width="1.5" fill="none">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14 2 14 8 20 8"></polyline>
-                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                    </svg>
-                    <p>Select an assignment from the left to view it</p>
+                    <h2 class="as-panel-empty-title">${emptyTitle}</h2>
+                    <p class="as-panel-empty-body">${emptyBody}</p>
+                    <button type="button" class="as-dp-btn as-dp-btn--primary" onclick="openCreateAssignment()">
+                        ${asDpIcon('plus', 14)}${emptyCta}
+                    </button>
                 </div>
             </div>
 
+            <!-- railId lets selectDesktopAssignment() swap this to
+                 selection-specific copy via updateInfoRail(). -->
             ${typeof buildInfoRail === 'function' ? buildInfoRail('About Assignments', `
                 <p>The submissions table shows every learner in the class, even those who haven't submitted yet, so you can see who's still missing.</p>
-                <p>Use <strong>Download Submissions</strong> to export all files for a single assignment in one go.</p>
-            `) : ''}
+                <p>Use <strong>Download all</strong> to export all files for a single assignment in one go.</p>
+            `, 'as-rail') : ''}
         </div>
 
         <div id="deleteAssignmentModal" class="teacher-modal-overlay as-modal-hidden">
@@ -366,6 +378,203 @@ function buildTeacherSubmissionsTableRows(submissions, audioClass) {
     return tableRows;
 }
 
+// ─────────────────────────────────────────────
+// DESKTOP PANEL HELPERS
+// (desktop only: the mobile detail page keeps using
+//  buildTeacherSubmissionsTableRows above)
+// ─────────────────────────────────────────────
+
+/** Small inline stroke icon, same 24x24 / 1.75 stroke family as the sidebar. */
+function asDpIcon(name, size) {
+    const paths = {
+        clip:     '<path d="m21.4 11-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/>',
+        download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>',
+        file:     '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>',
+        plus:     '<path d="M12 5v14M5 12h14"/>'
+    };
+    return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] || ''}</svg>`;
+}
+
+/** get_assignments.php sends due_date as PHP date('d M Y, g:i A'), e.g.
+ * "03 Oct 2026, 4:00 PM". That exact shape is parsed by hand: new Date() on it
+ * isn't reliable in every browser (Safari in particular). Returns null for any
+ * other shape. */
+function parseAssignmentDueDate(raw) {
+    const m = /^(\d{1,2}) ([A-Za-z]{3}) (\d{4}),? (\d{1,2}):(\d{2}) ?(AM|PM)$/i.exec(raw);
+    if (!m) return null;
+    const mon = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec']
+        .indexOf(m[2].toLowerCase());
+    if (mon < 0) return null;
+    let hour = parseInt(m[4], 10) % 12;
+    if (m[6].toUpperCase() === 'PM') hour += 12;
+    return new Date(parseInt(m[3], 10), mon, parseInt(m[1], 10), hour, parseInt(m[5], 10));
+}
+
+/** "Due in 2 days" / "Due today" / "Due 3 days ago". Any other date shape falls
+ * back to new Date(), but only when it has a year and isn't a day/month order
+ * that could be read two ways. Returns '' otherwise, so a wrong pill is never shown. */
+function getAssignmentDueLabel(rawDue) {
+    const raw = String(rawDue || '').trim();
+    if (!raw) return '';
+    let due = parseAssignmentDueDate(raw);
+    if (!due) {
+        if (!/\b(19|20)\d{2}\b/.test(raw)) return '';
+        if (/^\d{1,2}[\/.\-]\d{1,2}[\/.\-]\d{2,4}/.test(raw)) return '';
+        due = new Date(raw);
+    }
+    if (isNaN(due.getTime())) return '';
+    const dayStart = d => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+    const days = Math.round((dayStart(due) - dayStart(new Date())) / 86400000);
+    if (days === 0)  return 'Due today';
+    if (days === 1)  return 'Due tomorrow';
+    if (days === -1) return 'Due yesterday';
+    return days > 1 ? `Due in ${days} days` : `Due ${-days} days ago`;
+}
+
+function getAssignmentFileName(url) {
+    try { return decodeURIComponent(String(url).split('?')[0].split('/').pop()) || ''; }
+    catch (e) { return ''; }
+}
+
+/** The "Submission" cell for one learner. Everything learner-entered is escaped. */
+function buildDesktopSubmissionCell(sub) {
+    const esc = escapeTeacherAssignmentHtml;
+    if (!sub.submitted) return '<span class="as-dp-none">No submission</span>';
+
+    if (sub.submission_type === 'file' && sub.file_url) {
+        return `<a class="as-dp-link" href="${esc(sub.file_url)}" target="_blank" rel="noopener">${asDpIcon('file', 14)}View file</a>`;
+    }
+    if (sub.submission_type === 'text' && sub.text_answer) {
+        return `<button type="button" class="as-dp-tx-btn" aria-expanded="false" onclick="toggleAssignmentTextAnswer(this)">
+                    <span class="as-dp-tx">${esc(sub.text_answer)}</span>
+                </button>`;
+    }
+    if (sub.submission_type === 'audio' && sub.audio_url) {
+        return `<div class="as-dp-audio-wrap">
+                    <audio preload="metadata"><source src="${esc(sub.audio_url)}" type="audio/mpeg"></audio>
+                    <button type="button" class="as-dp-audio" aria-pressed="false"
+                        aria-label="Play recording from ${esc(sub.name)}" onclick="toggleAssignmentAudio(this)">
+                        <span class="as-dp-audio-icon">
+                            <svg class="as-dp-ico-play" viewBox="0 0 24 24" width="10" height="10" fill="currentColor" aria-hidden="true"><path d="M7 4v16l13-8z"/></svg>
+                            <svg class="as-dp-ico-pause" viewBox="0 0 24 24" width="10" height="10" fill="currentColor" aria-hidden="true"><path d="M7 4h3v16H7zM14 4h3v16h-3z"/></svg>
+                        </span>
+                        <span class="as-dp-audio-bar"><i></i></span>
+                        <span class="as-dp-audio-time">Play</span>
+                    </button>
+                </div>`;
+    }
+    return '<span class="as-dp-none">&mdash;</span>';
+}
+
+/** <tr> rows for the desktop submissions table. filter: 'all' | 'in' | 'out'. */
+function buildDesktopSubmissionRows(submissions, filter) {
+    const esc = escapeTeacherAssignmentHtml;
+    const list = (submissions || []).filter(s => filter === 'all' || (filter === 'in') === !!s.submitted);
+
+    if (!list.length) {
+        const msg = filter === 'in'  ? 'No one has submitted yet.'
+                  : filter === 'out' ? 'Everyone has submitted.'
+                  : 'No learners to show.';
+        return `<tr><td colspan="4" class="as-dp-table-empty">${msg}</td></tr>`;
+    }
+
+    return list.map(sub => {
+        const done = !!sub.submitted;
+        const status = done
+            ? `<span class="as-dp-status-main"><span class="as-dp-dot"></span>Submitted</span>${sub.submitted_at ? `<small>${esc(sub.submitted_at)}</small>` : ''}`
+            : `<span class="as-dp-status-main"><span class="as-dp-ring"></span>Not submitted</span>`;
+        return `
+            <tr class="${done ? '' : 'is-missing'}">
+                <td class="as-dp-name">${esc(sub.name)}</td>
+                <td><div class="as-dp-status">${status}</div></td>
+                <td class="as-dp-c-type as-dp-type">${done ? esc(sub.submission_type || '') : ''}</td>
+                <td>${buildDesktopSubmissionCell(sub)}</td>
+            </tr>`;
+    }).join('');
+}
+
+/** Long text answers show two lines and open on click; short ones aren't made clickable. */
+function markShortAssignmentTexts(scope) {
+    scope.querySelectorAll('.as-dp-tx').forEach(span => {
+        if (span.scrollHeight <= span.clientHeight + 1) {
+            const btn = span.parentElement;
+            btn.classList.add('is-short');
+            btn.removeAttribute('aria-expanded');
+            btn.tabIndex = -1;
+        }
+    });
+}
+
+window.toggleAssignmentTextAnswer = function(btn) {
+    if (btn.classList.contains('is-short')) return;
+    btn.setAttribute('aria-expanded', btn.getAttribute('aria-expanded') === 'true' ? 'false' : 'true');
+};
+
+/** Compact play pill backed by a real (hidden) <audio>: one recording plays at a time. */
+window.toggleAssignmentAudio = function(btn) {
+    const audio = btn.parentElement.querySelector('audio');
+    if (!audio) return;
+    if (audio.paused) {
+        audio.play().catch(() => {
+            btn.parentElement.classList.add('is-error');
+            const t = btn.querySelector('.as-dp-audio-time');
+            if (t) t.textContent = "Can't play";
+        });
+    } else {
+        audio.pause();
+    }
+};
+
+function wireAssignmentAudio(scope) {
+    const fmt = s => isFinite(s)
+        ? `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`
+        : '';
+    scope.querySelectorAll('.as-dp-audio-wrap').forEach(wrap => {
+        const audio = wrap.querySelector('audio');
+        const btn   = wrap.querySelector('.as-dp-audio');
+        const time  = wrap.querySelector('.as-dp-audio-time');
+        if (!audio || !btn || !time) return;
+
+        const idle = () => { time.textContent = fmt(audio.duration) || 'Play'; };
+
+        audio.addEventListener('loadedmetadata', () => { if (audio.paused) idle(); });
+        audio.addEventListener('play', () => {
+            scope.querySelectorAll('.as-dp-audio-wrap audio').forEach(a => { if (a !== audio) a.pause(); });
+            btn.setAttribute('aria-pressed', 'true');
+        });
+        audio.addEventListener('pause', () => btn.setAttribute('aria-pressed', 'false'));
+        audio.addEventListener('timeupdate', () => {
+            time.textContent = fmt(audio.currentTime);
+            const p = isFinite(audio.duration) && audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
+            btn.style.setProperty('--as-dp-p', p + '%');
+        });
+        audio.addEventListener('ended', () => {
+            btn.setAttribute('aria-pressed', 'false');
+            btn.style.setProperty('--as-dp-p', '0%');
+            idle();
+        });
+        audio.addEventListener('error', () => {
+            wrap.classList.add('is-error');
+            time.textContent = "Can't play";
+        });
+    });
+}
+
+/** All / Submitted / Missing. Re-renders only the table rows, so scroll position stays put. */
+window.setAssignmentSubFilter = function(filter) {
+    const assignment = (window._allAssignmentsFlat || [])[window._asSelectedIndex];
+    const body = document.getElementById('as-dp-rows');
+    if (!assignment || !body) return;
+
+    window._asSubFilter = filter;
+    body.innerHTML = buildDesktopSubmissionRows(assignment.submissions, filter);
+    document.querySelectorAll('#as-dp-filter button').forEach(b => {
+        b.setAttribute('aria-pressed', String(b.dataset.filter === filter));
+    });
+    wireAssignmentAudio(body);
+    markShortAssignmentTexts(body);
+};
+
 window.selectDesktopAssignment = function(index) {
     // Update sidebar active state
     document.querySelectorAll('.as-sidebar-item').forEach(el => el.classList.remove('active'));
@@ -383,83 +592,123 @@ window.selectDesktopAssignment = function(index) {
     const panel = document.getElementById('as-main-panel');
     if (!panel) return;
 
-    const { percent: subPercent, color: progressColor, submitted: subCount, total: totalCount } =
+    window._asSelectedIndex = index;
+    window._asSubFilter = 'all';
+
+    const esc = escapeTeacherAssignmentHtml;
+    const { percent, color, submitted: subCount, total: totalCount } =
         getTeacherAssignmentProgress(assignment);
 
-    const tableRows = buildTeacherSubmissionsTableRows(assignment.submissions, 'as-sub-audio--panel');
+    const subs     = assignment.submissions || [];
+    const inCount  = subs.filter(s => s.submitted).length;
+    const outCount = subs.length - inCount;
+
+    const dueLabel   = getAssignmentDueLabel(assignment.due_date);
+    const desc       = String(assignment.description || '').trim();
+    const attachName = assignment.file_url ? getAssignmentFileName(assignment.file_url) : '';
+
+    const submissionsHtml = (totalCount === 0 && subs.length === 0)
+        ? `<p class="as-dp-note">No learners are in this class yet, so there is nothing to submit.</p>`
+        : `
+            <div class="as-dp-prog">
+                <div class="as-dp-prog-num">${subCount} of ${totalCount}<span>${percent}% submitted</span></div>
+                ${outCount > 0
+                    ? `<button type="button" class="as-dp-btn" onclick="setAssignmentSubFilter('out')">Show the ${outCount} missing</button>`
+                    : `<span class="as-dp-prog-done">Everyone has submitted</span>`}
+            </div>
+            <div class="as-dp-track"><i style="--as-dp-w:${percent}%;--as-dp-c:${color};"></i></div>
+
+            <div class="as-dp-tools">
+                <div class="as-dp-seg" id="as-dp-filter" role="group" aria-label="Filter submissions">
+                    <button type="button" data-filter="all" aria-pressed="true"  onclick="setAssignmentSubFilter('all')">All ${subs.length}</button>
+                    <button type="button" data-filter="in"  aria-pressed="false" onclick="setAssignmentSubFilter('in')">Submitted ${inCount}</button>
+                    <button type="button" data-filter="out" aria-pressed="false" onclick="setAssignmentSubFilter('out')">Missing ${outCount}</button>
+                </div>
+            </div>
+
+            <table class="as-dp-table" aria-label="Learner submissions">
+                <colgroup>
+                    <col class="as-dp-c-name"><col class="as-dp-c-status"><col class="as-dp-c-type"><col>
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th scope="col">Learner</th>
+                        <th scope="col">Status</th>
+                        <th scope="col" class="as-dp-c-type">Type</th>
+                        <th scope="col">Submission</th>
+                    </tr>
+                </thead>
+                <tbody id="as-dp-rows">${buildDesktopSubmissionRows(subs, 'all')}</tbody>
+            </table>`;
 
     panel.innerHTML = `
-        <div class="as-panel-content">
-            <div class="as-panel-header">
-                <div>
-                    <div class="as-panel-title">${assignment.title}</div>
-                    <div class="as-panel-meta">
-                        <span>${assignment.class_name}</span>
-                        <span>&bull;</span>
-                        <span>Due ${assignment.due_date}</span>
-                    </div>
+        <div class="as-dp">
+            <p class="as-dp-crumb">${esc(assignment.class_name)}</p>
+
+            <div class="as-dp-head">
+                <div class="as-dp-title-wrap">
+                    <h2 class="as-dp-title">${esc(assignment.title)}</h2>
                 </div>
-                <div class="as-panel-actions">
+                <div class="as-dp-actions">
                     ${assignment.file_url ? `
-                        <a href="${assignment.file_url}" target="_blank" class="teacher-assignment-file-link">
-                            <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none">
-                                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
-                            </svg>
-                            Attachment
+                        <a class="as-dp-btn" href="${esc(assignment.file_url)}" target="_blank" rel="noopener"${attachName ? ` title="${esc(attachName)}"` : ''}>
+                            ${asDpIcon('clip', 14)}Attachment
                         </a>` : ''}
-                    <button class="teacher-assignment-download-btn"
+                    <button type="button" class="as-dp-btn as-dp-btn--primary"
+                        ${subCount > 0 ? '' : 'disabled title="No submissions yet"'}
                         onclick="downloadSubmissions(${assignment.id})">
-                        <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                            <polyline points="7 10 12 15 17 10"></polyline>
-                            <line x1="12" y1="15" x2="12" y2="3"></line>
-                        </svg>
-                        Download All
-                    </button>
-                    <button class="as-panel-delete-btn" onclick="confirmDeleteAssignment(${assignment.id})">
-                        <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none">
-                            <polyline points="3 6 5 6 21 6"></polyline>
-                            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
-                            <path d="M10 11v6"></path>
-                            <path d="M14 11v6"></path>
-                            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
-                        </svg>
-                        Delete
+                        ${asDpIcon('download', 14)}Download all
                     </button>
                 </div>
             </div>
 
-            <!-- Progress -->
-            <div class="as-panel-progress-row">
-                <div class="as-panel-progress-bar">
-                    <div class="as-panel-progress-fill"
-                        style="--as-progress-width:${subPercent}%;--as-progress-color:${progressColor};"></div>
+            <div class="as-dp-due">
+                ${dueLabel ? `<span class="as-dp-pill">${dueLabel}</span><span>${esc(assignment.due_date)}</span>`
+                           : `<span>Due ${esc(assignment.due_date)}</span>`}
+            </div>
+
+            <section class="as-dp-section">
+                <h3 class="as-dp-h">Instructions</h3>
+                <p class="as-dp-desc${desc ? '' : ' is-empty'}">${desc ? esc(desc) : 'No instructions were added.'}</p>
+            </section>
+
+            <section class="as-dp-section">
+                <h3 class="as-dp-h">Submissions</h3>
+                ${submissionsHtml}
+            </section>
+
+            <section class="as-dp-section">
+                <h3 class="as-dp-h">Delete</h3>
+                <div class="as-dp-row">
+                    <p>Permanently remove this assignment and every submission. This can't be undone.</p>
+                    <button type="button" class="as-dp-btn as-dp-btn--danger" onclick="confirmDeleteAssignment(${assignment.id})">Delete assignment</button>
                 </div>
-                <span class="as-panel-progress-label" style="--as-progress-color:${progressColor};">
-                    ${subCount}/${totalCount} submitted
-                </span>
-            </div>
-
-            <!-- Description -->
-            <div class="as-panel-desc">
-                ${assignment.description.replace(/\n/g, '<br>')}
-            </div>
-
-            <!-- Submissions Table -->
-            <div class="teacher-grades-table-wrapper">
-                <table class="teacher-grades-table">
-                    <thead>
-                        <tr>
-                            <th>Learner</th>
-                            <th>Status</th>
-                            <th>Type</th>
-                            <th>Submission</th>
-                        </tr>
-                    </thead>
-                    <tbody>${tableRows}</tbody>
-                </table>
-            </div>
+            </section>
         </div>`;
+
+    panel.scrollTop = 0;
+    const rowsEl = document.getElementById('as-dp-rows');
+    if (rowsEl) {
+        wireAssignmentAudio(rowsEl);
+        markShortAssignmentTexts(rowsEl);
+    }
+
+    // Swap the info rail to reflect this assignment's submission state,
+    // instead of leaving it on the generic page-level copy.
+    if (typeof updateInfoRail === 'function') {
+        const missing = totalCount - subCount;
+        if (missing > 0) {
+            updateInfoRail('as-rail', 'Submissions Pending', `
+                <p><strong>${missing}</strong> of ${totalCount} learners in ${esc(assignment.class_name)} haven't submitted yet — they're still shown in the table below so you can follow up.</p>
+                <p>Use <strong>Download all</strong> once you're ready to grade what's in so far.</p>
+            `);
+        } else {
+            updateInfoRail('as-rail', 'All Submissions In', `
+                <p>All ${totalCount} learners in ${esc(assignment.class_name)} have submitted this assignment.</p>
+                <p>Use <strong>Download all</strong> to export everything in one go.</p>
+            `);
+        }
+    }
 };
 
 // ─────────────────────────────────────────────

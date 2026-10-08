@@ -31,6 +31,9 @@ jobs:
             **/sandbox.iskool.online/**
             **/cgi-bin/**
             **/.env*
+            **/_archive/**
+            **/*.sql
+            **/php_errors.log
             composer.lock
             .gitignore
           log-level: verbose

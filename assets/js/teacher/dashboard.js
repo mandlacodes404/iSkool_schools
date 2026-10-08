@@ -105,12 +105,12 @@ function injectSharedTeacherDesktopLayoutStyles() {
 }
 
 /**
- * Builds the markup for the shared right-hand info rail — a fixed,
- * always-visible third column reserved for contextual help text (and
- * later, potentially, an AI/chat assistant). Call
- * injectSharedTeacherDesktopLayoutStyles() once per page load (already
- * required for the flat layout) before using this; it owns the rail's
- * CSS too.
+ * Builds the markup for the shared right-hand info rail — a fixed
+ * third column reserved for contextual help text (and later,
+ * potentially, an AI/chat assistant), collapsible via the chevron
+ * button in its header. Call injectSharedTeacherDesktopLayoutStyles()
+ * once per page load (already required for the flat layout) before
+ * using this; it owns the rail's CSS too.
  * @param {string} title    - header label, e.g. "About Quizzes"
  * @param {string} bodyHtml - one or more <p> elements (can include <strong>)
  * @param {string} [railId] - optional id on the header/body elements, so a
@@ -122,18 +122,50 @@ function injectSharedTeacherDesktopLayoutStyles() {
 window.buildInfoRail = function(title, bodyHtml, railId) {
     const headerId = railId ? ` id="${railId}-header"` : '';
     const bodyId    = railId ? ` id="${railId}-body"`   : '';
+    const isCollapsed = !!window.teacherSectionState?.infoRailCollapsed;
     return `
-        <div class="tchr-info-rail">
+        <div class="tchr-info-rail${isCollapsed ? ' collapsed' : ''}">
             <div class="tchr-info-rail-header"${headerId}>
-                <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="16" x2="12" y2="12"></line>
-                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                </svg>
-                <span${railId ? ` id="${railId}-header-text"` : ''}>${title}</span>
+                <div class="tchr-info-rail-header-text">
+                    <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                    <span${railId ? ` id="${railId}-header-text"` : ''}>${title}</span>
+                </div>
+                <button type="button" class="tchr-info-rail-toggle"
+                    onclick="toggleInfoRail(this)"
+                    aria-label="${isCollapsed ? 'Expand panel' : 'Collapse panel'}"
+                    aria-expanded="${isCollapsed ? 'false' : 'true'}">
+                    <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
             </div>
             <div class="tchr-info-rail-body"${bodyId}>${bodyHtml}</div>
         </div>`;
+};
+
+/**
+ * Toggles the shared info rail between expanded and collapsed. Persists
+ * the choice in window.teacherSectionState.infoRailCollapsed — shared
+ * across all six pages that render this rail (Announcements,
+ * Assignments, Quizzes, Resources, Syllabus, Evaluations, Grades), same
+ * as collapsedGroups, so collapsing it on one page keeps it collapsed
+ * when you switch to another.
+ * @param {HTMLElement} toggleBtn - the button that was clicked (inside .tchr-info-rail-header)
+ */
+window.toggleInfoRail = function(toggleBtn) {
+    const rail = toggleBtn?.closest('.tchr-info-rail');
+    if (!rail) return;
+
+    const isCollapsed = rail.classList.toggle('collapsed');
+    toggleBtn.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
+    toggleBtn.setAttribute('aria-label', isCollapsed ? 'Expand panel' : 'Collapse panel');
+
+    window.teacherSectionState.infoRailCollapsed = isCollapsed;
+    window.persistTeacherSectionState();
 };
 
 /**
@@ -526,6 +558,11 @@ window.handleTeacherHeaderBack = function(event) {
  *   collapsed, shared across every page that uses collapsible groups
  *   (Quizzes, Grades, Resources, Announcements, Assignments) since a
  *   group id is unique per page+class already.
+ * - infoRailCollapsed: whether the shared right-hand info rail
+ *   (buildInfoRail/toggleInfoRail) is collapsed. One flag shared across
+ *   every page that renders the rail, not per-page — it's one physical
+ *   panel the teacher is choosing to hide or show, same reasoning as
+ *   collapsedGroups being shared rather than duplicated per page.
  *
  * Persisted to sessionStorage (not just kept in memory) so a plain
  * page refresh — not only switching between sidebar links — restores
@@ -544,10 +581,11 @@ function loadTeacherSectionState() {
         return {
             selection: parsed.selection || {},
             scrollTop: parsed.scrollTop || {},
-            collapsedGroups: new Set(parsed.collapsedGroups || [])
+            collapsedGroups: new Set(parsed.collapsedGroups || []),
+            infoRailCollapsed: !!parsed.infoRailCollapsed
         };
     } catch (e) {
-        return { selection: {}, scrollTop: {}, collapsedGroups: new Set() };
+        return { selection: {}, scrollTop: {}, collapsedGroups: new Set(), infoRailCollapsed: false };
     }
 }
 
@@ -556,7 +594,8 @@ window.teacherSectionState = loadTeacherSectionState();
 /**
  * Writes the current in-memory teacherSectionState to sessionStorage.
  * Called after every mutation (selection change, scroll, group
- * toggle) so a refresh at any point picks up the latest state.
+ * toggle, info rail toggle) so a refresh at any point picks up the
+ * latest state.
  */
 window.persistTeacherSectionState = function() {
     try {
@@ -564,7 +603,8 @@ window.persistTeacherSectionState = function() {
         sessionStorage.setItem(TEACHER_SECTION_STATE_KEY, JSON.stringify({
             selection: s.selection,
             scrollTop: s.scrollTop,
-            collapsedGroups: Array.from(s.collapsedGroups)
+            collapsedGroups: Array.from(s.collapsedGroups),
+            infoRailCollapsed: s.infoRailCollapsed
         }));
     } catch (e) {
         // sessionStorage can throw in rare cases (private browsing quota,

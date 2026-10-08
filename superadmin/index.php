@@ -24,6 +24,58 @@ if (file_exists($env_file)) {
 session_start();
 date_default_timezone_set('Africa/Johannesburg');
 
+if (empty($_SESSION['sa_csrf_token'])) {
+    $_SESSION['sa_csrf_token'] = bin2hex(random_bytes(32));
+}
+
+function verify_sa_csrf_token(): void {
+    $token = $_POST['sa_csrf_token'] ?? '';
+    if (!is_string($token) || !isset($_SESSION['sa_csrf_token'])
+        || !hash_equals($_SESSION['sa_csrf_token'], $token)) {
+        http_response_code(403);
+        exit('Invalid CSRF token.');
+    }
+}
+
+function superadmin_login_allowed(): bool {
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $file = sys_get_temp_dir() . '/iskool_sa_rate_' . hash('sha256', $ip) . '.json';
+    $now = time();
+    $window = 15 * 60;
+    $maxAttempts = 5;
+
+    $handle = @fopen($file, 'c+');
+    if (!$handle) {
+        return false;
+    }
+
+    if (!flock($handle, LOCK_EX)) {
+        fclose($handle);
+        return false;
+    }
+
+    $raw = stream_get_contents($handle);
+    $data = json_decode($raw ?: '{}', true);
+    if (!is_array($data) || ($data['window'] ?? 0) + $window <= $now) {
+        $data = ['window' => $now, 'attempts' => 0];
+    }
+
+    if (($data['attempts'] ?? 0) >= $maxAttempts) {
+        flock($handle, LOCK_UN);
+        fclose($handle);
+        return false;
+    }
+
+    $data['attempts']++;
+    ftruncate($handle, 0);
+    rewind($handle);
+    fwrite($handle, json_encode($data));
+    fflush($handle);
+    flock($handle, LOCK_UN);
+    fclose($handle);
+    return true;
+}
+
 // ============================================================
 //  ⚙️  CONFIGURATION — Fill these before uploading
 // ============================================================
@@ -554,13 +606,20 @@ function onboardSchool(array $data): array {
 //  AUTH HANDLERS
 // ============================================================
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sa_login'])) {
-    if ($_POST['sa_password'] === SA_PASSWORD) {
+    verify_sa_csrf_token();
+
+    if (!superadmin_login_allowed()) {
+        $login_error = 'Too many login attempts. Please try again later.';
+    } elseif (hash_equals((string)SA_PASSWORD, (string)($_POST['sa_password'] ?? ''))) {
+        session_regenerate_id(true);
         $_SESSION['sa_auth'] = true;
+        $_SESSION['sa_login_at'] = time();
     } else {
         $login_error = 'Incorrect password. Try again.';
     }
 }
 if (isset($_POST['sa_logout'])) {
+    verify_sa_csrf_token();
     session_destroy();
     header('Location: index.php');
     exit;
@@ -572,6 +631,8 @@ $authed = !empty($_SESSION['sa_auth']);
 // ============================================================
 $result = null;
 if ($authed && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_school'])) {
+    verify_sa_csrf_token();
+
     $required = ['school_name','subdomain','admin_first_name','admin_last_name','admin_email','admin_password'];
     $missing  = array_filter($required, fn($f) => empty(trim($_POST[$f] ?? '')));
     if ($missing) {
@@ -731,6 +792,7 @@ if ($authed) {
       <div class="login-error"><?= htmlspecialchars($login_error) ?></div>
     <?php endif; ?>
     <form method="POST">
+      <input type="hidden" name="sa_csrf_token" value="<?= htmlspecialchars($_SESSION['sa_csrf_token'], ENT_QUOTES) ?>">
       <div class="form-group" style="margin-bottom:16px;">
         <label>Panel Password</label>
         <input type="password" name="sa_password" placeholder="Enter password" autofocus>
@@ -750,6 +812,7 @@ if ($authed) {
   <div class="topbar-right">
     <span class="badge">PRIVATE PANEL</span>
     <form method="POST" style="margin:0;">
+      <input type="hidden" name="sa_csrf_token" value="<?= htmlspecialchars($_SESSION['sa_csrf_token'], ENT_QUOTES) ?>">
       <button type="submit" name="sa_logout" class="btn btn-danger">Sign Out</button>
     </form>
   </div>
@@ -815,6 +878,7 @@ if ($authed) {
     </div>
     <div class="section-body">
       <form method="POST">
+        <input type="hidden" name="sa_csrf_token" value="<?= htmlspecialchars($_SESSION['sa_csrf_token'], ENT_QUOTES) ?>">
         <div class="form-grid">
 
           <div class="form-group full">

@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#faf9f5" />
+<meta name="description" content="iSkool is a modern platform for schools to manage, teach, communicate and help every learner thrive." />
+<title>iSkool — Wiggle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --paper:#faf9f5; --ink:#0a1b31; --muted:#5b697d; --line:rgba(12,29,51,.1);
+  --font:Manrope,Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --pad:64px; --gutter:max(var(--pad),calc((100% - 1160px)/2 + var(--pad)));
+}
+*{box-sizing:border-box}
+body{margin:0;min-width:320px;min-height:100vh;display:flex;flex-direction:column;color:var(--ink);font-family:var(--font);-webkit-font-smoothing:antialiased;
+  background:radial-gradient(circle at 8% 0,rgba(255,255,255,.98),transparent 34rem),radial-gradient(circle at 92% 38%,rgba(255,246,232,.5),transparent 30rem),var(--paper)}
+body.menu-open{overflow:hidden}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid rgba(74,126,206,.6);outline-offset:5px;border-radius:4px}
+::selection{background:rgba(119,164,232,.22)}
+
+/* top nav (same as the home page, no motion) */
+header{position:sticky;top:0;z-index:20;height:96px;padding:0 var(--gutter);display:flex;align-items:center;justify-content:space-between;background:rgba(250,249,245,.92)}
+.logo{display:block;width:142px;height:auto}
+.desktop-nav{display:flex;gap:34px;font-size:14px;font-weight:500}
+.desktop-nav a:hover{opacity:.5}
+.menu-button{width:24px;height:20px;padding:0;border:0;background:none;display:none;flex-direction:column;justify-content:center;gap:7px;cursor:pointer}
+.menu-button span{display:block;height:1.5px;width:100%;background:#526278}
+.menu-button[aria-expanded=true] span:first-child{transform:translateY(4.25px) rotate(45deg)}
+.menu-button[aria-expanded=true] span:last-child{transform:translateY(-4.25px) rotate(-45deg)}
+.mobile-panel{position:fixed;inset:0;z-index:15;display:none;place-items:center;padding:90px 34px 34px;background:rgba(250,249,245,.985)}
+.mobile-panel.open{display:grid}
+.mobile-links{width:min(420px,100%);display:grid}
+.mobile-links a{padding:14px 0;font-size:34px;letter-spacing:-1.5px;border-bottom:1px solid var(--line)}
+
+/* text only */
+main{flex:1;padding:72px var(--gutter) 96px}
+.copy{max-width:640px}
+.copy p{margin:0 0 26px;font-size:24px;line-height:1.38;letter-spacing:-.02em;font-weight:400}
+.copy .lead{font-weight:600}
+.copy .go{margin-top:72px;font-weight:600}
+.copy .go a{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:6px}
+footer{padding:0 var(--gutter) 28px;color:#738095;font-size:13px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px 28px}
+footer nav{display:flex;gap:28px}
+footer a:hover{color:var(--ink)}
+
+@media (max-width:800px){
+  :root{--pad:24px}
+  header{height:76px}
+  .logo{width:118px}
+  .desktop-nav{display:none}
+  .menu-button{display:flex}
+  main{padding:56px var(--gutter) 72px}
+  .copy p{font-size:20px;line-height:1.4;margin-bottom:22px}
+  .copy .go{margin-top:56px}
+}
+</style>
+</head>
+<body>
+<header>
+  <a href="wiggle.html" aria-label="Wiggle home"><img class="logo" src="enthropy/wiggle_colored.svg" alt="Wiggle" /></a>
+  <nav class="desktop-nav" aria-label="Primary">
+    <a href="wiggle.html#products">Products</a><a href="wiggle.html#stories">Stories</a><a href="about.html">About</a><a href="contact.html">Contact</a>
+  </nav>
+  <button class="menu-button" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-panel"><span></span><span></span></button>
+</header>
+
+<div class="mobile-panel" id="mobile-panel" aria-hidden="true">
+  <nav class="mobile-links" aria-label="Mobile">
+    <a href="wiggle.html#products">Products</a><a href="wiggle.html#stories">Stories</a><a href="about.html">About</a><a href="contact.html">Contact</a>
+  </nav>
+</div>
+
+<main>
+  <div class="copy">
+    <p class="lead">iSkool is a modern platform for schools to manage, teach, communicate and help every learner thrive. It brings teachers, learners and school staff together in one place.</p>
+    <p>Teachers use it to set quizzes and term tests, see results as they come in, and keep a clear record of how every learner is doing. Term tests count toward the term mark.</p>
+    <p>Learners have their own simple space to take their tests and see where they stand, and teachers can send announcements to keep a class informed.</p>
+    <p class="go">Want iSkool at your school? <a href="contact.html">Get in touch</a></p>
+  </div>
+</main>
+
+<footer>
+  <span>Copyright © 2026 Wiggle</span>
+  <nav aria-label="Legal"><a href="privacy-policy.html">Privacy policy</a><a href="terms-of-service.html">Terms of service</a></nav>
+</footer>
+
+<script>
+(() => {
+  const btn = document.querySelector('.menu-button'), panel = document.getElementById('mobile-panel');
+  const setMenu = open => {
+    document.body.classList.toggle('menu-open', open);
+    panel.classList.toggle('open', open);
+    panel.setAttribute('aria-hidden', String(!open));
+    btn.setAttribute('aria-expanded', String(open));
+    btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+  };
+  btn.addEventListener('click', () => setMenu(btn.getAttribute('aria-expanded') !== 'true'));
+  panel.querySelectorAll('a').forEach(a => a.addEventListener('click', () => setMenu(false)));
+  matchMedia('(min-width:801px)').addEventListener('change', e => { if (e.matches) setMenu(false); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') setMenu(false); });
+})();
+</script>
+</body>
+</html>

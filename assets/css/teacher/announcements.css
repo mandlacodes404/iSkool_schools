@@ -607,12 +607,19 @@
     width: 100%;
     border-collapse: collapse;
     font-size: 14px;
+    /* Deliberately NOT Nunito. A gradebook is a record, not editorial
+       content — plain system UI type reads as "trust me" (unambiguous
+       numerals, no rounded/decorative personality) the way Canvas,
+       PowerSchool etc. do. Scoped to this table only; the rest of the
+       app keeps Nunito. */
+    font-family: -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
+    font-variant-numeric: tabular-nums;
 }
 
 .teacher-grades-table th {
     background: rgba(255,255,255,0.04);
     color: #4fd1c5;
-    font-weight: 700;
+    font-weight: 600;
     padding: 12px 16px;
     text-align: left;
     border-bottom: 1px solid rgba(255,255,255,0.06);
@@ -637,7 +644,11 @@
     padding: 3px 10px;
     border-radius: 20px;
     font-size: 13px;
-    font-weight: 700;
+    /* Was 700 — a percentage is a fact, not a callout. Pill shape and
+       color (grade-high/mid/low below) are untouched per request; only
+       the type weight steps back so it reads as reported, not designed. */
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
 }
 
 .grade-high { background: rgba(30,215,96,0.15);  color: #1ed760; }

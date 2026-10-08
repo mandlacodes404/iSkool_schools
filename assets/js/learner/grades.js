@@ -141,7 +141,7 @@ window.fetchGrades = async function () {
     if (typeof window.setActive === 'function') window.setActive('grades');
 
     if (typeof window.configureHeader === 'function') {
-        window.configureHeader({ title: 'Grades', mode: 'standard', color: '#68d391' });
+        window.configureHeader({ title: 'Grades', mode: 'standard' });
     }
 
     const apiArea = document.getElementById('api-content-area');
@@ -193,72 +193,10 @@ function renderGrades(data) {
     // -- the inline <style id="grades-styles"> block that used to be injected
     // here was removed as part of the inline-style cleanup.)
 
-    // ── BUILD SIDEBAR ITEMS (collapsible groups, one quiz row each) ──────────
-    window._allGradesQuizzesFlat = [];
-    let sidebarItemsHtml = '';
-    if (groups.length === 0) {
-        sidebarItemsHtml = `<p class="grades-sidebar-empty">No results yet.</p>`;
-    } else {
-        let flatIdx = 0;
-        groups.forEach((group, gi) => {
-            const quizzes = group.quizzes;
-            const groupId = `grades-dg-${gi}`;
-            sidebarItemsHtml += `
-                <div class="grades-dt-teacher-group">
-                    <button type="button" class="grades-dt-teacher-header" onclick="toggleGradesDesktopGroup('${groupId}', this)">
-                        <svg class="grades-dt-teacher-chevron" viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none">
-                            <polyline points="9 18 15 12 9 6"></polyline>
-                        </svg>
-                        <svg class="grades-dt-teacher-folder-icon" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-                        </svg>
-                        <span class="grades-dt-teacher-name">${escHtml(group.group)}</span>
-                        <span class="grades-dt-teacher-count">${quizzes.length}</span>
-                    </button>
-                    <div class="grades-dt-teacher-body collapsed" id="${groupId}">
-                        <div class="grades-dt-subject-item grades-dt-term-row" id="grades-dt-termbtn-${gi}"
-                             onclick="selectDesktopGradeTerm(${gi})">
-                            <div class="grades-dt-subject-icon">
-                                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#68d391" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                                    <rect x="4" y="2" width="16" height="20" rx="2"/>
-                                    <line x1="8" y1="6" x2="16" y2="6"/>
-                                    <line x1="8" y1="10" x2="16" y2="10"/>
-                                    <line x1="8" y1="14" x2="16" y2="14"/>
-                                </svg>
-                            </div>
-                            <div class="grades-dt-subject-info">
-                                <div class="grades-dt-subject-name">Term Marks</div>
-                            </div>
-                        </div>`;
-            quizzes.forEach((q, qi) => {
-                const published = q.publish_marks == 1;
-                const pct       = q.total > 0 ? Math.round((q.score / q.total) * 100) : 0;
-                const pillClass = !published ? 'hidden-score' : pct >= 75 ? 'high' : pct >= 50 ? 'mid' : 'low';
-                const pillText  = published ? `${pct}%` : 'Pending';
-
-                sidebarItemsHtml += `
-                        <div class="grades-dt-subject-item" id="grades-dt-item-${flatIdx}"
-                             data-grade-quiz-index="${flatIdx}"
-                             data-title="${escAttr(q.quiz_title || '').toLowerCase()}"
-                             onclick="selectDesktopGradeQuiz(${flatIdx})">
-                            <div class="grades-dt-subject-icon">
-                                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#68d391" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                                    <line x1="18" y1="20" x2="18" y2="10"/>
-                                    <line x1="12" y1="20" x2="12" y2="4"/>
-                                    <line x1="6"  y1="20" x2="6"  y2="14"/>
-                                </svg>
-                            </div>
-                            <div class="grades-dt-subject-info">
-                                <div class="grades-dt-subject-name">${escHtml(q.quiz_title)}</div>
-                            </div>
-                            <span class="quiz-score-pill ${pillClass}">${pillText}</span>
-                        </div>`;
-                window._allGradesQuizzesFlat.push({ quiz: q, groupIndex: gi, quizIndexInGroup: qi });
-                flatIdx++;
-            });
-            sidebarItemsHtml += `</div></div>`;
-        });
-    }
+    // Desktop state (list + detail are rendered client-side by grRenderDesktopList / selectDesktopGradeSubject)
+    window._grGroups = groups;
+    window._grCurrentTerm = currentTerm;
+    window._grTarget = targetEmail;
 
     // ── BUILD MOBILE HTML (unchanged accordion) ──────────────────────────────
     let mobileHtml = `<div class="grades-wrap">`;
@@ -362,40 +300,40 @@ function renderGrades(data) {
 
     // Desktop layout
     html += `
-    <div class="grades-desktop-layout lqz-flat-layout">
-        <!-- Sidebar -->
-        <div class="grades-dt-sidebar lqz-flat-sidebar">
-            <div class="grades-dt-search-wrap">
-                <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                </svg>
-                <input type="text" class="grades-search" id="gradesSearchDt"
-                    placeholder="Search quiz..." oninput="gradesSearchDesktop(this.value)">
+    <div class="grades-desktop-layout lqz-flat-layout" id="gr-desktop-layout">
+        <div class="gr-sidebar">
+            <div class="gr-lh">
+                <div class="gr-desktop-search-wrap">
+                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
+                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    <input type="text" class="gr-desktop-search" id="gradesSearchDt"
+                        placeholder="Filter subjects" oninput="gradesSearchDesktop(this.value)">
+                </div>
+                <div class="gr-chips" id="gr-chips"></div>
             </div>
-            <button class="grades-dt-report-btn"
-                    onclick="generateGradesReport('${targetEmail}')">
-                <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                    <polyline points="14 2 14 8 20 8"/>
-                    <line x1="16" y1="13" x2="8" y2="13"/>
-                    <line x1="16" y1="17" x2="8" y2="17"/>
-                </svg>
-                Progress Report
-            </button>
-            <div class="grades-dt-sidebar-scroll">
-                ${sidebarItemsHtml}
+            <div class="gr-sidebar-scroll" id="gr-list" tabindex="0" onkeydown="grListKeydown(event)"></div>
+            <div class="gr-lfoot">
+                <button type="button" class="gr-btn2 gr-full" onclick="generateGradesReport('${targetEmail}')">
+                    <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                    </svg>
+                    Progress report
+                </button>
             </div>
         </div>
-
-        <!-- Main panel -->
-        <div class="grades-dt-main lqz-flat-panel">
-            <div class="grades-dt-panel-scroll" id="grades-dt-panel">
-                <div class="grades-dt-empty">
-                    <svg viewBox="0 0 24 24" width="40" height="40" stroke="#68d391" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-                    </svg>
-                    <p>${groups.length > 0 ? 'Select an assessment to view your grade' : "Your teachers haven't published any grades yet."}</p>
-                </div>
+        <div class="gr-split" id="gr-split" role="separator" aria-orientation="vertical" aria-label="Resize subject list" tabindex="0"></div>
+        <div class="gr-main-panel lqz-flat-panel" id="grades-dt-panel">
+            <div class="gr-panel-empty">
+                <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fd1c5" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="20" x2="18" y2="10"/>
+                    <line x1="12" y1="20" x2="12" y2="4"/>
+                    <line x1="6" y1="20" x2="6" y2="14"/>
+                </svg>
+                <p>${groups.length > 0 ? 'Select a subject to see your marks' : "Your teachers haven't published any grades yet."}</p>
             </div>
         </div>
     </div>`;
@@ -435,147 +373,477 @@ function renderGrades(data) {
 
     apiArea.innerHTML = html;
     if (typeof injectSharedDesktopLayoutStyles === 'function') injectSharedDesktopLayoutStyles();
+    grEnsureFont();
     apiArea._gradesData = data;
+    window.grInitDesktop();
     restoreGradesStateAfterRender();
     wireGradesScrollState();
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DESKTOP SIDEBAR: TOGGLE TEACHER/SUBJECT GROUP
+// DESKTOP: class performance overview ("range" view)
 // ─────────────────────────────────────────────────────────────────────────────
-window.toggleGradesDesktopGroup = function (id, headerEl) {
-    const body = document.getElementById(id);
-    if (!body) return;
-    const isOpen = !body.classList.contains('collapsed');
-    body.classList.toggle('collapsed', isOpen);
-    const chevron = headerEl ? headerEl.querySelector('.grades-dt-teacher-chevron') : null;
-    if (chevron) chevron.classList.toggle('open', !isOpen);
-    const openGroups = Array.from(document.querySelectorAll('.grades-dt-teacher-body:not(.collapsed)')).map(el => el.id);
-    saveGradesState({ openGroups });
-
-    // Desktop doesn't have this dynamic bottom-nav/header behaviour, so
-    // window.recalcMobileScrollUI won't exist there —
-    // recheckMobileNavAfterToggle() already no-ops safely when it's missing.
-    recheckMobileNavAfterToggle();
+window.grLoadRange = async function () {
+    const box = document.querySelector('.gr-ov');
+    if (!box) return;
+    const quizId = box.dataset.quizId;
+    const pct = Number(box.dataset.pct) || 0;
+    let data = window.learnerGradeStatsCache[quizId];
+    try {
+        if (!data) {
+            const res = await fetch(`get_quiz_stats.php?quiz_id=${quizId}`);
+            data = await res.json();
+            if (data.error) throw new Error(data.error);
+            window.learnerGradeStatsCache[quizId] = data;
+        }
+    } catch (e) {
+        if (document.body.contains(box)) {
+            const body = box.querySelector('.gr-ov-body');
+            if (body) body.innerHTML = '<div class="gr-ov-msg">Could not load class comparison.</div>';
+        }
+        return;
+    }
+    if (!document.body.contains(box)) return;
+    grPaintRange(box, pct, data);
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// DESKTOP PANEL: SELECT QUIZ
-// ─────────────────────────────────────────────────────────────────────────────
-window.selectDesktopGradeQuiz = function (flatIdx) {
-    const apiArea = document.getElementById('api-content-area');
-    if (!apiArea || !apiArea._gradesData) return;
-    const idx = parseInt(flatIdx, 10);
-    const entry = (window._allGradesQuizzesFlat || [])[idx];
-    if (!entry) return;
+function grPaintRange(box, p, d) {
+    const body = box.querySelector('.gr-ov-body');
+    const chip = box.querySelector('.gr-ov-chip');
+    const big = box.querySelector('.gr-ov-big');
+    const key = box.querySelector('.gr-ov-key');
+    const num = v => Math.max(0, Math.min(100, Math.round(Number(v) || 0)));
+    const mn = num(d.min), av = num(d.avg), mx = num(d.max);
 
-    document.querySelectorAll('.grades-dt-subject-item').forEach(el => el.classList.remove('active'));
-    const item = document.getElementById(`grades-dt-item-${idx}`);
-    if (item) item.classList.add('active');
-    saveGradesState({ desktopSelection: { type: 'quiz', flatIdx: idx } });
+    if (d.max === undefined || d.max === null || mn === mx) {
+        body.innerHTML = '<div class="gr-ov-msg">Not enough class results to compare yet.</div>';
+        return;
+    }
 
-    const { quiz: q, groupIndex, quizIndexInGroup } = entry;
-    const panel = document.getElementById('grades-dt-panel');
-    if (!panel) return;
+    const diff = Math.round(p - av);
+    let ins;
+    if (p >= mx) ins = { t: 'Top score in the class', c: 'ok', a: '\u2605' };
+    else if (Math.abs(diff) <= 2) ins = { t: 'In line with the class average', c: 'mid', a: '=' };
+    else if (diff > 0) ins = { t: `${diff} point${diff === 1 ? '' : 's'} above the class average`, c: 'ok', a: '\u25B2' };
+    else ins = { t: `${-diff} point${diff === -1 ? '' : 's'} below the class average`, c: 'warn', a: '\u25BC' };
 
-    // Prefixed IDs to avoid clashing with mobile accordion IDs for the same quiz
-    const pfx = `dt${groupIndex}-${quizIndexInGroup}`;
+    chip.hidden = false;
+    chip.className = 'gr-ov-chip ' + ins.c;
+    chip.textContent = ins.a + ' ' + ins.t;
+    big.className = 'gr-ov-big gr-ov-c-' + ins.c;
 
-    const published  = q.publish_marks == 1;
-    const pct         = q.total > 0 ? Math.round((q.score / q.total) * 100) : 0;
-    const pillClass   = !published ? 'hidden-score' : pct >= 75 ? 'high' : pct >= 50 ? 'mid' : 'low';
-    const pillText    = published ? `${pct}%` : 'Pending';
-    const gradingStatus = buildOpenEndedGradingStatus(q);
-    const duration    = q.duration;
-    const timeTaken   = formatDuration(q.time_taken, duration * 60);
-    const submittedAt = formatDate(q.submitted_at);
-    const titleHtml   = published
-        ? `<span class="quiz-title-link" onclick="openQuizReview(${q.result_id}, event)">${escHtml(q.quiz_title)}</span>`
-        : escHtml(q.quiz_title);
-    const summBadge = q.is_summative
-        ? `<span class="summative-badge">
-            <svg viewBox="0 0 24 24" width="9" height="9" stroke="currentColor" stroke-width="2" fill="none">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                <polyline points="22 4 12 14.01 9 11.01"/>
-            </svg>
-           </span>` : '';
+    // Labels sit on one row; when two are too close the next drops to another row (up to three).
+    const last = [-99, -99, -99];
+    let rows = 1, labels = '';
+    [['Lowest', mn], ['Average', av], ['Highest', mx]].forEach(([name, v]) => {
+        let r = last.findIndex(x => v - x >= 17);
+        if (r < 0) r = 2;
+        rows = Math.max(rows, r + 1);
+        last[r] = v;
+        labels += `<span class="gr-ov-lbl" style="left:${v}%;top:${18 + r * 34}px;"><i></i>${name} <b>${v}%</b></span>`;
+    });
 
-    panel.innerHTML = `
-        <div class="grades-dt-panel-header">
-            <h3 class="grades-dt-panel-title">
-                ${titleHtml}
-                ${summBadge}
-            </h3>
-            <span class="quiz-score-pill ${pillClass}">${pillText}</span>
-        </div>
-
-        <div class="quiz-row-details" id="qdetail-${pfx}" style="display:block;">
-            ${published ? `
-                <p><strong>Score:</strong> ${escHtml(String(q.score))} / ${escHtml(String(q.total))} &nbsp;·&nbsp; <strong>${pct}%</strong></p>
-            ` : `<p class="grades-unpublished-note">Marks not published yet.</p>`}
-            ${gradingStatus.details}
-            <p class="grades-detail-spaced"><strong>Duration:</strong> ${escHtml(String(duration))} min</p>
-            <p><strong>Time Taken:</strong> ${escHtml(timeTaken)}</p>
-            <p><strong>Taken on:</strong> ${escHtml(submittedAt)}</p>
-            ${published ? `<div class="grade-inline-stats loading" id="gstats-${pfx}" data-quiz-id="${q.quiz_id}">Loading performance overview...</div>` : ''}
+    body.style.marginBottom = (26 + rows * 34) + 'px';
+    body.innerHTML = `
+        <div class="gr-ov-rng">
+            <span class="gr-ov-end" style="left:-34px;">0%</span>
+            <span class="gr-ov-end" style="right:-44px;">100%</span>
+            <div class="gr-ov-tr"></div>
+            <div class="gr-ov-band" style="left:${mn}%;width:${mx - mn}%;"></div>
+            <span class="gr-ov-avg" style="left:${av}%;"></span>
+            <span class="gr-ov-you" style="left:${num(p)}%;"><em>You ${Math.round(p)}%</em></span>
+            ${labels}
         </div>`;
-
-    if (published) loadGradeStatsInline(`gstats-${pfx}`);
-};
+    key.innerHTML = '<span class="k1">Class range, lowest to highest</span><span class="k2">Class average</span>';
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DESKTOP PANEL: SELECT TERM MARKS FOR A GROUP
+// DESKTOP: subject list (term chips + search), detail panel, info modals
 // ─────────────────────────────────────────────────────────────────────────────
-window.selectDesktopGradeTerm = function (gi, term) {
-    const apiArea = document.getElementById('api-content-area');
-    if (!apiArea || !apiArea._gradesData) return;
-    const groupIndex = parseInt(gi, 10);
-    const group = apiArea._gradesData.groups?.[groupIndex];
-    if (!group) return;
-    const currentTerm = term !== undefined ? parseInt(term, 10) : (apiArea._gradesData.current_term || 1);
+window._grTerm = null;
+window._grSel = null;
+window._grOpenQuiz = null;
+window._grSearch = '';
 
-    document.querySelectorAll('.grades-dt-subject-item').forEach(el => el.classList.remove('active'));
-    const btn = document.getElementById(`grades-dt-termbtn-${groupIndex}`);
-    if (btn) btn.classList.add('active');
-    saveGradesState({ desktopSelection: { type: 'term', groupIndex, term: currentTerm } });
+function grTermOf(q) { return parseInt(q.term_number, 10) || window._grCurrentTerm || 1; }
+function grQuizzes(gi, term) {
+    const g = (window._grGroups || [])[gi];
+    return g ? (g.quizzes || []).filter(q => grTermOf(q) === term) : [];
+}
+function grTerms() {
+    const set = new Set([Number(window._grCurrentTerm) || 1]);
+    (window._grGroups || []).forEach(g => (g.quizzes || []).forEach(q => set.add(grTermOf(q))));
+    return Array.from(set).sort((a, b) => a - b);
+}
+function grAbbr(name) {
+    const w = String(name || '').trim().split(/\s+/).filter(Boolean);
+    if (!w.length) return '?';
+    return (w.length > 1 ? w[0][0] + w[1][0] : w[0].slice(0, 2)).toUpperCase();
+}
+function grCls(p) { return p === null ? 'gr-c-na' : p >= 75 ? 'gr-c-hi' : p >= 50 ? 'gr-c-mid' : 'gr-c-lo'; }
+function grShortDate(v) {
+    const t = parseLearnerGradeTime(v);
+    if (!t) return '';
+    const d = new Date(t);
+    return d.getDate() + ' ' + d.toLocaleString('en-GB', { month: 'short' });
+}
+function grNote(q) {
+    if (q.has_open_ended != 1) return '';
+    if (q.publish_marks != 1) return 'Pending: awaiting teacher grading';
+    if (q.quiz_fully_graded === true || q.is_fully_graded === true) return '';
+    return 'Partially graded';
+}
 
-    const panel = document.getElementById('grades-dt-panel');
-    if (!panel) return;
-    const pfx = `dtterm${groupIndex}`;
+// Same weighting rules as buildTermTable (summative + published only; weights over 100 are
+// scaled down; no weights set = equal shares).
+function grCalc(quizzes) {
+    const summative = quizzes.filter(q => q.is_summative);
+    const published = summative.filter(q => Number(q.publish_marks) === 1);
+    let weights = published.map(q => parseFloat(q.weight_percent) || 0);
+    let totalWeight = weights.reduce((a, b) => a + b, 0);
+    if (totalWeight > 100) {
+        const f = 100 / totalWeight;
+        weights = weights.map(w => w * f);
+        totalWeight = 100;
+    } else if (totalWeight === 0 && published.length > 0) {
+        weights = published.map(() => 100 / published.length);
+        totalWeight = 100;
+    }
+    const per = new Map();
+    let earned = 0;
+    published.forEach((q, i) => {
+        const e = q.total > 0 ? (q.score / q.total) * weights[i] : 0;
+        earned += e;
+        per.set(q.result_id, { w: weights[i], e });
+    });
+    return {
+        per, earned, weight: totalWeight, nPub: published.length, nSum: summative.length,
+        pct: published.length && totalWeight > 0 ? Math.round((earned / totalWeight) * 100) : null
+    };
+}
 
-    panel.innerHTML = `
-        <div class="grades-dt-panel-header">
-            <h3 class="grades-dt-panel-title">
-                <svg viewBox="0 0 24 24" width="18" height="18" stroke="#68d391" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-                </svg>
-                ${escHtml(group.group)}
-            </h3>
-        </div>
+window.grRenderDesktopList = function () {
+    const list = document.getElementById('gr-list');
+    if (!list) return;
+    const keep = list.scrollTop;
+    const groups = window._grGroups || [];
+    const term = window._grTerm, cur = Number(window._grCurrentTerm);
+    const q = window._grSearch;
 
-        <div class="term-marks-view term-marks-view--dt-panel">
-            <div class="term-selector-wrap">
-                <select class="term-selector" onchange="selectDesktopGradeTerm(${groupIndex}, this.value)">
-                    ${[1,2,3,4].map(t =>
-                        `<option value="${t}" ${t === currentTerm ? 'selected' : ''}>Term ${t}</option>`
-                    ).join('')}
-                </select>
-            </div>
-            <div id="term-table-wrap-${pfx}">
-                ${buildTermTable(group.quizzes, currentTerm)}
-            </div>
-        </div>`;
+    const chipsEl = document.getElementById('gr-chips');
+    if (chipsEl) {
+        chipsEl.innerHTML = grTerms().map(t =>
+            `<button type="button" class="gr-chip${t === term ? ' on' : ''}" onclick="grSetTerm(${t})">${t === cur ? '<span class="gr-cd"></span>' : ''}Term ${t}</button>`
+        ).join('');
+    }
+
+    const visible = groups.map((g, gi) => ({ g, gi }))
+        .filter(({ g, gi }) => grQuizzes(gi, term).length && (!q || String(g.group || '').toLowerCase().includes(q)));
+
+    let html = `<div class="gr-gh"><span>Term ${term}${term === cur ? ' &middot; Current' : ''}</span><i>${visible.length}</i></div>`;
+    visible.forEach(({ g, gi }) => {
+        const L = grQuizzes(gi, term), m = grCalc(L);
+        const pend = L.filter(x => Number(x.publish_marks) !== 1).length;
+        const active = window._grSel === gi && document.querySelector('#grades-dt-panel .gr-dh') ? ' active' : '';
+        html += `
+            <div class="gr-sidebar-item${active}" id="gr-sidebar-${gi}" onclick="selectDesktopGradeSubject(${gi})">
+                <span class="gr-ft">${escHtml(grAbbr(g.group))}</span>
+                <div class="gr-sidebar-item-info">
+                    <div class="gr-sidebar-item-title">${escHtml(g.group)}</div>
+                    <div class="gr-sidebar-item-meta">${L.length} result${L.length === 1 ? '' : 's'}${pend ? ' &middot; ' + pend + ' pending' : ''}</div>
+                </div>
+                <span class="gr-row-badge ${grCls(m.pct)}">${m.pct === null ? '&mdash;' : m.pct + '%'}</span>
+            </div>`;
+    });
+    list.innerHTML = visible.length ? html : `<div class="gr-list-empty">${groups.length ? 'No subjects match.' : 'No results yet.'}</div>`;
+    list.scrollTop = keep;
 };
 
-// Desktop sidebar search
+window.grSetTerm = function (t) {
+    window._grTerm = t;
+    window._grSearch = '';
+    const s = document.getElementById('gradesSearchDt');
+    if (s) s.value = '';
+    window.grRenderDesktopList();
+    const first = document.querySelector('#gr-list .gr-sidebar-item');
+    if (first) window.selectDesktopGradeSubject(parseInt(first.id.replace('gr-sidebar-', ''), 10), t);
+};
+
 window.gradesSearchDesktop = function (val) {
     const state = getGradesState();
     saveGradesState({ search: Object.assign({}, state.search, { desktop: val }) });
-    const term = val.toLowerCase();
-    document.querySelectorAll('.grades-dt-subject-item').forEach(item => {
-        const name = item.querySelector('.grades-dt-subject-name').textContent.toLowerCase();
-        item.style.display = name.includes(term) ? 'flex' : 'none';
+    window._grSearch = String(val || '').toLowerCase().trim();
+    window.grRenderDesktopList();
+};
+
+window.grListKeydown = function (e) {
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    const ids = Array.from(document.querySelectorAll('#gr-list .gr-sidebar-item'))
+        .map(el => parseInt(el.id.replace('gr-sidebar-', ''), 10));
+    if (!ids.length) return;
+    e.preventDefault();
+    const cur = ids.indexOf(window._grSel);
+    const next = e.key === 'ArrowDown' ? Math.min(ids.length - 1, cur + 1) : Math.max(0, cur < 0 ? 0 : cur - 1);
+    window.selectDesktopGradeSubject(ids[next]);
+    const el = document.getElementById(`gr-sidebar-${ids[next]}`);
+    if (el) el.scrollIntoView({ block: 'nearest' });
+};
+
+window.grInitSplit = function () {
+    const layout = document.getElementById('gr-desktop-layout');
+    const split = document.getElementById('gr-split');
+    if (!layout || !split) return;
+    const clamp = w => Math.max(260, Math.min(420, w));
+    const apply = w => layout.style.setProperty('--gr-listw', clamp(w) + 'px');
+    const current = () => parseInt(getComputedStyle(layout).getPropertyValue('--gr-listw'), 10) || 320;
+    const persist = () => { try { localStorage.setItem('lqz.listWidth', String(current())); } catch (e) {} };
+    try {
+        const saved = parseInt(localStorage.getItem('lqz.listWidth'), 10);
+        if (saved) apply(saved);
+    } catch (e) {}
+    split.addEventListener('mousedown', e => {
+        e.preventDefault();
+        split.classList.add('drag');
+        document.body.style.userSelect = 'none';
+        const left = layout.getBoundingClientRect().left;
+        const move = ev => apply(ev.clientX - left);
+        const up = () => {
+            split.classList.remove('drag');
+            document.body.style.userSelect = '';
+            document.removeEventListener('mousemove', move);
+            document.removeEventListener('mouseup', up);
+            persist();
+        };
+        document.addEventListener('mousemove', move);
+        document.addEventListener('mouseup', up);
     });
+    split.addEventListener('keydown', e => {
+        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+        e.preventDefault();
+        apply(current() + (e.key === 'ArrowRight' ? 16 : -16));
+        persist();
+    });
+};
+
+window.grInitDesktop = function () {
+    if (!document.getElementById('gr-list')) return;
+    window._grTerm = Number(window._grCurrentTerm) || 1;
+    window._grSel = null;
+    window._grOpenQuiz = null;
+    window._grSearch = '';
+    window.grRenderDesktopList();
+    window.grInitSplit();
+    const first = document.querySelector('#gr-list .gr-sidebar-item');
+    if (first) window.selectDesktopGradeSubject(parseInt(first.id.replace('gr-sidebar-', ''), 10), window._grTerm);
+};
+
+window.grToggleQuiz = function (resultId) {
+    window._grOpenQuiz = String(window._grOpenQuiz) === String(resultId) ? null : resultId;
+    window.selectDesktopGradeSubject(window._grSel, window._grTerm, true);
+};
+
+const GR_INFO_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="11" x2="12" y2="17"/><line x1="12" y1="7" x2="12.01" y2="7"/></svg>';
+const GR_INFO = {
+    mark: {
+        title: 'How your term mark works',
+        body: `
+            <p>Your term mark shows how you are doing in this subject so far this term.</p>
+            <ul>
+                <li>It is worked out from <strong>summative</strong> assessments only. These are the tests and exams your teacher has set to count towards the term. Practice quizzes do not count.</li>
+                <li>Each published summative result adds your percentage multiplied by its weight. Your term mark is the marks you have earned divided by the weight assessed so far.</li>
+                <li>Example: if one test worth 30% is published and you scored 80%, you have earned 24 of the 30 marks assessed so far, so your term mark is 80%.</li>
+                <li>It changes as new results are published. Results that are still pending are not included.</li>
+            </ul>
+            <p>Colours: 75% and above is green, 50% to 74% is orange, and below 50% is red.</p>`
+    },
+    assessed: {
+        title: 'What “term assessed” means',
+        body: `
+            <p>This shows how much of the term’s final mark has been assessed and published so far.</p>
+            <ul>
+                <li>It adds up the weights of your published summative assessments. If it says 70%, the published results make up 70% of the term and the other 30% is still to come.</li>
+                <li>When it reaches 100% the term is fully assessed and your term mark is final.</li>
+                <li>If your teacher has not set weights, the published assessments share the weight equally. If the weights add up to more than 100%, they are scaled down to fit.</li>
+            </ul>`
+    },
+    list: {
+        title: 'About the assessments list',
+        body: `
+            <p>This lists every quiz you have taken in this subject this term, newest first.</p>
+            <ul>
+                <li><strong>Summative</strong> means the result counts towards your term mark. The Weight column shows how much it counts and Earned shows the marks it adds. Results without the tag are practice only.</li>
+                <li><strong>Pending</strong> means the marks have not been published yet. <strong>Partially graded</strong> means some questions are still being marked, so the mark may change.</li>
+                <li>Click a published result to see how you compare with the class (lowest, average and highest) and to review your answers.</li>
+            </ul>`
+    }
+};
+
+window.grOpenInfo = function (kind, btn) {
+    const info = GR_INFO[kind];
+    if (!info) return;
+    window.grCloseInfo(true);
+    const ov = document.createElement('div');
+    ov.className = 'gr-modal-overlay';
+    ov.id = 'grInfoModal';
+    ov.setAttribute('role', 'dialog');
+    ov.setAttribute('aria-modal', 'true');
+    ov.setAttribute('aria-labelledby', 'grInfoTitle');
+    ov.innerHTML = `
+        <div class="gr-modal-box">
+            <div class="gr-modal-head">
+                <h3 id="grInfoTitle">${info.title}</h3>
+                <button type="button" class="gr-modal-x" aria-label="Close" onclick="grCloseInfo()">&times;</button>
+            </div>
+            <div class="gr-modal-body">${info.body}</div>
+            <div class="gr-modal-foot"><button type="button" class="gr-btn2" onclick="grCloseInfo()">Got it</button></div>
+        </div>`;
+    ov.addEventListener('mousedown', e => { if (e.target === ov) window.grCloseInfo(); });
+    document.body.appendChild(ov);
+    window._grInfoTrigger = btn || null;
+    window._grInfoKey = e => { if (e.key === 'Escape') window.grCloseInfo(); };
+    document.addEventListener('keydown', window._grInfoKey);
+    const focusBtn = ov.querySelector('.gr-modal-foot .gr-btn2');
+    if (focusBtn) focusBtn.focus();
+};
+
+window.grCloseInfo = function (silent) {
+    const ov = document.getElementById('grInfoModal');
+    if (ov) ov.remove();
+    if (window._grInfoKey) { document.removeEventListener('keydown', window._grInfoKey); window._grInfoKey = null; }
+    if (!silent && window._grInfoTrigger && document.body.contains(window._grInfoTrigger)) window._grInfoTrigger.focus();
+    window._grInfoTrigger = null;
+};
+
+function grInfoBtn(kind, label) {
+    return `<button type="button" class="gr-info" aria-label="${label}" onclick="grOpenInfo('${kind}', this)">${GR_INFO_ICON}</button>`;
+}
+
+window.selectDesktopGradeSubject = function (gi, term, keepOpen) {
+    const apiArea = document.getElementById('api-content-area');
+    const groups = window._grGroups || [];
+    gi = parseInt(gi, 10);
+    const group = groups[gi];
+    const panel = document.getElementById('grades-dt-panel');
+    if (!group || !panel) return;
+    if (term !== undefined && term !== null) window._grTerm = parseInt(term, 10);
+    if (window._grSel !== gi && !keepOpen) window._grOpenQuiz = null;
+    if (!keepOpen) window._grOpenQuiz = window._grSel === gi ? window._grOpenQuiz : null;
+    window._grSel = gi;
+    const t = window._grTerm, cur = Number(window._grCurrentTerm);
+    saveGradesState({ desktopSelection: { type: 'subject', groupIndex: gi, term: t, openQuiz: window._grOpenQuiz || null } });
+
+    const L = grQuizzes(gi, t).slice().sort((a, b) => parseLearnerGradeTime(b.submitted_at) - parseLearnerGradeTime(a.submitted_at));
+    const m = grCalc(L);
+    const pubN = L.filter(q => Number(q.publish_marks) === 1).length;
+    const rem = Math.max(0, 100 - m.weight);
+    const openId = window._grOpenQuiz;
+
+    const rowsHtml = L.map(q => {
+        const published = Number(q.publish_marks) === 1;
+        const pct = published && q.total > 0 ? Math.round((q.score / q.total) * 100) : (published ? 0 : null);
+        const pq = m.per.get(q.result_id);
+        const open = published && String(openId) === String(q.result_id);
+        const note = grNote(q);
+        let row = `
+            <tr class="gr-qr${published ? ' gr-can' : ''}${open ? ' gr-open' : ''}"
+                ${published ? `tabindex="0" role="button" aria-expanded="${open}" onclick="grToggleQuiz(${q.result_id})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();grToggleQuiz(${q.result_id});}"` : ''}>
+                <td><div class="gr-qt">${escHtml(q.quiz_title)}${q.is_summative ? '<span class="gr-sb">Summative</span>' : ''}</div>${note ? `<div class="gr-qn">${escHtml(note)}</div>` : ''}</td>
+                <td>${escHtml(grShortDate(q.submitted_at))}</td>
+                <td>${published ? escHtml(String(q.score)) + '/' + escHtml(String(q.total)) : '&mdash;'}</td>
+                <td class="${grCls(pct)}" style="font-weight:var(--gr-w-strong,700);">${published ? pct + '%' : 'Pending'}</td>
+                <td>${q.is_summative && pq ? pq.w.toFixed(0) + '%' : '&mdash;'}</td>
+                <td>${q.is_summative && pq ? pq.e.toFixed(1) : '&mdash;'}</td>
+            </tr>`;
+        if (open) {
+            const pctNow = pct === null ? 0 : pct;
+            row += `
+            <tr class="gr-xp"><td colspan="6"><div class="gr-ov" data-quiz-id="${q.quiz_id}" data-pct="${pctNow}">
+                <div class="gr-ov-head">
+                    <span class="gr-ov-big">${pctNow}%</span>
+                    <span class="gr-ov-of">${escHtml(String(q.score))} out of ${escHtml(String(q.total))}</span>
+                    <span class="gr-ov-chip" hidden></span>
+                    <span class="gr-ov-sp"></span>
+                    <button type="button" class="gr-btn2" onclick="openQuizReview(${q.result_id}, event)">Review answers</button>
+                </div>
+                <div class="gr-ov-body"><div class="gr-ov-msg">Loading class comparison...</div></div>
+                <div class="gr-ov-meta">Taken ${escHtml(formatDate(q.submitted_at))} &middot; ${escHtml(formatDuration(q.time_taken, q.duration * 60))} of ${escHtml(String(q.duration))} min</div>
+                <div class="gr-ov-key"></div>
+            </div></td></tr>`;
+        }
+        return row;
+    }).join('');
+
+    const totalRow = m.pct !== null
+        ? `<tr class="gr-tot"><td colspan="4">Term mark</td><td>${m.weight.toFixed(0)}%</td><td class="${grCls(m.pct)}">${m.earned.toFixed(1)}/${m.weight.toFixed(0)} &rarr; ${m.pct}%</td></tr>` : '';
+
+    const others = groups.map((g, i) => ({ g, i }))
+        .filter(({ i }) => i !== gi && grQuizzes(i, t).length)
+        .slice(0, 4)
+        .map(({ g, i }) => {
+            const k = grCalc(grQuizzes(i, t)).pct;
+            return `<button type="button" class="gr-more" onclick="selectDesktopGradeSubject(${i})"><b>${escHtml(g.group)}</b><small>Term mark ${k === null ? '&mdash;' : k + '%'}</small></button>`;
+        }).join('');
+
+    panel.innerHTML = `
+        <div class="gr-dh">
+            <h2 class="gr-dh-title">${escHtml(group.group)}</h2>
+            <span class="gr-panel-status">Term ${t}</span>
+            ${t === cur ? '<span class="gr-panel-status" style="background:rgba(79,209,197,0.1);border-color:rgba(79,209,197,0.35);color:#4fd1c5;">Current</span>' : ''}
+            <span class="gr-dsp"></span>
+        </div>
+        <div class="gr-dbody">
+            <div class="gr-body"><div class="gr-read">
+                <div class="gr-cards">
+                    <div class="gr-card">
+                        <small>Term mark ${grInfoBtn('mark', 'How your term mark works')}</small>
+                        <b class="${grCls(m.pct)}">${m.pct === null ? '&mdash;' : m.pct + '%'}</b>
+                        <span class="gr-cap">${m.nPub ? 'Based on ' + m.nPub + ' summative result' + (m.nPub > 1 ? 's' : '') : 'No summative results published yet'}</span>
+                    </div>
+                    <div class="gr-card">
+                        <small>Term assessed ${grInfoBtn('assessed', 'What term assessed means')}</small>
+                        <b>${Math.min(100, Math.round(m.weight))}%</b>
+                        <div class="gr-bar1"><i style="width:${Math.min(100, m.weight)}%;"></i></div>
+                        <span class="gr-cap">${rem ? rem.toFixed(0) + '% still to be assessed' : 'Fully assessed'}</span>
+                    </div>
+                    <div class="gr-card">
+                        <small>Results</small>
+                        <b>${L.length}</b>
+                        <span class="gr-cap">${pubN} published${L.length - pubN ? ', ' + (L.length - pubN) + ' pending' : ''}</span>
+                    </div>
+                </div>
+                <div class="gr-h3">Assessments ${grInfoBtn('list', 'About the assessments list')}</div>
+                <table class="gr-table">
+                    <thead><tr><th>Assessment</th><th>Date</th><th>Score</th><th>Result</th><th>Weight</th><th>Earned</th></tr></thead>
+                    <tbody>${rowsHtml}${totalRow}</tbody>
+                </table>
+            </div></div>
+            <aside class="gr-rail">
+                <h4>Details</h4>
+                <div class="gr-kv"><span>Subject</span><b>${escHtml(group.group)}</b></div>
+                <div class="gr-kv"><span>Term</span><b>Term ${t}${t === cur ? ' (current)' : ''}</b></div>
+                <div class="gr-kv"><span>Results</span><b>${L.length}</b></div>
+                <div class="gr-kv"><span>Summative</span><b>${m.nSum}</b></div>
+                <div class="gr-kv"><span>Published</span><b>${pubN}</b></div>
+                ${L.length ? `<div class="gr-kv"><span>Latest result</span><b>${escHtml(grShortDate(L[0].submitted_at))}</b></div>` : ''}
+                ${others ? `<h4 class="gr-rail-sub">Other subjects in Term ${t}</h4>${others}` : ''}
+            </aside>
+        </div>`;
+
+    // Highlight the row in the list, keep it visible
+    document.querySelectorAll('.gr-sidebar-item').forEach(el => el.classList.remove('active'));
+    const row = document.getElementById(`gr-sidebar-${gi}`);
+    if (row) {
+        row.classList.add('active');
+        const box = document.getElementById('gr-list');
+        if (box) {
+            const top = row.offsetTop, bottom = top + row.offsetHeight;
+            if (top < box.scrollTop + 34) box.scrollTop = Math.max(0, top - 34);
+            else if (bottom > box.scrollTop + box.clientHeight) box.scrollTop = bottom - box.clientHeight;
+        }
+    }
+
+    window.grLoadRange();
+    wireGradesScrollState();
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -800,29 +1068,17 @@ function restoreGradesStateAfterRender() {
             if (!String(rowId).startsWith('qdetail-dt')) openQuizRowByDetailId(rowId);
         });
 
-        if (state.openGroups) {
-            document.querySelectorAll('.grades-dt-teacher-body').forEach(body => {
-                const open = state.openGroups.includes(body.id);
-                body.classList.toggle('collapsed', !open);
-                const header = body.previousElementSibling?.querySelector('.grades-dt-teacher-header');
-                const chevron = header ? header.querySelector('.grades-dt-teacher-chevron') : null;
-                if (chevron) chevron.classList.toggle('open', open);
-            });
-        }
-
-        if (state.desktopSelection && apiArea?._gradesData) {
-            if (state.desktopSelection.type === 'quiz'
-                && (window._allGradesQuizzesFlat || [])[state.desktopSelection.flatIdx]) {
-                window.selectDesktopGradeQuiz(state.desktopSelection.flatIdx);
-            } else if (state.desktopSelection.type === 'term'
-                && apiArea._gradesData.groups?.[state.desktopSelection.groupIndex]) {
-                window.selectDesktopGradeTerm(state.desktopSelection.groupIndex, state.desktopSelection.term);
+        if (state.desktopSelection && state.desktopSelection.type === 'subject' && apiArea?._gradesData) {
+            const ds = state.desktopSelection;
+            if (apiArea._gradesData.groups?.[ds.groupIndex]) {
+                window._grOpenQuiz = ds.openQuiz || null;
+                window.selectDesktopGradeSubject(ds.groupIndex, ds.term, true);
             }
         }
 
         requestAnimationFrame(() => {
             const mainContent = document.querySelector('.main-content');
-            const panel = document.getElementById('grades-dt-panel');
+            const panel = document.querySelector('.gr-body');
             if (mainContent && Number.isFinite(state.scroll.main)) mainContent.scrollTop = state.scroll.main;
             if (panel && Number.isFinite(state.scroll.panel)) panel.scrollTop = state.scroll.panel;
         });
@@ -851,7 +1107,7 @@ function saveOpenQuizRows() {
 
 function wireGradesScrollState() {
     const mainContent = document.querySelector('.main-content');
-    const panel = document.getElementById('grades-dt-panel');
+    const panel = document.querySelector('.gr-body');
     if (mainContent && mainContent.dataset.gradesScrollState !== '1') {
         mainContent.dataset.gradesScrollState = '1';
         mainContent.addEventListener('scroll', () => {
@@ -1720,9 +1976,40 @@ function ensurePrStylesInjected() {
             .pr-info-modal-notes li:last-child { margin-bottom: 0; }
 
             @media (max-width: 480px) {
-                .pr-info-modal-box { padding: 20px 18px; border-radius: 14px; }
+                .pr-info-modal-box { padding: 20px 18px; border-radius: 14px; border: none; }
+                .pr-info-modal-notes { border: none; }
+                .pr-info-modal-badge { border: none !important; }
                 .pr-info-modal-title { font-size: 16.5px; }
                 .pr-info-modal-body { font-size: 13.5px; }
+            }
+
+            /* ── DESKTOP TYPOGRAPHY (Geist, 900px and up) ──
+               On desktop the report is rendered inside #grades-dt-panel (on mobile it is a full-screen
+               sheet and keeps the Nunito weights above). The info modal is appended to <body>. */
+            @media (min-width: 900px) {
+                #grades-dt-panel .pr-wrap { font-family: inherit; }
+                #grades-dt-panel .pr-learn-more-btn { font-family: inherit; }
+                #grades-dt-panel .pr-hero-status,
+                #grades-dt-panel .pr-hero-avatar,
+                #grades-dt-panel .pr-hero-name,
+                #grades-dt-panel .pr-hero-trendlabel,
+                #grades-dt-panel .pr-hero-trenditem-v,
+                #grades-dt-panel .pr-subjects-title,
+                #grades-dt-panel .pr-subject-v2-badge,
+                #grades-dt-panel .pr-subject-v2-pct,
+                #grades-dt-panel .pr-grade-pill,
+                #grades-dt-panel .pr-learn-more-btn { font-weight: 500; }
+                #grades-dt-panel .pr-subject-v2-name { font-weight: 450; }
+                #grades-dt-panel .pr-hero-avgnum { font-weight: 300; }
+                .pr-info-modal-box {
+                    font-family: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+                    font-variant-numeric: tabular-nums;
+                    -webkit-font-smoothing: antialiased;
+                    -moz-osx-font-smoothing: grayscale;
+                }
+                .pr-info-modal-badge,
+                .pr-info-modal-title,
+                .pr-info-modal-notes-title { font-weight: 500; }
             }
         `;
     document.head.appendChild(style);
@@ -1951,7 +2238,7 @@ function renderProgressReport(data) {
 
 function prAboutModalHtml() {
     return `
-        <div class="pr-info-modal-title">What is a Progress Report?</div>
+        <div class="pr-info-modal-title">About Progress Report</div>
         <div class="pr-info-modal-body">
             <p>Your Progress Report shows how you're doing <strong>right now</strong>, while the term is still happening.</p>
             <p>It works together with your <strong>Syllabus</strong>: at the start of the term, your Syllabus tells you what marks are coming up and how much each one counts. Your Progress Report then fills in the marks as your teachers grade them — so as the term goes on, you can see your mark building up assessment by assessment, instead of only finding out at the end.</p>
@@ -2475,3 +2762,14 @@ window.closeQuizReviewModal = function () {
     const modal = document.getElementById('prReportModal');
     if (modal) modal.remove();
 };
+
+// Nunito 400/600/700 for the desktop grades page. 600 is the medium weight, so load it
+// explicitly instead of letting the browser quietly fall back to 700 (or 400).
+function grEnsureFont() {
+    if (document.getElementById('gr-nunito-font')) return;
+    const link = document.createElement('link');
+    link.id = 'gr-nunito-font';
+    link.rel = 'stylesheet';
+    link.href = 'https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap';
+    document.head.appendChild(link);
+}

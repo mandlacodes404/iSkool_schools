@@ -87,21 +87,35 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
     <meta name="msapplication-navbutton-color" content="#0d1117">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
-    <link rel="stylesheet" href="assets/css/teacher/dashboard.css?v=4.7">
+    <link rel="stylesheet" href="assets/css/teacher/dashboard.css?v=4.8">
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
-    <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=6.6">
-    <link rel="stylesheet" href="assets/css/teacher/assignments.css?v=2.4">
+    <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=6.8">
+    <link rel="stylesheet" href="assets/css/teacher/assignments.css?v=2.5">
     <link rel="stylesheet" href="assets/css/teacher/resources.css?v=2.1">
-    <link rel="stylesheet" href="assets/css/teacher/sbo.css?v=2.0">
-    <link rel="stylesheet" href="assets/css/teacher/evaluations.css?v=2.6">
-    <link rel="stylesheet" href="assets/css/teacher/grades.css?v=2.7">
+    <link rel="stylesheet" href="assets/css/teacher/sbo.css?v=2.1">
+    <link rel="stylesheet" href="assets/css/teacher/evaluations.css?v=2.7">
+    <link rel="stylesheet" href="assets/css/teacher/grades.css?v=3.0">
     <link rel="stylesheet" href="assets/css/teacher/teacher_calendar.css?v=1.3">
     <title>Dashboard - <?= htmlspecialchars($schoolName) ?></title>
     <link rel="manifest" href="/manifest.php?v=1.1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Geist:wght@400..600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=13.2">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_menu.css?v=1.1">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_menu.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_settings.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_settings.css?v=1.0">   
+    <script>
+    // Desktop sidebar: restore the saved collapsed state BEFORE first paint (no flash).
+    // With no saved choice, screens narrower than 1440px start as a rail.
+    (function () {
+        try {
+            var s = localStorage.getItem('iskoolTeacherMenuCollapsed');
+            if (s === '1' || (s === null && window.innerWidth < 1440)) document.documentElement.classList.add('dm-collapsed');
+        } catch (e) {}
+    })();
+    </script>
 <script>
 function getCsrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
@@ -130,7 +144,7 @@ function getCsrfToken() {
         <img src="/icon.svg?v=1.4" width="180" height="180" alt="iSkool logo">
         <span id="dash-splash-wordmark">iSkool</span>
     </div>
-    <img src="enthropy/enthropy_wordmark.svg" alt="ENTHROPY" id="dash-splash-brand-wordmark">
+    <img src="enthropy/wiggle_colored.svg" alt="ENTHROPY" id="dash-splash-brand-wordmark">
 </div>
 <script>
 // ──────── SPLASH HANDOFF: hide once Home is actually ready ────────
@@ -228,7 +242,29 @@ if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.wasLockedAtLoad
 <!-- ═══════════════════════════════════════════
      SIDEBAR
 ═══════════════════════════════════════════ -->
-<div class="sidebar">
+<div class="sidebar dm-menu" id="dmSidebar">
+
+    <!-- ══ DESKTOP ONLY: brand row + quick search (hidden on mobile by CSS) ══ -->
+    <div class="dm-brand">
+        <?php if ($schoolLogo): ?>
+            <img class="dm-mark" src="<?= htmlspecialchars($schoolLogo) ?>" alt="">
+        <?php else: ?>
+            <span class="dm-mark dm-mark--initials" aria-hidden="true"><?= htmlspecialchars($schoolInitials) ?></span>
+        <?php endif; ?>
+        <div class="dm-brand-text">
+            <span class="dm-brand-name" title="<?= htmlspecialchars($schoolName) ?>"><?= htmlspecialchars($schoolName) ?></span>
+            <span class="dm-brand-sub">Teacher</span>
+        </div>
+        <button type="button" class="dm-toggle" id="dmToggle" aria-controls="dmSidebar" aria-expanded="true" aria-label="Collapse sidebar"></button>
+    </div>
+
+    <button type="button" class="dm-search" id="dmSearchBtn" aria-label="Search pages and actions">
+        <span class="dm-label">Search</span><kbd class="dm-kbd" id="dmSearchKbd"></kbd>
+    </button>
+
+    <!-- Profile block. Mobile: avatar, name and email at the top of the menu.
+         Desktop: the same three elements become the account button at the bottom. -->
+    <div class="dm-account-root" id="dmAccount">
     <div class="sidebar-header">
         <div class="profile-picture-wrapper">
             <?php if (!empty($teacherProfile) && $teacherProfile !== 'default.png'): ?>
@@ -251,69 +287,70 @@ if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.wasLockedAtLoad
 
     <div class="teacher-name"><?= htmlspecialchars($teacherFullName) ?></div>
     <div class="teacher-email"><?= htmlspecialchars($teacherEmail) ?></div>
+    </div>
 
     <div class="sidebar-links" style="margin-top:40px;">
         <!-- Home -->
-        <a class="mobile-bottom-link" href="javascript:void(0)" data-page="teacher_manual" onclick="loadTeacherManual()">
+        <a class="mobile-bottom-link dm-item" href="javascript:void(0)" data-page="teacher_manual" onclick="loadTeacherManual()">
             <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                 <polyline points="9 22 9 12 15 12 15 22"></polyline>
             </svg>
-            <span>Home</span>
+            <span class="dm-label">Home</span>
         </a>
 
         <!-- Quizzes -->
-        <a class="desktop-bottom-link" href="javascript:void(0)" data-page="teacher_quizzes" onclick="fetchTeacherQuizzes()">
+        <a class="desktop-bottom-link dm-item" href="javascript:void(0)" data-page="teacher_quizzes" onclick="fetchTeacherQuizzes()">
             <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;">
                 <line x1="18" y1="20" x2="18" y2="10"></line>
                 <line x1="12" y1="20" x2="12" y2="4"></line>
                 <line x1="6"  y1="20" x2="6"  y2="14"></line>
             </svg>
-            <span>Quizzes</span>
+            <span class="dm-label">Quizzes</span>
         </a>
 
         <!-- Assignments -->
-        <a class="mobile-bottom-link" href="javascript:void(0)" data-page="teacher_assignments" onclick="fetchTeacherAssignments()">
+        <a class="mobile-bottom-link dm-item" href="javascript:void(0)" data-page="teacher_assignments" onclick="fetchTeacherAssignments()">
             <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                 <polyline points="14 2 14 8 20 8"></polyline>
                 <line x1="16" y1="13" x2="8" y2="13"></line>
                 <line x1="16" y1="17" x2="8" y2="17"></line>
             </svg>
-            <span>Assignments</span>
+            <span class="dm-label">Assignments</span>
         </a>
 
         <!-- Announcements -->
-        <a class="mobile-bottom-link" href="javascript:void(0)" data-page="teacher_announcements" onclick="fetchTeacherAnnouncements()">
+        <a class="mobile-bottom-link dm-item" href="javascript:void(0)" data-page="teacher_announcements" onclick="fetchTeacherAnnouncements()">
             <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;">
                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                 <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
             </svg>
-            <span>Announcements</span>
+            <span class="dm-label">Announcements</span>
         </a>
 
         <!-- Grades -->
-        <a href="javascript:void(0)" data-page="teacher_grades" onclick="fetchTeacherGrades()">
+        <a class="dm-item" href="javascript:void(0)" data-page="teacher_grades" onclick="fetchTeacherGrades()">
             <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                 <polyline points="14 2 14 8 20 8"></polyline>
                 <line x1="16" y1="13" x2="8" y2="13"></line>
                 <line x1="16" y1="17" x2="8" y2="17"></line>
             </svg>
-            <span>Grades</span>
+            <span class="dm-label">Grades</span>
         </a>
 
         <!-- Resources -->
-        <a class="mobile-bottom-link" href="javascript:void(0)" data-page="teacher_resources" onclick="fetchTeacherResources()">
+        <a class="mobile-bottom-link dm-item" href="javascript:void(0)" data-page="teacher_resources" onclick="fetchTeacherResources()">
             <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;">
                 <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
                 <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
             </svg>
-            <span>Upload Resource</span>
+            <span class="dm-label">Resources</span>
         </a>
 
         <!-- Syllabus -->
-        <a class="desktop-top-row-link" href="javascript:void(0)" data-page="teacher_syllabus" onclick="fetchTeacherSyllabus(); setTopNavTab('tab-syllabus')">
+        <a class="desktop-top-row-link dm-item" href="javascript:void(0)" data-page="teacher_syllabus" onclick="fetchTeacherSyllabus(); setTopNavTab('tab-syllabus')">
             <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;">
                 <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
                 <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
@@ -321,51 +358,88 @@ if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.wasLockedAtLoad
                 <line x1="12" y1="10" x2="16" y2="10"></line>
                 <line x1="12" y1="14" x2="16" y2="14"></line>
             </svg>
-            <span>Syllabus</span>
+            <span class="dm-label">Syllabus</span>
         </a>
 
         <!-- Evaluations -->
-        <a class="desktop-top-row-link" href="javascript:void(0)" data-page="teacher_evaluations" onclick="fetchTeacherEvaluations(); setTopNavTab('tab-evaluations')">
+        <a class="desktop-top-row-link dm-item" href="javascript:void(0)" data-page="teacher_evaluations" onclick="fetchTeacherEvaluations(); setTopNavTab('tab-evaluations')">
             <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;">
                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
             </svg>
-            <span>Evaluations</span>
+            <span class="dm-label">Evaluations</span>
         </a>
 
         <!-- Analytics -->
-        <a class="desktop-only desktop-top-row-link" href="javascript:void(0)" data-page="teacher_analytics" onclick="fetchTeacherAnalytics(); setTopNavTab('tab-analytics')">
+        <a class="desktop-only desktop-top-row-link dm-item" href="javascript:void(0)" data-page="teacher_analytics" onclick="fetchTeacherAnalytics(); setTopNavTab('tab-analytics')">
             <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;">
                 <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
                 <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
             </svg>
-            <span>Analytics</span>
+            <span class="dm-label">Analytics</span>
         </a>
 
         <!-- Calendar -->
-        <a class="desktop-top-row-link" href="javascript:void(0)" data-page="teacher_calendar" onclick="fetchTeacherCalendar(); setTopNavTab('tab-calendar')">
+        <a class="desktop-top-row-link dm-item" href="javascript:void(0)" data-page="teacher_calendar" onclick="fetchTeacherCalendar(); setTopNavTab('tab-calendar')">
             <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;">
                 <rect x="3" y="4" width="18" height="18" rx="2"></rect>
                 <line x1="16" y1="2" x2="16" y2="6"></line>
                 <line x1="8" y1="2" x2="8" y2="6"></line>
                 <line x1="3" y1="10" x2="21" y2="10"></line>
             </svg>
-            <span>Calendar</span>
+            <span class="dm-label">Calendar</span>
         </a>
 
         <!-- Settings -->
-        <a class="desktop-top-row-link" href="javascript:void(0)" data-page="teacher_settings" onclick="loadTeacherSettings(); setTopNavTab('tab-settings')">
+        <a class="desktop-top-row-link dm-item" href="javascript:void(0)" data-page="teacher_settings" onclick="loadTeacherSettings(); setTopNavTab('tab-settings')">
             <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-right:10px;">
                 <circle cx="12" cy="12" r="3"></circle>
                 <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
             </svg>
-            <span>Settings</span>
+            <span class="dm-label">Settings</span>
         </a>
+    
+        <div class="dm-sep dm-sep--a" aria-hidden="true"></div>
+        <div class="dm-sep dm-sep--b" aria-hidden="true"></div>
+        <div class="dm-sep dm-sep--d" aria-hidden="true"></div>
     </div>
+
+    <div class="dm-sep dm-sep--c" aria-hidden="true"></div>
 
     <div class="footer" style="font-size:15px;"><span><strong><?= htmlspecialchars(iskool_app_version_label()) ?></strong></span></div>
 </div>
 
 <div id="mobileOverlay"></div>
+
+<!-- ══ DESKTOP ONLY: floating pieces. They sit outside .sidebar so its overflow can't clip them. ══ -->
+<div class="dm-tip" id="dmTip" role="tooltip"><span id="dmTipText"></span><kbd id="dmTipKbd"></kbd></div>
+
+<div class="dm-pop" id="dmAccountMenu" role="menu" aria-label="Account">
+    <div class="dm-pop-head">
+        <span class="dm-pop-name"><?= htmlspecialchars($teacherFullName) ?></span>
+        <span class="dm-pop-mail"><?= htmlspecialchars($teacherEmail) ?></span>
+    </div>
+    <button type="button" class="dm-pop-item" role="menuitem" data-act="settings" style="--dm-ico: var(--dm-i-sliders)">Settings</button>
+    <button type="button" class="dm-pop-item" role="menuitem" data-act="photo" style="--dm-ico: var(--dm-i-upload)">Upload photo</button>
+    <div class="dm-pop-sep" role="separator"></div>
+    <button type="button" class="dm-pop-item is-danger" role="menuitem" data-act="signout" style="--dm-ico: var(--dm-i-logout)">Sign out</button>
+    <div class="dm-pop-ver"><?= htmlspecialchars(iskool_app_version_label()) ?></div>
+</div>
+
+<div class="dm-palette" id="dmPalette" aria-hidden="true">
+    <div class="dm-palette-panel" role="dialog" aria-modal="true" aria-label="Search pages and actions">
+        <div class="dm-palette-field">
+            <input id="dmPaletteInput" type="text" placeholder="Jump to a page or action" autocomplete="off" spellcheck="false"
+                   role="combobox" aria-expanded="true" aria-controls="dmPaletteList" aria-autocomplete="list" aria-label="Search pages and actions">
+        </div>
+        <ul id="dmPaletteList" role="listbox"></ul>
+        <p class="dm-palette-empty" id="dmPaletteEmpty" hidden></p>
+        <div class="dm-palette-foot">
+            <span><kbd>&uarr;</kbd><kbd>&darr;</kbd>Move</span>
+            <span><kbd>&crarr;</kbd>Open</span>
+            <span><kbd>Esc</kbd>Close</span>
+        </div>
+    </div>
+</div>
 
 <!-- ═══════════════════════════════════════════
      MAIN CONTENT
@@ -410,6 +484,9 @@ if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.wasLockedAtLoad
                     <span id="teacherHeaderBackLabel"></span>
                 </button>
             </div>
+
+            <!-- DESKTOP ONLY: names the current page (kept in step with the active sidebar link by teacher_desktop_menu.js) -->
+            <h1 class="dm-page-title" id="dmPageTitle"></h1>
 
             <!-- Centre: logo + school name (standard mode) / detail title (detail mode) -->
             <div class="top-nav-brand" id="teacherHeaderBrand">
@@ -1496,16 +1573,21 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
-<script src="assets/js/teacher/dashboard.js?v=13.2"></script>
+<script src="assets/js/teacher/dashboard.js?v=13.3"></script>
 <script src="assets/js/teacher/class-picker.js?v=1.1"></script>
-<script src="assets/js/teacher/quizzes.js?v=7.3"></script>
-<script src="assets/js/teacher/announcements.js?v=5.7"></script>
-<script src="assets/js/teacher/evaluations.js?v=4.7"></script>
-<script src="assets/js/teacher/resources.js?v=4.3"></script>
-<script src="assets/js/teacher/grades.js?v=4.8"></script>
-<script src="assets/js/teacher/assignments.js?v=4.7"></script>
-<script src="assets/js/teacher/sbo.js?v=4.7"></script>
-<script src="assets/js/teacher/analytics.js?v=3.8"></script>
+<script src="assets/js/teacher/quizzes.js?v=7.8"></script>
+<script src="assets/js/teacher/announcements.js?v=5.8"></script>
+<script src="assets/js/teacher/evaluations.js?v=4.9"></script>
+<script src="assets/js/teacher/resources.js?v=4.4"></script>
+<script src="assets/js/teacher/grades.js?v=5.0"></script>
+<script src="assets/js/teacher/assignments.js?v=5.0"></script>
+<script src="assets/js/teacher/sbo.js?v=4.9"></script>
+<script src="assets/js/teacher/analytics.js?v=4.3"></script>
 <script src="assets/js/teacher/teacher_calendar.js?v=2.0"></script>
+<script src="assets/js/teacher/teacher_desktop_menu.js?v=1.0"></script>
+<script src="assets/js/teacher/teacher_mobile_menu.js?v=1.0"></script>
+<script>window.ISKOOL_TEACHER = <?= json_encode(['name'=>$teacherFullName,'email'=>$teacherEmail,'initials'=>$teacherInitials], JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?>;</script>
+<script src="assets/js/teacher/teacher_mobile_settings.js?v=1.0"></script>
+<script src="assets/js/teacher/teacher_desktop_settings.js?v=1.0"></script>
 </body>
 </html>

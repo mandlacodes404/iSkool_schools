@@ -121,6 +121,8 @@ window.submitLearnerAssignmentInline = async function(event, form) {
         }
 
         window.learnerAssignmentCache = null;
+        window._lasEditingId = null;
+        if (typeof window.lasRenderDesktopList === 'function') window.lasRenderDesktopList();
         if (window.innerWidth > 899 && typeof window.selectDesktopLearnerAssignment === 'function') {
             window.selectDesktopLearnerAssignment(window._learnerAssignmentSelectedIdx);
         } else {
@@ -230,7 +232,7 @@ function saveAssignmentPageState() {
         selectedIdx:   window._learnerAssignmentSelectedIdx ?? null, // legacy fallback
         sidebarScroll: sidebar ? sidebar.scrollTop : 0,
         mainScroll:    mainContent ? mainContent.scrollTop : 0,
-        panelScroll:   panel ? panel.scrollTop : 0,
+        panelScroll:   (document.querySelector('.las-body') || {}).scrollTop || 0,
         mobileSearch: document.getElementById('lasMobileSearch')?.value || '',
         openFolders: Array.from(document.querySelectorAll('.las-mobile-folder-body:not(.collapsed)')).map(el => el.id),
         openDesktopGroups: Array.from(document.querySelectorAll('.las-desktop-teacher-body:not(.collapsed)')).map(el => el.id),
@@ -242,7 +244,7 @@ function saveAssignmentPageState() {
 function wireAssignmentScrollState() {
     const mainContent = document.querySelector('.main-content');
     const sidebar = document.querySelector('.las-sidebar-scroll');
-    const panel = document.getElementById('las-main-panel');
+    const panel = document.querySelector('.las-body');
     [mainContent, sidebar, panel].forEach(el => {
         if (!el || el.dataset.lasScrollWired === '1') return;
         el.dataset.lasScrollWired = '1';
@@ -256,6 +258,7 @@ function restoreAssignmentPageState() {
             ? window.learnerPageState.get('assignments')
             : JSON.parse(sessionStorage.getItem('assignmentPageState') || '{}');
         if (!state || Object.keys(state).length === 0) {
+            window.lasEnsureSelection();
             wireAssignmentScrollState();
             return;
         }
@@ -298,8 +301,9 @@ function restoreAssignmentPageState() {
             if (mainContent && Number.isFinite(state.mainScroll)) {
                 mainContent.scrollTop = state.mainScroll;
             }
-            const panel = document.getElementById('las-main-panel');
-            if (panel && Number.isFinite(state.panelScroll)) panel.scrollTop = state.panelScroll;
+            const panelBody = document.querySelector('.las-body');
+            if (panelBody && Number.isFinite(state.panelScroll)) panelBody.scrollTop = state.panelScroll;
+            window.lasEnsureSelection();
             wireAssignmentScrollState();
             saveAssignmentPageState();
         });
@@ -355,71 +359,30 @@ function renderAssignmentCards(groupedData) {
         });
     }
 
-    // ── Build sidebar HTML ──
-    let sidebarHtml = '';
-    let flatIdx = 0;
-    let desktopGroupIdx = 0;
-    for (const { teacher, tasks } of teacherEntries) {
-        const groupId = `las-dg-${desktopGroupIdx++}`;
-        sidebarHtml += `
-            <div class="las-desktop-teacher-group">
-                <button type="button" class="las-desktop-teacher-header" onclick="toggleLasDesktopGroup('${groupId}', this)">
-                    <svg class="las-desktop-teacher-chevron" viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none">
-                        <polyline points="9 18 15 12 9 6"></polyline>
-                    </svg>
-                    <svg class="las-desktop-teacher-folder-icon" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-                    </svg>
-                    <span class="las-desktop-teacher-name">${escapeLearnerAssignmentHtml(teacher)}</span>
-                    <span class="las-desktop-teacher-count">${tasks.length}</span>
-                </button>
-                <div class="las-desktop-teacher-body collapsed" id="${groupId}">`;
-        tasks.forEach(task => {
-            const isDone = hasLearnerAssignmentSubmission(task);
-            const dotClass = task.is_past_due ? 'las-sidebar-status-dot--past-due'
-                : isDone ? 'las-sidebar-status-dot--done' : 'las-sidebar-status-dot--pending';
-
-            sidebarHtml += `
-                <div class="las-sidebar-item" id="las-sidebar-${flatIdx}"
-                    data-title="${escapeLearnerAssignmentHtml(task.title || '').toLowerCase()}"
-                    onclick="selectDesktopLearnerAssignment(${flatIdx})">
-                    <div class="las-sidebar-item-icon">
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#a78bfa" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="las-icon-crisp">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                            <polyline points="14 2 14 8 20 8"></polyline>
-                        </svg>
-                    </div>
-                    <div class="las-sidebar-item-info">
-                        <div class="las-sidebar-item-title">${task.title}</div>
-                        <div class="las-sidebar-item-meta">${task.class_name} &middot; Due ${task.due_date}</div>
-                    </div>
-                    <span class="las-sidebar-status-dot ${dotClass}"></span>
-                </div>`;
-            flatIdx++;
-        });
-        sidebarHtml += `</div></div>`;
-    }
-
     // ── Build full HTML ──
     // (Styles for this markup now live in assets/css/learner/assignments.css
     // — the inline <style> block that used to be injected here was removed
     // as part of the inline-style cleanup.)
     let html = `
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
-        <div class="las-desktop-layout lqz-flat-layout">
-            <div class="las-sidebar lqz-flat-sidebar">
-                <div class="las-desktop-search-wrap">
-                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="las-icon-crisp">
-                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                    </svg>
-                    <input type="text" class="las-desktop-search" id="lasDesktopSearch"
-                        placeholder="Search assignments..." oninput="lasDesktopSearch(this.value)">
+        <div class="las-desktop-layout lqz-flat-layout" id="las-desktop-layout">
+            <div class="las-sidebar">
+                <div class="las-lh">
+                    <div class="las-desktop-search-wrap">
+                        <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="las-icon-crisp">
+                            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                        <input type="text" class="las-desktop-search" id="lasDesktopSearch"
+                            placeholder="Filter assignments" oninput="lasDesktopSearch(this.value)">
+                    </div>
+                    <div class="las-chips" id="las-chips"></div>
                 </div>
-                <div class="las-sidebar-scroll">${sidebarHtml}</div>
+                <div class="las-sidebar-scroll" id="las-list" tabindex="0" onkeydown="lasListKeydown(event)"></div>
             </div>
+            <div class="las-split" id="las-split" role="separator" aria-orientation="vertical" aria-label="Resize assignment list" tabindex="0"></div>
             <div class="las-main-panel lqz-flat-panel" id="las-main-panel">
                 <div class="las-panel-empty">
-                    <svg viewBox="0 0 24 24" width="48" height="48" stroke="#a78bfa" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" class="las-icon-crisp">
+                    <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fd1c5" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" class="las-icon-crisp">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                         <polyline points="14 2 14 8 20 8"></polyline>
                         <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -536,40 +499,9 @@ function renderAssignmentCards(groupedData) {
 
     apiArea.innerHTML = html;
     if (typeof injectSharedDesktopLayoutStyles === 'function') injectSharedDesktopLayoutStyles();
+    lasEnsureFont();
+    window.lasInitDesktop();
 }
-
-window.lasDesktopSearch = function(val) {
-    const term = val.toLowerCase().trim();
-    document.querySelectorAll('.las-desktop-teacher-group').forEach(group => {
-        const header = group.querySelector('.las-desktop-teacher-header');
-        const body   = group.querySelector('.las-desktop-teacher-body');
-        const nameEl = group.querySelector('.las-desktop-teacher-name');
-        const groupName = nameEl ? nameEl.textContent.toLowerCase() : '';
-        if (!header || !body) return;
-
-        const items = body.querySelectorAll('.las-sidebar-item');
-        let visible = 0;
-        items.forEach(item => {
-            const title = (item.dataset.title || '');
-            const show = !term || title.includes(term) || groupName.includes(term);
-            item.style.display = show ? '' : 'none';
-            if (show) visible++;
-        });
-
-        const groupShow = visible > 0 || !term || groupName.includes(term);
-        group.style.display = groupShow ? '' : 'none';
-
-        if (term && visible) {
-            body.classList.remove('collapsed');
-            const chev = header.querySelector('.las-desktop-teacher-chevron');
-            if (chev) chev.classList.add('open');
-        } else if (!term) {
-            body.classList.add('collapsed');
-            const chev = header.querySelector('.las-desktop-teacher-chevron');
-            if (chev) chev.classList.remove('open');
-        }
-    });
-};
 
 // Re-checks the bottom nav/header scroll-state repeatedly for a short
 // window after a folder is expanded/collapsed. A single delayed check
@@ -601,21 +533,6 @@ window.toggleLasMobileFolder = function(id, headerEl) {
     // background (and header) never got re-checked against the new
     // height — it could stay stuck showing whatever state it was in
     // before the folder toggled.
-    recheckMobileNavAfterToggle();
-};
-
-window.toggleLasDesktopGroup = function(id, headerEl) {
-    const body = document.getElementById(id);
-    if (!body) return;
-    const isOpen = !body.classList.contains('collapsed');
-    body.classList.toggle('collapsed', isOpen);
-    const chevron = headerEl ? headerEl.querySelector('.las-desktop-teacher-chevron') : null;
-    if (chevron) chevron.classList.toggle('open', !isOpen);
-    saveAssignmentPageState();
-
-    // Desktop doesn't have this dynamic bottom-nav/header behaviour, so
-    // window.recalcMobileScrollUI won't exist there — recheckMobileNav-
-    // AfterToggle() already no-ops safely when it's missing.
     recheckMobileNavAfterToggle();
 };
 
@@ -784,78 +701,354 @@ window.openMobileLearnerAssignmentById = function(assignmentId) {
 // ─────────────────────────────────────────────
 // DESKTOP PANEL: SELECT ASSIGNMENT
 // ─────────────────────────────────────────────
+// ─────────────────────────────────────────────
+// DESKTOP LIST: urgency groups, filter chips, search
+// ─────────────────────────────────────────────
+window._lasFilter = 'all';
+window._lasTerm = '';
+window._lasEditingId = null;
+
+function lasDueMs(task) { return parseLearnerAssignmentTime(task.due_date) || 0; }
+
+function lasDaysLeft(task) {
+    const due = lasDueMs(task);
+    if (!due) return null;
+    const a = new Date(); a.setHours(0, 0, 0, 0);
+    const b = new Date(due); b.setHours(0, 0, 0, 0);
+    return Math.round((b - a) / 86400000);
+}
+
+function lasFmtDay(ms) {
+    const d = new Date(ms);
+    return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()] + ' ' + d.getDate() + ' ' + d.toLocaleString('en-GB', { month: 'short' });
+}
+
+function lasFmtDue(task) {
+    const ms = lasDueMs(task);
+    if (!ms) return 'No due date';
+    const d = new Date(ms);
+    return lasFmtDay(ms) + ', ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+}
+
+function lasTaskState(task) {
+    const done = hasLearnerAssignmentSubmission(task);
+    const days = lasDaysLeft(task);
+    if (done) return { key: 'done', group: 'Submitted', color: '#22c55e', badge: 'Done', days };
+    if (task.is_past_due) return { key: 'closed', group: 'Closed', color: '#6b7280', badge: 'Closed', days };
+    let badge = 'No due date';
+    if (days !== null) {
+        badge = days < 0 ? 'Overdue' : days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : lasFmtDay(lasDueMs(task)).replace(/^\w+ /, '');
+    }
+    return {
+        key: 'todo',
+        group: days !== null && days <= 7 ? 'Due soon' : 'Later',
+        color: days !== null && days <= 3 ? '#e67e22' : '#4fd1c5',
+        badge, days
+    };
+}
+
+function lasRelText(s) {
+    if (s.key === 'done') return 'Submitted';
+    if (s.key === 'closed') return 'Closed';
+    if (s.days === null) return 'No due date';
+    if (s.days < 0) return 'Overdue';
+    if (s.days === 0) return 'Due today';
+    if (s.days === 1) return 'Due tomorrow';
+    return 'Due in ' + s.days + ' days';
+}
+
+window.lasRenderDesktopList = function () {
+    const list = document.getElementById('las-list');
+    if (!list) return;
+    const keepScroll = list.scrollTop;
+    const term = window._lasTerm;
+    const items = (window._allLearnerAssignmentsFlat || []).map((task, idx) => ({ task, idx, s: lasTaskState(task) }));
+    const showActive = !!document.querySelector('#las-main-panel .las-dh');
+
+    const counts = { all: items.length, todo: 0, done: 0, closed: 0 };
+    items.forEach(i => { counts[i.s.key]++; });
+    const chipsEl = document.getElementById('las-chips');
+    if (chipsEl) {
+        chipsEl.innerHTML = [['all', 'All'], ['todo', 'To do'], ['done', 'Submitted'], ['closed', 'Closed']]
+            .map(([k, label]) => `<button type="button" class="las-chip${window._lasFilter === k ? ' on' : ''}" onclick="lasSetFilter('${k}')">${label} ${counts[k]}</button>`)
+            .join('');
+    }
+
+    const visible = items.filter(i =>
+        (window._lasFilter === 'all' || i.s.key === window._lasFilter) &&
+        (!term || `${i.task.title || ''} ${i.task.class_name || ''} ${i.task.teacher || ''}`.toLowerCase().includes(term))
+    );
+
+    const FAR = 8.64e15;
+    let html = '';
+    ['Due soon', 'Later', 'Submitted', 'Closed'].forEach(group => {
+        const rows = visible.filter(i => i.s.group === group).sort((a, b) => {
+            const A = lasDueMs(a.task) || FAR, B = lasDueMs(b.task) || FAR;
+            return (group === 'Due soon' || group === 'Later') ? A - B : (lasDueMs(b.task) - lasDueMs(a.task));
+        });
+        if (!rows.length) return;
+        html += `<div class="las-gh">${group}</div>`;
+        rows.forEach(({ task, idx, s }) => {
+            const meta = [task.class_name, task.teacher].filter(Boolean).join(' &middot; ');
+            const active = showActive && idx === window._learnerAssignmentSelectedIdx ? ' active' : '';
+            html += `
+                <div class="las-sidebar-item${active}" id="las-sidebar-${idx}" onclick="selectDesktopLearnerAssignment(${idx})">
+                    <span class="las-sidebar-status-dot" style="background:${s.color};"></span>
+                    <div class="las-sidebar-item-info">
+                        <div class="las-sidebar-item-title">${task.title}</div>
+                        <div class="las-sidebar-item-meta">${meta}</div>
+                    </div>
+                    <span class="las-row-badge" style="color:${s.color};">${escapeLearnerAssignmentHtml(s.badge)}</span>
+                </div>`;
+        });
+    });
+    list.innerHTML = html || `<div class="las-list-empty">${items.length ? 'No assignments match.' : "Your teachers haven't posted any assignments yet."}</div>`;
+    list.scrollTop = keepScroll;
+};
+
+window.lasSetFilter = function (key) {
+    window._lasFilter = key;
+    window.lasRenderDesktopList();
+};
+
+window.lasDesktopSearch = function (val) {
+    window._lasTerm = String(val || '').toLowerCase().trim();
+    window.lasRenderDesktopList();
+};
+
+// ↑ / ↓ move through the list
+window.lasListKeydown = function (e) {
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    const ids = Array.from(document.querySelectorAll('#las-list .las-sidebar-item'))
+        .map(el => parseInt(el.id.replace('las-sidebar-', ''), 10));
+    if (!ids.length) return;
+    e.preventDefault();
+    const cur = ids.indexOf(window._learnerAssignmentSelectedIdx);
+    const next = e.key === 'ArrowDown' ? Math.min(ids.length - 1, cur + 1) : Math.max(0, cur < 0 ? 0 : cur - 1);
+    window.selectDesktopLearnerAssignment(ids[next]);
+    const el = document.getElementById(`las-sidebar-${ids[next]}`);
+    if (el) el.scrollIntoView({ block: 'nearest' });
+};
+
+// Desktop never shows an empty detail pane when there's something to show
+window.lasEnsureSelection = function () {
+    if (window.innerWidth < 900) return;
+    if (document.querySelector('#las-list .las-sidebar-item.active')) return;
+    const first = document.querySelector('#las-list .las-sidebar-item');
+    if (first) window.selectDesktopLearnerAssignment(parseInt(first.id.replace('las-sidebar-', ''), 10));
+};
+
+// Drag (or ← / →) to resize the list; width is remembered and shared with Quiz
+window.lasInitSplit = function () {
+    const layout = document.getElementById('las-desktop-layout');
+    const split = document.getElementById('las-split');
+    if (!layout || !split) return;
+    const clamp = w => Math.max(260, Math.min(420, w));
+    const apply = w => layout.style.setProperty('--las-listw', clamp(w) + 'px');
+    const current = () => parseInt(getComputedStyle(layout).getPropertyValue('--las-listw'), 10) || 320;
+    const persist = () => { try { localStorage.setItem('lqz.listWidth', String(current())); } catch (e) {} };
+    try {
+        const saved = parseInt(localStorage.getItem('lqz.listWidth'), 10);
+        if (saved) apply(saved);
+    } catch (e) {}
+
+    split.addEventListener('mousedown', e => {
+        e.preventDefault();
+        split.classList.add('drag');
+        document.body.style.userSelect = 'none';
+        const left = layout.getBoundingClientRect().left;
+        const move = ev => apply(ev.clientX - left);
+        const up = () => {
+            split.classList.remove('drag');
+            document.body.style.userSelect = '';
+            document.removeEventListener('mousemove', move);
+            document.removeEventListener('mouseup', up);
+            persist();
+        };
+        document.addEventListener('mousemove', move);
+        document.addEventListener('mouseup', up);
+    });
+    split.addEventListener('keydown', e => {
+        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+        e.preventDefault();
+        apply(current() + (e.key === 'ArrowRight' ? 16 : -16));
+        persist();
+    });
+};
+
+window.lasInitDesktop = function () {
+    window._lasFilter = 'all';
+    window._lasTerm = '';
+    window._lasEditingId = null;
+    window.lasRenderDesktopList();
+    window.lasInitSplit();
+};
+
+// ─────────────────────────────────────────────
+// DESKTOP PANEL: SELECT ASSIGNMENT
+// ─────────────────────────────────────────────
+function lasAttr(v) { return escapeLearnerAssignmentJsString(v).replace(/"/g, '&quot;'); }
+
+function lasFileName(path) {
+    try { return decodeURIComponent(String(path).split('?')[0].split('/').pop()) || 'File'; }
+    catch (e) { return 'File'; }
+}
+
+const LAS_ICON_FILE = '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>';
+const LAS_ICON_OK = '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+
+function lasFileCard(path, caption, docTitle, btnLabel) {
+    return `
+        <div class="las-file">
+            <span class="las-fi">${LAS_ICON_FILE}</span>
+            <span class="las-fx"><b>${escapeLearnerAssignmentHtml(lasFileName(path))}</b><small>${escapeLearnerAssignmentHtml(caption)}</small></span>
+            <button type="button" class="las-btn2" onclick="viewDocument('${lasAttr(path)}', '${lasAttr(docTitle)}')">${btnLabel}</button>
+        </div>`;
+}
+
+function lasComposerMarkup(task, formId, editing) {
+    const hasSub = hasLearnerAssignmentSubmission(task);
+    const currentFile = task.submission_file
+        ? `<p class="las-comp-hint">Current file: <a href="javascript:void(0)" onclick="viewDocument('${lasAttr(task.submission_file)}', 'My Submission: ${lasAttr(task.title)}')">${escapeLearnerAssignmentHtml(lasFileName(task.submission_file))}</a>. Choose a new file to replace it.</p>`
+        : '';
+    return `
+        <form id="${formId}" class="las-comp" action="submit_assignment.php?assignment_id=${encodeURIComponent(task.id)}" enctype="multipart/form-data" onsubmit="submitLearnerAssignmentInline(event, this)">
+            <label class="las-lbl las-lbl--first" for="${formId}-text">Written response <em>(optional)</em></label>
+            <textarea id="${formId}-text" class="las-comp-textarea" name="submission_text" placeholder="Write your response here...">${escapeLearnerAssignmentHtml(task.submission_text || '')}</textarea>
+            <label class="las-lbl" for="${formId}-file">File <em>(optional)</em></label>
+            <input id="${formId}-file" class="las-comp-file" type="file" name="submission_file" accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.zip">
+            <p class="las-comp-hint">PDF, Word, PowerPoint, images or ZIP. Up to 50 MB.</p>
+            ${currentFile}
+            <p class="las-submission-error" role="alert" hidden></p>
+            <div class="las-comp-actions">
+                ${editing ? '<button type="button" class="las-comp-cancel" onclick="lasCancelEdit()">Cancel</button>' : ''}
+                <button type="submit" class="las-comp-submit btn-loadable">
+                    <span class="btn-label">${hasSub ? 'Update submission' : 'Submit assignment'}</span>
+                    ${learnerAssignmentSpinnerMarkup()}
+                </button>
+            </div>
+        </form>`;
+}
+
+window.lasFocusComposer = function (formId) {
+    const ta = document.querySelector(`#${formId} .las-comp-textarea`);
+    if (!ta) return;
+    ta.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    ta.focus({ preventScroll: true });
+};
+
+window.lasStartEdit = function (taskId) {
+    const idx = (window._allLearnerAssignmentsFlat || []).findIndex(t => String(t.id) === String(taskId));
+    if (idx < 0) return;
+    window._lasEditingId = taskId;
+    window.selectDesktopLearnerAssignment(idx);
+    window.lasFocusComposer(`las-desktop-submission-${taskId}`);
+};
+
+window.lasCancelEdit = function () {
+    window._lasEditingId = null;
+    window.selectDesktopLearnerAssignment(window._learnerAssignmentSelectedIdx);
+};
+
 window.selectDesktopLearnerAssignment = function(flatIdx) {
+    const task = (window._allLearnerAssignmentsFlat || [])[flatIdx];
+    if (!task) return;
+    if (window._learnerAssignmentSelectedIdx !== flatIdx && String(window._lasEditingId) !== String(task.id)) {
+        window._lasEditingId = null;
+    }
     window._learnerAssignmentSelectedIdx = flatIdx;
     saveAssignmentPageState();
     document.querySelectorAll('.las-sidebar-item').forEach(el => el.classList.remove('active'));
     const sidebarItem = document.getElementById(`las-sidebar-${flatIdx}`);
     if (sidebarItem) sidebarItem.classList.add('active');
 
-    const task = (window._allLearnerAssignmentsFlat || [])[flatIdx];
-    if (!task) return;
-
     const panel = document.getElementById('las-main-panel');
     if (!panel) return;
 
+    const s = lasTaskState(task);
     const isDone = hasLearnerAssignmentSubmission(task);
-    const statusDotClass = task.is_past_due ? 'las-status-dot--past-due'
-        : isDone ? 'las-status-dot--done' : 'las-status-dot--pending';
-    const statusLabel = task.is_past_due ? 'Locked' : (isDone ? 'Submitted' : 'Not Submitted');
-    const actionLabel = task.is_past_due ? 'Submission Closed' : (isDone ? 'Update Submission' : 'Submit Assignment');
-    const submissionFormId = `las-desktop-submission-${task.id}`;
-
+    const isClosed = !!task.is_past_due;
+    const editing = String(window._lasEditingId) === String(task.id) && !isClosed;
+    const formId = `las-desktop-submission-${task.id}`;
     const sender = task.teacher || 'Teacher';
-    const initials = task.initials || getLearnerAssignmentInitials(sender);
+
+    // ── Status chip ──
+    let statusLabel = 'Not submitted', statusDot = '#e67e22', statusCls = '';
+    if (isDone) { statusLabel = 'Submitted'; statusDot = '#22c55e'; statusCls = ' las-panel-status--ok'; }
+    else if (isClosed) { statusLabel = 'Closed'; statusDot = '#6b7280'; }
+
+    // ── Primary action (sticky header, right-aligned) ──
+    let actionHtml;
+    if (isClosed) actionHtml = '<span class="las-act-text" style="color:#8b949e;">Submission closed</span>';
+    else if (isDone) actionHtml = `<button type="button" class="las-pri" onclick="lasStartEdit('${lasAttr(task.id)}')">Update submission</button>`;
+    else actionHtml = `<button type="button" class="las-pri" onclick="lasFocusComposer('${formId}')">Add your work</button>`;
+
+    // ── Body ──
+    const desc = task.description ? task.description.replace(/\n/g, '<br>') : 'No description provided.';
+    let body = `<p class="las-lead">${desc}</p>`;
+
+    if (task.teacher_file) {
+        body += `<div class="las-h3">Attachment</div>` +
+            lasFileCard(task.teacher_file, 'From ' + sender, 'Teacher Attachment: ' + task.title, 'Open');
+    }
+
+    body += `<div class="las-h3">Your work</div>`;
+    if (isDone && !editing) {
+        const when = task.submitted_at ? ' ' + escapeLearnerAssignmentHtml(formatLearnerAssignmentPostedDate(task.submitted_at)) : '';
+        body += `
+            <div class="las-comp">
+                <div class="las-okrow">${LAS_ICON_OK}<span>Submitted${when}</span></div>
+                ${task.submission_file ? lasFileCard(task.submission_file, 'Your upload', 'My Submission: ' + task.title, 'View') : ''}
+                ${task.submission_text ? `<p class="las-subtxt">${escapeLearnerAssignmentHtml(task.submission_text)}</p>` : ''}
+            </div>`;
+    } else if (isClosed) {
+        body += `<p class="las-muted">The deadline has passed and no work was submitted. Speak to ${escapeLearnerAssignmentHtml(sender)} if you think this is a mistake.</p>`;
+    } else {
+        body += lasComposerMarkup(task, formId, editing);
+    }
+
+    // ── Context rail ──
+    const posted = task.created_at ? formatLearnerAssignmentPostedDate(task.created_at) : '';
+    const rail = `
+        <aside class="las-rail">
+            <h4>Details</h4>
+            <div class="las-kv"><span>Class</span><b>${task.class_name || ''}</b></div>
+            <div class="las-kv"><span>Teacher</span><b>${escapeLearnerAssignmentHtml(sender)}</b></div>
+            <div class="las-kv"><span>Due</span><b>${escapeLearnerAssignmentHtml(lasFmtDue(task))}</b></div>
+            <div class="las-kv"><span>Time left</span><b style="color:${s.color};">${escapeLearnerAssignmentHtml(lasRelText(s))}</b></div>
+            ${posted ? `<div class="las-kv"><span>Posted</span><b>${escapeLearnerAssignmentHtml(posted)}</b></div>` : ''}
+            ${task.submitted_at ? `<div class="las-kv"><span>Submitted</span><b>${escapeLearnerAssignmentHtml(formatLearnerAssignmentPostedDate(task.submitted_at))}</b></div>` : ''}
+        </aside>`;
 
     panel.innerHTML = `
-        <div class="las-panel-content">
-            <div class="las-panel-header">
-                <div class="las-panel-author-row">
-                    <div class="las-panel-avatar">${escapeLearnerAssignmentHtml(initials)}</div>
-                    <div class="las-panel-author-info">
-                        <div class="las-panel-author-name">${escapeLearnerAssignmentHtml(sender)}</div>
-                        <div class="las-panel-author-role">
-                            <span>Author</span><span class="las-panel-role-sep">|</span><span class="las-panel-role-badge">Teacher</span>
-                        </div>
-                        <div class="las-panel-posted">Posted ${escapeLearnerAssignmentHtml(task.created_at ? formatLearnerAssignmentPostedDate(task.created_at) : '')}</div>
-                    </div>
-                </div>
-                <div class="las-panel-status">
-                    <span class="las-panel-status-dot ${statusDotClass}"></span>
-                    ${statusLabel}
-                </div>
-                <div class="las-panel-title">${task.title}</div>
-                <div class="las-panel-meta">
-                    <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="las-icon-crisp-inline"><path d="M2 3h20v14H2z"></path><path d="M8 21h8"></path><path d="M12 17v4"></path></svg>
-                    <span>${task.class_name}</span>
-                    <span>&bull;</span>
-                    <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="las-icon-crisp-inline"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                    <span>Due: ${task.due_date}</span>
-                </div>
-            </div>
-
-            <div class="las-panel-desc">
-                ${task.description ? task.description.replace(/\n/g, '<br>') : 'No description provided.'}
-            </div>
-
-            <div class="las-panel-links">
-                ${task.teacher_file ? `
-                    <a class="las-panel-link" href="javascript:void(0)"
-                        onclick="viewDocument('${task.teacher_file}', 'Teacher Attachment: ${task.title.replace(/'/g, "\\'")}')">
-                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="las-icon-crisp"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
-                        Teacher Attachment
-                    </a>` : ''}
-                ${task.submission_file ? `
-                    <a class="las-panel-link" href="javascript:void(0)"
-                        onclick="viewDocument('${task.submission_file}', 'My Submission: ${task.title.replace(/'/g, "\\'")}')">
-                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="las-icon-crisp"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                        View My Work
-                    </a>` : ''}
-            </div>
-
-            ${task.is_past_due
-                ? `<span class="las-panel-action las-panel-action--locked">${actionLabel}</span>`
-                : `<button type="button" class="las-panel-action" onclick="openLearnerAssignmentInlineForm(event, '${submissionFormId}')">${actionLabel}</button>
-                   ${learnerAssignmentSubmissionFormMarkup(task, submissionFormId)}`}
+        <div class="las-dh">
+            <h2 class="las-dh-title">${task.title}</h2>
+            <span class="las-panel-status${statusCls}"><span class="las-panel-status-dot" style="background:${statusDot};"></span>${statusLabel}</span>
+            <span class="las-dsp"></span>
+            ${actionHtml}
+        </div>
+        <div class="las-dbody">
+            <div class="las-body"><div class="las-read">${body}</div></div>
+            ${rail}
         </div>`;
+
+    // Keep the selected row visible inside the list (scrolls the list only)
+    const listBox = document.getElementById('las-list');
+    if (listBox && sidebarItem) {
+        const top = sidebarItem.offsetTop, bottom = top + sidebarItem.offsetHeight;
+        if (top < listBox.scrollTop + 34) listBox.scrollTop = Math.max(0, top - 34);
+        else if (bottom > listBox.scrollTop + listBox.clientHeight) listBox.scrollTop = bottom - listBox.clientHeight;
+    }
+    if (window.learnerPageState) wireAssignmentScrollState();
 };
+
+// Nunito 400/600/700 for the desktop assignments page. 600 is the medium weight, so load it
+// explicitly instead of letting the browser quietly fall back to 700 (or 400).
+function lasEnsureFont() {
+    if (document.getElementById('las-nunito-font')) return;
+    const link = document.createElement('link');
+    link.id = 'las-nunito-font';
+    link.rel = 'stylesheet';
+    link.href = 'https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap';
+    document.head.appendChild(link);
+}

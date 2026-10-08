@@ -118,7 +118,9 @@ window.fetchQuizzes = async function() {
 
     // 1. STANDARD MODE: Show Bottom Nav and Sidebar Menu
     if (typeof window.configureHeader === 'function') {
-        window.configureHeader({ title: 'Quizzes', mode: 'standard', color: '#fdd663' });
+        // Desktop matches the mockup (white title); mobile keeps the yellow header.
+        const lqzIsDesktop = window.innerWidth >= 900;
+        window.configureHeader({ title: 'Quizzes', mode: 'standard', color: lqzIsDesktop ? '#e6edf3' : '#fdd663' });
     }
 
     // 2. Sidebar & UI Management
@@ -194,7 +196,7 @@ function saveQuizPageState() {
         selectedIdx:  window._learnerQuizSelectedIdx ?? null, // legacy fallback
         sidebarScroll: sidebar ? sidebar.scrollTop : 0,
         mainScroll:    mainContent ? mainContent.scrollTop : 0,
-        panelScroll:   panel ? panel.scrollTop : 0,
+        panelScroll:   (document.querySelector('.lqz-body') || {}).scrollTop || 0,
         mobileSearch: document.getElementById('lqzMobileSearch')?.value || '',
         openFolders: Array.from(document.querySelectorAll('.lqz-mobile-folder-body:not(.collapsed)')).map(el => el.id),
         openDesktopGroups: Array.from(document.querySelectorAll('.lqz-desktop-teacher-body:not(.collapsed)')).map(el => el.id),
@@ -206,7 +208,7 @@ function saveQuizPageState() {
 function wireQuizScrollState() {
     const mainContent = document.querySelector('.main-content');
     const sidebar = document.querySelector('.lqz-sidebar-scroll');
-    const panel = document.getElementById('lqz-main-panel');
+    const panel = document.querySelector('.lqz-body');
     [mainContent, sidebar, panel].forEach(el => {
         if (!el || el.dataset.lqzScrollWired === '1') return;
         el.dataset.lqzScrollWired = '1';
@@ -220,6 +222,7 @@ function restoreQuizPageState() {
             ? window.learnerPageState.get('quiz')
             : JSON.parse(sessionStorage.getItem('quizPageState') || '{}');
         if (!state || Object.keys(state).length === 0) {
+            window.lqzEnsureSelection();
             wireQuizScrollState();
             return;
         }
@@ -262,8 +265,9 @@ function restoreQuizPageState() {
             if (mainContent && Number.isFinite(state.mainScroll)) {
                 mainContent.scrollTop = state.mainScroll;
             }
-            const panel = document.getElementById('lqz-main-panel');
-            if (panel && Number.isFinite(state.panelScroll)) panel.scrollTop = state.panelScroll;
+            const panelBody = document.querySelector('.lqz-body');
+            if (panelBody && Number.isFinite(state.panelScroll)) panelBody.scrollTop = state.panelScroll;
+            window.lqzEnsureSelection();
             wireQuizScrollState();
             saveQuizPageState();
         });
@@ -374,6 +378,17 @@ if (!data.isContinuing) {
     }
 };
 
+// Nunito 400/600/700 for the MOBILE quiz list (.lqz-mobile-*). The desktop page now uses Geist
+// (loaded in learner_dashboard.php). Keep this loader: the global Nunito link only has weight 600.
+function lqzEnsureFont() {
+    if (document.getElementById('lqz-nunito-font')) return;
+    const link = document.createElement('link');
+    link.id = 'lqz-nunito-font';
+    link.rel = 'stylesheet';
+    link.href = 'https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap';
+    document.head.appendChild(link);
+}
+
 function renderQuizCards(groupedData) {
     const apiArea = document.getElementById('api-content-area');
     if (!apiArea) return;
@@ -430,57 +445,6 @@ function renderQuizCards(groupedData) {
         }
     }
 
-    // ── Build sidebar HTML ──
-    let sidebarHtml = '';
-    let flatIdx = 0;
-    let desktopGroupIdx = 0;
-    for (const { teacher, quizzes } of teacherEntries) {
-        const groupId = `lqz-dg-${desktopGroupIdx++}`;
-        sidebarHtml += `
-            <div class="lqz-desktop-teacher-group">
-                <button type="button" class="lqz-desktop-teacher-header" onclick="toggleLqzDesktopGroup('${groupId}', this)">
-                    <svg class="lqz-desktop-teacher-chevron" viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none">
-                        <polyline points="9 18 15 12 9 6"></polyline>
-                    </svg>
-                    <svg class="lqz-desktop-teacher-folder-icon" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-                    </svg>
-                    <span class="lqz-desktop-teacher-name">${escapeHtml(teacher)}</span>
-                    <span class="lqz-desktop-teacher-count">${quizzes.length}</span>
-                </button>
-                <div class="lqz-desktop-teacher-body collapsed" id="${groupId}">`;
-        quizzes.forEach(quiz => {
-            flatIdx = window._allLearnerQuizzesFlat.indexOf(quiz);
-            const startTimeStr = quiz.start_time || "";
-            let isScheduled = false;
-            if (startTimeStr) {
-                const st = new Date(startTimeStr.replace(/-/g, "/"));
-                isScheduled = ((quiz.status === 'Scheduled' || quiz.status === 'Open') && st > now);
-            }
-            const dotColor = quiz.attempt_status === 'submitted' ? '#22c55e'
-                : quiz.status === 'Closed' ? '#6b7280'
-                : isScheduled ? '#fdd663'
-                : quiz.attempt_status === 'in_progress' ? '#e67e22'
-                : '#4fd1c5';
-
-            sidebarHtml += `
-                <div class="lqz-sidebar-item" id="lqz-sidebar-${flatIdx}"
-                    data-title="${escapeHtml(quiz.title || '').toLowerCase()}"
-                    onclick="selectDesktopLearnerQuiz(${flatIdx})">
-                    <div class="lqz-sidebar-item-icon">
-                        ${learnerQuizPencilSvg(16, 16, '#fdd663')}
-                    </div>
-                    <div class="lqz-sidebar-item-info">
-                        <div class="lqz-sidebar-item-title">${escapeHtml(quiz.title)}</div>
-                        <div class="lqz-sidebar-item-meta">${escapeHtml(quiz.duration)} mins &middot; ${escapeHtml(formatQuizDate(quiz.start_time))}</div>
-                    </div>
-                    <span class="lqz-sidebar-status-dot" style="background:${dotColor};"></span>
-                </div>`;
-        });
-        sidebarHtml += `</div></div>`;
-    }
-
-    // ── Build full HTML ──
     let html = `
         <style>
             @media (min-width: 900px) {
@@ -494,285 +458,342 @@ function renderQuizCards(groupedData) {
             }
 
             .lqz-desktop-layout {
+                --lqz-listw: 320px;
+                /* Type weights for the whole desktop quiz page (Geist). Tune here. */
+                --lqz-w-strong: 500;  /* title, status chip, group labels, primary button */
+                --lqz-w-medium: 450;  /* list rows, filter chips, values, small actions */
                 display: flex;
                 gap: 0;
                 min-height: 500px;
+                font-family: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+                font-size: 14px;
+                font-weight: 400;
+                font-variant-numeric: tabular-nums; /* marks, times and counts line up */
+                -webkit-font-smoothing: antialiased; /* keeps light weights from looking heavy on dark */
+                -moz-osx-font-smoothing: grayscale;
+                line-height: normal;
+                color: #e6edf3;
             }
+            /* The mockup sizes everything border-box; without this the header is
+               65px instead of 64px and the rail is 321px instead of 280px. */
+            .lqz-desktop-layout,
+            .lqz-desktop-layout *,
+            .lqz-desktop-layout *::before,
+            .lqz-desktop-layout *::after { box-sizing: border-box; }
+            .lqz-desktop-layout :focus-visible { outline: 2px solid #4fd1c5; outline-offset: -2px; }
 
+            /* ── List pane ── */
             .lqz-sidebar {
-                width: 280px;
-                min-width: 240px;
-                max-width: 300px;
+                width: var(--lqz-listw);
+                min-width: 260px;
+                max-width: 420px;
+                flex-shrink: 0;
+                min-height: 0;
                 display: flex;
                 flex-direction: column;
                 overflow: hidden;
+                background: #12161c;
+                border-right: 1px solid rgba(255,255,255,0.07);
+            }
+            .lqz-lh {
+                padding: 12px 12px 10px;
+                border-bottom: 1px solid rgba(255,255,255,0.07);
+                flex-shrink: 0;
+            }
+            .lqz-desktop-search-wrap { position: relative; }
+            .lqz-desktop-search-wrap svg {
+                position: absolute;
+                left: 11px;
+                top: 50%;
+                transform: translateY(-50%);
+                pointer-events: none;
+                color: #7d8794;
+            }
+            .lqz-desktop-search {
+                width: 100%;
+                box-sizing: border-box;
+                height: 34px;
+                padding: 0 10px 0 33px;
+                border-radius: 8px;
+                background: rgba(255,255,255,0.05);
+                border: 1px solid rgba(255,255,255,0.07);
+                color: #e6edf3;
+                font-size: 13px;
+                font-family: inherit;
+                transition: border-color 0.2s;
+            }
+            .lqz-desktop-search:focus { outline: none; border-color: #4fd1c5; }
+            .lqz-desktop-search::placeholder { color: #7d8794; }
+            .lqz-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+            .lqz-chip {
+                height: 26px;
+                padding: 0 10px;
+                border-radius: 999px;
+                border: 1px solid rgba(255,255,255,0.07);
+                background: none;
+                color: #9aa4b2;
+                font-family: inherit;
+                font-size: 12px;
+                font-weight: var(--lqz-w-medium);
+                white-space: nowrap;
+                cursor: pointer;
+            }
+            .lqz-chip:hover { color: #e6edf3; }
+            .lqz-chip.on {
+                background: rgba(79,209,197,0.1);
+                border-color: rgba(79,209,197,0.4);
+                color: #4fd1c5;
             }
             .lqz-sidebar-scroll {
                 flex: 1;
+                min-height: 0;
                 overflow-y: auto;
-                padding: 8px 0;
+                position: relative;
+                outline: none;
             }
+            .lqz-sidebar-scroll:focus-visible { outline: 2px solid #4fd1c5; outline-offset: -2px; }
             .lqz-sidebar-scroll::-webkit-scrollbar { width: 8px; }
             .lqz-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
             .lqz-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; transition: background 0.15s ease; }
             .lqz-sidebar-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
-
-            .lqz-desktop-teacher-group { border-bottom: 1px solid rgba(255,255,255,0.04); }
-            .lqz-desktop-teacher-header {
-                width: 100%;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                padding: 10px 14px;
-                background: transparent;
-                border: 0;
-                color: #8b949e;
-                cursor: pointer;
-                font-family: inherit;
-                text-align: left;
-            }
-            .lqz-desktop-teacher-header:hover { background: rgba(255,255,255,0.03); color: #c9d1d9; }
-            .lqz-desktop-teacher-chevron { flex-shrink: 0; transition: transform 0.2s ease; }
-            .lqz-desktop-teacher-chevron.open { transform: rotate(90deg); }
-            .lqz-desktop-teacher-folder-icon { flex-shrink: 0; opacity: 0.85; }
-            .lqz-desktop-teacher-name {
-                flex: 1;
-                min-width: 0;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
+            .lqz-gh {
+                position: sticky;
+                top: 0;
+                z-index: 1;
+                background: #12161c;
                 font-size: 11px;
-                font-weight: 800;
+                font-weight: var(--lqz-w-strong);
                 letter-spacing: 0.6px;
                 text-transform: uppercase;
+                color: #7d8794;
+                padding: 12px 14px 6px;
             }
-            .lqz-desktop-teacher-count {
-                flex-shrink: 0;
-                font-size: 10px;
-                font-weight: 800;
-                color: #fdd663;
-                background: rgba(253,214,99,0.1);
-                border: 1px solid rgba(253,214,99,0.25);
-                border-radius: 999px;
-                padding: 1px 7px;
-            }
-            .lqz-desktop-teacher-body.collapsed { display: none; }
             .lqz-sidebar-item {
                 display: flex;
                 align-items: center;
                 gap: 10px;
-                padding: 10px 16px;
+                height: 52px;
+                padding: 0 14px;
                 cursor: pointer;
                 border-left: 3px solid transparent;
-                transition: all 0.15s ease;
             }
             .lqz-sidebar-item:hover { background: rgba(255,255,255,0.04); }
             .lqz-sidebar-item.active {
-                background: rgba(79,209,197,0.08);
+                background: rgba(79,209,197,0.1);
                 border-left-color: #4fd1c5;
             }
-            .lqz-sidebar-item-icon { flex-shrink: 0; opacity: 0.7; }
+            .lqz-sidebar-status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
             .lqz-sidebar-item-info { flex: 1; min-width: 0; }
             .lqz-sidebar-item-title {
                 font-size: 13px;
-                font-weight: 600;
-                color: #c9d1d9;
+                font-weight: var(--lqz-w-medium);
+                color: #e6edf3;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
-            .lqz-sidebar-item.active .lqz-sidebar-item-title { color: #e2e8f0; }
-            .lqz-sidebar-item-meta { font-size: 11px; color: #555e6a; margin-top: 2px; }
-            .lqz-sidebar-status-dot {
-                width: 7px; height: 7px;
-                border-radius: 50%;
+            .lqz-sidebar-item-meta {
+                font-size: 12px;
+                color: #7d8794;
+                margin-top: 1px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .lqz-row-badge { font-size: 12px; font-weight: var(--lqz-w-medium); flex-shrink: 0; }
+            /* the selected row keeps one step more weight so it still reads as current */
+            .lqz-sidebar-item.active .lqz-sidebar-item-title { font-weight: var(--lqz-w-strong); }
+            .lqz-list-empty { padding: 40px 20px; text-align: center; color: #7d8794; font-size: 13px; }
+
+            /* ── Resize handle ── */
+            .lqz-split {
+                width: 6px;
+                margin-left: -3px;
                 flex-shrink: 0;
+                cursor: col-resize;
+                position: relative;
+                z-index: 2;
+                outline: none;
+            }
+            .lqz-split:hover, .lqz-split.drag, .lqz-split:focus-visible {
+                background: linear-gradient(90deg, transparent 2px, #4fd1c5 2px, #4fd1c5 4px, transparent 4px);
             }
 
+            /* ── Detail pane ── */
             .lqz-main-panel {
                 flex: 1;
-                overflow-y: auto;
+                min-width: 0;
+                min-height: 0;
                 display: flex;
                 flex-direction: column;
+                overflow: hidden;
+                container-type: inline-size;
             }
-            .lqz-main-panel::-webkit-scrollbar { width: 8px; }
-            .lqz-main-panel::-webkit-scrollbar-track { background: transparent; }
-            .lqz-main-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; transition: background 0.15s ease; }
-            .lqz-main-panel::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
-
             .lqz-panel-empty {
                 flex: 1;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                color: #555e6a;
+                color: #7d8794;
                 gap: 12px;
                 padding: 40px;
             }
             .lqz-panel-empty svg { opacity: 0.3; }
             .lqz-panel-empty p { font-size: 14px; margin: 0; }
 
-            .lqz-panel-content { padding: 28px 32px; }
-
-            /* Author row (mirrors announcements/assignments panel pattern) */
-            .lqz-panel-author-row {
+            .lqz-dh {
+                height: 64px;
                 display: flex;
                 align-items: center;
                 gap: 12px;
-                margin-bottom: 18px;
+                padding: 0 28px;
+                border-bottom: 1px solid rgba(255,255,255,0.07);
+                flex-shrink: 0;
             }
-            .lqz-panel-avatar {
-                flex: 0 0 auto;
-                width: 44px;
-                height: 44px;
-                border-radius: 50%;
-                border: 1px solid rgba(253,214,99,0.35);
-                background: rgba(253,214,99,0.1);
-                color: #fdd663;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 15px;
-                font-weight: 800;
-                letter-spacing: 0.2px;
+            /* id prefix so a host-level #api-content-area h2 rule cannot recolour the title */
+            #lqz-main-panel .lqz-dh-title {
+                margin: 0;
+                min-width: 0;
+                font-family: inherit;
+                font-size: 18px;
+                font-weight: var(--lqz-w-strong);
+                line-height: 1.25;
+                color: #e6edf3;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
-            .lqz-panel-author-info { min-width: 0; }
-            .lqz-panel-author-name {
-                color: #e2e8f0;
-                font-size: 16px;
-                font-weight: 700;
-                line-height: 1.3;
-                overflow-wrap: anywhere;
-            }
-            .lqz-panel-author-role {
-                color: #8b949e;
-                font-size: 11px;
-                font-weight: 700;
-                letter-spacing: 0.6px;
-                text-transform: uppercase;
-                margin-top: 2px;
-            }
-            .lqz-panel-role-badge { color: #fdd663; }
-            .lqz-panel-role-sep { color: #5a6472; margin: 0 6px; }
-            .lqz-panel-posted {
-                color: #8b949e;
-                font-size: 12px;
-                margin-top: 4px;
-            }
+            /* Fixed height + line-height:1 so the chip is the same 23px tall whatever
+               line-height the host page sets, and sits centred on the title. */
             .lqz-panel-status {
                 display: inline-flex;
                 align-items: center;
-                gap: 7px;
-                padding: 4px 9px;
-                border-radius: 6px;
-                font-size: 10px;
-                font-weight: 800;
-                letter-spacing: 0.6px;
-                text-transform: uppercase;
-                margin-bottom: 12px;
-                color: #c9d1d9;
-                border: 1px solid rgba(255,255,255,0.1);
-                background: rgba(255,255,255,0.04);
-            }
-            .lqz-panel-status-dot {
-                display: inline-block;
-                width: 7px;
-                height: 7px;
-                border-radius: 50%;
+                gap: 6px;
                 flex-shrink: 0;
+                height: 23px;
+                padding: 0 8px;
+                border-radius: 6px;
+                border: 1px solid rgba(255,255,255,0.07);
+                font-size: 11px;
+                font-weight: var(--lqz-w-strong);
+                line-height: 1;
+                letter-spacing: 0.5px;
+                text-transform: uppercase;
+                white-space: nowrap;
+                color: #9aa4b2;
             }
+            .lqz-panel-status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+            .lqz-panel-status--sum {
+                background: rgba(79,209,197,0.1);
+                border-color: rgba(79,209,197,0.3);
+                color: #4fd1c5;
+            }
+            .lqz-dsp { flex: 1; }
+            /* Non-clickable states (Completed / Pending / Closed / countdown) share the
+               primary button's 34px height so the right edge of the header lines up. */
+            .lqz-act-text {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                flex-shrink: 0;
+                height: 34px;
+                padding: 0 14px;
+                border-radius: 8px;
+                border: 1px solid rgba(255,255,255,0.07);
+                font-size: 13px;
+                font-weight: var(--lqz-w-medium);
+                line-height: 1;
+                white-space: nowrap;
+                font-variant-numeric: tabular-nums;
+            }
+            .lqz-act-text svg { flex-shrink: 0; }
+            .lqz-pri {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                line-height: 1;
+                height: 34px;
+                padding: 0 18px;
+                border-radius: 8px;
+                background: #4fd1c5;
+                color: #0d1117;
+                font-weight: var(--lqz-w-strong);
+                font-size: 13px;
+                text-decoration: none;
+                flex-shrink: 0;
+                cursor: pointer;
+            }
+            .lqz-pri:hover { background: #38b2ac; }
+            .lqz-pri--warn { background: #e67e22; }
+            .lqz-pri--warn:hover { background: #d06f1c; }
+            .lqz-dbody { flex: 1; min-height: 0; display: flex; }
+            .lqz-body { flex: 1; min-width: 0; overflow-y: auto; padding: 28px; }
+            .lqz-body::-webkit-scrollbar { width: 8px; }
+            .lqz-body::-webkit-scrollbar-track { background: transparent; }
+            .lqz-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+            .lqz-body::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
+            .lqz-read { max-width: 760px; }
+            .lqz-lead { color: #c9d1d9; line-height: 1.7; margin: 0 0 20px; font-size: 14px; }
 
             .lqz-panel-marks-note {
                 display: flex;
                 align-items: flex-start;
-                gap: 7px;
-                font-size: 12.5px;
-                color: #8b949e;
-                line-height: 1.5;
-                margin-bottom: 14px;
-            }
-            .lqz-panel-marks-note svg { flex-shrink: 0; margin-top: 2px; }
-            .lqz-panel-marks-note strong { color: #a0a8b3; font-weight: 700; }
-            .lqz-panel-marks-note--ready { color: #6fcf97; }
-            .lqz-panel-marks-note--ready strong { color: #6fcf97; }
-
-            .lqz-panel-header {
+                gap: 8px;
+                font-size: 13px;
+                line-height: 1.6;
+                color: #9aa4b2;
+                padding: 10px 12px;
                 margin-bottom: 20px;
-                padding-bottom: 20px;
-                border-bottom: 1px solid rgba(255,255,255,0.07);
+                border: 1px solid rgba(255,255,255,0.07);
+                border-radius: 8px;
             }
-            .lqz-panel-title {
-                font-size: 22px;
-                font-weight: 800;
-                color: #e2e8f0;
-                margin: 0 0 8px;
-                line-height: 1.28;
-            }
-            .lqz-panel-meta {
-                font-size: 13px;
-                color: #8b949e;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                flex-wrap: wrap;
-            }
-            .lqz-panel-action-row {
-                margin-top: 28px;
-                display: flex;
-                align-items: center;
-                gap: 12px;
-            }
+            .lqz-panel-marks-note svg { flex-shrink: 0; margin-top: 3px; }
+            .lqz-panel-marks-note strong { color: #c9d1d9; font-weight: var(--lqz-w-medium); }
+            .lqz-panel-inst-list strong, .lqz-panel-inst-note strong { font-weight: var(--lqz-w-medium); }
+            .lqz-panel-marks-note--ready, .lqz-panel-marks-note--ready strong { color: #6fcf97; }
 
-            /* Instructions — simple, unboxed, same aesthetic as the rest of the panel */
-            .lqz-panel-instructions { margin-top: 8px; }
-            .lqz-panel-instructions-loading {
-                color: #8b949e;
-                font-size: 13px;
-                padding: 4px 0;
-            }
+            .lqz-panel-instructions-loading { color: #7d8794; font-size: 13px; }
             .lqz-panel-inst-label {
-                font-size: 11px;
-                font-weight: 800;
+                font-size: 12px;
+                font-weight: var(--lqz-w-strong);
                 letter-spacing: 0.6px;
                 text-transform: uppercase;
-                color: #8b949e;
-                margin: 22px 0 10px;
+                color: #7d8794;
+                margin: 0 0 10px;
             }
-            .lqz-panel-inst-list {
-                list-style: none;
-                margin: 0;
-                padding: 0;
-                display: flex;
-                flex-direction: column;
-                gap: 10px;
-            }
-            .lqz-panel-inst-list li {
-                position: relative;
-                padding-left: 18px;
-                font-size: 14px;
-                color: #c9d1d9;
-                line-height: 1.6;
-            }
-            .lqz-panel-inst-list li::before {
-                content: '';
-                position: absolute;
-                left: 0;
-                top: 8px;
-                width: 5px;
-                height: 5px;
-                border-radius: 50%;
-                background: #fdd663;
-            }
+            .lqz-panel-inst-list { margin: 0; padding-left: 18px; color: #c9d1d9; line-height: 1.8; font-size: 14px; }
             .lqz-panel-inst-list li.lqz-panel-inst-warn { color: #e67e22; }
-            .lqz-panel-inst-list li.lqz-panel-inst-warn::before { background: #e67e22; }
-            .lqz-panel-inst-note {
-                font-size: 13px;
-                color: #8b949e;
-                line-height: 1.6;
-                margin-top: 14px;
+            .lqz-panel-inst-note { color: #7d8794; font-size: 13px; }
+            .lqz-panel-inst-note strong { color: #c9d1d9; }
+
+            /* ── Context rail (hides when the detail pane is under 900px wide) ── */
+            .lqz-rail {
+                width: 280px;
+                flex-shrink: 0;
+                border-left: 1px solid rgba(255,255,255,0.07);
+                padding: 24px 20px;
+                overflow-y: auto;
             }
-            .lqz-panel-inst-note strong { color: #a0a8b3; }
+            .lqz-rail h4 {
+                margin: 0 0 14px;
+                font-size: 12px;
+                font-weight: var(--lqz-w-strong);
+                letter-spacing: 0.6px;
+                text-transform: uppercase;
+                color: #7d8794;
+            }
+            .lqz-kv {
+                display: flex;
+                justify-content: space-between;
+                gap: 10px;
+                padding: 10px 0;
+                border-bottom: 1px solid rgba(255,255,255,0.07);
+                font-size: 13px;
+            }
+            .lqz-kv span { color: #9aa4b2; }
+            .lqz-kv b { font-weight: var(--lqz-w-medium); text-align: right; color: #e6edf3; }
+            @container (max-width: 899px) { .lqz-rail { display: none; } }
 
             /* ── MOBILE LIST STYLES (flat, no card wrapper) ── */
             .lqz-mobile-list {
@@ -990,56 +1011,27 @@ function renderQuizCards(groupedData) {
             }
             .lqz-mobile-search-empty svg { opacity: 0.5; }
 
-            /* ── DESKTOP SEARCH BAR ── */
-            .lqz-desktop-search-wrap {
-                display: none;
-                position: relative;
-                padding: 10px 10px 8px;
-                flex-shrink: 0;
-                border-bottom: 1px solid rgba(255,255,255,0.07);
-            }
-            .lqz-desktop-search-wrap svg {
-                position: absolute;
-                left: 22px;
-                top: 50%;
-                transform: translateY(-50%);
-                pointer-events: none;
-                opacity: 0.4;
-            }
-            .lqz-desktop-search {
-                width: 100%;
-                box-sizing: border-box;
-                padding: 8px 12px 8px 32px;
-                border-radius: 8px;
-                background: rgba(255,255,255,0.05);
-                border: 1px solid rgba(255,255,255,0.08);
-                color: #e2e8f0;
-                font-size: 12.5px;
-                font-family: 'Nunito', sans-serif;
-                transition: border-color 0.2s;
-            }
-            .lqz-desktop-search:focus { outline: none; border-color: #fdd663; }
-            .lqz-desktop-search::placeholder { color: #555e6a; }
-            @media (min-width: 900px) {
-                .lqz-desktop-search-wrap { display: block; }
-            }
         </style>
 
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
-        <div class="lqz-desktop-layout lqz-flat-layout">
-            <div class="lqz-sidebar lqz-flat-sidebar">
-                <div class="lqz-desktop-search-wrap">
-                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
-                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                    </svg>
-                    <input type="text" class="lqz-desktop-search" id="lqzDesktopSearch"
-                        placeholder="Search quizzes..." oninput="lqzDesktopSearch(this.value)">
+        <div class="lqz-desktop-layout lqz-flat-layout" id="lqz-desktop-layout">
+            <div class="lqz-sidebar">
+                <div class="lqz-lh">
+                    <div class="lqz-desktop-search-wrap">
+                        <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision">
+                            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                        <input type="text" class="lqz-desktop-search" id="lqzDesktopSearch"
+                            placeholder="Filter quizzes" oninput="lqzDesktopSearch(this.value)">
+                    </div>
+                    <div class="lqz-chips" id="lqz-chips"></div>
                 </div>
-                <div class="lqz-sidebar-scroll">${sidebarHtml}</div>
+                <div class="lqz-sidebar-scroll" id="lqz-list" tabindex="0" onkeydown="lqzListKeydown(event)"></div>
             </div>
+            <div class="lqz-split" id="lqz-split" role="separator" aria-orientation="vertical" aria-label="Resize quiz list" tabindex="0"></div>
             <div class="lqz-main-panel lqz-flat-panel" id="lqz-main-panel">
                 <div class="lqz-panel-empty">
-                    ${learnerQuizPencilSvg(48, 48, '#fdd663').replace('stroke-width="2"', 'stroke-width="1.5"')}
+                    ${learnerQuizPencilSvg(48, 48, '#4fd1c5').replace('stroke-width="2"', 'stroke-width="1.5"')}
                     <p>${hasAnyQuizzes ? 'Select a quiz from the left' : "Your teachers haven't posted any quizzes yet."}</p>
                 </div>
             </div>
@@ -1189,6 +1181,8 @@ function renderQuizCards(groupedData) {
 
     apiArea.innerHTML = html;
     if (typeof injectSharedDesktopLayoutStyles === 'function') injectSharedDesktopLayoutStyles();
+    lqzEnsureFont();
+    window.lqzInitDesktop();
     startQuizCountdowns();
 }
 
@@ -1221,50 +1215,41 @@ window.selectDesktopLearnerQuiz = function(flatIdx) {
     const isInProgress = quiz.attempt_status === 'in_progress';
     const canTakeQuiz = !isClosed && !isScheduled && !isCompleted && !isPendingResult;
 
-    // ── Status badge (mirrors announcements/assignments panel pattern) ──
-    let statusDotColor = '#fdd663';
-    let statusLabel = 'Upcoming';
-    if (isCompleted) { statusDotColor = '#27ae60'; statusLabel = 'Completed'; }
-    else if (isPendingResult) { statusDotColor = '#fdd663'; statusLabel = 'Pending Result'; }
-    else if (isClosed) { statusDotColor = '#6b7280'; statusLabel = 'Closed'; }
-    else if (isScheduled) { statusDotColor = '#fdd663'; statusLabel = 'Scheduled'; }
-    else if (isInProgress) { statusDotColor = '#e67e22'; statusLabel = 'In Progress'; }
-    else { statusDotColor = '#4fd1c5'; statusLabel = 'Not Started'; }
+    // ── Status badge — colour comes from lqzQuizState(), the same helper the list
+    //    dots use, so a row's dot and the panel chip can never disagree. ──
+    const state = lqzQuizState(quiz);
+    const statusDotColor = state.color;
+    let statusLabel = 'Not Started';
+    if (isCompleted) statusLabel = 'Completed';
+    else if (isPendingResult) statusLabel = 'Pending Result';
+    else if (isClosed) statusLabel = 'Closed';
+    else if (isScheduled) statusLabel = 'Scheduled';
+    else if (isInProgress) statusLabel = 'In Progress';
 
-    // ── Action button ──
+    const checkSvg = `<svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>`;
+
+    // ── Primary action (header, right-aligned) ──
     let actionBtn = '';
     if (isCompleted) {
-        actionBtn = `<span style="color:#27ae60; font-weight:700; font-size:15px;">✓ Completed</span>`;
+        actionBtn = `<span class="lqz-act-text" style="color:${state.color};">${checkSvg}Completed</span>`;
     } else if (isPendingResult) {
-        actionBtn = `<span style="color:#fdd663; font-weight:700; font-size:15px;">Pending</span>`;
+        actionBtn = `<span class="lqz-act-text" style="color:${state.color};">Pending</span>`;
     } else if (isClosed) {
-        actionBtn = `<span style="color:#8b949e; font-weight:700; font-size:15px;">Closed</span>`;
+        actionBtn = `<span class="lqz-act-text" style="color:#9aa4b2;">Closed</span>`;
     } else if (isScheduled) {
         const st = new Date(startTimeStr.replace(/-/g, "/"));
-        actionBtn = `<span class="quiz-countdown" 
-                         data-start="${st.getTime()}" 
-                         data-quiz-id="${quiz.id}"
-                         style="color:#fdd663; font-weight:700; font-size:15px;">
-                        Calculating...
-                     </span>`;
+        actionBtn = `<span class="quiz-countdown lqz-act-text" data-start="${st.getTime()}" data-quiz-id="${quiz.id}" style="color:${state.color};">Calculating...</span>`;
     } else if (isInProgress) {
-        actionBtn = `<a href="take_quiz.php?quiz_id=${quiz.id}"
-            style="background:rgba(230,126,34,0.1);border:1px solid rgba(230,126,34,0.4);color:#e67e22;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;">
-            Continue Quiz
-        </a>`;
+        actionBtn = `<a class="lqz-pri lqz-pri--warn" href="take_quiz.php?quiz_id=${quiz.id}">Continue quiz</a>`;
     } else {
-        actionBtn = `<a href="take_quiz.php?quiz_id=${quiz.id}"
-            style="background:rgba(79,209,197,0.1);border:1px solid rgba(79,209,197,0.4);color:#4fd1c5;padding:12px 28px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;">
-            Start Quiz
-        </a>`;
+        actionBtn = `<a class="lqz-pri" href="take_quiz.php?quiz_id=${quiz.id}">Start quiz</a>`;
     }
 
     const summativeBadge = quiz.is_summative
-        ? `<span style="background:rgba(79,209,197,0.1);border:1px solid rgba(79,209,197,0.3);color:#4fd1c5;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;">Summative</span>`
+        ? `<span class="lqz-panel-status lqz-panel-status--sum">Summative</span>`
         : '';
 
     const sender = quiz.teacher || 'Teacher';
-    const initials = getLearnerQuizInitials(sender);
     const instructionsBoxId = `lqz-inst-${quiz.id}-${flatIdx}`;
 
     // ── Marks-availability note (shown for submitted quizzes only) ──
@@ -1283,55 +1268,64 @@ window.selectDesktopLearnerQuiz = function(flatIdx) {
             </div>`;
     }
 
+    let leadHtml = '';
+    if (isScheduled) {
+        leadHtml = `<p class="lqz-lead">This quiz opens on ${escapeHtml(formatQuizDate(quiz.start_time))}. The Start button appears here automatically when it opens.</p>`;
+    } else if (isClosed && !isCompleted && !isPendingResult) {
+        leadHtml = `<p class="lqz-lead">This quiz is closed and can no longer be attempted.</p>`;
+    }
+
+    const showInstructions = canTakeQuiz || isInProgress;
+    const attemptsRow = showInstructions
+        ? `<div class="lqz-kv"><span>Attempts allowed</span><b id="lqz-attempts-${quiz.id}">—</b></div>`
+        : '';
+
     panel.innerHTML = `
-        <div class="lqz-panel-content">
-            <div class="lqz-panel-header">
-                <div class="lqz-panel-author-row">
-                    <div class="lqz-panel-avatar">${escapeHtml(initials)}</div>
-                    <div class="lqz-panel-author-info">
-                        <div class="lqz-panel-author-name">${escapeHtml(sender)}</div>
-                        <div class="lqz-panel-author-role">
-                            <span>Author</span><span class="lqz-panel-role-sep">|</span><span class="lqz-panel-role-badge">Teacher</span>
-                        </div>
-                        <div class="lqz-panel-posted">Posted ${escapeHtml(formatLearnerQuizPostedDate(quiz.start_time))}</div>
-                    </div>
-                </div>
-                <div class="lqz-panel-status">
-                    <span class="lqz-panel-status-dot" style="background:${statusDotColor};"></span>
-                    ${statusLabel}
-                </div>
-                ${marksNoteHtml}
-                <div class="lqz-panel-title">
-                    ${escapeHtml(quiz.title)} ${summativeBadge}
-                </div>
-                <div class="lqz-panel-meta">
-                    <span>${escapeHtml(quiz.subject)}</span>
-                    <span>&bull;</span>
-                    <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none" style="vertical-align:middle;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                    <span>${escapeHtml(quiz.duration)} mins</span>
-                    <span>&bull;</span>
-                    <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none" style="vertical-align:middle;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                    <span>${escapeHtml(formatQuizDate(quiz.start_time))}</span>
+        <div class="lqz-dh">
+            <h2 class="lqz-dh-title">${escapeHtml(quiz.title)}</h2>
+            <span class="lqz-panel-status"><span class="lqz-panel-status-dot" style="background:${statusDotColor};"></span>${statusLabel}</span>
+            ${summativeBadge}
+            <span class="lqz-dsp"></span>
+            ${actionBtn}
+        </div>
+        <div class="lqz-dbody">
+            <div class="lqz-body">
+                <div class="lqz-read">
+                    ${marksNoteHtml}
+                    ${leadHtml}
+                    ${showInstructions ? `
+                    <div class="lqz-panel-instructions" id="${instructionsBoxId}">
+                        <div class="lqz-panel-instructions-loading">Loading instructions…</div>
+                    </div>` : ''}
                 </div>
             </div>
-
-            ${canTakeQuiz || isInProgress ? `
-            <div class="lqz-panel-instructions" id="${instructionsBoxId}">
-                <div class="lqz-panel-instructions-loading">Loading instructions…</div>
-            </div>` : ''}
-
-            <div class="lqz-panel-action-row">
-                ${actionBtn}
-            </div>
+            <aside class="lqz-rail">
+                <h4>Details</h4>
+                <div class="lqz-kv"><span>Subject</span><b>${escapeHtml(quiz.subject)}</b></div>
+                <div class="lqz-kv"><span>Teacher</span><b>${escapeHtml(sender)}</b></div>
+                <div class="lqz-kv"><span>Time limit</span><b>${escapeHtml(quiz.duration)} min</b></div>
+                <div class="lqz-kv"><span>Opens</span><b>${escapeHtml(formatQuizDate(quiz.start_time))}</b></div>
+                <div class="lqz-kv"><span>Type</span><b>${quiz.is_summative ? 'Summative' : 'Formative'}</b></div>
+                ${attemptsRow}
+            </aside>
         </div>`;
+
+    // Keep the selected row visible inside the list (scrolls the list only)
+    const listBox = document.getElementById('lqz-list');
+    if (listBox && sidebarItem) {
+        const top = sidebarItem.offsetTop, bottom = top + sidebarItem.offsetHeight;
+        if (top < listBox.scrollTop + 34) listBox.scrollTop = Math.max(0, top - 34);
+        else if (bottom > listBox.scrollTop + listBox.clientHeight) listBox.scrollTop = bottom - listBox.clientHeight;
+    }
 
     // Kick off countdown if needed
     startQuizCountdowns();
 
     // Load instructions inline for actionable quizzes only
-    if (canTakeQuiz || isInProgress) {
+    if (showInstructions) {
         loadLearnerQuizPanelInstructions(quiz.id, instructionsBoxId);
     }
+    if (window.learnerPageState) wireQuizScrollState();
 };
 
 // Fetches quiz instructions and renders them inline in the desktop panel,
@@ -1346,6 +1340,9 @@ window.loadLearnerQuizPanelInstructions = async function(quizId, boxId) {
         if (!box) return; // user navigated away before this resolved
 
         const data = payload.data ?? payload;
+
+        const attemptsEl = document.getElementById(`lqz-attempts-${quizId}`);
+        if (attemptsEl && data.attemptLimit !== undefined && data.attemptLimit !== null) attemptsEl.textContent = String(data.attemptLimit);
 
         const bullets = [
             data.isContinuing ? `<li class="lqz-panel-inst-warn"><strong>Note:</strong> you have an unfinished attempt — you'll resume where you left off.</li>` : '',
@@ -1413,42 +1410,147 @@ window.lqzMobileSearch = function(val) {
     recheckMobileNavAfterToggle();
 };
 
-window.lqzDesktopSearch = function(val) {
-    const term = val.toLowerCase().trim();
-    document.querySelectorAll('.lqz-desktop-teacher-group').forEach(group => {
-        const header = group.querySelector('.lqz-desktop-teacher-header');
-        const body   = group.querySelector('.lqz-desktop-teacher-body');
-        const nameEl = group.querySelector('.lqz-desktop-teacher-name');
-        const groupName = nameEl ? nameEl.textContent.toLowerCase() : '';
-        if (!header || !body) return;
+// ─────────────────────────────────────────────
+// DESKTOP LIST: status groups, filter chips, search
+// ─────────────────────────────────────────────
+window._lqzFilter = 'all';
+window._lqzTerm = '';
 
-        const items = body.querySelectorAll('.lqz-sidebar-item');
-        let visible = 0;
-        items.forEach(item => {
-            const title = (item.dataset.title || '');
-            const show = !term || title.includes(term) || groupName.includes(term);
-            item.style.display = show ? '' : 'none';
-            if (show) visible++;
+function lqzQuizState(quiz) {
+    const st = quiz.start_time ? new Date(String(quiz.start_time).replace(/-/g, '/')) : null;
+    const scheduled = !!st && (quiz.status === 'Scheduled' || quiz.status === 'Open') && st > new Date();
+    const submitted = quiz.attempt_status === 'submitted';
+    const pending = submitted && (quiz.publish_marks === 0 || quiz.result_label === 'Pending');
+    if (submitted) return { key: 'done', group: 'Completed', color: pending ? '#fdd663' : '#22c55e', badge: pending ? 'Pending' : 'Done' };
+    if (quiz.status === 'Closed') return { key: 'closed', group: 'Closed', color: '#6b7280', badge: 'Closed' };
+    if (scheduled) return { key: 'upcoming', group: 'Upcoming', color: '#fdd663', badge: st.toLocaleDateString('en-ZA', { day: 'numeric', month: 'short' }) };
+    if (quiz.attempt_status === 'in_progress') return { key: 'open', group: 'Available now', color: '#e67e22', badge: 'Continue' };
+    return { key: 'open', group: 'Available now', color: '#4fd1c5', badge: 'Start' };
+}
+
+window.lqzRenderDesktopList = function () {
+    const list = document.getElementById('lqz-list');
+    if (!list) return;
+    const term = window._lqzTerm;
+    const items = (window._allLearnerQuizzesFlat || []).map((quiz, idx) => ({ quiz, idx, s: lqzQuizState(quiz) }));
+    const showActive = !!document.querySelector('#lqz-main-panel .lqz-dh');
+
+    // Filter chips with counts
+    const counts = { all: items.length, open: 0, upcoming: 0, done: 0 };
+    items.forEach(i => { if (counts[i.s.key] !== undefined) counts[i.s.key]++; });
+    const chipsEl = document.getElementById('lqz-chips');
+    if (chipsEl) {
+        chipsEl.innerHTML = [['all', 'All'], ['open', 'Open'], ['upcoming', 'Upcoming'], ['done', 'Done']]
+            .map(([k, label]) => `<button type="button" class="lqz-chip${window._lqzFilter === k ? ' on' : ''}" onclick="lqzSetFilter('${k}')">${label} ${counts[k]}</button>`)
+            .join('');
+    }
+
+    const visible = items.filter(i =>
+        (window._lqzFilter === 'all' || i.s.key === window._lqzFilter) &&
+        (!term || `${i.quiz.title || ''} ${i.quiz.subject || ''} ${i.quiz.teacher || ''}`.toLowerCase().includes(term))
+    );
+
+    let html = '';
+    ['Available now', 'Upcoming', 'Completed', 'Closed'].forEach(group => {
+        const rows = visible.filter(i => i.s.group === group).sort((a, b) =>
+            group === 'Upcoming'
+                ? parseLearnerQuizTime(a.quiz.start_time) - parseLearnerQuizTime(b.quiz.start_time)
+                : getLearnerQuizTime(b.quiz) - getLearnerQuizTime(a.quiz)
+        );
+        if (!rows.length) return;
+        html += `<div class="lqz-gh">${group}</div>`;
+        rows.forEach(({ quiz, idx, s }) => {
+            const subject = String(quiz.subject || '');
+            const teacher = String(quiz.teacher || '');
+            const meta = teacher && teacher !== subject ? `${subject} &middot; ${teacher}` : subject;
+            const active = showActive && idx === window._learnerQuizSelectedIdx ? ' active' : '';
+            html += `
+                <div class="lqz-sidebar-item${active}" id="lqz-sidebar-${idx}" onclick="selectDesktopLearnerQuiz(${idx})">
+                    <span class="lqz-sidebar-status-dot" style="background:${s.color};"></span>
+                    <div class="lqz-sidebar-item-info">
+                        <div class="lqz-sidebar-item-title">${escapeHtml(quiz.title)}</div>
+                        <div class="lqz-sidebar-item-meta">${escapeHtml(meta).replace(/&amp;middot;/g, '&middot;')}</div>
+                    </div>
+                    <span class="lqz-row-badge" style="color:${s.color};">${escapeHtml(s.badge)}</span>
+                </div>`;
         });
-
-        const groupShow = visible > 0 || !term || groupName.includes(term);
-        group.style.display = groupShow ? '' : 'none';
-
-        if (term && visible) {
-            body.classList.remove('collapsed');
-            const chev = header.querySelector('.lqz-desktop-teacher-chevron');
-            if (chev) chev.classList.add('open');
-        } else if (!term) {
-            body.classList.add('collapsed');
-            const chev = header.querySelector('.lqz-desktop-teacher-chevron');
-            if (chev) chev.classList.remove('open');
-        }
     });
+    list.innerHTML = html || `<div class="lqz-list-empty">${items.length ? 'No quizzes match.' : "Your teachers haven't posted any quizzes yet."}</div>`;
+};
 
-    // Desktop doesn't use the dynamic bottom-nav/header behaviour, so
-    // recheckMobileNavAfterToggle() will just no-op there — kept for
-    // consistency in case that ever changes.
-    recheckMobileNavAfterToggle();
+window.lqzSetFilter = function (key) {
+    window._lqzFilter = key;
+    window.lqzRenderDesktopList();
+};
+
+window.lqzDesktopSearch = function (val) {
+    window._lqzTerm = String(val || '').toLowerCase().trim();
+    window.lqzRenderDesktopList();
+};
+
+// ↑ / ↓ move through the list
+window.lqzListKeydown = function (e) {
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    const ids = Array.from(document.querySelectorAll('#lqz-list .lqz-sidebar-item'))
+        .map(el => parseInt(el.id.replace('lqz-sidebar-', ''), 10));
+    if (!ids.length) return;
+    e.preventDefault();
+    const cur = ids.indexOf(window._learnerQuizSelectedIdx);
+    const next = e.key === 'ArrowDown' ? Math.min(ids.length - 1, cur + 1) : Math.max(0, cur < 0 ? 0 : cur - 1);
+    window.selectDesktopLearnerQuiz(ids[next]);
+};
+
+// Desktop never shows an empty detail pane when there's something to show
+window.lqzEnsureSelection = function () {
+    if (window.innerWidth < 900) return;
+    if (document.querySelector('#lqz-list .lqz-sidebar-item.active')) return;
+    const first = document.querySelector('#lqz-list .lqz-sidebar-item');
+    if (first) window.selectDesktopLearnerQuiz(parseInt(first.id.replace('lqz-sidebar-', ''), 10));
+};
+
+// Drag (or ← / →) to resize the list; width is remembered
+window.lqzInitSplit = function () {
+    const layout = document.getElementById('lqz-desktop-layout');
+    const split = document.getElementById('lqz-split');
+    if (!layout || !split) return;
+    const clamp = w => Math.max(260, Math.min(420, w));
+    const apply = w => layout.style.setProperty('--lqz-listw', clamp(w) + 'px');
+    const current = () => parseInt(getComputedStyle(layout).getPropertyValue('--lqz-listw'), 10) || 320;
+    const persist = () => { try { localStorage.setItem('lqz.listWidth', String(current())); } catch (e) {} };
+    try {
+        const saved = parseInt(localStorage.getItem('lqz.listWidth'), 10);
+        if (saved) apply(saved);
+    } catch (e) {}
+
+    split.addEventListener('mousedown', e => {
+        e.preventDefault();
+        split.classList.add('drag');
+        document.body.style.userSelect = 'none';
+        const left = layout.getBoundingClientRect().left;
+        const move = ev => apply(ev.clientX - left);
+        const up = () => {
+            split.classList.remove('drag');
+            document.body.style.userSelect = '';
+            document.removeEventListener('mousemove', move);
+            document.removeEventListener('mouseup', up);
+            persist();
+        };
+        document.addEventListener('mousemove', move);
+        document.addEventListener('mouseup', up);
+    });
+    split.addEventListener('keydown', e => {
+        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+        e.preventDefault();
+        apply(current() + (e.key === 'ArrowRight' ? 16 : -16));
+        persist();
+    });
+};
+
+window.lqzInitDesktop = function () {
+    window._lqzFilter = 'all';
+    window._lqzTerm = '';
+    window.lqzRenderDesktopList();
+    window.lqzInitSplit();
 };
 
 // Re-checks the bottom nav/header scroll-state repeatedly for a short
@@ -1483,30 +1585,21 @@ window.toggleLqzMobileFolder = function(id, headerEl) {
     recheckMobileNavAfterToggle();
 };
 
-window.toggleLqzDesktopGroup = function(id, headerEl) {
-    const body = document.getElementById(id);
-    if (!body) return;
-    const isOpen = !body.classList.contains('collapsed');
-    body.classList.toggle('collapsed', isOpen);
-    const chevron = headerEl ? headerEl.querySelector('.lqz-desktop-teacher-chevron') : null;
-    if (chevron) chevron.classList.toggle('open', !isOpen);
-    saveQuizPageState();
-
-    // Desktop doesn't have this dynamic bottom-nav/header behaviour, so
-    // window.recalcMobileScrollUI won't exist there —
-    // recheckMobileNavAfterToggle() already no-ops safely when it's missing.
-    recheckMobileNavAfterToggle();
-};
-
 function startQuizCountdowns() {
     const countdowns = document.querySelectorAll('.quiz-countdown');
     if (!countdowns.length) return;
 
     countdowns.forEach(el => {
+        // Already ticking (this runs on every panel select and list render)
+        if (el.dataset.cdRunning) return;
+        el.dataset.cdRunning = '1';
+
         const startMs = parseInt(el.dataset.startMs || el.dataset.start);
         const quizId  = el.dataset.quizId;
 
         const tick = setInterval(() => {
+            // Panel was re-rendered and this element is gone — stop its timer
+            if (!el.isConnected) { clearInterval(tick); return; }
             const diff = startMs - Date.now();
 
             if (diff <= 0) {
@@ -1515,8 +1608,13 @@ function startQuizCountdowns() {
                 el.style.transition = 'opacity 0.4s';
                 el.style.opacity = '0';
                 setTimeout(() => {
-                    el.outerHTML = `<span style="color:#4fd1c5; font-weight:700; font-size:13px; cursor:pointer;"
-                                         onclick="loadQuizInstructions(${quizId})">Start</span>`;
+                    if (!el.isConnected) return;
+                    // Desktop panel: swap in the same primary button the panel renders
+                    // for an open quiz. Mobile rows keep the text action.
+                    el.outerHTML = el.classList.contains('lqz-act-text')
+                        ? `<a class="lqz-pri" href="take_quiz.php?quiz_id=${quizId}">Start quiz</a>`
+                        : `<span style="color:#4fd1c5; font-weight:700; font-size:13px; cursor:pointer;"
+                                 onclick="loadQuizInstructions(${quizId})">Start</span>`;
                 }, 400);
                 return;
             }

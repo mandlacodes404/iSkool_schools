@@ -90,7 +90,7 @@ function saveResourcePageState() {
         selectedIdx:   window._learnerResourceSelectedIdx ?? null, // legacy fallback
         sidebarScroll: sidebar ? sidebar.scrollTop : 0,
         mainScroll:    mainContent ? mainContent.scrollTop : 0,
-        panelScroll:   panel ? panel.scrollTop : 0,
+        panelScroll:   (document.querySelector('.lrs-pvw') || {}).scrollTop || 0,
         mobileSearch: document.getElementById('lrsMobileSearch')?.value || '',
         openFolders: Array.from(document.querySelectorAll('.lrs-mobile-folder-body:not(.collapsed)')).map(el => el.id),
         openDesktopGroups: Array.from(document.querySelectorAll('.lrs-desktop-teacher-body:not(.collapsed)')).map(el => el.id),
@@ -102,7 +102,7 @@ function saveResourcePageState() {
 function wireResourceScrollState() {
     const mainContent = document.querySelector('.main-content');
     const sidebar = document.querySelector('.lrs-sidebar-scroll');
-    const panel = document.getElementById('lrs-main-panel');
+    const panel = document.querySelector('.lrs-pvw');
     [mainContent, sidebar, panel].forEach(el => {
         if (!el || el.dataset.lrsScrollWired === '1') return;
         el.dataset.lrsScrollWired = '1';
@@ -116,6 +116,7 @@ function restoreResourcePageState() {
             ? window.learnerPageState.get('resources')
             : JSON.parse(sessionStorage.getItem('resourcePageState') || '{}');
         if (!state || Object.keys(state).length === 0) {
+            window.lrsEnsureSelection();
             wireResourceScrollState();
             return;
         }
@@ -158,8 +159,9 @@ function restoreResourcePageState() {
             if (mainContent && Number.isFinite(state.mainScroll)) {
                 mainContent.scrollTop = state.mainScroll;
             }
-            const panel = document.getElementById('lrs-main-panel');
-            if (panel && Number.isFinite(state.panelScroll)) panel.scrollTop = state.panelScroll;
+            const panelBody = document.querySelector('.lrs-pvw');
+            if (panelBody && Number.isFinite(state.panelScroll)) panelBody.scrollTop = state.panelScroll;
+            window.lrsEnsureSelection();
             wireResourceScrollState();
             saveResourcePageState();
         });
@@ -195,20 +197,22 @@ function renderResourceCards(data) {
     if (Object.keys(data).length === 0) {
         apiArea.innerHTML = `
             <!-- ═══ DESKTOP EMPTY ═══ -->
-            <div class="lrs-desktop-layout lqz-flat-layout">
-                <div class="lrs-sidebar lqz-flat-sidebar">
-                    <div class="lrs-desktop-search-wrap">
-                        <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lrs-icon-crisp">
-                            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                        </svg>
-                        <input type="text" class="lrs-desktop-search" id="lrsDesktopSearch"
-                            placeholder="Search resources..." oninput="lrsDesktopSearch(this.value)">
+            <div class="lrs-desktop-layout lqz-flat-layout" id="lrs-desktop-layout">
+                <div class="lrs-sidebar">
+                    <div class="lrs-lh">
+                        <div class="lrs-desktop-search-wrap">
+                            <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lrs-icon-crisp">
+                                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                            </svg>
+                            <input type="text" class="lrs-desktop-search" id="lrsDesktopSearch" placeholder="Filter resources" disabled>
+                        </div>
                     </div>
-                    <div class="lrs-sidebar-scroll"></div>
+                    <div class="lrs-sidebar-scroll" id="lrs-list"></div>
                 </div>
+                <div class="lrs-split" aria-hidden="true"></div>
                 <div class="lrs-main-panel lqz-flat-panel" id="lrs-main-panel">
                     <div class="lrs-panel-empty">
-                        <svg viewBox="0 0 24 24" width="48" height="48" stroke="#f28c38" stroke-width="1.5" fill="none">
+                        <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fd1c5" stroke-width="1.5" fill="none">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                             <polyline points="14 2 14 8 20 8"></polyline>
                             <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -252,71 +256,30 @@ function renderResourceCards(data) {
         });
     }
 
-    // ── Build sidebar HTML ──
-    let sidebarHtml = '';
-    let flatIdx = 0;
-    let desktopGroupIdx = 0;
-    for (const { teacher, files } of teacherEntries) {
-        const groupId = `lrs-dg-${desktopGroupIdx++}`;
-        sidebarHtml += `
-            <div class="lrs-desktop-teacher-group">
-                <button type="button" class="lrs-desktop-teacher-header" onclick="toggleLrsDesktopGroup('${groupId}', this)">
-                    <svg class="lrs-desktop-teacher-chevron" viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.5" fill="none">
-                        <polyline points="9 18 15 12 9 6"></polyline>
-                    </svg>
-                    <svg class="lrs-desktop-teacher-folder-icon" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-                    </svg>
-                    <span class="lrs-desktop-teacher-name">${escapeResourceHtml(teacher)}</span>
-                    <span class="lrs-desktop-teacher-count">${files.length}</span>
-                </button>
-                <div class="lrs-desktop-teacher-body collapsed" id="${groupId}">`;
-        files.forEach(file => {
-            const isVideo = file.resource_type === 'video';
-            const metaLabel = isVideo
-                ? 'VIDEO'
-                : (file.ext ? file.ext.toUpperCase() : 'FILE');
-            const metaRight = isVideo
-                ? 'YouTube'
-                : (file.size || 'N/A');
-
-            sidebarHtml += `
-                <div class="lrs-sidebar-item" id="lrs-sidebar-${flatIdx}"
-                    data-title="${escapeResourceHtml(file.title || '').toLowerCase()}"
-                    onclick="selectDesktopLearnerResource(${flatIdx})">
-                    <div class="lrs-sidebar-item-icon">
-                        ${getFileIcon(file.ext, isVideo)}
-                    </div>
-                    <div class="lrs-sidebar-item-info">
-                        <div class="lrs-sidebar-item-title">${file.title}</div>
-                        <div class="lrs-sidebar-item-meta">${metaLabel} &middot; ${metaRight}</div>
-                    </div>
-                </div>`;
-            flatIdx++;
-        });
-        sidebarHtml += `</div></div>`;
-    }
-
     // ── Build full HTML ──
     // (Styles for this markup now live in assets/css/learner/resources.css
     // — the inline <style> block that used to be injected here was removed
     // as part of the inline-style cleanup.)
     let html = `
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
-        <div class="lrs-desktop-layout lqz-flat-layout">
-            <div class="lrs-sidebar lqz-flat-sidebar">
-                <div class="lrs-desktop-search-wrap">
-                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lrs-icon-crisp">
-                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                    </svg>
-                    <input type="text" class="lrs-desktop-search" id="lrsDesktopSearch"
-                        placeholder="Search resources..." oninput="lrsDesktopSearch(this.value)">
+        <div class="lrs-desktop-layout lqz-flat-layout" id="lrs-desktop-layout">
+            <div class="lrs-sidebar">
+                <div class="lrs-lh">
+                    <div class="lrs-desktop-search-wrap">
+                        <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lrs-icon-crisp">
+                            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                        <input type="text" class="lrs-desktop-search" id="lrsDesktopSearch"
+                            placeholder="Filter resources" oninput="lrsDesktopSearch(this.value)">
+                    </div>
+                    <div class="lrs-chips" id="lrs-chips"></div>
                 </div>
-                <div class="lrs-sidebar-scroll">${sidebarHtml}</div>
+                <div class="lrs-sidebar-scroll" id="lrs-list" tabindex="0" onkeydown="lrsListKeydown(event)"></div>
             </div>
+            <div class="lrs-split" id="lrs-split" role="separator" aria-orientation="vertical" aria-label="Resize resource list" tabindex="0"></div>
             <div class="lrs-main-panel lqz-flat-panel" id="lrs-main-panel">
                 <div class="lrs-panel-empty">
-                    <svg viewBox="0 0 24 24" width="48" height="48" stroke="#f28c38" stroke-width="1.5" fill="none">
+                    <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fd1c5" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                         <polyline points="14 2 14 8 20 8"></polyline>
                         <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -415,6 +378,8 @@ function renderResourceCards(data) {
 
     apiArea.innerHTML = html;
     if (typeof injectSharedDesktopLayoutStyles === 'function') injectSharedDesktopLayoutStyles();
+    lrsEnsureFont();
+    window.lrsInitDesktop();
 }
 
 // ─────────────────────────────────────────────
@@ -437,44 +402,6 @@ function recheckMobileNavAfterToggle() {
     });
 }
 
-window.lrsDesktopSearch = function(val) {
-    const term = val.toLowerCase().trim();
-    document.querySelectorAll('.lrs-desktop-teacher-group').forEach(group => {
-        const header = group.querySelector('.lrs-desktop-teacher-header');
-        const body   = group.querySelector('.lrs-desktop-teacher-body');
-        const nameEl = group.querySelector('.lrs-desktop-teacher-name');
-        const groupName = nameEl ? nameEl.textContent.toLowerCase() : '';
-        if (!header || !body) return;
-
-        const items = body.querySelectorAll('.lrs-sidebar-item');
-        let visible = 0;
-        items.forEach(item => {
-            const title = (item.dataset.title || '');
-            const show = !term || title.includes(term) || groupName.includes(term);
-            item.style.display = show ? '' : 'none';
-            if (show) visible++;
-        });
-
-        const groupShow = visible > 0 || !term || groupName.includes(term);
-        group.style.display = groupShow ? '' : 'none';
-
-        if (term && visible) {
-            body.classList.remove('collapsed');
-            const chev = header.querySelector('.lrs-desktop-teacher-chevron');
-            if (chev) chev.classList.add('open');
-        } else if (!term) {
-            body.classList.add('collapsed');
-            const chev = header.querySelector('.lrs-desktop-teacher-chevron');
-            if (chev) chev.classList.remove('open');
-        }
-    });
-
-    // Desktop doesn't use the dynamic bottom-nav/header behaviour, so
-    // recheckMobileNavAfterToggle() will just no-op there — kept for
-    // consistency in case that ever changes.
-    recheckMobileNavAfterToggle();
-};
-
 window.toggleLrsMobileFolder = function(id, headerEl) {
     const body = document.getElementById(id);
     if (!body) return;
@@ -493,145 +420,260 @@ window.toggleLrsMobileFolder = function(id, headerEl) {
     recheckMobileNavAfterToggle();
 };
 
-window.toggleLrsDesktopGroup = function(id, headerEl) {
-    const body = document.getElementById(id);
-    if (!body) return;
-    const isOpen = !body.classList.contains('collapsed');
-    body.classList.toggle('collapsed', isOpen);
-    const chevron = headerEl ? headerEl.querySelector('.lrs-desktop-teacher-chevron') : null;
-    if (chevron) chevron.classList.toggle('open', !isOpen);
-    saveResourcePageState();
+// ─────────────────────────────────────────────
+// DESKTOP LIST: teacher groups, type chips, search
+// ─────────────────────────────────────────────
+window._lrsFilter = 'all';
+window._lrsTerm = '';
 
-    // Desktop doesn't have this dynamic bottom-nav/header behaviour, so
-    // window.recalcMobileScrollUI won't exist there —
-    // recheckMobileNavAfterToggle() already no-ops safely when it's missing.
-    recheckMobileNavAfterToggle();
+function lrsKind(file) {
+    if (file.resource_type === 'video') return 'vid';
+    const e = (file.ext || '').toLowerCase();
+    if (e === 'pdf') return 'pdf';
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(e)) return 'img';
+    if (['ppt', 'pptx'].includes(e)) return 'ppt';
+    if (['xls', 'xlsx', 'csv'].includes(e)) return 'xls';
+    return 'doc';
+}
+function lrsCat(kind) { return kind === 'vid' ? 'vid' : kind === 'img' ? 'img' : 'doc'; }
+function lrsTag(file, kind) { return kind === 'vid' ? 'VID' : String(file.ext || 'FILE').toUpperCase().slice(0, 4); }
+function lrsTypeLabel(kind) {
+    return { vid: 'Video', pdf: 'PDF document', img: 'Image', ppt: 'Presentation', xls: 'Spreadsheet', doc: 'Document' }[kind];
+}
+function lrsDaysAgo(file) {
+    const t = getLearnerResourceTime(file);
+    if (!t) return null;
+    const a = new Date(); a.setHours(0, 0, 0, 0);
+    const b = new Date(t); b.setHours(0, 0, 0, 0);
+    return Math.round((a - b) / 86400000);
+}
+function lrsShortDate(file) {
+    const t = getLearnerResourceTime(file);
+    if (!t) return file.uploaded_at || '';
+    const d = new Date(t);
+    return d.getDate() + ' ' + d.toLocaleString('en-GB', { month: 'short' });
+}
+function lrsRelTime(file) {
+    const d = lrsDaysAgo(file);
+    if (d === null) return '';
+    if (d <= 0) return 'Today';
+    return d < 14 ? d + 'd' : lrsShortDate(file);
+}
+function lrsYoutubeWatchUrl(file) {
+    const m = String(file.video_url || '').match(/embed\/([A-Za-z0-9_-]{11})/);
+    return m ? 'https://www.youtube.com/watch?v=' + m[1] : (file.video_url || '#');
+}
+
+window.lrsRenderDesktopList = function () {
+    const list = document.getElementById('lrs-list');
+    if (!list) return;
+    const keepScroll = list.scrollTop;
+    const term = window._lrsTerm;
+    const items = (window._allLearnerResourcesFlat || []).map((file, idx) => ({ file, idx, kind: lrsKind(file) }));
+    const showActive = !!document.querySelector('#lrs-main-panel .lrs-dh');
+
+    const counts = { all: items.length, doc: 0, vid: 0, img: 0 };
+    items.forEach(i => { counts[lrsCat(i.kind)]++; });
+    const chipsEl = document.getElementById('lrs-chips');
+    if (chipsEl) {
+        chipsEl.innerHTML = [['all', 'All'], ['doc', 'Docs'], ['vid', 'Videos'], ['img', 'Images']]
+            .map(([k, label]) => `<button type="button" class="lrs-chip${window._lrsFilter === k ? ' on' : ''}" onclick="lrsSetFilter('${k}')">${label} ${counts[k]}</button>`)
+            .join('');
+    }
+
+    const visible = items.filter(({ file, kind }) =>
+        (window._lrsFilter === 'all' || lrsCat(kind) === window._lrsFilter) &&
+        (!term || `${file.title || ''} ${file.teacher || ''} ${file.ext || ''}`.toLowerCase().includes(term))
+    );
+
+    const order = [];
+    visible.forEach(i => { if (!order.includes(i.file.teacher)) order.push(i.file.teacher); });
+
+    let html = '';
+    order.forEach(teacher => {
+        const rows = visible.filter(i => i.file.teacher === teacher);
+        html += `<div class="lrs-gh"><span>${escapeResourceHtml(teacher)}</span><i>${rows.length}</i></div>`;
+        rows.forEach(({ file, idx, kind }) => {
+            const meta = (kind === 'vid' ? 'YouTube' : (file.size || 'N/A')) + ' &middot; ' + escapeResourceHtml(lrsShortDate(file));
+            const active = showActive && idx === window._learnerResourceSelectedIdx ? ' active' : '';
+            html += `
+                <div class="lrs-sidebar-item${active}" id="lrs-sidebar-${idx}" data-title="${escapeResourceHtml(file.title || '').toLowerCase()}" onclick="selectDesktopLearnerResource(${idx})">
+                    <span class="lrs-ft lrs-t-${kind}">${escapeResourceHtml(lrsTag(file, kind))}</span>
+                    <div class="lrs-sidebar-item-info">
+                        <div class="lrs-sidebar-item-title">${escapeResourceHtml(file.title || '')}</div>
+                        <div class="lrs-sidebar-item-meta">${meta}</div>
+                    </div>
+                    <span class="lrs-tm">${escapeResourceHtml(lrsRelTime(file))}</span>
+                </div>`;
+        });
+    });
+    list.innerHTML = html || `<div class="lrs-list-empty">${items.length ? 'No resources match.' : "Your teachers haven't posted any resources yet."}</div>`;
+    list.scrollTop = keepScroll;
 };
 
+window.lrsSetFilter = function (key) { window._lrsFilter = key; window.lrsRenderDesktopList(); };
+window.lrsDesktopSearch = function (val) {
+    window._lrsTerm = String(val || '').toLowerCase().trim();
+    window.lrsRenderDesktopList();
+};
+
+// ↑ / ↓ move through the list
+window.lrsListKeydown = function (e) {
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    const ids = Array.from(document.querySelectorAll('#lrs-list .lrs-sidebar-item'))
+        .map(el => parseInt(el.id.replace('lrs-sidebar-', ''), 10));
+    if (!ids.length) return;
+    e.preventDefault();
+    const cur = ids.indexOf(window._learnerResourceSelectedIdx);
+    const next = e.key === 'ArrowDown' ? Math.min(ids.length - 1, cur + 1) : Math.max(0, cur < 0 ? 0 : cur - 1);
+    window.selectDesktopLearnerResource(ids[next]);
+    const el = document.getElementById(`lrs-sidebar-${ids[next]}`);
+    if (el) el.scrollIntoView({ block: 'nearest' });
+};
+
+// Desktop never shows an empty detail pane when there's something to show
+window.lrsEnsureSelection = function () {
+    if (window.innerWidth < 900) return;
+    if (document.querySelector('#lrs-list .lrs-sidebar-item.active')) return;
+    const first = document.querySelector('#lrs-list .lrs-sidebar-item');
+    if (first) window.selectDesktopLearnerResource(parseInt(first.id.replace('lrs-sidebar-', ''), 10));
+};
+
+// Drag (or ← / →) to resize the list; width is remembered and shared with the other pages
+window.lrsInitSplit = function () {
+    const layout = document.getElementById('lrs-desktop-layout');
+    const split = document.getElementById('lrs-split');
+    if (!layout || !split) return;
+    const clamp = w => Math.max(260, Math.min(420, w));
+    const apply = w => layout.style.setProperty('--lrs-listw', clamp(w) + 'px');
+    const current = () => parseInt(getComputedStyle(layout).getPropertyValue('--lrs-listw'), 10) || 320;
+    const persist = () => { try { localStorage.setItem('lqz.listWidth', String(current())); } catch (e) {} };
+    try {
+        const saved = parseInt(localStorage.getItem('lqz.listWidth'), 10);
+        if (saved) apply(saved);
+    } catch (e) {}
+
+    split.addEventListener('mousedown', e => {
+        e.preventDefault();
+        split.classList.add('drag');
+        document.body.style.userSelect = 'none';
+        const left = layout.getBoundingClientRect().left;
+        const move = ev => apply(ev.clientX - left);
+        const up = () => {
+            split.classList.remove('drag');
+            document.body.style.userSelect = '';
+            document.removeEventListener('mousemove', move);
+            document.removeEventListener('mouseup', up);
+            persist();
+        };
+        document.addEventListener('mousemove', move);
+        document.addEventListener('mouseup', up);
+    });
+    split.addEventListener('keydown', e => {
+        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+        e.preventDefault();
+        apply(current() + (e.key === 'ArrowRight' ? 16 : -16));
+        persist();
+    });
+};
+
+window.lrsInitDesktop = function () {
+    window._lrsFilter = 'all';
+    window._lrsTerm = '';
+    window.lrsRenderDesktopList();
+    window.lrsInitSplit();
+};
+
+// ─────────────────────────────────────────────
+// DESKTOP PANEL: SELECT RESOURCE (inline preview)
+// ─────────────────────────────────────────────
 window.selectDesktopLearnerResource = function(flatIdx) {
+    const flat = window._allLearnerResourcesFlat || [];
+    const file = flat[flatIdx];
+    if (!file) return;
     window._learnerResourceSelectedIdx = flatIdx;
     saveResourcePageState();
     document.querySelectorAll('.lrs-sidebar-item').forEach(el => el.classList.remove('active'));
     const sidebarItem = document.getElementById(`lrs-sidebar-${flatIdx}`);
     if (sidebarItem) sidebarItem.classList.add('active');
 
-    const file = (window._allLearnerResourcesFlat || [])[flatIdx];
-    if (!file) return;
-
     const panel = document.getElementById('lrs-main-panel');
     if (!panel) return;
 
-    const isVideo = file.resource_type === 'video';
-    const ext     = (file.ext || '').toLowerCase();
+    const kind = lrsKind(file);
+    const ext = (file.ext || '').toLowerCase();
+    const tag = lrsTag(file, kind);
+    const title = escapeResourceHtml(file.title || '');
+    const path = escapeResourceHtml(file.path || '');
 
-    // ── VIDEO BRANCH ──
-    if (isVideo) {
-        // Convert embed URL back to watch URL for "open in YouTube" button
-        const youtubeWatchUrl = (file.video_url || '').replace(
-            /youtube\.com\/embed\/([A-Za-z0-9_-]{11}).*/,
-            'youtube.com/watch?v=$1'
-        );
-
-        panel.innerHTML = `
-            <div class="lrs-preview-topbar">
-                <div class="lrs-preview-topbar-info">
-                    <div class="lrs-preview-topbar-title">${file.title}</div>
-                    <div class="lrs-preview-topbar-meta">
-                        <svg viewBox="0 0 24 24" width="11" height="11" fill="#ff4444" stroke="none">
-                            <path d="M23 7s-.3-2-1.2-2.8c-1.1-1.2-2.4-1.2-3-1.3C16.2 2.8 12 2.8 12 2.8s-4.2 0-6.8.1c-.6.1-1.9.1-3 1.3C1.3 5 1 7 1 7S.7 9.1.7 11.2v2c0 2.1.3 4.2.3 4.2s.3 2 1.2 2.8c1.1 1.2 2.6 1.1 3.3 1.2C7.5 21.6 12 21.6 12 21.6s4.2 0 6.8-.2c.6-.1 1.9-.1 3-1.3.9-.8 1.2-2.8 1.2-2.8s.3-2.1.3-4.2v-2C23.3 9.1 23 7 23 7zM9.7 15.5V8.4l8.1 3.6-8.1 3.5z"/>
-                        </svg>
-                        <span>VIDEO</span>
-                        <span>&bull;</span>
-                        <span>${file.teacher}</span>
-                        <span>&bull;</span>
-                        <span>${file.uploaded_at}</span>
-                    </div>
-                </div>
-                <div class="lrs-preview-topbar-actions">
-                    <a href="https://${youtubeWatchUrl}" target="_blank" class="lrs-yt-btn">
-                        <svg viewBox="0 0 24 24" width="13" height="13" fill="#ff6b6b" stroke="none">
-                            <path d="M23 7s-.3-2-1.2-2.8c-1.1-1.2-2.4-1.2-3-1.3C16.2 2.8 12 2.8 12 2.8s-4.2 0-6.8.1c-.6.1-1.9.1-3 1.3C1.3 5 1 7 1 7S.7 9.1.7 11.2v2c0 2.1.3 4.2.3 4.2s.3 2 1.2 2.8c1.1 1.2 2.6 1.1 3.3 1.2C7.5 21.6 12 21.6 12 21.6s4.2 0 6.8-.2c.6-.1 1.9-.1 3-1.3.9-.8 1.2-2.8 1.2-2.8s.3-2.1.3-4.2v-2C23.3 9.1 23 7 23 7zM9.7 15.5V8.4l8.1 3.6-8.1 3.5z"/>
-                        </svg>
-                        Open in YouTube
-                    </a>
-                </div>
-            </div>
-
-            <!-- Full-panel YouTube embed -->
-            <div class="lrs-video-embed-wrap">
-                <iframe
-                    src="${file.video_url}"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-                    allowfullscreen
-                    title="${file.title}">
-                </iframe>
-            </div>`;
-        return;
-    }
-
-    // ── FILE BRANCH ──
-    const path = file.path;
-
-    let previewHtml = '';
-
-    if (ext === 'pdf') {
-        previewHtml = `
-            <div class="lrs-preview-wrap">
-                <iframe
-                    src="${path}"
-                    class="lrs-preview-iframe"
-                    title="${file.title}">
-                </iframe>
-            </div>`;
-    } else if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
-        previewHtml = `
-            <div class="lrs-preview-wrap lrs-preview-img-wrap">
-                <img src="${path}" alt="${file.title}" class="lrs-preview-img">
-            </div>`;
+    // ── Header actions ──
+    let actions;
+    if (kind === 'vid') {
+        actions = `<a class="lrs-pri" href="${escapeResourceHtml(lrsYoutubeWatchUrl(file))}" target="_blank" rel="noopener">Open in YouTube</a>`;
     } else {
-        const icon = getFileIcon(file.ext, false);
-        previewHtml = `
-            <div class="lrs-preview-fallback">
-                <div class="lrs-preview-fallback-icon">${icon.replace('width="20"','width="52"').replace('height="20"','height="52"')}</div>
-                <p class="lrs-preview-fallback-label">Preview not available for .${ext.toUpperCase()} files</p>
-                <a href="${path}" target="_blank" class="lrs-open-btn lrs-open-btn--flush">
-                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none">
-                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                        <polyline points="15 3 21 3 21 9"></polyline>
-                        <line x1="10" y1="14" x2="21" y2="3"></line>
-                    </svg>
-                    Open File
-                </a>
-            </div>`;
+        const openLabel = (kind === 'pdf' || kind === 'img') ? 'Open in new tab' : 'Open file';
+        actions = `<a class="lrs-btn2" href="${path}" download>Download</a>` +
+                  `<a class="lrs-pri" href="${path}" target="_blank" rel="noopener">${openLabel}</a>`;
     }
+
+    // ── Preview canvas ──
+    let preview;
+    if (kind === 'vid') {
+        preview = `<div class="lrs-pvw"><div class="lrs-pvid"><iframe src="${escapeResourceHtml(file.video_url || '')}"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+            allowfullscreen title="${title}"></iframe></div></div>`;
+    } else if (kind === 'pdf') {
+        preview = `<div class="lrs-pvw lrs-pvw--bleed"><iframe class="lrs-pdf" src="${path}" title="${title}"></iframe></div>`;
+    } else if (kind === 'img') {
+        preview = `<div class="lrs-pvw"><img class="lrs-pimg" src="${path}" alt="${title}"></div>`;
+    } else {
+        preview = `<div class="lrs-pvw"><div class="lrs-fb">
+            <span class="lrs-ft lrs-ft--lg lrs-t-${kind}">${escapeResourceHtml(tag)}</span>
+            <p>Preview isn't available for .${escapeResourceHtml(ext.toUpperCase() || 'this')} files</p>
+        </div></div>`;
+    }
+
+    // ── Context rail ──
+    const more = flat
+        .map((f, i) => ({ f, i }))
+        .filter(({ f, i }) => i !== flatIdx && f.teacher === file.teacher)
+        .slice(0, 3)
+        .map(({ f, i }) => {
+            const k = lrsKind(f);
+            return `
+            <button type="button" class="lrs-more" onclick="selectDesktopLearnerResource(${i})">
+                <span class="lrs-ft lrs-ft--sm lrs-t-${k}">${escapeResourceHtml(lrsTag(f, k))}</span>
+                <span class="lrs-more-text"><b>${escapeResourceHtml(f.title || '')}</b><small>${escapeResourceHtml(lrsShortDate(f))}</small></span>
+            </button>`;
+        }).join('');
 
     panel.innerHTML = `
-        <div class="lrs-preview-topbar">
-            <div class="lrs-preview-topbar-info">
-                <div class="lrs-preview-topbar-title">${file.title}</div>
-                <div class="lrs-preview-topbar-meta">
-                    <span>${file.teacher}</span>
-                    <span>&bull;</span>
-                    <span>${ext ? ext.toUpperCase() : 'FILE'}</span>
-                    <span>&bull;</span>
-                    <span>${file.size || 'N/A'}</span>
-                    <span>&bull;</span>
-                    <span>${file.uploaded_at}</span>
-                </div>
-            </div>
-            <div class="lrs-preview-topbar-actions">
-                <a href="${path}" target="_blank" class="lrs-preview-open-btn">
-                    <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none">
-                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                        <polyline points="15 3 21 3 21 9"></polyline>
-                        <line x1="10" y1="14" x2="21" y2="3"></line>
-                    </svg>
-                    Open in new tab
-                </a>
-            </div>
+        <div class="lrs-dh">
+            <h2 class="lrs-dh-title">${title}</h2>
+            <span class="lrs-panel-status">${escapeResourceHtml(tag)}</span>
+            <span class="lrs-dsp"></span>
+            ${actions}
         </div>
+        <div class="lrs-dbody">
+            ${preview}
+            <aside class="lrs-rail">
+                <h4>Details</h4>
+                <div class="lrs-kv"><span>Teacher</span><b>${escapeResourceHtml(file.teacher || '')}</b></div>
+                <div class="lrs-kv"><span>Type</span><b>${lrsTypeLabel(kind)}</b></div>
+                <div class="lrs-kv"><span>${kind === 'vid' ? 'Source' : 'Size'}</span><b>${kind === 'vid' ? 'YouTube' : escapeResourceHtml(file.size || 'N/A')}</b></div>
+                <div class="lrs-kv"><span>Uploaded</span><b>${escapeResourceHtml(file.uploaded_at || lrsShortDate(file))}</b></div>
+                ${more ? `<h4 class="lrs-rail-sub">More from ${escapeResourceHtml(file.teacher || '')}</h4>${more}` : ''}
+            </aside>
+        </div>`;
 
-        ${previewHtml}`;
+    // Keep the selected row visible inside the list (scrolls the list only)
+    const listBox = document.getElementById('lrs-list');
+    if (listBox && sidebarItem) {
+        const top = sidebarItem.offsetTop, bottom = top + sidebarItem.offsetHeight;
+        if (top < listBox.scrollTop + 34) listBox.scrollTop = Math.max(0, top - 34);
+        else if (bottom > listBox.scrollTop + listBox.clientHeight) listBox.scrollTop = bottom - listBox.clientHeight;
+    }
+    if (window.learnerPageState) wireResourceScrollState();
 };
 
 window.lrsMobileSearch = function(val) {
@@ -708,3 +750,14 @@ function escapeResourceHtml(value) {
 window.openResourceMenu = function(btn) {
     window.open(path, '_blank');
 };
+
+// Nunito 400/600/700 for the desktop resources page. 600 is the medium weight, so load it
+// explicitly instead of letting the browser quietly fall back to 700 (or 400).
+function lrsEnsureFont() {
+    if (document.getElementById('lrs-nunito-font')) return;
+    const link = document.createElement('link');
+    link.id = 'lrs-nunito-font';
+    link.rel = 'stylesheet';
+    link.href = 'https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap';
+    document.head.appendChild(link);
+}

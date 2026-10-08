@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 1024 1024"
+     width="1024"
+     height="1024">
+  <title>Minimalist Dotted Circle Logo</title>
+  <desc>Two concentric rings of black geometric dots forming a circular mark.</desc>
+  <g fill="#000000">
+    <circle cx="512.00" cy="357.00" r="24" />
+    <circle cx="589.50" cy="377.77" r="24" />
+    <circle cx="646.23" cy="434.50" r="24" />
+    <circle cx="667.00" cy="512.00" r="24" />
+    <circle cx="646.23" cy="589.50" r="24" />
+    <circle cx="589.50" cy="646.23" r="24" />
+    <circle cx="512.00" cy="667.00" r="24" />
+    <circle cx="434.50" cy="646.23" r="24" />
+    <circle cx="377.77" cy="589.50" r="24" />
+    <circle cx="357.00" cy="512.00" r="24" />
+    <circle cx="377.77" cy="434.50" r="24" />
+    <circle cx="434.50" cy="377.77" r="24" />
+    <circle cx="512.00" cy="417.00" r="13" />
+    <circle cx="559.50" cy="429.73" r="13" />
+    <circle cx="594.27" cy="464.50" r="13" />
+    <circle cx="607.00" cy="512.00" r="13" />
+    <circle cx="594.27" cy="559.50" r="13" />
+    <circle cx="559.50" cy="594.27" r="13" />
+    <circle cx="512.00" cy="607.00" r="13" />
+    <circle cx="464.50" cy="594.27" r="13" />
+    <circle cx="429.73" cy="559.50" r="13" />
+    <circle cx="417.00" cy="512.00" r="13" />
+    <circle cx="429.73" cy="464.50" r="13" />
+    <circle cx="464.50" cy="429.73" r="13" />
+  </g>
+</svg>
