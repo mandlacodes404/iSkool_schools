@@ -1319,6 +1319,24 @@
     .tchr-create-form [style*="color: #4FD1C5"] {
         color: #b9c4ff !important;
     }
+    .tchr-create-form [style*="color:#b7f5ef"],
+    .tchr-create-form [style*="color: #b7f5ef"] {
+        color: #c4ccff !important;
+    }
+    .tchr-create-form [style*="background:#4fd1c5"],
+    .tchr-create-form [style*="background: #4fd1c5"],
+    .tchr-create-form [style*="background:#4FD1C5"],
+    .tchr-create-form [style*="background: #4FD1C5"] {
+        background-color: #a5b4fc !important;
+        border-color: #a5b4fc !important;
+        color: #171a28 !important;
+    }
+    .tchr-create-form [style*="border:1px solid #4fd1c5"],
+    .tchr-create-form [style*="border: 1px solid #4fd1c5"],
+    .tchr-create-form [style*="border:1px solid #4FD1C5"],
+    .tchr-create-form [style*="border: 1px solid #4FD1C5"] {
+        border-color: rgba(165, 180, 252, .24) !important;
+    }
     .tchr-create-form [style*="accent-color:#4fd1c5"],
     .tchr-create-form [style*="accent-color: #4fd1c5"],
     .tchr-create-form [style*="accent-color:#4FD1C5"],
