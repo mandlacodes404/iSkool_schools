@@ -1416,8 +1416,8 @@
         background-color: rgba(165, 180, 252, .075) !important;
     }
 
-    .tchr-create-form [style*="box-shadow:0 0 0"],
-    .tchr-create-form [style*="box-shadow: 0 0 0"] {
+    .tchr-create-form [style*="box-shadow"][style*="79,209,197"],
+    .tchr-create-form [style*="box-shadow"][style*="79, 209, 197"] {
         box-shadow: 0 0 0 3px rgba(165, 180, 252, .14) !important;
     }
 
