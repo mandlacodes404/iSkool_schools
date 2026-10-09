@@ -690,6 +690,21 @@
     new MutationObserver(syncTitle).observe(titleEl, { childList: true, characterData: true, subtree: true });
   }
 
+  /* ── Detail pages keep their top bar (desktop) ──────────────────────────
+     The CSS hides the whole top bar on desktop, with one exception: configureHeader() in detail
+     mode shows #headerBackBtn, which is the way back from a detail page. Watching that button's
+     own display is the one hook needed. It puts .dm-detail on <html> while the button is showing,
+     so the CSS can keep the bar for exactly those pages, and the page scripts never need to know
+     this file exists. */
+  var backBtn = $('headerBackBtn');
+  function syncDetail() {
+    root.classList.toggle('dm-detail', !!backBtn && getComputedStyle(backBtn).display !== 'none');
+  }
+  if (backBtn && window.MutationObserver) {
+    new MutationObserver(syncDetail).observe(backBtn, { attributes: true, attributeFilter: ['style'] });
+  }
+  syncDetail();
+
   /* ── Desktop / mobile switch ───────────────────────────────────────── */
   function syncMode() {
     syncTitle();

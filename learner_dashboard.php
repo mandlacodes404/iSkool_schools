@@ -250,7 +250,7 @@ if (!empty($joinedClassIds)) {
     <link rel="stylesheet" href="assets/css/learner/resources.css?v=2.5">
      <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=4.6">
      <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=13.4">
-    <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=1.6">
+    <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=1.7">
     <link rel="stylesheet" href="assets/css/learner/mobile_menu.css?v=1.5">
     <link rel="stylesheet" href="assets/css/learner/mobile_settings.css?v=1.0">
     <link rel="stylesheet" href="assets/css/learner/desktop_settings.css?v=1.0">   <!-- new -->
@@ -3942,7 +3942,7 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/syllabus.js?v=3.9"></script>
 <script src="assets/js/learner/learner_calendar.js?v=2.3"></script>
 <script src="assets/js/learner/desktop_menu.js?v=1.4"></script>
-<script src="assets/js/learner/mobile_menu.js?v=1.1"></script>
+<script src="assets/js/learner/mobile_menu.js?v=1.2"></script>
 <script src="assets/js/learner/mobile_settings.js?v=1.2"></script>
 <script src="assets/js/learner/desktop_settings.js?v=1.0"></script>
 <script>window.ISKOOL_SETTINGS = { sendResetUrl: 'auth/password/send_reset_link.php' };</script>

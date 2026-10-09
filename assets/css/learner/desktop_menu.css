@@ -7,9 +7,10 @@
    Load it AFTER learner_dashboard.css. Every layout rule sits inside
    min-width: 769px, so the mobile menu is not affected.
 
-   The sidebar and top bar are one frame; the page is a rounded panel inset
-   into it (see "Inset page"), and the surfaces step up frame < page < card
-   (see "Re-tone" near the end).
+   The page fills the whole area to the right of the sidebar, flush to the
+   window edges (see "Full-bleed page"). The top bar is hidden, except on
+   detail pages where it keeps the back button (see "Header"). The surfaces
+   step up sidebar < page < card (see "Re-tone" near the end).
 
    Once you are happy with it, the old desktop-only sidebar rules in
    learner_dashboard.css (the min-width: 769px blocks, .desktop-backdrop,
@@ -28,10 +29,10 @@
 html {
   --dm-w: 268px;
   --dm-pad: 10px;
-  --dm-head: 62px; /* brand row and .main-header share this height so their contents line up */
-  --dm-gap: 10px; /* space between the page panel and the window edge */
-  --dm-panel-r: 14px; /* page panel corner radius */
-  --dm-chrome: calc(var(--dm-head) + var(--dm-gap) + 2px); /* top bar + panel margin + panel border: what a page's own "100vh minus header" sum must subtract */
+  --dm-head: 62px; /* brand row height (and the detail-page top bar) */
+  --dm-chrome: 0px; /* space the desktop chrome takes above the page: none now (no top bar, no inset). Kept so a page's own "100vh minus chrome" sum still works */
+  --dm-gap: 0px; /* the old inset margin and corner radius, now 0. Kept only so */
+  --dm-panel-r: 0px; /* anything that still reads them keeps working; delete once nothing does */
   --dm-bg: #0d1117;
   --dm-page: #000000;
   --dm-card: #0d1117;
@@ -76,22 +77,21 @@ html.dm-ready body .main-content { transition: margin-left .22s var(--dm-ease) !
 html body #desktopMenuToggle,
 html body .desktop-backdrop { display: none !important; }
 
-/* ── Inset page: sidebar and top bar are one frame, the page is a panel set inside it ──
-   All three page panes get the same panel: #api-content-area (API pages), #mainFrame (iframe pages)
-   and .my-class-content (My class). Their scroll rules elsewhere are left alone; the panel only sets
-   size, edge and corners. flex-basis 0 makes the panel fill what the top bar leaves, so a fixed
-   height set on a pane elsewhere is ignored. */
+/* ── Full-bleed page: sidebar on the left, the page filling everything else ──
+   All three page panes get the same treatment: #api-content-area (API pages), #mainFrame (iframe
+   pages) and .my-class-content (My class). Their scroll rules elsewhere are left alone; this only
+   sets size and the one divider next to the sidebar. flex-basis 0 makes the pane fill the full
+   height, so a fixed height set on a pane elsewhere is ignored. */
 html body { background-color: var(--dm-bg); }
-html body .main-content { background-color: var(--dm-bg); }
+html body .main-content { background-color: var(--dm-page); }
 html body #api-content-area,
 html body #mainFrame,
 html body .my-class-content.active {
   flex: 1 1 0; min-height: 0; box-sizing: border-box;
-  margin: 0 var(--dm-gap) var(--dm-gap) 0;
-  border: 1px solid rgba(255,255,255,.08); border-radius: var(--dm-panel-r);
+  margin: 0; border: 0; border-left: 1px solid var(--dm-line); border-radius: 0;
   background: var(--dm-page);
 }
-html body #mainFrame { width: calc(100% - var(--dm-gap)); }
+html body #mainFrame { width: 100%; }
 
 /* ── Sidebar shell ──────────────────────────────────────────────────────── */
 html body .sidebar.dm-menu {
@@ -484,13 +484,19 @@ html.dm-collapsed body .sidebar.dm-menu .dm-account-root::after, html.dm-collaps
 .dm-join-actions { display: flex; gap: 8px; margin-top: 16px; }
 .dm-join-actions .dm-join-btn { flex: 1 1 0; margin: 0; }
 
-/* ── Header (companion changes: brand and account now live in the sidebar) ── */
+/* ── Header: hidden on desktop, except on detail pages ──────────────────────
+   The brand and the account live in the sidebar, search is the palette, and the active menu item
+   names the page, so the top bar goes and the page starts at the very top of the window.
+   One exception: configureHeader({ mode: 'detail' }) shows #headerBackBtn here, and that button is
+   the way back from a detail page. desktop_menu.js mirrors it onto <html> as .dm-detail, and while
+   that class is on, the slim bar below stays. The element is never removed, only not shown. */
+html:not(.dm-detail) body .main-header { display: none !important; }
 html body .main-header {
   /* Same surface as the sidebar. !important so a colour left inline by the mobile
      scroll handler (window resized across the breakpoint) can never show on desktop. */
   background: var(--dm-bg) !important; padding: 0 24px; min-height: 62px;
   box-sizing: border-box; gap: 12px;
-  /* No divider: the page panel below has its own edge. !important for the same reason as the background. */
+  /* No divider: the page below has its own edge. !important for the same reason as the background. */
   border-bottom: 0 !important;
 }
 html body .main-header #headerLeft,
@@ -504,11 +510,15 @@ html body .main-header .school-name {
   display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   color: var(--dm-text); font: 600 15px/1.2 var(--dm-font); letter-spacing: -.005em;
 }
+/* Detail pages: the bar is showing, so the page below it gets a top edge as well. */
+html.dm-detail body #api-content-area,
+html.dm-detail body #mainFrame,
+html.dm-detail body .my-class-content.active { border-top: 1px solid var(--dm-line); }
 
-/* ── Re-tone: frame < page < card ───────────────────────────────────────────
-   The frame (sidebar + top bar) is the darkest step, the page panel sits one step above it and
-   cards one step above that. Delete this whole block to fall back to the plain inset look (black
-   page, #0d1117 frame and cards). --card-bg is the token learner_dashboard.css already uses for
+/* ── Re-tone: sidebar < page < card ───────────────────────────────────────────
+   The sidebar is the darkest step, the page sits one step above it and cards one step above
+   that. Delete this whole block to fall back to the plain look (black page, #0d1117 sidebar and
+   cards). --card-bg is the token learner_dashboard.css already uses for
    cards, so anything built on it follows. Colours hardcoded in other stylesheets do not follow. */
 html { --dm-bg: #0a0d12; --dm-page: #10151c; --dm-card: #181e27; }
 html body { --card-bg: var(--dm-card); }
