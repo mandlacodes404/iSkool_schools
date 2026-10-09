@@ -102,7 +102,7 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Geist:wght@400..600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=13.2">
-    <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_menu.css?v=1.4">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_menu.css?v=1.5">
     <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_menu.css?v=1.0">
     <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_settings.css?v=1.0">
     <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_settings.css?v=1.0">   
@@ -1575,7 +1575,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 <script src="assets/js/teacher/dashboard.js?v=13.3"></script>
 <script src="assets/js/teacher/class-picker.js?v=1.1"></script>
-<script src="assets/js/teacher/quizzes.js?v=7.9"></script>
+<script src="assets/js/teacher/quizzes.js?v=8.0"></script>
 <script src="assets/js/teacher/announcements.js?v=5.9"></script>
 <script src="assets/js/teacher/evaluations.js?v=4.9"></script>
 <script src="assets/js/teacher/resources.js?v=4.5"></script>

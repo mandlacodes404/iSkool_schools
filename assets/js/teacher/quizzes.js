@@ -234,12 +234,12 @@ function renderTeacherQuizzes(data) {
                 text-transform: uppercase;
             }
             .qz-sidebar-term-active {
-                background: rgba(79,209,197,0.15);
-                color: #4fd1c5;
+                background: var(--dm-ac-bg, rgba(79,209,197,0.15));
+                color: var(--dm-ac, #4fd1c5);
                 font-size: 9px;
                 padding: 2px 6px;
                 border-radius: 4px;
-                border: 1px solid rgba(79,209,197,0.3);
+                border: 1px solid var(--dm-ac-line-strong, rgba(79,209,197,0.3));
             }
             .qz-sidebar-class-label {
                 padding: 4px 16px 2px;
@@ -267,8 +267,8 @@ function renderTeacherQuizzes(data) {
                 background: rgba(255,255,255,0.04);
             }
             .qz-sidebar-item.active {
-                background: rgba(79,209,197,0.08);
-                border-left-color: #4fd1c5;
+                background: var(--dm-ac-sel, rgba(79,209,197,0.08));
+                border-left-color: var(--dm-ac-bar, #4fd1c5);
             }
             .qz-sidebar-item-icon { flex-shrink: 0; opacity: 0.7; }
             .qz-sidebar-item-info { flex: 1; min-width: 0; }
@@ -313,7 +313,7 @@ function renderTeacherQuizzes(data) {
                 --q-soft:#b6bbc3;
                 --q-muted:#8a9099;
                 --q-faint:#5f656e;
-                --q-accent:#4fd1c5;
+                --q-accent:var(--dm-ac, #4fd1c5);
                 --q-danger:#f4776f;
             }
             #qz-main-panel .qz2 {
@@ -556,7 +556,7 @@ function renderTeacherQuizzes(data) {
             #qz-main-panel .qz2-btn.qz2-pri {
                 background:var(--q-accent);
                 border-color:var(--q-accent);
-                color:#04211f;
+                color:var(--dm-ac-on, #04211f);
             }
             #qz-main-panel .qz2-btn.qz2-pri:hover {
                 background:var(--q-accent);
@@ -610,6 +610,7 @@ function renderTeacherQuizzes(data) {
             }
             #qz-main-panel .qz2-sw[aria-checked="true"] i {
                 transform:translateX(16px);
+                background:var(--dm-ac-on, #fff);
             }
             #qz-main-panel .qz2-sw:disabled:not(.is-loading) {
                 opacity:.6;
@@ -676,7 +677,7 @@ function renderTeacherQuizzes(data) {
             .qz2-toast.on { opacity: 1; transform: translate(-50%, 0); }
             .qz2-toast.qz2-toast-err { border-color: rgba(244,119,111,0.45); color: #f4776f; }
             @media (prefers-reduced-motion: reduce) { .qz2-toast { transition: none; } }
-            .teacher-quiz-action-btn.edit { background: rgba(79,209,197,0.1); color: #4fd1c5; border-color: rgba(79,209,197,0.25); }
+            .teacher-quiz-action-btn.edit { background: var(--dm-ac-bg, rgba(79,209,197,0.1)); color: var(--dm-ac, #4fd1c5); border-color: var(--dm-ac-line, rgba(79,209,197,0.25)); }
             .teacher-quiz-action-btn.delete { background: rgba(248,81,73,0.1); color: #f85149; border-color: rgba(248,81,73,0.25); }
             @media (max-width: 899px) {
                 .qz-desktop-only-btn { display: none !important; }
@@ -988,7 +989,7 @@ function renderTeacherQuizzes(data) {
         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
     </svg>
     <h3 style="color:#e2e8f0;margin:0 0 6px;letter-spacing:2px;font-size:16px;">INTEGRITY MONITOR</h3>
-    <p style="color:#4fd1c5;font-size:12px;font-weight:700;letter-spacing:1px;margin:0;">POWERED BY AI INVIGILATOR</p>
+    <p style="color:var(--dm-ac, #4fd1c5);font-size:12px;font-weight:700;letter-spacing:1px;margin:0;">POWERED BY AI INVIGILATOR</p>
 </div>
 
 <p style="line-height:1.8;color:#cbd5e0;font-size:14px;margin-bottom:20px;">
@@ -997,12 +998,12 @@ function renderTeacherQuizzes(data) {
     <strong style="color:#e2e8f0;">exact question they were on is logged and timestamped.</strong>
 </p>
 
-<div style="background:rgba(79,209,197,0.05);border:1px solid rgba(79,209,197,0.2);border-radius:12px;padding:16px;margin-bottom:20px;">
+<div style="background:var(--dm-ac-bg-soft, rgba(79,209,197,0.05));border:1px solid var(--dm-ac-line, rgba(79,209,197,0.2));border-radius:12px;padding:16px;margin-bottom:20px;">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
         <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
             <polyline points="20 6 9 17 4 12"></polyline>
         </svg>
-        <span style="color:#4fd1c5;font-size:12px;font-weight:800;letter-spacing:1px;">VERIFIED & TESTED</span>
+        <span style="color:var(--dm-ac, #4fd1c5);font-size:12px;font-weight:800;letter-spacing:1px;">VERIFIED & TESTED</span>
     </div>
     <p style="margin:0;font-size:13px;color:#cbd5e0;line-height:1.7;">
         This report shows you <strong style="color:#e2e8f0;">precisely where interruptions happened, 
@@ -1179,7 +1180,7 @@ window.openMobileTeacherQuiz = function(flatIndex) {
         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
     </svg>
     <h3 style="color:#e2e8f0;margin:0 0 6px;letter-spacing:2px;font-size:16px;">INTEGRITY MONITOR</h3>
-    <p style="color:#4fd1c5;font-size:12px;font-weight:700;letter-spacing:1px;margin:0;">POWERED BY AI INVIGILATOR</p>
+    <p style="color:var(--dm-ac, #4fd1c5);font-size:12px;font-weight:700;letter-spacing:1px;margin:0;">POWERED BY AI INVIGILATOR</p>
 </div>
 
 <p style="line-height:1.8;color:#cbd5e0;font-size:14px;margin-bottom:20px;">
@@ -1188,12 +1189,12 @@ window.openMobileTeacherQuiz = function(flatIndex) {
     <strong style="color:#e2e8f0;">exact question they were on is logged and timestamped.</strong>
 </p>
 
-<div style="background:rgba(79,209,197,0.05);border:1px solid rgba(79,209,197,0.2);border-radius:12px;padding:16px;margin-bottom:20px;">
+<div style="background:var(--dm-ac-bg-soft, rgba(79,209,197,0.05));border:1px solid var(--dm-ac-line, rgba(79,209,197,0.2));border-radius:12px;padding:16px;margin-bottom:20px;">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
         <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
             <polyline points="20 6 9 17 4 12"></polyline>
         </svg>
-        <span style="color:#4fd1c5;font-size:12px;font-weight:800;letter-spacing:1px;">VERIFIED & TESTED</span>
+        <span style="color:var(--dm-ac, #4fd1c5);font-size:12px;font-weight:800;letter-spacing:1px;">VERIFIED & TESTED</span>
     </div>
     <p style="margin:0;font-size:13px;color:#cbd5e0;line-height:1.7;">
         This report shows you <strong style="color:#e2e8f0;">precisely where interruptions happened, 
@@ -1855,7 +1856,7 @@ function renderQuizReview(data) {
         html += `
             <div class="teacher-review-question">
                 <div class="teacher-review-q-meta">Question ${i + 1} (${escapeHtml(q.points)} point${q.points != 1 ? 's' : ''})</div>
-                <div style="color:#4fd1c5;font-weight:800;font-size:13px;margin-bottom:10px;">
+                <div style="color:var(--dm-ac, #4fd1c5);font-weight:800;font-size:13px;margin-bottom:10px;">
                     ${escapeHtml(formatPts(q.points_earned))} / ${escapeHtml(formatPts(q.points_possible ?? q.points))} pts
                 </div>
                 <div class="teacher-review-q-text">${escapeHtml(q.text)}</div>`;
@@ -1922,7 +1923,7 @@ function renderQuizReview(data) {
             const showDeduction = ma.scoring_mode === 'partial_penalty' && Number(ma.points_deducted || 0) > 0 && Number(ma.wrong_selected_count || 0) > 0;
             html += `
                 <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px;margin-top:12px;color:#c9d1d9;font-size:13px;">
-                    <strong style="color:#4fd1c5;">Multiple Answer</strong> &bull; ${escapeHtml(scoringLabel)}
+                    <strong style="color:var(--dm-ac, #4fd1c5);">Multiple Answer</strong> &bull; ${escapeHtml(scoringLabel)}
                     ${showDeduction ? `<div style="margin-top:6px;color:#f5c38b;">${escapeHtml(ma.correct_selected_count || 0)} correct selected (+${escapeHtml(formatPts(ma.points_added))}pts), ${escapeHtml(ma.wrong_selected_count || 0)} wrong selected (-${escapeHtml(formatPts(ma.points_deducted))}pts deducted)</div>` : ''}
                 </div>`;
             q.choices.forEach(choice => {
@@ -2025,7 +2026,7 @@ window.openCreateQuiz = async function() {
             <div class="${isDesktop ? 'tchr-create-form tchr-create-form--quiz' : ''}" style="max-width:${isDesktop ? '860px' : '760px'};margin:0 auto;padding-top:0;">
                 ${isDesktop ? '<p class="tchr-create-crumb">Quizzes</p>' : ''}
                 <div style="display:flex;align-items:center;justify-content:space-between;margin:${titleMargin};">
-                    <h2 class="cq-create-title" style="margin:0;${isDesktop ? '' : 'color:#4fd1c5;font-size:22px;font-weight:800;'}">Create a New Quiz</h2>
+                    <h2 class="cq-create-title" style="margin:0;${isDesktop ? '' : 'color:var(--dm-ac, #4fd1c5);font-size:22px;font-weight:800;'}">Create a New Quiz</h2>
                     ${isDesktop ? `
                         <button onclick="fetchTeacherQuizzes()"
                             style="background:none;border:none;color:#8b949e;font-size:22px;
@@ -2033,14 +2034,14 @@ window.openCreateQuiz = async function() {
                     ` : ''}
                 </div>
                 <style>
-                    .cq-section { background:#1a1919; border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:18px; margin-bottom:16px; }
+                    .cq-section { background:var(--dm-card, #1a1919); border:1px solid rgba(255,255,255,0.06); border-radius:12px; padding:18px; margin-bottom:16px; }
                     .cq-section-title { display:flex; align-items:center; gap:10px; color:#e2e8f0; font-size:15px; font-weight:900; margin:0 0 14px; }
-                    .cq-step { width:24px; height:24px; border-radius:7px; display:inline-flex; align-items:center; justify-content:center; background:rgba(79,209,197,0.13); color:#4fd1c5; border:1px solid rgba(79,209,197,0.28); font-size:12px; font-weight:900; flex-shrink:0; }
+                    .cq-step { width:24px; height:24px; border-radius:7px; display:inline-flex; align-items:center; justify-content:center; background:var(--dm-ac-bg, rgba(79,209,197,0.13)); color:var(--dm-ac, #4fd1c5); border:1px solid var(--dm-ac-line-strong, rgba(79,209,197,0.28)); font-size:12px; font-weight:900; flex-shrink:0; }
                     .cq-section-help { color:#8b949e; font-size:13px; line-height:1.5; margin:-6px 0 14px; }
                     .cq-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:14px; }
-                    .cq-preview-card { background:#0d1117; border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:14px; }
+                    .cq-preview-card { background:var(--dm-page, #0d1117); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:14px; }
                     .cq-preview-label { color:#8b949e; font-size:11px; font-weight:900; letter-spacing:.8px; text-transform:uppercase; margin-bottom:10px; }
-                    .cq-learner-card { background:#161b22; border:1px solid rgba(255,255,255,0.07); border-radius:14px; padding:18px; margin-bottom:12px; }
+                    .cq-learner-card { background:var(--dm-card, #161b22); border:1px solid rgba(255,255,255,0.07); border-radius:14px; padding:18px; margin-bottom:12px; }
                     .cq-learner-meta { display:flex; justify-content:space-between; gap:10px; align-items:center; margin-bottom:12px; color:#94a3b8; font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.7px; }
                     .cq-learner-question { color:#e2e8f0; font-size:15px; font-weight:800; line-height:1.55; margin-bottom:14px; }
                     .cq-learner-choice { display:flex; align-items:center; gap:12px; color:#e2e8f0; background:rgba(255,255,255,0.025); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:11px 13px; margin-top:8px; font-size:13px; font-weight:700; }
@@ -2110,7 +2111,7 @@ window.openCreateQuiz = async function() {
                         <div id="cqPublishMarksWrap">
                             <label id="cqPublishMarksLabel" style="display:flex;align-items:center;gap:10px;color:#c9d1d9;font-size:14px;cursor:pointer;">
                                 <input type="checkbox" name="publish_marks" value="1"
-                                    style="width:18px;height:18px;accent-color:#4fd1c5;cursor:pointer;">
+                                    style="width:18px;height:18px;accent-color:var(--dm-ac, #4fd1c5);cursor:pointer;">
                                 Show learners their marks immediately after they submit
                             </label>
                             <div id="cqPublishMarksOpenMessage" style="display:none;background:rgba(242,140,56,0.08);border:1px solid rgba(242,140,56,0.28);border-radius:10px;color:#f5c38b;font-size:13px;line-height:1.5;padding:12px;">
@@ -2120,7 +2121,7 @@ window.openCreateQuiz = async function() {
 
                         <label style="display:flex;align-items:center;gap:10px;color:#c9d1d9;font-size:14px;cursor:pointer;">
                             <input type="checkbox" name="is_summative" value="1" id="cqSummative"
-                                style="width:18px;height:18px;accent-color:#4fd1c5;cursor:pointer;"
+                                style="width:18px;height:18px;accent-color:var(--dm-ac, #4fd1c5);cursor:pointer;"
                                 onchange="toggleCqWeight()">
                             This counts toward the official term mark
                         </label>
@@ -2133,10 +2134,10 @@ window.openCreateQuiz = async function() {
                         </div>
 
                         <!-- FIX 7: Shortened force email label + helper -->
-                        <div style="background:rgba(79,209,197,0.05);border:1px solid rgba(79,209,197,0.15);border-radius:10px;padding:12px;">
-                            <label style="display:flex;align-items:center;gap:10px;color:#4fd1c5;font-size:14px;font-weight:600;cursor:pointer;margin:0;">
+                        <div style="background:var(--dm-ac-bg-soft, rgba(79,209,197,0.05));border:1px solid var(--dm-ac-line, rgba(79,209,197,0.15));border-radius:10px;padding:12px;">
+                            <label style="display:flex;align-items:center;gap:10px;color:var(--dm-ac, #4fd1c5);font-size:14px;font-weight:600;cursor:pointer;margin:0;">
                                 <input type="checkbox" name="force_email" value="1"
-                                    style="width:18px;height:18px;accent-color:#4fd1c5;cursor:pointer;flex-shrink:0;">
+                                    style="width:18px;height:18px;accent-color:var(--dm-ac, #4fd1c5);cursor:pointer;flex-shrink:0;">
                                 Also send email notifications
                             </label>
                             <p style="margin:6px 0 0 28px;font-size:12px;color:#8b949e;line-height:1.5;">Push notifications are sent automatically. Email is optional.</p>
@@ -2149,8 +2150,8 @@ window.openCreateQuiz = async function() {
                         <div class="cq-section-help">Single Page is easiest for normal class quizzes. Multi-Page is better for controlled tests.</div>
 
                     <!-- Term Info -->
-                    <div style="background:rgba(79,209,197,0.08);border:1px solid rgba(79,209,197,0.2);border-left:5px solid #4fd1c5;border-radius:10px;padding:14px;margin:16px 0;text-align:center;">
-                        <div style="font-size:18px;font-weight:800;color:#4fd1c5;">Posting to: TERM ${currentTerm}</div>
+                    <div style="background:var(--dm-ac-bg-soft, rgba(79,209,197,0.08));border:1px solid var(--dm-ac-line, rgba(79,209,197,0.2));border-left:5px solid var(--dm-ac-bar, #4fd1c5);border-radius:10px;padding:14px;margin:16px 0;text-align:center;">
+                        <div style="font-size:18px;font-weight:800;color:var(--dm-ac, #4fd1c5);">Posting to: TERM ${currentTerm}</div>
                         <div style="font-size:12px;color:#8b949e;margin-top:4px;">This quiz belongs to the current active term.</div>
                     </div>
 
@@ -2161,7 +2162,7 @@ window.openCreateQuiz = async function() {
                             <input type="radio" name="layout_mode" value="single_page" checked
                                 style="display:none;" onchange="toggleCqMultiPage(this)">
                             <div class="cq-mode-card" id="cqModeSingle"
-                                style="background:#1a1919;border:2px solid #4fd1c5;border-radius:10px;padding:14px;text-align:center;transition:all 0.3s;">
+                                style="background:var(--dm-card, #1a1919);border:2px solid var(--dm-ac, #4fd1c5);border-radius:10px;padding:14px;text-align:center;transition:all 0.3s;">
                                 <svg viewBox="0 0 24 24" width="20" height="20" stroke="#4fd1c5" stroke-width="2" fill="none" style="margin-bottom:4px;">
                                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                                     <polyline points="14 2 14 8 20 8"></polyline>
@@ -2173,7 +2174,7 @@ window.openCreateQuiz = async function() {
                             <input type="radio" name="layout_mode" value="multi_page"
                                 style="display:none;" onchange="toggleCqMultiPage(this)">
                             <div class="cq-mode-card" id="cqModeMulti"
-                                style="background:#1a1919;border:2px solid rgba(255,255,255,0.1);border-radius:10px;padding:14px;text-align:center;transition:all 0.3s;">
+                                style="background:var(--dm-card, #1a1919);border:2px solid rgba(255,255,255,0.1);border-radius:10px;padding:14px;text-align:center;transition:all 0.3s;">
                                 <svg viewBox="0 0 24 24" width="20" height="20" stroke="#8b949e" stroke-width="2" fill="none" style="margin-bottom:4px;">
                                     <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
                                     <line x1="8" y1="21" x2="16" y2="21"></line>
@@ -2184,16 +2185,16 @@ window.openCreateQuiz = async function() {
                         </label>
                     </div>
 
-                    <div id="cqMultiPageOptions" style="display:none;background:rgba(79,209,197,0.04);border:1px dashed rgba(79,209,197,0.3);border-radius:10px;padding:14px;margin-bottom:16px;">
-                        <div style="font-size:12px;font-weight:800;color:#4fd1c5;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Multi-Page Security</div>
+                    <div id="cqMultiPageOptions" style="display:none;background:var(--dm-ac-bg-soft, rgba(79,209,197,0.04));border:1px var(--dm-ac-dash, dashed) var(--dm-ac-line-strong, rgba(79,209,197,0.3));border-radius:10px;padding:14px;margin-bottom:16px;">
+                        <div style="font-size:12px;font-weight:800;color:var(--dm-ac, #4fd1c5);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Multi-Page Security</div>
                         <label style="display:flex;align-items:flex-start;gap:10px;color:#c9d1d9;font-size:13px;margin-bottom:10px;cursor:pointer;">
                             <input type="checkbox" name="shuffle_questions" value="1"
-                                style="width:16px;height:16px;accent-color:#4fd1c5;margin-top:2px;flex-shrink:0;">
+                                style="width:16px;height:16px;accent-color:var(--dm-ac, #4fd1c5);margin-top:2px;flex-shrink:0;">
                             <span><strong>Shuffle Questions</strong> — every learner gets questions in a different order.</span>
                         </label>
                         <label style="display:flex;align-items:flex-start;gap:10px;color:#c9d1d9;font-size:13px;cursor:pointer;">
                             <input type="checkbox" name="is_linear" value="1"
-                                style="width:16px;height:16px;accent-color:#4fd1c5;margin-top:2px;flex-shrink:0;">
+                                style="width:16px;height:16px;accent-color:var(--dm-ac, #4fd1c5);margin-top:2px;flex-shrink:0;">
                             <span><strong>Linear Progression</strong> — learners cannot go back to previous questions.</span>
                         </label>
                     </div>
@@ -2204,7 +2205,7 @@ window.openCreateQuiz = async function() {
                         <div class="cq-section-help">Add each question, then check the preview to see what learners will see before you create the quiz.</div>
 
                     <!-- FIX 3: Live summary bar -->
-                    <div id="cqSummaryBar" style="display:flex;align-items:center;justify-content:center;gap:16px;background:#161b22;border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:10px 16px;margin:16px 0 8px;font-size:13px;font-weight:700;color:#4fd1c5;">
+                    <div id="cqSummaryBar" style="display:flex;align-items:center;justify-content:center;gap:16px;background:var(--dm-card, #161b22);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:10px 16px;margin:16px 0 8px;font-size:13px;font-weight:700;color:var(--dm-ac, #4fd1c5);">
                         <span><i class="fas fa-list-ol" style="margin-right:5px;"></i><span id="cqSummaryQCount">0</span> question<span id="cqSummaryQPlural">s</span></span>
                         <span style="color:rgba(255,255,255,0.15);font-size:18px;font-weight:300;">|</span>
                         <span><i class="fas fa-star" style="margin-right:5px;"></i><span id="cqSummaryMarks">0</span> mark<span id="cqSummaryMPlural">s</span> total</span>
@@ -2212,13 +2213,13 @@ window.openCreateQuiz = async function() {
 
                     <!-- Questions -->
                     <label class="teacher-modal-label" style="margin-top:8px;">Questions *</label>
-                    <div id="cqOpenEndedBanner" style="display:none;background:rgba(79,209,197,0.08);border:1px solid rgba(79,209,197,0.25);border-radius:10px;color:#b7f5ef;font-size:13px;line-height:1.5;padding:12px;margin:0 0 12px;">
+                    <div id="cqOpenEndedBanner" style="display:none;background:var(--dm-ac-bg-soft, rgba(79,209,197,0.08));border:1px solid var(--dm-ac-line, rgba(79,209,197,0.25));border-radius:10px;color:var(--dm-ac-text, #b7f5ef);font-size:13px;line-height:1.5;padding:12px;margin:0 0 12px;">
                         This quiz contains open-ended questions. After all learners submit, you will need to manually grade their responses before you can release marks.
                     </div>
                     <div id="cqQuestionsContainer"></div>
                     <button type="button" onclick="addCqQuestion()"
-                        style="width:100%;margin-top:8px;margin-bottom:16px;background:rgba(79,209,197,0.08);
-                               border:1px dashed rgba(79,209,197,0.4);color:#4fd1c5;border-radius:8px;
+                        style="width:100%;margin-top:8px;margin-bottom:16px;background:var(--dm-ac-bg-soft, rgba(79,209,197,0.08));
+                               border:1px var(--dm-ac-dash, dashed) var(--dm-ac-line-strong, rgba(79,209,197,0.4));color:var(--dm-ac, #4fd1c5);border-radius:8px;
                                padding:10px;cursor:pointer;font-size:13px;font-weight:700;">
                         + Add Question
                     </button>
@@ -2373,13 +2374,13 @@ window.addCqQuestion = function() {
     const i   = cqQuestionIndex;
     const div = document.createElement('div');
     div.id    = `cq-question-${i}`;
-    div.style.cssText = 'background:#1a1919;border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:20px;margin-bottom:14px;transition:border-color 0.2s;';
+    div.style.cssText = 'background:var(--dm-card, #1a1919);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:20px;margin-bottom:14px;transition:border-color 0.2s;';
 
     div.innerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-            <span style="font-size:15px;font-weight:800;color:#4fd1c5;">Question ${i + 1}</span>
+            <span style="font-size:15px;font-weight:800;color:var(--dm-ac, #4fd1c5);">Question ${i + 1}</span>
             <div style="display:flex;align-items:center;gap:10px;">
-                <span id="cq-pts-display-${i}" style="font-size:13px;color:#4fd1c5;font-weight:700;">1 pt</span>
+                <span id="cq-pts-display-${i}" style="font-size:13px;color:var(--dm-ac, #4fd1c5);font-weight:700;">1 pt</span>
                 ${i > 0 ? `<button type="button" onclick="removeCqQuestion(${i})"
                     style="background:rgba(248,81,73,0.1);border:1px solid rgba(248,81,73,0.3);color:#f85149;padding:5px 10px;border-radius:6px;font-size:12px;cursor:pointer;">
                     Remove
@@ -2394,19 +2395,19 @@ window.addCqQuestion = function() {
             <option value="open_ended">Open Ended - teacher marks the response</option>
             <option value="fill_in_blank">Fill in the Blank - learners type missing words</option>
         </select>
-        <div class="cq-qtype-helper cq-mcq-helper" style="margin-top:6px;padding:8px 12px;background:rgba(79,209,197,0.07);border-left:3px solid #4fd1c5;border-radius:0 6px 6px 0;font-size:12px;color:#a0aec0;line-height:1.5;">Best for quick checks: learners choose one correct answer from the options you provide.</div>
-        <div class="cq-qtype-helper cq-ma-helper" style="display:none;margin-top:6px;padding:8px 12px;background:rgba(79,209,197,0.07);border-left:3px solid #4fd1c5;border-radius:0 6px 6px 0;font-size:12px;color:#a0aec0;line-height:1.5;">Use this when two or more options are correct.</div>
-        <div class="cq-qtype-helper cq-oe-helper" style="display:none;margin-top:6px;padding:8px 12px;background:rgba(79,209,197,0.07);border-left:3px solid #4fd1c5;border-radius:0 6px 6px 0;font-size:12px;color:#a0aec0;line-height:1.5;">Use this for explanations, paragraphs, calculations, or evidence-based answers. You will mark it manually.</div>
-        <div class="cq-qtype-helper cq-fitb-helper" style="display:none;margin-top:6px;padding:8px 12px;background:rgba(79,209,197,0.07);border-left:3px solid #4fd1c5;border-radius:0 6px 6px 0;font-size:12px;color:#a0aec0;line-height:1.5;">Use <code style="background:rgba(79,209,197,0.15);color:#4fd1c5;padding:1px 4px;border-radius:3px;font-family:monospace;">{blank}</code> where the learner should type an answer.</div>
+        <div class="cq-qtype-helper cq-mcq-helper" style="margin-top:6px;padding:8px 12px;background:var(--dm-ac-bg-soft, rgba(79,209,197,0.07));border-left:3px solid var(--dm-ac-bar, #4fd1c5);border-radius:0 6px 6px 0;font-size:12px;color:#a0aec0;line-height:1.5;">Best for quick checks: learners choose one correct answer from the options you provide.</div>
+        <div class="cq-qtype-helper cq-ma-helper" style="display:none;margin-top:6px;padding:8px 12px;background:var(--dm-ac-bg-soft, rgba(79,209,197,0.07));border-left:3px solid var(--dm-ac-bar, #4fd1c5);border-radius:0 6px 6px 0;font-size:12px;color:#a0aec0;line-height:1.5;">Use this when two or more options are correct.</div>
+        <div class="cq-qtype-helper cq-oe-helper" style="display:none;margin-top:6px;padding:8px 12px;background:var(--dm-ac-bg-soft, rgba(79,209,197,0.07));border-left:3px solid var(--dm-ac-bar, #4fd1c5);border-radius:0 6px 6px 0;font-size:12px;color:#a0aec0;line-height:1.5;">Use this for explanations, paragraphs, calculations, or evidence-based answers. You will mark it manually.</div>
+        <div class="cq-qtype-helper cq-fitb-helper" style="display:none;margin-top:6px;padding:8px 12px;background:var(--dm-ac-bg-soft, rgba(79,209,197,0.07));border-left:3px solid var(--dm-ac-bar, #4fd1c5);border-radius:0 6px 6px 0;font-size:12px;color:#a0aec0;line-height:1.5;">Use <code style="background:var(--dm-ac-bg, rgba(79,209,197,0.15));color:var(--dm-ac, #4fd1c5);padding:1px 4px;border-radius:3px;font-family:monospace;">{blank}</code> where the learner should type an answer.</div>
 
         <label class="teacher-modal-label" style="margin-top:12px;">Question Text *</label>
 
         <!-- FIX 2: FITB callout shown when fill_in_blank selected -->
-        <div class="cq-fitb-callout" style="display:none;background:rgba(79,209,197,0.08);border:1px solid rgba(79,209,197,0.35);border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:13px;color:#a0aec0;line-height:1.6;">
-            <strong style="color:#4fd1c5;"><i class="fas fa-lightbulb"></i> Fill in the Blank instructions</strong><br>
-            Type your question and use <code style="background:rgba(79,209,197,0.15);color:#4fd1c5;padding:1px 5px;border-radius:4px;font-family:monospace;">{blank}</code> where you want a gap.<br>
+        <div class="cq-fitb-callout" style="display:none;background:var(--dm-ac-bg-soft, rgba(79,209,197,0.08));border:1px solid var(--dm-ac-line-strong, rgba(79,209,197,0.35));border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:13px;color:#a0aec0;line-height:1.6;">
+            <strong style="color:var(--dm-ac, #4fd1c5);"><i class="fas fa-lightbulb"></i> Fill in the Blank instructions</strong><br>
+            Type your question and use <code style="background:var(--dm-ac-bg, rgba(79,209,197,0.15));color:var(--dm-ac, #4fd1c5);padding:1px 5px;border-radius:4px;font-family:monospace;">{blank}</code> where you want a gap.<br>
             <em>Example: The capital of France is {blank}.</em><br>
-            <button type="button" onclick="cqInsertBlankTag(this)" style="margin-top:6px;background:rgba(79,209,197,0.15);color:#4fd1c5;border:1px solid rgba(79,209,197,0.4);border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600;cursor:pointer;">+ Insert {blank} at cursor</button>
+            <button type="button" onclick="cqInsertBlankTag(this)" style="margin-top:6px;background:var(--dm-ac-bg, rgba(79,209,197,0.15));color:var(--dm-ac, #4fd1c5);border:1px solid var(--dm-ac-line-strong, rgba(79,209,197,0.4));border-radius:6px;padding:4px 12px;font-size:12px;font-weight:600;cursor:pointer;">+ Insert {blank} at cursor</button>
         </div>
 
         <input type="text" name="question[]" class="teacher-modal-input cq-question-text"
@@ -2414,7 +2415,7 @@ window.addCqQuestion = function() {
 
         <!-- FIX 2: Live blank counter -->
         <div class="cq-blank-counter" style="display:none;margin-top:5px;font-size:12px;color:#8b949e;">
-            <span class="cq-blank-count" style="color:#4fd1c5;font-weight:700;">0</span> blank<span class="cq-blank-plural">s</span> detected → <span class="cq-blank-count" style="color:#4fd1c5;font-weight:700;">0</span> answer<span class="cq-blank-plural">s</span> required
+            <span class="cq-blank-count" style="color:var(--dm-ac, #4fd1c5);font-weight:700;">0</span> blank<span class="cq-blank-plural">s</span> detected → <span class="cq-blank-count" style="color:var(--dm-ac, #4fd1c5);font-weight:700;">0</span> answer<span class="cq-blank-plural">s</span> required
         </div>
 
         <label class="teacher-modal-label" style="margin-top:12px;">Optional Image</label>
@@ -2443,7 +2444,7 @@ window.addCqQuestion = function() {
             <div class="cq-ma-correct-list" style="display:none;margin-top:8px;">
                 ${[0, 1, 2, 3].map(n => `
                     <label style="display:flex;align-items:center;gap:8px;color:#c9d1d9;font-size:13px;margin:6px 0;">
-                        <input type="checkbox" name="multiple_answer_correct[${i}][]" value="${n}" style="width:16px;height:16px;accent-color:#4fd1c5;">
+                        <input type="checkbox" name="multiple_answer_correct[${i}][]" value="${n}" style="width:16px;height:16px;accent-color:var(--dm-ac, #4fd1c5);">
                         <span>Choice ${n + 1}</span>
                     </label>
                 `).join('')}
@@ -2458,7 +2459,7 @@ window.addCqQuestion = function() {
                 <input type="number" name="ma_select_exactly[${i}]" min="1" class="teacher-modal-input" placeholder="Optional" style="max-width:150px;">
             </div>
         </div>
-        <div class="cq-open-preview" style="display:none;background:rgba(255,255,255,0.04);border:1px dashed rgba(255,255,255,0.14);border-radius:8px;color:#8b949e;font-size:13px;padding:12px;margin-top:12px;">
+        <div class="cq-open-preview" style="display:none;background:rgba(255,255,255,0.04);border:1px var(--dm-ac-dash, dashed) rgba(255,255,255,0.14);border-radius:8px;color:#8b949e;font-size:13px;padding:12px;margin-top:12px;">
             Learners will type their answer here.
         </div>
         ${buildFitbBuilderHtml('cq', i, null, false)}
@@ -2540,7 +2541,7 @@ function fitbPreviewHtml(text) {
     let blankIndex = 1;
     return parts.map(part => {
         if (/^\{blank\}$/i.test(part)) {
-            return `<input type="text" disabled placeholder="..." style="display:inline-block;width:110px;margin:0 4px;padding:5px 7px;border-radius:6px;border:1px solid rgba(79,209,197,.35);background:rgba(255,255,255,.05);color:#c9d1d9;">`;
+            return `<input type="text" disabled placeholder="..." style="display:inline-block;width:110px;margin:0 4px;padding:5px 7px;border-radius:6px;border:1px solid var(--dm-ac-line-strong, rgba(79,209,197,.35));background:rgba(255,255,255,.05);color:#c9d1d9;">`;
         }
         return escapeHtml(part);
     }).join('') || '<span style="color:#8b949e;">Type a sentence using {blank}.</span>';
@@ -2548,7 +2549,7 @@ function fitbPreviewHtml(text) {
 
 function buildChipInputs(name, values) {
     return (values || []).map(value => `
-        <span class="fitb-chip-tag" style="display:inline-flex;align-items:center;gap:6px;background:rgba(79,209,197,.08);border:1px solid rgba(79,209,197,.25);color:#4fd1c5;border-radius:6px;padding:4px 7px;font-size:12px;font-weight:800;">
+        <span class="fitb-chip-tag" style="display:inline-flex;align-items:center;gap:6px;background:var(--dm-ac-bg-soft, rgba(79,209,197,.08));border:1px solid var(--dm-ac-line, rgba(79,209,197,.25));color:var(--dm-ac, #4fd1c5);border-radius:6px;padding:4px 7px;font-size:12px;font-weight:800;">
             ${escapeHtml(value)}
             <button type="button" data-action="remove-fitb-chip" style="background:transparent;border:0;color:#f85149;cursor:pointer;font-weight:900;">x</button>
             <input type="hidden" name="${name}" value="${escapeHtml(value)}">
@@ -2563,7 +2564,7 @@ function buildFitbBuilderHtml(prefix, index, fitb, locked) {
     const blanksJson = escapeHtml(JSON.stringify(fitb?.blanks || []));
     return `
         <div class="fitb-builder" data-prefix="${prefix}" data-locked="${locked ? '1' : '0'}" data-fitb-blanks="${blanksJson}" style="display:none;margin-top:12px;background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px;">
-            <div style="color:#b7f5ef;font-size:13px;line-height:1.5;margin-bottom:10px;">
+            <div style="color:var(--dm-ac-text, #b7f5ef);font-size:13px;line-height:1.5;margin-bottom:10px;">
                 Type {blank} wherever you want a blank to appear. Example: "The capital of France is {blank}."
             </div>
             <label class="teacher-modal-label">Fill in the Blank Sub-Type</label>
@@ -2576,13 +2577,13 @@ function buildFitbBuilderHtml(prefix, index, fitb, locked) {
                 <option value="partial" ${scoringMode === 'partial' ? 'selected' : ''}>Partial Credit</option>
                 <option value="all_or_nothing" ${scoringMode === 'all_or_nothing' ? 'selected' : ''}>All or Nothing</option>
             </select>
-            <div class="fitb-preview" style="margin-top:10px;padding:10px;border:1px dashed rgba(79,209,197,.35);border-radius:8px;color:#e2e8f0;line-height:2;"></div>
+            <div class="fitb-preview" style="margin-top:10px;padding:10px;border:1px var(--dm-ac-dash, dashed) var(--dm-ac-line-strong, rgba(79,209,197,.35));border-radius:8px;color:#e2e8f0;line-height:2;"></div>
             <div class="fitb-blanks" style="margin-top:10px;"></div>
             <div class="fitb-distractors" style="display:${subType === 'word_bank' ? 'block' : 'none'};margin-top:12px;">
                 <label class="teacher-modal-label">Distractor Words</label>
                 <div style="display:flex;gap:8px;">
                     <input type="text" class="teacher-modal-input fitb-distractor-input" placeholder="Extra word" style="margin:0;" ${lockedAttr}>
-                    <button type="button" data-action="add-fitb-distractor" ${lockedAttr} style="background:rgba(79,209,197,.1);border:1px solid rgba(79,209,197,.3);color:#4fd1c5;border-radius:7px;padding:0 12px;cursor:pointer;">Add</button>
+                    <button type="button" data-action="add-fitb-distractor" ${lockedAttr} style="background:var(--dm-ac-bg, rgba(79,209,197,.1));border:1px solid var(--dm-ac-line-strong, rgba(79,209,197,.3));color:var(--dm-ac, #4fd1c5);border-radius:7px;padding:0 12px;cursor:pointer;">Add</button>
                 </div>
                 <div class="fitb-distractor-chips" style="display:flex;flex-wrap:wrap;gap:7px;margin-top:8px;">${buildChipInputs(`fitb_distractors[${index}][]`, distractors)}</div>
                 <div class="fitb-bank-count" style="font-size:12px;color:#8b949e;margin-top:8px;"></div>
@@ -2621,11 +2622,11 @@ function syncFitbBuilder(questionEl) {
                 <label class="teacher-modal-label">Blank ${blankIndex} accepted answers:</label>
                 <div style="display:flex;gap:8px;">
                     <input type="text" class="teacher-modal-input fitb-answer-input" placeholder="Accepted answer" style="margin:0;">
-                    <button type="button" data-action="add-fitb-answer" style="background:rgba(79,209,197,.1);border:1px solid rgba(79,209,197,.3);color:#4fd1c5;border-radius:7px;padding:0 12px;cursor:pointer;">Add</button>
+                    <button type="button" data-action="add-fitb-answer" style="background:var(--dm-ac-bg, rgba(79,209,197,.1));border:1px solid var(--dm-ac-line-strong, rgba(79,209,197,.3));color:var(--dm-ac, #4fd1c5);border-radius:7px;padding:0 12px;cursor:pointer;">Add</button>
                 </div>
                 <div class="fitb-answer-chips" style="display:flex;flex-wrap:wrap;gap:7px;margin-top:8px;">${buildChipInputs(`fitb_accepted_answers[${index}][${blankIndex}][]`, answers)}</div>
                 <label style="display:flex;align-items:center;gap:8px;margin-top:8px;color:#c9d1d9;font-size:13px;">
-                    <input type="checkbox" name="fitb_case_sensitive[${index}][${blankIndex}]" value="1" ${caseSensitive ? 'checked' : ''} style="width:16px;height:16px;accent-color:#4fd1c5;">
+                    <input type="checkbox" name="fitb_case_sensitive[${index}][${blankIndex}]" value="1" ${caseSensitive ? 'checked' : ''} style="width:16px;height:16px;accent-color:var(--dm-ac, #4fd1c5);">
                     Case sensitive
                 </label>
             </div>`;
@@ -2763,15 +2764,15 @@ window.toggleCqMultiPage = function(radio) {
             singleCard.querySelector('div').style.color  = '#8b949e';
         }
         if (multiCard) {
-            multiCard.style.borderColor = '#4fd1c5';
-            multiCard.querySelector('svg').style.stroke = '#4fd1c5';
+            multiCard.style.borderColor = 'var(--dm-ac, #4fd1c5)';
+            multiCard.querySelector('svg').style.stroke = 'var(--dm-ac, #4fd1c5)';
             multiCard.querySelector('div').style.color  = '#e2e8f0';
         }
     } else {
         if (multiOptions) multiOptions.style.display = 'none';
         if (singleCard) {
-            singleCard.style.borderColor = '#4fd1c5';
-            singleCard.querySelector('svg').style.stroke = '#4fd1c5';
+            singleCard.style.borderColor = 'var(--dm-ac, #4fd1c5)';
+            singleCard.querySelector('svg').style.stroke = 'var(--dm-ac, #4fd1c5)';
             singleCard.querySelector('div').style.color  = '#e2e8f0';
         }
         if (multiCard) {
@@ -2836,7 +2837,7 @@ function buildCqLearnerQuestionPreview(data) {
             ${data.fitbSubType === 'word_bank' ? `
                 <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;">
                     ${(data.wordBankWords.length ? data.wordBankWords : ['word', 'extra']).map(word => `
-                        <span style="border:1px solid rgba(79,209,197,0.28);background:rgba(79,209,197,0.08);color:#4fd1c5;border-radius:8px;padding:7px 10px;font-size:12px;font-weight:900;">${escapeHtml(word)}</span>
+                        <span style="border:1px solid var(--dm-ac-line-strong, rgba(79,209,197,0.28));background:var(--dm-ac-bg-soft, rgba(79,209,197,0.08));color:var(--dm-ac, #4fd1c5);border-radius:8px;padding:7px 10px;font-size:12px;font-weight:900;">${escapeHtml(word)}</span>
                     `).join('')}
                 </div>` : ''}
         `;
@@ -2878,7 +2879,7 @@ function updateCqPreview() {
     const title = document.querySelector('#createQuizForm input[name="quiz_title"]')?.value.trim() || 'Untitled Quiz';
     const duration = document.querySelector('#createQuizForm input[name="duration"]')?.value || '0';
     fullPreview.innerHTML = `
-        <div style="background:#161b22;border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:16px;margin-bottom:12px;">
+        <div style="background:var(--dm-card, #161b22);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:16px;margin-bottom:12px;">
             <div style="color:#e2e8f0;font-size:18px;font-weight:900;margin-bottom:6px;">${escapeHtml(title)}</div>
             <div style="color:#8b949e;font-size:13px;">${escapeHtml(duration)} minutes &bull; ${blocks.length} question${blocks.length === 1 ? '' : 's'}</div>
         </div>
@@ -3076,9 +3077,9 @@ function buildEditQuestionHtml(question, index, locked) {
     choices.forEach((choice, choiceIndex) => {
         const correctControl = isMultipleAnswer
             ? `<input type="checkbox" name="multiple_answer_correct[${index}][]" value="${choiceIndex}" ${choice.is_correct == 1 ? 'checked' : ''} ${choiceDisabled}
-                    style="width:16px;height:16px;accent-color:#4fd1c5;flex-shrink:0;">`
+                    style="width:16px;height:16px;accent-color:var(--dm-ac, #4fd1c5);flex-shrink:0;">`
             : `<input type="radio" name="correct_choice[${index}]" value="${choiceIndex}" ${choice.is_correct == 1 ? 'checked' : ''} ${choiceDisabled}
-                    style="width:16px;height:16px;accent-color:#4fd1c5;flex-shrink:0;">`;
+                    style="width:16px;height:16px;accent-color:var(--dm-ac, #4fd1c5);flex-shrink:0;">`;
         choicesHtml += `
             <div class="eq-choice-row" style="display:flex;gap:8px;margin-bottom:8px;align-items:center;">
                 <input type="hidden" name="choice_id[${index}][]" value="${escapeHtml(choice.id || 0)}">
@@ -3093,9 +3094,9 @@ function buildEditQuestionHtml(question, index, locked) {
 
     return `
         <div class="eq-question" data-question-index="${index}"
-            style="background:#1a1919;border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:20px;margin-bottom:14px;">
+            style="background:var(--dm-card, #1a1919);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:20px;margin-bottom:14px;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-                <span style="font-size:15px;font-weight:800;color:#4fd1c5;">Question ${index + 1}</span>
+                <span style="font-size:15px;font-weight:800;color:var(--dm-ac, #4fd1c5);">Question ${index + 1}</span>
                 ${!locked ? `<button type="button" data-action="remove-edit-question"
                     style="background:rgba(248,81,73,0.1);border:1px solid rgba(248,81,73,0.3);color:#f85149;padding:5px 10px;border-radius:6px;font-size:12px;cursor:pointer;">Remove</button>` : ''}
             </div>
@@ -3118,7 +3119,7 @@ function buildEditQuestionHtml(question, index, locked) {
             <label class="teacher-modal-label" style="margin-top:12px;">Optional Image</label>
             ${question.image_path ? `<div style="font-size:12px;color:#8b949e;margin-bottom:8px;">Current image: ${escapeHtml(question.image_path)}</div>` : ''}
             ${question.image_path && !locked ? `<label style="display:flex;align-items:center;gap:8px;color:#c9d1d9;font-size:13px;margin-bottom:8px;">
-                <input type="checkbox" data-action="toggle-remove-image" style="accent-color:#4fd1c5;"> Remove current image
+                <input type="checkbox" data-action="toggle-remove-image" style="accent-color:var(--dm-ac, #4fd1c5);"> Remove current image
             </label>` : ''}
             <input type="file" name="question_images[]" accept="image/*" ${disabled}
                 style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#e2e8f0;padding:8px 12px;box-sizing:border-box;font-size:13px;">
@@ -3126,7 +3127,7 @@ function buildEditQuestionHtml(question, index, locked) {
                 <label class="teacher-modal-label" style="margin-top:12px;">Answer Choices *</label>
                 <div class="eq-choices">${choicesHtml}</div>
                 ${!locked && !isOpenEnded ? `<button type="button" data-action="add-edit-choice"
-                style="margin-top:2px;background:rgba(79,209,197,0.08);border:1px dashed rgba(79,209,197,0.4);color:#4fd1c5;border-radius:8px;padding:8px 10px;cursor:pointer;font-size:12px;font-weight:700;">+ Add Choice</button>` : ''}
+                style="margin-top:2px;background:var(--dm-ac-bg-soft, rgba(79,209,197,0.08));border:1px var(--dm-ac-dash, dashed) var(--dm-ac-line-strong, rgba(79,209,197,0.4));color:var(--dm-ac, #4fd1c5);border-radius:8px;padding:8px 10px;cursor:pointer;font-size:12px;font-weight:700;">+ Add Choice</button>` : ''}
                 <div class="eq-ma-settings" style="display:${isMultipleAnswer ? 'block' : 'none'};margin-top:12px;background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px;">
                     <label class="teacher-modal-label">Scoring Mode</label>
                     <select name="ma_scoring_mode[${index}]" class="teacher-modal-input" ${choiceDisabled}>
@@ -3137,7 +3138,7 @@ function buildEditQuestionHtml(question, index, locked) {
                     <input type="number" name="ma_select_exactly[${index}]" min="1" class="teacher-modal-input" value="${escapeHtml(question.multiple_answer?.select_exactly ?? '')}" placeholder="Optional" ${choiceDisabled} style="max-width:150px;">
                 </div>
             </div>
-            <div class="eq-open-preview" style="display:${isOpenEnded ? 'block' : 'none'};background:rgba(255,255,255,0.04);border:1px dashed rgba(255,255,255,0.14);border-radius:8px;color:#8b949e;font-size:13px;padding:12px;margin-top:12px;">
+            <div class="eq-open-preview" style="display:${isOpenEnded ? 'block' : 'none'};background:rgba(255,255,255,0.04);border:1px var(--dm-ac-dash, dashed) rgba(255,255,255,0.14);border-radius:8px;color:#8b949e;font-size:13px;padding:12px;margin-top:12px;">
                 Learners will type their answer here.
             </div>
             ${buildFitbBuilderHtml('eq', index, question.fitb || null, locked).replace('display:none;', `display:${isFitb ? 'block' : 'none'};`)}
@@ -3219,9 +3220,9 @@ window.openEditQuiz = async function(quizId) {
 
         target.innerHTML = `
             <div style="max-width:${isDesktop ? '620px' : '760px'};margin:0 auto;padding:${isDesktop ? '20px 32px 32px' : '0'};">
-                <h2 style="color:#4fd1c5;font-size:${isDesktop ? '18px' : '22px'};margin:0 0 20px;font-weight:800;">Edit Quiz</h2>
+                <h2 style="color:var(--dm-ac, #4fd1c5);font-size:${isDesktop ? '18px' : '22px'};margin:0 0 20px;font-weight:800;">Edit Quiz</h2>
                 ${locked ? `<div style="background:rgba(242,140,56,0.08);border:1px solid rgba(242,140,56,0.35);color:#f5c38b;border-radius:10px;padding:12px;margin-bottom:16px;font-size:13px;line-height:1.5;">${escapeHtml(data.data.locked_message)}</div>` : ''}
-                <div id="eqOpenEndedBanner" style="display:${quiz.has_open_ended == 1 ? 'block' : 'none'};background:rgba(79,209,197,0.08);border:1px solid rgba(79,209,197,0.25);border-radius:10px;color:#b7f5ef;font-size:13px;line-height:1.5;padding:12px;margin-bottom:16px;">
+                <div id="eqOpenEndedBanner" style="display:${quiz.has_open_ended == 1 ? 'block' : 'none'};background:var(--dm-ac-bg-soft, rgba(79,209,197,0.08));border:1px solid var(--dm-ac-line, rgba(79,209,197,0.25));border-radius:10px;color:var(--dm-ac-text, #b7f5ef);font-size:13px;line-height:1.5;padding:12px;margin-bottom:16px;">
                     This quiz contains open-ended questions. After all learners submit, you will need to manually grade their responses before you can release marks.
                 </div>
                 <div id="eqPublishMarksOpenMessage" style="display:${quiz.has_open_ended == 1 ? 'block' : 'none'};background:rgba(242,140,56,0.08);border:1px solid rgba(242,140,56,0.28);border-radius:10px;color:#f5c38b;font-size:13px;line-height:1.5;padding:12px;margin-bottom:16px;">
@@ -3243,13 +3244,13 @@ window.openEditQuiz = async function(quizId) {
                     <div id="eqPublishMarksWrap" style="margin-top:16px;">
                         <label id="eqPublishMarksLabel" style="display:${quiz.has_open_ended == 1 ? 'none' : 'flex'};align-items:center;gap:10px;color:#c9d1d9;font-size:14px;cursor:pointer;">
                             <input type="checkbox" name="publish_marks" value="1" ${quiz.publish_marks == 1 ? 'checked' : ''}
-                                style="width:18px;height:18px;accent-color:#4fd1c5;">
+                                style="width:18px;height:18px;accent-color:var(--dm-ac, #4fd1c5);">
                             Publish marks immediately after submission
                         </label>
                     </div>
                     <label style="display:flex;align-items:center;gap:10px;color:#c9d1d9;font-size:14px;margin-top:16px;cursor:pointer;">
                         <input type="checkbox" name="is_summative" value="1" id="eqSummative" ${quiz.is_summative == 1 ? 'checked' : ''}
-                            style="width:18px;height:18px;accent-color:#4fd1c5;">
+                            style="width:18px;height:18px;accent-color:var(--dm-ac, #4fd1c5);">
                         Counts toward official term mark
                     </label>
                     <div id="eqWeightContainer" style="display:${quiz.is_summative == 1 ? 'block' : 'none'};margin-left:28px;">
@@ -3265,17 +3266,17 @@ window.openEditQuiz = async function(quizId) {
                     <div style="margin-top:12px;display:flex;flex-direction:column;gap:10px;">
                         <label style="display:flex;gap:10px;color:#c9d1d9;font-size:13px;">
                             <input type="checkbox" name="shuffle_questions" value="1" ${quiz.shuffle_questions == 1 ? 'checked' : ''} ${layoutDisabled}
-                                style="width:16px;height:16px;accent-color:#4fd1c5;"> Shuffle Questions
+                                style="width:16px;height:16px;accent-color:var(--dm-ac, #4fd1c5);"> Shuffle Questions
                         </label>
                         <label style="display:flex;gap:10px;color:#c9d1d9;font-size:13px;">
                             <input type="checkbox" name="is_linear" value="1" ${quiz.is_linear == 1 ? 'checked' : ''} ${layoutDisabled}
-                                style="width:16px;height:16px;accent-color:#4fd1c5;"> Linear Progression
+                                style="width:16px;height:16px;accent-color:var(--dm-ac, #4fd1c5);"> Linear Progression
                         </label>
                     </div>
                     <label class="teacher-modal-label" style="margin-top:18px;">Questions *</label>
                     <div id="editQuestionsContainer">${questionsHtml}</div>
                     ${!locked ? `<button type="button" data-action="add-edit-question"
-                        style="width:100%;margin-top:8px;margin-bottom:16px;background:rgba(79,209,197,0.08);border:1px dashed rgba(79,209,197,0.4);color:#4fd1c5;border-radius:8px;padding:10px;cursor:pointer;font-size:13px;font-weight:700;">+ Add Question</button>` : ''}
+                        style="width:100%;margin-top:8px;margin-bottom:16px;background:var(--dm-ac-bg-soft, rgba(79,209,197,0.08));border:1px var(--dm-ac-dash, dashed) var(--dm-ac-line-strong, rgba(79,209,197,0.4));color:var(--dm-ac, #4fd1c5);border-radius:8px;padding:10px;cursor:pointer;font-size:13px;font-weight:700;">+ Add Question</button>` : ''}
                     <div id="eqError" style="color:#ff5555;font-size:14px;margin-top:8px;display:none;"></div>
                     <div style="display:flex;gap:12px;margin-top:16px;margin-bottom:32px;">
                         <button type="button" data-action="cancel-edit-quiz" class="teacher-modal-cancel" style="flex:1;padding:13px;">Cancel</button>
@@ -3433,8 +3434,8 @@ document.addEventListener('click', function(e) {
         const choices = question ? question.querySelector('.eq-choices') : null;
         if (choices) {
             const correctControl = currentType === 'multiple_answer'
-                ? '<input type="checkbox" name="multiple_answer_correct[0][]" value="0" style="width:16px;height:16px;accent-color:#4fd1c5;flex-shrink:0;">'
-                : '<input type="radio" name="correct_choice[0]" value="0" style="width:16px;height:16px;accent-color:#4fd1c5;flex-shrink:0;">';
+                ? '<input type="checkbox" name="multiple_answer_correct[0][]" value="0" style="width:16px;height:16px;accent-color:var(--dm-ac, #4fd1c5);flex-shrink:0;">'
+                : '<input type="radio" name="correct_choice[0]" value="0" style="width:16px;height:16px;accent-color:var(--dm-ac, #4fd1c5);flex-shrink:0;">';
             choices.insertAdjacentHTML('beforeend', `
                 <div class="eq-choice-row" style="display:flex;gap:8px;margin-bottom:8px;align-items:center;">
                     <input type="hidden" name="choice_id[0][]" value="0">
@@ -3568,7 +3569,7 @@ window.decodeIntegrity = async function() {
 
         if (!data || data.length === 0) {
             resultsDiv.innerHTML = `
-                <div style="text-align:center;padding:30px;background:rgba(79,209,197,0.05);border-radius:12px;border:1px dashed #4fd1c5;">
+                <div style="text-align:center;padding:30px;background:var(--dm-ac-bg-soft, rgba(79,209,197,0.05));border-radius:12px;border:1px var(--dm-ac-dash, dashed) var(--dm-ac, #4fd1c5);">
                     <svg viewBox="0 0 24 24" width="24" height="24" stroke="#4fd1c5" stroke-width="2" fill="none" style="margin-bottom:10px;">
                         <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                         <polyline points="22 4 12 14.01 9 11.01"></polyline>
@@ -3579,10 +3580,10 @@ window.decodeIntegrity = async function() {
             let html = `
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
                     <span style="color:#8b949e;font-size:13px;">${escapeHtml(data.length)} learner${data.length !== 1 ? 's' : ''} flagged</span>
-                    <span style="background:rgba(79,209,197,0.2);color:#4fd1c5;padding:4px 10px;border-radius:6px;font-size:10px;font-weight:800;border:1px solid #4fd1c5;">AI ACTIVE</span>
+                    <span style="background:var(--dm-ac-bg, rgba(79,209,197,0.2));color:var(--dm-ac, #4fd1c5);padding:4px 10px;border-radius:6px;font-size:10px;font-weight:800;border:1px solid var(--dm-ac, #4fd1c5);">AI ACTIVE</span>
                 </div>`;
 
-            html += `<div style="background:#161b22;border:1px solid rgba(255,255,255,0.07);border-radius:14px;overflow:hidden;">`;
+            html += `<div style="background:var(--dm-card, #161b22);border:1px solid rgba(255,255,255,0.07);border-radius:14px;overflow:hidden;">`;
 
             data.forEach((row, i) => {
                 const isLast = i === data.length - 1;
