@@ -1229,8 +1229,215 @@
     .tchr-create-form .rs-form-error { margin-top: 12px; }
     .tchr-create-form .cq-grid { gap: 18px; }
 }
+
+/* ── DESKTOP CREATE FORMS: layered indigo/slate palette ──────────────────────
+   Keep the existing form structure and mobile colours, but replace the old
+   teal accent with a restrained periwinkle hue and softly tinted surface layers.
+   This block is desktop-only and scoped to the four create-form wrappers.
+*/
+@media (min-width: 900px) {
+    .tchr-create-form {
+        --tcf-accent: #a5b4fc;
+        --tcf-accent-rgb: 165, 180, 252;
+        --tcf-accent-soft: rgba(165, 180, 252, .075);
+        --tcf-accent-border: rgba(165, 180, 252, .22);
+        --tcf-line: rgba(185, 194, 220, .10);
+        --tcf-line-strong: rgba(185, 194, 220, .19);
+        --tcf-text: #e7e9f2;
+        --tcf-soft: #c0c5d5;
+        --tcf-muted: #969db2;
+        --tcf-faint: #737b91;
+        background:
+            linear-gradient(145deg, rgba(165, 180, 252, .045), transparent 48%),
+            linear-gradient(180deg, #191d2a 0%, #151923 100%);
+        border: 1px solid rgba(165, 180, 252, .11);
+        border-radius: 16px;
+        box-shadow: 0 18px 46px rgba(0, 0, 0, .16);
+    }
+
+    .tchr-create-form .teacher-modal-input:focus,
+    .tchr-create-form input:focus,
+    .tchr-create-form select:focus,
+    .tchr-create-form textarea:focus {
+        border-color: var(--tcf-accent);
+        box-shadow: 0 0 0 3px rgba(165, 180, 252, .14);
+    }
+
+    .tchr-create-form .teacher-modal-submit,
+    .tchr-create-form .as-form-submit-btn {
+        color: #171a28;
+        background: #a5b4fc;
+        border-color: #a5b4fc;
+        box-shadow: 0 2px 8px rgba(165, 180, 252, .10);
+    }
+    .tchr-create-form .teacher-modal-submit:hover,
+    .tchr-create-form .as-form-submit-btn:hover {
+        background: #bac5ff;
+        border-color: #bac5ff;
+        filter: none;
+    }
+
+    /* Quiz sections become distinct, softly tinted layers rather than teal cards. */
+    .tchr-create-form .cq-section {
+        background: linear-gradient(145deg, rgba(165, 180, 252, .055), rgba(255, 255, 255, .012)) !important;
+        border: 1px solid rgba(165, 180, 252, .13) !important;
+        border-radius: 12px !important;
+        padding: 20px !important;
+        margin: 14px 0 0 !important;
+    }
+    .tchr-create-form .cq-step {
+        background: rgba(165, 180, 252, .10) !important;
+        border-color: rgba(165, 180, 252, .24) !important;
+        color: #c4ccff !important;
+    }
+    .tchr-create-form .cq-preview-card {
+        background: #121722 !important;
+        border-color: rgba(185, 194, 220, .12) !important;
+    }
+    .tchr-create-form .cq-learner-card {
+        background: linear-gradient(155deg, #1c2130, #181d29) !important;
+        border-color: rgba(185, 194, 220, .12) !important;
+    }
+    .tchr-create-form .cq-learner-choice {
+        background: rgba(165, 180, 252, .035) !important;
+        border-color: rgba(185, 194, 220, .13) !important;
+    }
+    .tchr-create-form .cq-mode-card {
+        background: linear-gradient(145deg, rgba(165, 180, 252, .065), rgba(255, 255, 255, .015)) !important;
+        border-color: rgba(185, 194, 220, .18) !important;
+    }
+    .tchr-create-form .cq-mode-card[style*="#4fd1c5"],
+    .tchr-create-form .cq-mode-card[style*="#4FD1C5"] {
+        border-color: rgba(165, 180, 252, .55) !important;
+        box-shadow: inset 0 0 0 1px rgba(165, 180, 252, .08);
+    }
+
+    /* Recolour legacy inline accents inside these desktop forms only. */
+    .tchr-create-form [style*="color:#4fd1c5"],
+    .tchr-create-form [style*="color: #4fd1c5"],
+    .tchr-create-form [style*="color:#4FD1C5"],
+    .tchr-create-form [style*="color: #4FD1C5"] {
+        color: #b9c4ff !important;
+    }
+    .tchr-create-form [style*="color:#b7f5ef"],
+    .tchr-create-form [style*="color: #b7f5ef"] {
+        color: #c4ccff !important;
+    }
+    .tchr-create-form [style*="background:#4fd1c5"],
+    .tchr-create-form [style*="background: #4fd1c5"],
+    .tchr-create-form [style*="background:#4FD1C5"],
+    .tchr-create-form [style*="background: #4FD1C5"] {
+        background-color: #a5b4fc !important;
+        border-color: #a5b4fc !important;
+        color: #171a28 !important;
+    }
+    .tchr-create-form [style*="border:1px solid #4fd1c5"],
+    .tchr-create-form [style*="border: 1px solid #4fd1c5"],
+    .tchr-create-form [style*="border:1px solid #4FD1C5"],
+    .tchr-create-form [style*="border: 1px solid #4FD1C5"] {
+        border-color: rgba(165, 180, 252, .24) !important;
+    }
+    .tchr-create-form [style*="accent-color:#4fd1c5"],
+    .tchr-create-form [style*="accent-color: #4fd1c5"],
+    .tchr-create-form [style*="accent-color:#4FD1C5"],
+    .tchr-create-form [style*="accent-color: #4FD1C5"] {
+        accent-color: #a5b4fc !important;
+    }
+    .tchr-create-form svg[stroke="#4fd1c5"],
+    .tchr-create-form svg[stroke="#4FD1C5"] {
+        stroke: #a5b4fc !important;
+    }
+    .tchr-create-form [style*="background:rgba(79,209,197"],
+    .tchr-create-form [style*="background: rgba(79,209,197"],
+    .tchr-create-form [style*="background:rgba(79, 209, 197"],
+    .tchr-create-form [style*="background: rgba(79, 209, 197"] {
+        background-color: rgba(165, 180, 252, .075) !important;
+    }
+    .tchr-create-form [style*="border:1px solid rgba(79,209,197"],
+    .tchr-create-form [style*="border: 1px solid rgba(79,209,197"],
+    .tchr-create-form [style*="border:1px dashed rgba(79,209,197"],
+    .tchr-create-form [style*="border: 1px dashed rgba(79,209,197"],
+    .tchr-create-form [style*="border:2px solid #4fd1c5"],
+    .tchr-create-form [style*="border: 2px solid #4fd1c5"],
+    .tchr-create-form [style*="border-left:5px solid #4fd1c5"],
+    .tchr-create-form [style*="border-left: 5px solid #4fd1c5"] {
+        border-color: rgba(165, 180, 252, .24) !important;
+    }
+    .tchr-create-form [style*="background:#1a1919"],
+    .tchr-create-form [style*="background: #1a1919"] {
+        background-color: #1c2130 !important;
+    }
+    .tchr-create-form [style*="background:#161b22"],
+    .tchr-create-form [style*="background: #161b22"] {
+        background-color: #1a1f2d !important;
+    }
+    .tchr-create-form [style*="background:#0d1117"],
+    .tchr-create-form [style*="background: #0d1117"] {
+        background-color: #121722 !important;
+    }
+}
+
 @media (min-width: 900px) and (max-width: 1200px) {
     .tchr-create-form,
     .tchr-create-form.as-form-wrap--desktop { padding: 32px 28px 56px; }
+}
+
+/* Final desktop-only accent cleanup for inline styles emitted by legacy form
+   templates. Keep the hue restrained and the layered slate/periwinkle palette
+   consistent across dynamically-created quiz controls as well. */
+@media (min-width: 900px) {
+    .tchr-create-form {
+        --tcf-accent: #a5b4fc;
+        --q-accent: #a5b4fc;
+    }
+
+    .tchr-create-form [style*="border-left-color:#4fd1c5"],
+    .tchr-create-form [style*="border-left-color: #4fd1c5"],
+    .tchr-create-form [style*="border-left-color:#4FD1C5"],
+    .tchr-create-form [style*="border-left-color: #4FD1C5"] {
+        border-left-color: rgba(165, 180, 252, .55) !important;
+    }
+
+    .tchr-create-form [style*="border-color:rgba(79,209,197"],
+    .tchr-create-form [style*="border-color: rgba(79,209,197"],
+    .tchr-create-form [style*="border-color:rgba(79, 209, 197"],
+    .tchr-create-form [style*="border-color: rgba(79, 209, 197"],
+    .tchr-create-form [style*="border-color:#4fd1c5"],
+    .tchr-create-form [style*="border-color: #4fd1c5"],
+    .tchr-create-form [style*="border-color:#4FD1C5"],
+    .tchr-create-form [style*="border-color: #4FD1C5"] {
+        border-color: rgba(165, 180, 252, .25) !important;
+    }
+
+    .tchr-create-form [style*="background-color:rgba(79,209,197"],
+    .tchr-create-form [style*="background-color: rgba(79,209,197"],
+    .tchr-create-form [style*="background-color:rgba(79, 209, 197"],
+    .tchr-create-form [style*="background-color: rgba(79, 209, 197"] {
+        background-color: rgba(165, 180, 252, .075) !important;
+    }
+
+    .tchr-create-form [style*="box-shadow"][style*="79,209,197"],
+    .tchr-create-form [style*="box-shadow"][style*="79, 209, 197"] {
+        box-shadow: 0 0 0 3px rgba(165, 180, 252, .14) !important;
+    }
+
+    .tchr-create-form [style*="--q-accent:#4fd1c5"],
+    .tchr-create-form [style*="--q-accent: #4fd1c5"],
+    .tchr-create-form [style*="--q-accent:#4FD1C5"],
+    .tchr-create-form [style*="--q-accent: #4FD1C5"] {
+        --q-accent: #a5b4fc !important;
+    }
+
+    .tchr-create-form .cq-step,
+    .tchr-create-form .cq-create-title,
+    .tchr-create-form .cq-question-title,
+    .tchr-create-form .cq-question-points {
+        color: #c4ccff;
+    }
+
+    .tchr-create-form .cq-qtype-helper {
+        background: rgba(165, 180, 252, .055) !important;
+        border-left-color: rgba(165, 180, 252, .55) !important;
+    }
 }
 
