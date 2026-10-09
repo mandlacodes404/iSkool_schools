@@ -1007,6 +1007,10 @@
    targeted; the existing Evaluations, Grades and Syllabus styles stay canonical.
    ═══════════════════════════════════════════════════════════════════════════ */
 @media (min-width: 900px) {
+    .tchr-create-form.as-form-wrap--desktop {
+        max-width: 860px;
+        padding: 40px 40px 72px;
+    }
     .tchr-create-form {
         --tcf-line: var(--dm-line, rgba(255,255,255,.07));
         --tcf-line-strong: var(--dm-line-strong, rgba(255,255,255,.14));
@@ -1226,6 +1230,7 @@
     .tchr-create-form .cq-grid { gap: 18px; }
 }
 @media (min-width: 900px) and (max-width: 1200px) {
-    .tchr-create-form { padding: 32px 28px 56px; }
+    .tchr-create-form,
+    .tchr-create-form.as-form-wrap--desktop { padding: 32px 28px 56px; }
 }
 

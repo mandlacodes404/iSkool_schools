@@ -2019,13 +2019,11 @@ window.openCreateQuiz = async function() {
             if (newBtn) newBtn.classList.add('active');
         }
 
-        const headerPad = isDesktop ? 'padding:20px 32px 0;' : '';
-        const formPad   = isDesktop ? 'padding:0 32px 32px;' : '';
         const titleSize = isDesktop ? '18px' : '22px';
         const titleMargin = isDesktop ? '0 0 20px' : '0 0 24px';
 
         target.innerHTML = `
-            <div class="${isDesktop ? 'tchr-create-form tchr-create-form--quiz' : ''}" style="max-width:${isDesktop ? '920px' : '760px'};margin:0 auto;${formPad}padding-top:${isDesktop ? '20px' : '0'};">
+            <div class="${isDesktop ? 'tchr-create-form tchr-create-form--quiz' : ''}" style="max-width:${isDesktop ? '860px' : '760px'};margin:0 auto;padding-top:0;">
                 ${isDesktop ? '<p class="tchr-create-crumb">Quizzes</p>' : ''}
                 <div style="display:flex;align-items:center;justify-content:space-between;margin:${titleMargin};">
                     <h2 style="color:#4fd1c5;font-size:${titleSize};margin:0;font-weight:800;">Create a New Quiz</h2>
