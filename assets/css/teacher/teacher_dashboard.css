@@ -1382,3 +1382,62 @@
     .tchr-create-form.as-form-wrap--desktop { padding: 32px 28px 56px; }
 }
 
+/* Final desktop-only accent cleanup for inline styles emitted by legacy form
+   templates. Keep the hue restrained and the layered slate/periwinkle palette
+   consistent across dynamically-created quiz controls as well. */
+@media (min-width: 900px) {
+    .tchr-create-form {
+        --tcf-accent: #a5b4fc;
+        --q-accent: #a5b4fc;
+    }
+
+    .tchr-create-form [style*="border-left-color:#4fd1c5"],
+    .tchr-create-form [style*="border-left-color: #4fd1c5"],
+    .tchr-create-form [style*="border-left-color:#4FD1C5"],
+    .tchr-create-form [style*="border-left-color: #4FD1C5"] {
+        border-left-color: rgba(165, 180, 252, .55) !important;
+    }
+
+    .tchr-create-form [style*="border-color:rgba(79,209,197"],
+    .tchr-create-form [style*="border-color: rgba(79,209,197"],
+    .tchr-create-form [style*="border-color:rgba(79, 209, 197"],
+    .tchr-create-form [style*="border-color: rgba(79, 209, 197"],
+    .tchr-create-form [style*="border-color:#4fd1c5"],
+    .tchr-create-form [style*="border-color: #4fd1c5"],
+    .tchr-create-form [style*="border-color:#4FD1C5"],
+    .tchr-create-form [style*="border-color: #4FD1C5"] {
+        border-color: rgba(165, 180, 252, .25) !important;
+    }
+
+    .tchr-create-form [style*="background-color:rgba(79,209,197"],
+    .tchr-create-form [style*="background-color: rgba(79,209,197"],
+    .tchr-create-form [style*="background-color:rgba(79, 209, 197"],
+    .tchr-create-form [style*="background-color: rgba(79, 209, 197"] {
+        background-color: rgba(165, 180, 252, .075) !important;
+    }
+
+    .tchr-create-form [style*="box-shadow:0 0 0"],
+    .tchr-create-form [style*="box-shadow: 0 0 0"] {
+        box-shadow: 0 0 0 3px rgba(165, 180, 252, .14) !important;
+    }
+
+    .tchr-create-form [style*="--q-accent:#4fd1c5"],
+    .tchr-create-form [style*="--q-accent: #4fd1c5"],
+    .tchr-create-form [style*="--q-accent:#4FD1C5"],
+    .tchr-create-form [style*="--q-accent: #4FD1C5"] {
+        --q-accent: #a5b4fc !important;
+    }
+
+    .tchr-create-form .cq-step,
+    .tchr-create-form .cq-create-title,
+    .tchr-create-form .cq-question-title,
+    .tchr-create-form .cq-question-points {
+        color: #c4ccff;
+    }
+
+    .tchr-create-form .cq-qtype-helper {
+        background: rgba(165, 180, 252, .055) !important;
+        border-left-color: rgba(165, 180, 252, .55) !important;
+    }
+}
+
