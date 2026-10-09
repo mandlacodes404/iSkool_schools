@@ -12,9 +12,11 @@
    What it changes on desktop
      - the drawer becomes a permanent sidebar (all 11 pages in 3 groups)
      - the two-row GitHub-style header (brand + search + avatar, then a tab
-       strip) becomes one 62px row that names the current page
-     - the page sits in a rounded panel inset into the sidebar + header frame
-     - the surfaces step up: frame < page < card
+       strip) is hidden: the brand and account live in the sidebar, search is
+       the palette, and the page starts at the very top of the window
+     - the page fills the whole area to the right of the sidebar, flush to the
+       window edges (no inset panel, no gap, no rounded corners)
+     - the surfaces step up: sidebar < page < card
 
    What it deliberately leaves alone
      - all markup the mobile layout needs (nothing is removed, only hidden on
@@ -37,10 +39,10 @@
 html {
   --dm-w: 268px;
   --dm-pad: 10px;
-  --dm-head: 62px; /* brand row and .main-header share this height so their contents line up */
-  --dm-gap: 10px; /* space between the page panel and the window edge */
-  --dm-panel-r: 14px; /* page panel corner radius */
-  --dm-chrome: calc(var(--dm-head) + var(--dm-gap) + 2px); /* top bar + panel margin + panel border: what a page's own "100vh minus header" sum must subtract */
+  --dm-head: 62px; /* brand row height */
+  --dm-chrome: 0px; /* space the desktop chrome takes above the page: none now (no header, no inset). Kept so a page's own "100vh minus chrome" sum still works */
+  --dm-gap: 0px; /* the old inset margin and corner radius, now 0. Kept only so */
+  --dm-panel-r: 0px; /* anything that still reads them keeps working; delete once nothing does */
   --dm-bg: #0d1117;
   --dm-page: #000000;
   --dm-card: #0d1117;
@@ -93,20 +95,20 @@ html body .sidebar.dm-menu .round-toggle { display: none !important; }
 /* The dimming overlay belonged to the drawer. */
 html body .sidebar.dm-menu ~ #mobileOverlay { display: none !important; }
 
-/* ── Inset page: sidebar and header are one frame, the page is a panel set inside it ──
-   Both content panes get the same panel: #api-content-area (API pages) and #mainFrame
-   (iframe pages). Their own scroll and padding rules are left alone; the panel only sets
-   size, edge and corners. flex-basis 0 makes the panel fill what the header leaves. */
+/* ── Full-bleed page: sidebar on the left, the page filling everything else ──
+   Both content panes get the same treatment: #api-content-area (API pages) and #mainFrame
+   (iframe pages). Their own scroll and padding rules are left alone; this only sets size and
+   the one divider next to the sidebar. flex-basis 0 makes the pane fill the full height, since
+   no header sits above it on desktop. */
 html body { background-color: var(--dm-bg); }
-html body .main-content { background-color: var(--dm-bg); }
+html body .main-content { background-color: var(--dm-page); }
 html body #api-content-area,
 html body #mainFrame {
   flex: 1 1 0; min-height: 0; box-sizing: border-box;
-  margin: 0 var(--dm-gap) var(--dm-gap) 0;
-  border: 1px solid rgba(255,255,255,.08); border-radius: var(--dm-panel-r);
+  margin: 0; border: 0; border-left: 1px solid var(--dm-line); border-radius: 0;
   background: var(--dm-page) !important;
 }
-html body #mainFrame { width: calc(100% - var(--dm-gap)); }
+html body #mainFrame { width: 100%; }
 
 /* ── Sidebar: always on screen (the old rules park it at left:-260px, hidden) ── */
 html body .sidebar.dm-menu {
@@ -437,41 +439,23 @@ html.dm-collapsed body .sidebar.dm-menu .dm-account-root::after, html.dm-collaps
 .dm-krow i { display: flex; gap: 4px; font-style: normal; }
 .dm-keys-note { grid-column: 1 / -1; margin: 6px 0 0; padding-top: 12px; border-top: 1px solid var(--dm-line); color: var(--dm-faint); font-size: 12px; line-height: 1.5; }
 
-/* ── Header: one row that names the page ────────────────────────────────────
-   The brand and the account now live in the sidebar, and search is the palette,
-   so everything the old two-row header held is hidden. The elements stay in the
-   DOM because dashboard.js and the inline page script still look them up. */
-html body .top-nav-wrapper {
-  /* Same surface as the sidebar. !important so a colour left inline by the mobile
-     scroll handler (window resized across the breakpoint) can never show on desktop. */
-  background: var(--dm-bg) !important;
-  border-bottom: 0 !important;
-}
-html body .top-nav-row1 {
-  box-sizing: border-box; height: var(--dm-head); padding: 0 24px; gap: 12px;
-  justify-content: flex-start;
-}
-html body .top-nav-left,
-html body #teacherHeaderBrand,
-html body #teacherHeaderDetailTitle,
-html body #teacherHeaderRight,
-html body .top-nav-row2 { display: none !important; }
-html body .dm-page-title {
-  display: block; margin: 0; min-width: 0;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  color: var(--dm-text); font: 600 15px/1.2 var(--dm-font); letter-spacing: -.005em;
-}
+/* ── Header: hidden on desktop ──────────────────────────────────────────────
+   The brand and the account live in the sidebar, search is the palette, and the active menu
+   item names the page, so the whole header goes and the page starts at the very top of the
+   window. It stays in the DOM (the mobile layout and dashboard.js's mobile scroll and colour
+   handling still use it); nothing is removed, it is only not shown here. */
+html body .top-nav-wrapper { display: none !important; }
 
-/* ── Re-tone: frame < page < card ───────────────────────────────────────────
-   The frame (sidebar + header) is the darkest step, the page panel sits one step above it and
-   cards one step above that. Delete this whole block to fall back to the plain inset look.
+/* ── Re-tone: sidebar < page < card ─────────────────────────────────────────
+   The sidebar is the darkest step, the page sits one step above it and cards one step above
+   that. Delete this whole block to fall back to the plain look.
    teacher_dashboard.css and dashboard.css paint the flat layout in #12161c / #0d1117 with
    !important, so the three shared teacher panes are re-toned here. Colours hard-coded in the
    page stylesheets (grades.css and so on) do not follow yet. */
 html { --dm-bg: #0a0d12; --dm-page: #10151c; --dm-card: #181e27; }
 html body { --card-bg: var(--dm-card); }
-/* Left panel, main panel and info panel are ONE colour (--dm-page), the same as the inset
-   itself (#api-content-area / #mainFrame above). Only the frame (sidebar + header) is darker. */
+/* Left panel, main panel and info panel are ONE colour (--dm-page), the same as the page itself
+   (#api-content-area / #mainFrame above). Only the sidebar is darker. */
 html body .tchr-flat-sidebar,
 html body .tchr-flat-panel,
 html body .tchr-info-rail { background: var(--dm-page) !important; }
