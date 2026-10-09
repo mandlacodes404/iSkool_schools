@@ -611,7 +611,8 @@ function openCreateAnnouncementPanel(panel) {
     if (newBtn) newBtn.classList.add('active');
 
     panel.innerHTML = `
-        <div class="an-panel-content">
+        <div class="an-panel-content tchr-create-form tchr-create-form--announcement">
+            <p class="tchr-create-crumb">Announcements</p>
             <div class="an-panel-form-header">
                 <div class="an-panel-form-title">New Announcement</div>
                 <button onclick="fetchTeacherAnnouncements()" class="an-panel-form-close-btn">&times;</button>

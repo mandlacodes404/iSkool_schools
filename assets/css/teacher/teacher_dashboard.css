@@ -999,3 +999,238 @@
         }
 
         .drawer-icon svg { transition: transform 0.3s ease; display: block; }
+
+ 
+/* ═══════════════════════════════════════════════════════════════════════════
+   TEACHER DESKTOP CREATE FORMS
+   Shared presentation for the remaining create flows. Mobile forms are not
+   targeted; the existing Evaluations, Grades and Syllabus styles stay canonical.
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (min-width: 900px) {
+    .tchr-create-form.as-form-wrap--desktop {
+        max-width: 860px;
+        padding: 40px 40px 72px;
+    }
+    .tchr-create-form {
+        --tcf-line: var(--dm-line, rgba(255,255,255,.07));
+        --tcf-line-strong: var(--dm-line-strong, rgba(255,255,255,.14));
+        --tcf-text: var(--dm-text, #e8eaed);
+        --tcf-soft: var(--dm-soft, #b6bbc3);
+        --tcf-muted: var(--dm-muted, #8a9099);
+        --tcf-faint: var(--dm-faint, #5f656e);
+        --tcf-accent: var(--dm-accent, #4fd1c5);
+        box-sizing: border-box;
+        width: 100%;
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 40px 40px 72px;
+        color: var(--tcf-text);
+        font-family: var(--dm-font, 'Geist', 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif);
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 1.5;
+        animation: tchr-create-form-in .18s ease;
+    }
+    @keyframes tchr-create-form-in { from { opacity: 0; } to { opacity: 1; } }
+    .tchr-create-form .tchr-create-crumb {
+        margin: 0 0 8px;
+        color: var(--tcf-muted);
+        font-size: 13px;
+        font-weight: 400;
+    }
+    .tchr-create-form .as-form-header,
+    .tchr-create-form .an-panel-form-header,
+    .tchr-create-form .rs-panel-form-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        margin: 0 0 28px;
+        padding: 0;
+        border: 0;
+        background: transparent;
+    }
+    .tchr-create-form .as-form-title,
+    .tchr-create-form .an-panel-form-title,
+    .tchr-create-form .rs-panel-form-title,
+    .tchr-create-form > div > h2 {
+        margin: 0;
+        color: var(--tcf-text);
+        font-size: 28px;
+        font-weight: 500;
+        line-height: 1.15;
+        letter-spacing: -.025em;
+    }
+    .tchr-create-form .as-form-title--desktop { font-size: 28px; font-weight: 500; }
+    .tchr-create-form .as-form-close-btn,
+    .tchr-create-form .an-panel-form-close-btn,
+    .tchr-create-form .rs-panel-form-close-btn {
+        color: var(--tcf-muted);
+        font-size: 22px;
+        border: 1px solid var(--tcf-line-strong);
+        border-radius: 8px;
+        width: 32px;
+        height: 32px;
+        flex: 0 0 32px;
+        display: grid;
+        place-items: center;
+    }
+    .tchr-create-form .teacher-modal-label {
+        display: block;
+        margin: 22px 0 7px;
+        color: var(--tcf-soft);
+        font-size: 13px;
+        font-weight: 500;
+        line-height: 1.4;
+    }
+    .tchr-create-form .teacher-modal-input,
+    .tchr-create-form input[type="text"],
+    .tchr-create-form input[type="number"],
+    .tchr-create-form input[type="datetime-local"],
+    .tchr-create-form input[type="file"],
+    .tchr-create-form select,
+    .tchr-create-form textarea {
+        box-sizing: border-box;
+        width: 100%;
+        min-height: 38px;
+        margin: 0;
+        padding: 9px 12px;
+        border: 1px solid var(--tcf-line-strong);
+        border-radius: 8px;
+        background: transparent;
+        color: var(--tcf-text);
+        font: inherit;
+        font-weight: 400;
+        box-shadow: none;
+        transition: border-color .15s ease, box-shadow .15s ease;
+    }
+    .tchr-create-form input[type="file"] { padding: 8px 10px; }
+    .tchr-create-form textarea { min-height: 94px; resize: vertical; }
+    .tchr-create-form input::placeholder,
+    .tchr-create-form textarea::placeholder { color: var(--tcf-faint); }
+    .tchr-create-form .teacher-modal-input:focus,
+    .tchr-create-form input:focus,
+    .tchr-create-form select:focus,
+    .tchr-create-form textarea:focus {
+        outline: none;
+        border-color: var(--tcf-accent);
+        box-shadow: 0 0 0 3px rgba(79,209,197,.14);
+    }
+    .tchr-create-form .teacher-modal-input:focus-visible,
+    .tchr-create-form button:focus-visible {
+        outline: 2px solid var(--tcf-accent);
+        outline-offset: 2px;
+    }
+    .tchr-create-form .as-term-banner,
+    .tchr-create-form .cq-section {
+        margin: 28px 0 0;
+        padding: 22px 0 0;
+        border: 0;
+        border-top: 1px solid var(--tcf-line);
+        border-radius: 0;
+        background: transparent;
+        text-align: left;
+    }
+    .tchr-create-form .as-term-banner { border-left: 0; }
+    .tchr-create-form .as-term-banner-title {
+        color: var(--tcf-soft);
+        font-size: 13px;
+        font-weight: 500;
+    }
+    .tchr-create-form .as-term-banner-subtitle { color: var(--tcf-muted); }
+    .tchr-create-form .cq-section-title {
+        color: var(--tcf-text);
+        font-size: 14px;
+        font-weight: 500;
+    }
+    .tchr-create-form .cq-section-help { color: var(--tcf-muted); font-weight: 400; }
+    .tchr-create-form .cq-step {
+        background: transparent;
+        border-color: var(--tcf-line-strong);
+        color: var(--tcf-muted);
+        border-radius: 7px;
+        font-weight: 500;
+    }
+    .tchr-create-form .cq-preview-card,
+    .tchr-create-form .cq-learner-card {
+        background: rgba(255,255,255,.025);
+        border-color: var(--tcf-line);
+    }
+    .tchr-create-form .cq-preview-textarea {
+        box-sizing: border-box;
+        background: transparent;
+        border-color: var(--tcf-line-strong);
+        color: var(--tcf-text);
+    }
+    .tchr-create-form .cq-mode-card { background: transparent !important; }
+    .tchr-create-form .as-email-checkbox-label {
+        margin-top: 22px;
+        background: transparent;
+        border: 1px solid var(--tcf-line);
+        border-radius: 8px;
+        color: var(--tcf-soft);
+    }
+    .tchr-create-form .rs-type-toggle-btn {
+        border-radius: 8px;
+        border-color: var(--tcf-line-strong);
+    }
+    .tchr-create-form .teacher-file-drop {
+        background: transparent;
+        border-color: var(--tcf-line-strong);
+        border-radius: 10px;
+    }
+    .tchr-create-form .an-email-label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .tchr-create-form input[type="checkbox"],
+    .tchr-create-form input[type="radio"] { accent-color: var(--tcf-accent); }
+    .tchr-create-form .as-form-actions,
+    .tchr-create-form .an-panel-form-actions,
+    .tchr-create-form .rs-panel-form-actions {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid var(--tcf-line);
+    }
+    .tchr-create-form .teacher-modal-cancel,
+    .tchr-create-form .teacher-modal-submit,
+    .tchr-create-form .as-form-cancel-btn,
+    .tchr-create-form .as-form-submit-btn {
+        min-height: 36px;
+        padding: 0 14px;
+        border-radius: 8px;
+        font: inherit;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+    }
+    .tchr-create-form .teacher-modal-cancel,
+    .tchr-create-form .as-form-cancel-btn {
+        color: var(--tcf-text);
+        background: transparent;
+        border: 1px solid var(--tcf-line-strong);
+    }
+    .tchr-create-form .teacher-modal-submit,
+    .tchr-create-form .as-form-submit-btn {
+        color: #04211f;
+        background: var(--tcf-accent);
+        border: 1px solid var(--tcf-accent);
+    }
+    .tchr-create-form .teacher-modal-submit:hover,
+    .tchr-create-form .as-form-submit-btn:hover { filter: brightness(1.06); }
+    .tchr-create-form .as-form-error,
+    .tchr-create-form .an-form-error,
+    .tchr-create-form .rs-form-error { margin-top: 12px; }
+    .tchr-create-form .cq-grid { gap: 18px; }
+}
+@media (min-width: 900px) and (max-width: 1200px) {
+    .tchr-create-form,
+    .tchr-create-form.as-form-wrap--desktop { padding: 32px 28px 56px; }
+}
+

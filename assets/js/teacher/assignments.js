@@ -865,7 +865,8 @@ window.openCreateAssignment = async function() {
         const backFn = isDesktop ? `selectDesktopAssignment(window._lastSelectedAssignmentIdx)` : `fetchTeacherAssignments()`;
 
         target.innerHTML = `
-            <div class="as-form-wrap ${isDesktop ? 'as-form-wrap--desktop' : 'as-form-wrap--mobile'}">
+            <div class="as-form-wrap ${isDesktop ? 'as-form-wrap--desktop tchr-create-form' : 'as-form-wrap--mobile'}">
+                ${isDesktop ? '<p class="tchr-create-crumb">Assignments</p>' : ''}
                 <div class="as-form-header ${isDesktop ? 'as-form-header--desktop' : ''}">
                     <h2 class="as-form-title ${isDesktop ? 'as-form-title--desktop' : ''}">
                         Create New Assignment
