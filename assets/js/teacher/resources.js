@@ -465,7 +465,8 @@ function openUploadResourcePanel(panel) {
     if (newBtn) newBtn.classList.add('active');
 
     panel.innerHTML = `
-        <div class="rs-panel-content">
+        <div class="rs-panel-content tchr-create-form tchr-create-form--resource">
+            <p class="tchr-create-crumb">Resources</p>
             <div class="rs-panel-form-header">
                 <div class="rs-panel-form-title">Upload Resource</div>
                 <button onclick="fetchTeacherResources()" class="rs-panel-form-close-btn">&times;</button>
