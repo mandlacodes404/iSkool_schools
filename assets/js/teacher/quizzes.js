@@ -2025,7 +2025,8 @@ window.openCreateQuiz = async function() {
         const titleMargin = isDesktop ? '0 0 20px' : '0 0 24px';
 
         target.innerHTML = `
-            <div style="max-width:${isDesktop ? '920px' : '760px'};margin:0 auto;${formPad}padding-top:${isDesktop ? '20px' : '0'};">
+            <div class="${isDesktop ? 'tchr-create-form tchr-create-form--quiz' : ''}" style="max-width:${isDesktop ? '920px' : '760px'};margin:0 auto;${formPad}padding-top:${isDesktop ? '20px' : '0'};">
+                ${isDesktop ? '<p class="tchr-create-crumb">Quizzes</p>' : ''}
                 <div style="display:flex;align-items:center;justify-content:space-between;margin:${titleMargin};">
                     <h2 style="color:#4fd1c5;font-size:${titleSize};margin:0;font-weight:800;">Create a New Quiz</h2>
                     ${isDesktop ? `
