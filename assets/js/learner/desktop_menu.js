@@ -50,7 +50,6 @@
     ['nav-assignments-sidebar',   'assign',    'a', 'homework tasks submissions'],
     ['nav-resources-sidebar',     'folder',    'r', 'files notes downloads materials'],
     ['nav-announcements-sidebar', 'megaphone', 'n', 'news notices updates'],
-    ['nav-calendar-sidebar',      'calendar',  'l', 'schedule events reminders dates timetable'],
     ['nav-syllabus-sidebar',      'book',      's', 'curriculum topics outline'],
     ['nav-grades-sidebar',        'chart',     'g', 'grades marks results reports progress'],
     ['nav-evaluations-sidebar',   'star',      'e', 'feedback rate teacher survey'],
