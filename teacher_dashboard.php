@@ -105,7 +105,7 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
     <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_menu.css?v=1.5">
     <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_menu.css?v=1.0">
     <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_settings.css?v=1.0">
-    <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_settings.css?v=1.0">   
+    <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_settings.css?v=1.1">   
     <script>
     // Desktop sidebar: restore the saved collapsed state BEFORE first paint (no flash).
     // With no saved choice, screens narrower than 1440px start as a rail.
@@ -1588,6 +1588,6 @@ document.addEventListener('DOMContentLoaded', function () {
 <script src="assets/js/teacher/teacher_mobile_menu.js?v=1.0"></script>
 <script>window.ISKOOL_TEACHER = <?= json_encode(['name'=>$teacherFullName,'email'=>$teacherEmail,'initials'=>$teacherInitials], JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?>;</script>
 <script src="assets/js/teacher/teacher_mobile_settings.js?v=1.0"></script>
-<script src="assets/js/teacher/teacher_desktop_settings.js?v=1.0"></script>
+<script src="assets/js/teacher/teacher_desktop_settings.js?v=1.1"></script>
 </body>
 </html>
