@@ -456,7 +456,9 @@ html body .top-nav-wrapper { display: none !important; }
 html { --dm-bg: #111111; --dm-page: #151515; --dm-card: #1a1a19; --dm-raise: #1a1a19; }
 /* Sidebar, in step with the Settings modal: the selected link uses the modal's selected-item grey (#383838) and the
    initials avatar uses the modal's avatar (#2d2d2c, soft letters, medium weight) instead of the old maroon. */
-html body .sidebar.dm-menu .dm-item.active { background: #383838; }
+/* Menu link text: #c2c3b7 normally, #f0efec when selected (hover keeps its own colour). */
+html body .sidebar.dm-menu .dm-item { color: #c2c3b7; }
+html body .sidebar.dm-menu .dm-item.active { background: #383838; color: #f0efec; }
 html body .sidebar.dm-menu .dm-account-root .initials-avatar { background-color: #2d2d2c; color: #c3c2b7; font-weight: 500; }
 html body { --card-bg: var(--dm-card); }
 /* Left panel, main panel and info panel are ONE colour (--dm-page), the same as the page itself
