@@ -215,6 +215,8 @@ html body .sidebar.dm-menu .sidebar-links::-webkit-scrollbar { display: none; }
 
 html body .sidebar.dm-menu .dm-item, html body .sidebar.dm-menu .dm-search {
   position: relative; display: flex; align-items: center; gap: 12px;
+  box-sizing: border-box; /* links are anchors (content-box by default): without this, 100% wide plus the side padding overflows
+                             the list and its edge clips the right side of the highlight, so the right corners looked square */
   width: 100%; height: 36px; padding: 0 10px;
   border: 0; border-radius: 8px; background: transparent; box-shadow: none;
   color: var(--dm-soft); font: 450 14px/1 var(--dm-font); letter-spacing: 0;

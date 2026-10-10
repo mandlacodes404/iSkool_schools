@@ -250,7 +250,7 @@ if (!empty($joinedClassIds)) {
     <link rel="stylesheet" href="assets/css/learner/resources.css?v=2.5">
      <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=4.6">
      <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=13.4">
-    <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=2.2">
+    <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=2.3">
     <link rel="stylesheet" href="assets/css/learner/mobile_menu.css?v=1.5">
     <link rel="stylesheet" href="assets/css/learner/mobile_settings.css?v=1.0">
     <link rel="stylesheet" href="assets/css/learner/desktop_settings.css?v=1.2">   <!-- new -->
