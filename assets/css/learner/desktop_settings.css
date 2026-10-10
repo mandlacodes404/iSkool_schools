@@ -14,11 +14,14 @@
    Learner extras on top of the teacher version: the editable Personal info form (two-column fields, skeleton while it
    loads, and an unsaved-changes bar that sticks to the bottom of the panel).
 
+   The account popover that opens from the sidebar avatar (.dm-pop, built in desktop_menu.css) takes the same colours;
+   see the "Account popover" block near the end.
+
    To undo it all, remove the include lines. */
 
 @media (min-width: 769px) {
 
-.dsm, .ds-ov, .ds-toast {
+.dsm, .ds-ov, .ds-toast, .dm-pop {
   --ds-bg: #1a1a19;         /* content panel */
   --ds-rail: #151515;       /* left rail */
   --ds-raise: #212121;      /* search box and inputs */
@@ -36,6 +39,8 @@
   --ds-danger: #f08a84;
   --ds-warn: #e3b341;
   --ds-font: 'Geist', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+.dsm, .ds-ov, .ds-toast {
   font-family: var(--ds-font);
   font-weight: 400;   /* body is 600 on this page; reset it here */
 }
@@ -193,6 +198,21 @@
 /* Skeleton while the profile loads */
 .ds-sk { display: block; border-radius: 8px; background: var(--ds-sel); animation: ds-pulse 1.4s ease-in-out infinite; }
 @keyframes ds-pulse { 50% { opacity: .45; } }
+
+/* -- Account popover: the card that opens from the avatar at the bottom of the sidebar --
+   It is built and positioned in desktop_menu.css, which loads before this file. Only its colours are set here, to
+   the same warm greys as the modal. Size, spacing, position and animation stay with the menu stylesheet.
+   To go back to the old look, delete this block and take ".dm-pop" out of the colour variables selector at the top. */
+.dm-pop { background: var(--ds-bg); border-color: var(--ds-edge); }
+.dm-pop-name { color: var(--ds-text); }
+.dm-pop-mail { color: var(--ds-muted); }
+.dm-pop-sep { background: var(--ds-line); }
+.dm-pop-item { color: var(--ds-soft); }
+.dm-pop-item:hover, .dm-pop-item:focus-visible { background: var(--ds-hover); color: var(--ds-text); }
+.dm-pop-item:focus-visible { outline-color: var(--ds-soft); }
+.dm-pop-item.is-danger, .dm-pop-item.is-danger:hover { color: var(--ds-danger); }
+.dm-pop-item.is-danger:hover { background: rgba(240,138,132,.1); }
+.dm-pop-kbd, .dm-pop-ver { color: var(--ds-faint); }
 
 /* -- Narrower desktops and tablets -- */
 @media (max-width: 1040px) {

@@ -253,7 +253,7 @@ if (!empty($joinedClassIds)) {
     <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=1.9">
     <link rel="stylesheet" href="assets/css/learner/mobile_menu.css?v=1.5">
     <link rel="stylesheet" href="assets/css/learner/mobile_settings.css?v=1.0">
-    <link rel="stylesheet" href="assets/css/learner/desktop_settings.css?v=1.1">   <!-- new -->
+    <link rel="stylesheet" href="assets/css/learner/desktop_settings.css?v=1.2">   <!-- new -->
     <script>
     // Desktop sidebar: restore the saved collapsed state BEFORE first paint (no flash).
     // With no saved choice, screens narrower than 1100px start as a rail.
