@@ -89,7 +89,7 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
     <link rel="stylesheet" href="assets/css/teacher/dashboard.css?v=4.8">
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
-    <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=6.8">
+    <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=6.9">
     <link rel="stylesheet" href="assets/css/teacher/assignments.css?v=2.5">
     <link rel="stylesheet" href="assets/css/teacher/resources.css?v=2.1">
     <link rel="stylesheet" href="assets/css/teacher/sbo.css?v=2.1">
@@ -102,7 +102,7 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Geist:wght@400..600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=13.2">
-    <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_menu.css?v=1.6">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_menu.css?v=1.7">
     <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_menu.css?v=1.0">
     <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_settings.css?v=1.0">
     <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_settings.css?v=1.2">   

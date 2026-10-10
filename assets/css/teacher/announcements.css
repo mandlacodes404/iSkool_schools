@@ -136,7 +136,7 @@
     color: #8b949e;
 }
 .eval-card {
-    background: #161b22;
+    background: var(--dm-card, #161b22);
     border-radius: 12px;
     padding: 25px;
     margin-bottom: 20px;

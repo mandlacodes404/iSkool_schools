@@ -80,7 +80,7 @@
 
 /* 3. The Quiz Card */
 .quiz-card {
-    background: #161b22;
+    background: var(--dm-card, #161b22);
     padding: 18px;
     border-radius: 14px;
     margin: 12px 0;
