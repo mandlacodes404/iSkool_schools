@@ -1,37 +1,27 @@
 /* =========================================================================
-   assets/css/teacher/teacher_desktop_menu.css
-   Desktop navigation for the teacher dashboard. Same design language as the
-   learner side (assets/css/learner/desktop_menu.css): a persistent, collapsible
+   assets/css/learner/desktop_menu.css
+   Desktop navigation for the learner dashboard: a persistent, collapsible
    sidebar with grouped navigation, quick search (Ctrl/Cmd + K), an account
    menu, rail tooltips and a keyboard-shortcuts sheet (press ?).
 
-   Load it AFTER teacher_dashboard.css. Every layout rule sits inside
-   min-width: 769px, so the mobile menu, bottom nav and mobile header are
-   not affected.
+   Load it AFTER learner_dashboard.css. Every layout rule sits inside
+   min-width: 769px, so the mobile menu is not affected.
 
-   What it changes on desktop
-     - the drawer becomes a permanent sidebar (all 11 pages in 3 groups)
-     - the two-row GitHub-style header (brand + search + avatar, then a tab
-       strip) is hidden: the brand and account live in the sidebar, search is
-       the palette, and the page starts at the very top of the window
-     - the page fills the whole area to the right of the sidebar, flush to the
-       window edges (no inset panel, no gap, no rounded corners)
-     - the surfaces step up: sidebar < page < card
-     - teal is gone: one neutral accent (--dm-ac) and a few flat tints, shared with the page files
+   The page fills the whole area to the right of the sidebar, flush to the
+   window edges (see "Full-bleed page"). The top bar is hidden, except on
+   detail pages where it keeps the back button (see "Header"). The surfaces
+   step up sidebar < page < card (see "Re-tone" near the end). Teal is gone on
+   desktop: one neutral accent (--dm-ac) and a few flat tints (see "Tokens").
 
-   What it deliberately leaves alone
-     - all markup the mobile layout needs (nothing is removed, only hidden on
-       desktop), and every existing onclick / setTeacherActive() path
-     - dashboard.js and the page scripts
-     - colours hard-coded in the page stylesheets (grades.css, assignments.css,
-       ...): they keep their own colours until they are moved to the tokens
-
-   Delete the "Re-tone" block near the end to fall back to the plain look.
+   Once you are happy with it, the old desktop-only sidebar rules in
+   learner_dashboard.css (the min-width: 769px blocks, .desktop-backdrop,
+   #desktopMenuToggle, .desktop-close-btn) can be deleted and the few
+   !important flags below can go with them.
    ========================================================================= */
 
 /* Desktop-only pieces stay inert below 769px */
 .dm-brand, .dm-search, .dm-sep, .dm-meta, .dm-kbd,
-.dm-tip, .dm-pop, .dm-palette, .dm-keys, .dm-page-title { display: none; }
+.dm-tip, .dm-pop, .dm-palette, .dm-keys, .dm-join { display: none; }
 .dm-account-root { display: contents; }
 
 @media (min-width: 769px) {
@@ -40,8 +30,8 @@
 html {
   --dm-w: 268px;
   --dm-pad: 10px;
-  --dm-head: 62px; /* brand row height */
-  --dm-chrome: 0px; /* space the desktop chrome takes above the page: none now (no header, no inset). Kept so a page's own "100vh minus chrome" sum still works */
+  --dm-head: 62px; /* brand row height (and the detail-page top bar) */
+  --dm-chrome: 0px; /* space the desktop chrome takes above the page: none now (no top bar, no inset). Kept so a page's own "100vh minus chrome" sum still works */
   --dm-gap: 0px; /* the old inset margin and corner radius, now 0. Kept only so */
   --dm-panel-r: 0px; /* anything that still reads them keeps working; delete once nothing does */
   --dm-bg: #0d1117;
@@ -92,43 +82,30 @@ html {
   --dm-i-keyboard: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 8h.01'/%3E%3Cpath d='M12 12h.01'/%3E%3Cpath d='M14 8h.01'/%3E%3Cpath d='M16 12h.01'/%3E%3Cpath d='M18 8h.01'/%3E%3Cpath d='M6 8h.01'/%3E%3Cpath d='M7 16h10'/%3E%3Cpath d='M8 12h.01'/%3E%3Crect width='20' height='16' x='2' y='4' rx='2'/%3E%3C/svg%3E");
   --dm-i-x: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 6 6 18'/%3E%3Cpath d='m6 6 12 12'/%3E%3C/svg%3E");
   --dm-i-logout: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4'/%3E%3Cpolyline points='16 17 21 12 16 7'/%3E%3Cline x1='21' x2='9' y1='12' y2='12'/%3E%3C/svg%3E");
-  --dm-i-calendar: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 2v4'/%3E%3Cpath d='M16 2v4'/%3E%3Crect width='18' height='18' x='3' y='4' rx='2'/%3E%3Cpath d='M3 10h18'/%3E%3C/svg%3E");
-  --dm-i-pie: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 12c.552 0 1.005-.449.95-.998a10 10 0 0 0-8.953-8.951c-.55-.055-.998.398-.998.95v8a1 1 0 0 0 1 1z'/%3E%3Cpath d='M21.21 15.89A10 10 0 1 1 8 2.83'/%3E%3C/svg%3E");
 }
 html.dm-collapsed { --dm-w: 64px; --dm-pad: 12px; }
 
 /* ── Page layout: content sits beside the sidebar instead of under a drawer ── */
 html body .main-content { margin-left: var(--dm-w) !important; }
 html.dm-ready body .main-content { transition: margin-left .22s var(--dm-ease) !important; }
-
-/* The old drawer controls have no job on desktop any more. They stay in the DOM
-   (dashboard.js still binds to them) and are simply not shown. */
 html body #desktopMenuToggle,
-html body #mobileToggle,
-html body .sidebar.dm-menu .round-toggle { display: none !important; }
-/* The dimming overlay belonged to the drawer. */
-html body .sidebar.dm-menu ~ #mobileOverlay { display: none !important; }
+html body .desktop-backdrop { display: none !important; }
 
 /* ── Full-bleed page: sidebar on the left, the page filling everything else ──
-   Both content panes get the same treatment: #api-content-area (API pages) and #mainFrame
-   (iframe pages). Their own scroll and padding rules are left alone; this only sets size and
-   the one divider next to the sidebar. flex-basis 0 makes the pane fill the full height, since
-   no header sits above it on desktop. */
+   All three page panes get the same treatment: #api-content-area (API pages), #mainFrame (iframe
+   pages) and .my-class-content (My class). Their scroll rules elsewhere are left alone; this only
+   sets size and the one divider next to the sidebar. flex-basis 0 makes the pane fill the full
+   height, so a fixed height set on a pane elsewhere is ignored. */
 html body { background-color: var(--dm-bg); }
 html body .main-content { background-color: var(--dm-page); }
 html body #api-content-area,
-html body #mainFrame {
+html body #mainFrame,
+html body .my-class-content.active {
   flex: 1 1 0; min-height: 0; box-sizing: border-box;
   margin: 0; border: 0; border-left: 1px solid var(--dm-line); border-radius: 0;
-  background: var(--dm-page) !important;
+  background: var(--dm-page);
 }
 html body #mainFrame { width: 100%; }
-
-/* ── Sidebar: always on screen (the old rules park it at left:-260px, hidden) ── */
-html body .sidebar.dm-menu {
-  left: 0; top: 0; height: 100vh;
-  visibility: visible; opacity: 1;
-}
 
 /* ── Sidebar shell ──────────────────────────────────────────────────────── */
 html body .sidebar.dm-menu {
@@ -245,35 +222,53 @@ html body .sidebar.dm-menu .dm-label { font-weight: inherit; }
 /* Group headings are pure CSS, so nothing shifts when the script loads.
    To rename one, change its content string below. */
 html body .sidebar.dm-menu .sidebar-links::before,
-html body .sidebar.dm-menu .dm-sep--a,
-html body .sidebar.dm-menu .dm-sep--b {
+html body .sidebar.dm-menu .dm-sep--a {
   flex: none; display: block; height: auto; margin: 16px 0 4px; padding: 0 10px; background: none;
   color: var(--dm-faint); font: 500 12px/1 var(--dm-font); letter-spacing: .01em;
   white-space: nowrap; user-select: none;
 }
-html body .sidebar.dm-menu .sidebar-links::before { content: 'Teaching'; order: 15; }
-html body .sidebar.dm-menu .dm-sep--a::before { content: 'Assessment'; }
-html body .sidebar.dm-menu .dm-sep--b::before { content: 'Plan & communicate'; }
+html body .sidebar.dm-menu .sidebar-links::before { content: 'Learning'; order: 15; }
+html body .sidebar.dm-menu .dm-sep--a::before { content: 'Academics'; }
 
-/* Order: Home / Teaching / Assessment / Plan & communicate / Settings.
-   Keyed on data-page, the same attribute setTeacherActive() already uses.
-   The desktop-top-row-link rule in teacher_dashboard.css hides five of these on
-   desktop (they used to be header tabs); every link is shown again here. */
-html body .sidebar.dm-menu a.dm-item { display: flex; }
-html body .sidebar.dm-menu a[data-page="teacher_manual"]        { order: 10;  --dm-ico: var(--dm-i-home); }
-html body .sidebar.dm-menu a[data-page="teacher_quizzes"]       { order: 20;  --dm-ico: var(--dm-i-quiz); }
-html body .sidebar.dm-menu a[data-page="teacher_assignments"]   { order: 30;  --dm-ico: var(--dm-i-assign); }
-html body .sidebar.dm-menu a[data-page="teacher_resources"]     { order: 40;  --dm-ico: var(--dm-i-folder); }
-html body .sidebar.dm-menu a[data-page="teacher_syllabus"]      { order: 50;  --dm-ico: var(--dm-i-book); }
-html body .sidebar.dm-menu .dm-sep--a                           { order: 55; }
-html body .sidebar.dm-menu a[data-page="teacher_grades"]        { order: 60;  --dm-ico: var(--dm-i-chart); }
-html body .sidebar.dm-menu a[data-page="teacher_evaluations"]   { order: 70;  --dm-ico: var(--dm-i-star); }
-html body .sidebar.dm-menu a[data-page="teacher_analytics"]     { order: 80;  --dm-ico: var(--dm-i-pie); }
-html body .sidebar.dm-menu .dm-sep--b                           { order: 85; }
-html body .sidebar.dm-menu a[data-page="teacher_announcements"] { order: 90;  --dm-ico: var(--dm-i-megaphone); }
-html body .sidebar.dm-menu a[data-page="teacher_calendar"]      { order: 100; --dm-ico: var(--dm-i-calendar); }
-html body .sidebar.dm-menu .dm-sep--d                           { order: 105; }
-html body .sidebar.dm-menu a[data-page="teacher_settings"]      { order: 110; --dm-ico: var(--dm-i-sliders); }
+/* Order: Home / Learning / Academics / class */
+#nav-home-sidebar { order: 10; --dm-ico: var(--dm-i-home); }
+#nav-quiz-sidebar { order: 20; --dm-ico: var(--dm-i-quiz); }
+#nav-assignments-sidebar { order: 30; --dm-ico: var(--dm-i-assign); }
+#nav-resources-sidebar { order: 40; --dm-ico: var(--dm-i-folder); }
+#nav-announcements-sidebar { order: 50; --dm-ico: var(--dm-i-megaphone); }
+html body .sidebar.dm-menu .dm-sep--a { order: 55; }
+#nav-syllabus-sidebar { order: 60; --dm-ico: var(--dm-i-book); }
+#nav-grades-sidebar { order: 70; --dm-ico: var(--dm-i-chart); }
+#nav-evaluations-sidebar { order: 80; --dm-ico: var(--dm-i-star); }
+html body .sidebar.dm-menu .dm-sep--b { order: 85; }
+#nav-myclass-sidebar { order: 90; --dm-ico: var(--dm-i-users); }
+#nav-joinclass-sidebar { order: 90; --dm-ico: var(--dm-i-plus); }
+html body .sidebar.dm-menu .join-class-form { order: 91; }
+html body .sidebar.dm-menu .join-status { display: none; }
+
+/* ── Join-a-class form ──────────────────────────────────────────────────── */
+html body .sidebar.dm-menu .join-class-form {
+  margin: 6px 0 0; padding: 12px;
+  border: 1px solid var(--dm-line); border-radius: 10px; background: rgba(255,255,255,.025);
+}
+html body .sidebar.dm-menu .dm-note {
+  margin: 0 0 10px; color: var(--dm-muted) !important;
+  font: 400 12.5px/1.45 var(--dm-font) !important;
+}
+html body .sidebar.dm-menu .join-class-form select {
+  width: 100%; height: 36px; padding: 0 10px;
+  border: 1px solid var(--dm-line-strong); border-radius: 8px;
+  background: var(--dm-bg); color: var(--dm-text); font: 450 14px var(--dm-font);
+  box-shadow: none; color-scheme: dark;
+}
+html body .sidebar.dm-menu .join-class-form select:hover { border-color: rgba(255,255,255,.2); box-shadow: none; }
+html body .sidebar.dm-menu .join-class-form select:focus { border-color: var(--dm-accent); box-shadow: none; outline: none; }
+html body .sidebar.dm-menu .join-class-form .join-class-btn {
+  display: block; width: 100%; height: 36px; margin-top: 8px; padding: 0;
+  border: 0; border-radius: 8px; background: var(--dm-text); color: var(--dm-bg);
+  font: 500 14px/36px var(--dm-font); text-align: center; transform: none;
+}
+html body .sidebar.dm-menu .join-class-form .join-class-btn:hover { background: #fff; transform: none; }
 
 /* ── Account block (bottom) ─────────────────────────────────────────────── */
 html body .sidebar.dm-menu .dm-account-root {
@@ -294,16 +289,16 @@ html body .sidebar.dm-menu .dm-account-root::after {
 }
 html body .sidebar.dm-menu .dm-account-root .sidebar-header { grid-area: av; display: block !important; margin: 0 !important; }
 html body .sidebar.dm-menu .dm-account-root .profile-picture-wrapper { display: block !important; width: 32px !important; height: 32px !important; }
-html body .sidebar.dm-menu .dm-account-root .round-toggle { display: none !important; }
+html body .sidebar.dm-menu .dm-account-root .desktop-close-btn { display: none !important; }
 html body .sidebar.dm-menu .dm-account-root .initials-avatar { width: 32px !important; height: 32px !important; font-size: 12px !important; letter-spacing: 0; }
-html body .sidebar.dm-menu .dm-account-root img.teacher-avatar { width: 32px !important; height: 32px !important; }
-html body .sidebar.dm-menu .teacher-name {
+html body .sidebar.dm-menu .dm-account-root img.learner-avatar { width: 32px !important; height: 32px !important; }
+html body .sidebar.dm-menu .learner-name {
   grid-area: name; margin: 0; max-height: none; opacity: 1;
   color: var(--dm-text); font: 500 14px/1.25 var(--dm-font);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 /* The account block shows the name only. The email is still in the account menu. */
-html body .sidebar.dm-menu .teacher-email { display: none; }
+html body .sidebar.dm-menu .learner-email { display: none; }
 
 /* ── Focus ──────────────────────────────────────────────────────────────── */
 html body .sidebar.dm-menu .dm-item:focus-visible, html body .sidebar.dm-menu .dm-search:focus-visible,
@@ -322,18 +317,17 @@ html.dm-collapsed body .sidebar.dm-menu .dm-brand:hover .dm-toggle, html.dm-coll
 html.dm-collapsed body .sidebar.dm-menu .dm-item, html.dm-collapsed body .sidebar.dm-menu .dm-search { justify-content: center; gap: 0; padding: 0; }
 html.dm-collapsed body .sidebar.dm-menu .dm-sep { margin-left: 4px; margin-right: 4px; }
 html.dm-collapsed body .sidebar.dm-menu .sidebar-links::before,
-html.dm-collapsed body .sidebar.dm-menu .dm-sep--a,
-html.dm-collapsed body .sidebar.dm-menu .dm-sep--b {
+html.dm-collapsed body .sidebar.dm-menu .dm-sep--a {
   height: 1px; margin: 8px 4px; padding: 0; background: var(--dm-line); font-size: 0;
 }
 html.dm-collapsed body .sidebar.dm-menu .sidebar-links::before,
-html.dm-collapsed body .sidebar.dm-menu .dm-sep--a::before,
-html.dm-collapsed body .sidebar.dm-menu .dm-sep--b::before { content: ''; }
+html.dm-collapsed body .sidebar.dm-menu .dm-sep--a::before { content: ''; }
+html.dm-collapsed body .sidebar.dm-menu .join-class-form { display: none !important; }
 html.dm-collapsed body .sidebar.dm-menu .dm-account-root {
   grid-template-columns: 32px; grid-template-areas: "av";
   justify-content: center; padding: 6px 0;
 }
-html.dm-collapsed body .sidebar.dm-menu .dm-account-root::after, html.dm-collapsed body .sidebar.dm-menu .teacher-name { display: none; }
+html.dm-collapsed body .sidebar.dm-menu .dm-account-root::after, html.dm-collapsed body .sidebar.dm-menu .learner-name { display: none; }
 
 /* ── Tooltip (rail + toggle) ────────────────────────────────────────────── */
 .dm-tip {
@@ -452,32 +446,103 @@ html.dm-collapsed body .sidebar.dm-menu .dm-account-root::after, html.dm-collaps
 .dm-krow i { display: flex; gap: 4px; font-style: normal; }
 .dm-keys-note { grid-column: 1 / -1; margin: 6px 0 0; padding-top: 12px; border-top: 1px solid var(--dm-line); color: var(--dm-faint); font-size: 12px; line-height: 1.5; }
 
-/* ── Header: hidden on desktop ──────────────────────────────────────────────
-   The brand and the account live in the sidebar, search is the palette, and the active menu
-   item names the page, so the whole header goes and the page starts at the very top of the
-   window. It stays in the DOM (the mobile layout and dashboard.js's mobile scroll and colour
-   handling still use it); nothing is removed, it is only not shown here. */
-html body .top-nav-wrapper { display: none !important; }
+/* ── Join a Class dialog ────────────────────────────────────────────────────
+   Same surface as the shortcuts sheet. The PHP form is moved in here while the dialog is open,
+   so its rules are scoped to the dialog rather than the sidebar. */
+.dm-join {
+  position: fixed; inset: 0; z-index: 6600; align-items: center; justify-content: center;
+  background: rgba(0,0,0,.5); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
+  font-family: var(--dm-font);
+}
+.dm-join.is-open { display: flex; animation: dm-fade .12s ease-out; }
+.dm-join-panel {
+  width: min(420px, calc(100vw - 48px)); max-height: calc(100vh - 96px); overflow-y: auto; outline: 0;
+  background: var(--dm-raise); border: 1px solid var(--dm-line-strong); border-radius: 14px;
+  box-shadow: 0 24px 64px rgba(0,0,0,.6); animation: dm-pop .14s var(--dm-ease);
+}
+.dm-join-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 14px 12px 20px; border-bottom: 1px solid var(--dm-line); }
+.dm-join-head h2 { margin: 0; color: var(--dm-text); font: 500 15px/1.2 var(--dm-font); }
+.dm-join-body { padding: 16px 20px 20px; }
+.dm-join-body .join-class-form { margin: 0; padding: 0; border: 0; background: none; }
+.dm-join-body form { margin: 0; }
+/* !important: the note carries an inline colour, weight and size in the markup */
+.dm-join-body .dm-note {
+  margin: 0 0 16px; padding: 10px 12px;
+  border: 1px solid rgba(244,119,111,.28); border-radius: 8px; background: rgba(244,119,111,.08);
+  color: var(--dm-soft) !important; font: 400 13px/1.5 var(--dm-font) !important;
+}
+.dm-join-body .dm-note strong { color: var(--dm-danger); font-weight: 600; }
+.dm-join-body select {
+  display: block; width: 100%; height: 40px; margin: 0; padding: 0 12px;
+  border: 1px solid var(--dm-line-strong); border-radius: 8px;
+  background: var(--dm-bg); color: var(--dm-text); font: 450 14px var(--dm-font);
+  box-shadow: none; color-scheme: dark; cursor: pointer;
+}
+.dm-join-body select:hover { border-color: rgba(255,255,255,.2); box-shadow: none; }
+.dm-join-body select:focus { border-color: var(--dm-accent); box-shadow: none; outline: none; }
+.dm-join-body .join-class-btn, .dm-join-btn {
+  display: block; width: 100%; height: 40px; margin: 12px 0 0; padding: 0;
+  border: 1px solid var(--dm-line-strong); border-radius: 8px; background: none; color: var(--dm-soft);
+  font: 500 14px/38px var(--dm-font); text-align: center; cursor: pointer; transform: none;
+  transition: background .12s ease, color .12s ease;
+}
+.dm-join-btn:hover { background: var(--dm-hover); color: var(--dm-text); }
+.dm-join-body .join-class-btn, .dm-join-btn--go { border: 0; background: var(--dm-text); color: var(--dm-bg); line-height: 40px; }
+.dm-join-body .join-class-btn:hover, .dm-join-btn--go:hover { background: #fff; color: var(--dm-bg); transform: none; }
+.dm-join-body .join-class-btn:focus-visible, .dm-join-btn:focus-visible { outline: 0; box-shadow: 0 0 0 2px var(--dm-accent); }
+.dm-join-btn:disabled { opacity: .6; cursor: default; }
+.dm-join-confirm { display: none; }
+.dm-join-panel.is-confirming .dm-join-confirm { display: block; }
+.dm-join-panel.is-confirming .join-class-form { display: none !important; }
+.dm-join-ask { margin: 0; color: var(--dm-soft); font: 400 14px/1.55 var(--dm-font); }
+.dm-join-ask strong { color: var(--dm-text); font-weight: 600; }
+.dm-join-actions { display: flex; gap: 8px; margin-top: 16px; }
+.dm-join-actions .dm-join-btn { flex: 1 1 0; margin: 0; }
 
-/* ── Re-tone: sidebar < page < card ─────────────────────────────────────────
+/* ── Header: hidden on desktop, except on detail pages ──────────────────────
+   The brand and the account live in the sidebar, search is the palette, and the active menu item
+   names the page, so the top bar goes and the page starts at the very top of the window.
+   One exception: configureHeader({ mode: 'detail' }) shows #headerBackBtn here, and that button is
+   the way back from a detail page. desktop_menu.js mirrors it onto <html> as .dm-detail, and while
+   that class is on, the slim bar below stays. The element is never removed, only not shown. */
+html:not(.dm-detail) body .main-header { display: none !important; }
+html body .main-header {
+  /* Same surface as the sidebar. !important so a colour left inline by the mobile
+     scroll handler (window resized across the breakpoint) can never show on desktop. */
+  background: var(--dm-bg) !important; padding: 0 24px; min-height: 62px;
+  box-sizing: border-box; gap: 12px;
+  /* No divider: the page below has its own edge. !important for the same reason as the background. */
+  border-bottom: 0 !important;
+}
+html body .main-header #headerLeft,
+html body .main-header #headerRight { flex: 0 0 auto !important; }
+html body .main-header .logo-container {
+  flex: 1 1 auto !important; justify-content: flex-start !important; gap: 0 !important; min-width: 0;
+}
+html body .main-header #headerLogo,
+html body .main-header .top-nav-avatar-btn { display: none !important; }
+html body .main-header .school-name {
+  display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  color: var(--dm-text); font: 600 15px/1.2 var(--dm-font); letter-spacing: -.005em;
+}
+/* Detail pages: the bar is showing, so the page below it gets a top edge as well. */
+html.dm-detail body #api-content-area,
+html.dm-detail body #mainFrame,
+html.dm-detail body .my-class-content.active { border-top: 1px solid var(--dm-line); }
+
+/* ── Re-tone: sidebar < page < card ───────────────────────────────────────────
    The sidebar is the darkest step, the page sits one step above it and cards one step above
-   that. Delete this whole block to fall back to the plain look.
-   teacher_dashboard.css and dashboard.css paint the flat layout in #12161c / #0d1117 with
-   !important, so the three shared teacher panes are re-toned here. Colours hard-coded in the
-   page stylesheets (grades.css and so on) do not follow yet. */
+   that. Delete this whole block to fall back to the plain look (black page, #0d1117 sidebar and
+   cards). --card-bg is the token learner_dashboard.css already uses for
+   cards, so anything built on it follows. Colours hardcoded in other stylesheets do not follow. */
 /* Neutral greys, in step with the Settings modal: sidebar #111111, page and panes #151515, cards and floating
-   panels (--dm-card, --dm-raise: quick search, shortcuts sheet) #1a1a19, the modal panel colour. */
+   panels (--dm-card, --dm-raise: quick search, shortcuts sheet, Join a class dialog) #1a1a19, the modal panel colour. */
 html { --dm-bg: #111111; --dm-page: #151515; --dm-card: #1a1a19; --dm-raise: #1a1a19; }
 /* Sidebar, in step with the Settings modal: the selected link uses the modal's selected-item grey (#383838) and the
    initials avatar uses the modal's avatar (#2d2d2c, soft letters, medium weight) instead of the old maroon. */
 html body .sidebar.dm-menu .dm-item.active { background: #383838; }
 html body .sidebar.dm-menu .dm-account-root .initials-avatar { background-color: #2d2d2c; color: #c3c2b7; font-weight: 500; }
 html body { --card-bg: var(--dm-card); }
-/* Left panel, main panel and info panel are ONE colour (--dm-page), the same as the page itself
-   (#api-content-area / #mainFrame above). Only the sidebar is darker. */
-html body .tchr-flat-sidebar,
-html body .tchr-flat-panel,
-html body .tchr-info-rail { background: var(--dm-page) !important; }
 
 /* Teal icons drawn with stroke="#4fd1c5" or fill="#4fd1c5" attributes in the page scripts: an attribute
    cannot hold var(), so they follow the neutral accent here instead. */
@@ -490,7 +555,7 @@ html body .tchr-info-rail { background: var(--dm-page) !important; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html body .sidebar.dm-menu, html body .main-content, .dm-item, .dm-pop, .dm-palette, .dm-palette-panel, .dm-keys, .dm-keys-panel, .dm-tip {
+  html body .sidebar.dm-menu, html body .main-content, .dm-item, .dm-pop, .dm-palette, .dm-palette-panel, .dm-keys, .dm-keys-panel, .dm-join, .dm-join-panel, .dm-tip {
     transition: none !important; animation: none !important;
   }
 }
