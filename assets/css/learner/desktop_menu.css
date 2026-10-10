@@ -466,7 +466,9 @@ html body .top-nav-wrapper { display: none !important; }
    teacher_dashboard.css and dashboard.css paint the flat layout in #12161c / #0d1117 with
    !important, so the three shared teacher panes are re-toned here. Colours hard-coded in the
    page stylesheets (grades.css and so on) do not follow yet. */
-html { --dm-bg: #0a0d12; --dm-page: #10151c; --dm-card: #181e27; }
+/* Neutral greys, in step with the Settings modal: sidebar #111111, page and panes #151515. Cards are still the old
+   blue-grey (--dm-card) for now. */
+html { --dm-bg: #111111; --dm-page: #151515; --dm-card: #181e27; }
 html body { --card-bg: var(--dm-card); }
 /* Left panel, main panel and info panel are ONE colour (--dm-page), the same as the page itself
    (#api-content-area / #mainFrame above). Only the sidebar is darker. */
