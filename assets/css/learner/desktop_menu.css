@@ -544,10 +544,20 @@ html body .sidebar.dm-menu .dm-item.active { background: #383838; }
 html body .sidebar.dm-menu .dm-account-root .initials-avatar { background-color: #2d2d2c; color: #c3c2b7; font-weight: 500; }
 html body { --card-bg: var(--dm-card); }
 
-/* Selector panel: the left column of the Quiz, Announcements, Assignments, Resources, Gradebook, Evaluations and
-   Syllabus pages is the same colour as the main panel (both are --dm-page). manual.js injects .lqz-flat-sidebar
-   with a hard-coded #12161c !important, so this needs the extra "html body" to win on specificity. */
-html body .lqz-flat-sidebar { background: var(--dm-page) !important; }
+/* Selector panel: the left column of the API pages is the same colour as the main panel (both are --dm-page).
+   Each page paints its own list column with a hard-coded #12161c (.lan-sidebar in announcements.css, .las-sidebar in
+   assignments.css) and the sticky group heading ("Earlier", "Due soon" ...) with the same colour, so the heading
+   follows too or it would show as a band. manual.js also injects .lqz-flat-sidebar with #12161c !important for pages
+   that use it. The extra "html body" makes these win on specificity. */
+html body .lqz-flat-sidebar,
+html body .lan-sidebar,
+html body .las-sidebar,
+html body .lan-gh,
+html body .las-gh { background: var(--dm-page) !important; }
+/* Safety net for the pages whose own CSS has not been checked yet (Quiz, Resources, Evaluations, Gradebook,
+   Syllabus): the column inside the flat layout that holds the scrolling list. Kept as its own rule so a browser
+   without :has() ignores only this one. */
+html body .lqz-flat-layout > :has(.lqz-sidebar-scroll, .lrs-sidebar-scroll, .lev-sidebar-scroll, .syl-dt-sidebar-scroll, .grades-dt-sidebar-scroll) { background: var(--dm-page) !important; }
 
 /* Teal icons drawn with stroke="#4fd1c5" or fill="#4fd1c5" attributes in the page scripts: an attribute
    cannot hold var(), so they follow the neutral accent here instead. */
