@@ -90,7 +90,7 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
     <link rel="stylesheet" href="assets/css/teacher/dashboard.css?v=4.8">
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
     <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=7.0">
-    <link rel="stylesheet" href="assets/css/teacher/assignments.css?v=3.1">
+    <link rel="stylesheet" href="assets/css/teacher/assignments.css?v=3.2">
     <link rel="stylesheet" href="assets/css/teacher/resources.css?v=2.2">
     <link rel="stylesheet" href="assets/css/teacher/sbo.css?v=2.2">
     <link rel="stylesheet" href="assets/css/teacher/evaluations.css?v=2.8">
