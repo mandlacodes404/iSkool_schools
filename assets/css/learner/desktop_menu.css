@@ -538,6 +538,8 @@ html.dm-detail body .my-class-content.active { border-top: 1px solid var(--dm-li
 /* Neutral greys, in step with the Settings modal: sidebar #111111, page and panes #151515, cards and floating
    panels (--dm-card, --dm-raise: quick search, shortcuts sheet, Join a class dialog) #1a1a19, the modal panel colour. */
 html { --dm-bg: #111111; --dm-page: #151515; --dm-card: #1a1a19; --dm-raise: #1a1a19; }
+/* Text scale (warm): titles #f0efec, body #c2c3b7, meta lines #9b9c92, faint #7a7b73. */
+html { --dm-text: #f0efec; --dm-soft: #c2c3b7; --dm-muted: #9b9c92; --dm-faint: #7a7b73; }
 /* Sidebar, in step with the Settings modal: the selected link uses the modal's selected-item grey (#383838) and the
    initials avatar uses the modal's avatar (#2d2d2c, soft letters, medium weight) instead of the old maroon. */
 /* Menu link text: #c2c3b7 normally, #f0efec when selected (hover keeps its own colour). */
