@@ -120,23 +120,19 @@ function renderTeacherAssignments(data) {
             const classGroupId = `as-class-group-${classGroupIdx++}`;
             let itemsHtml = '';
             entries.forEach(({ assignment, index }) => {
-                const { color: dotColor } = getTeacherAssignmentProgress(assignment);
+                const { submitted, total } = getTeacherAssignmentProgress(assignment);
+                const allIn = total > 0 && submitted >= total;
+                const dotLabel = allIn ? 'Every learner has submitted' : 'Waiting on submissions';
 
                 itemsHtml += `
                     <div class="as-sidebar-item" id="as-sidebar-${index}"
                         data-title="${escapeTeacherAssignmentHtml(assignment.title)}"
                         onclick="selectDesktopAssignment(${index})">
-                        <div class="as-sidebar-item-icon">
-                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
-                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                <polyline points="14 2 14 8 20 8"></polyline>
-                            </svg>
-                        </div>
+                        <span class="as-sidebar-dot${allIn ? ' is-done' : ''}" role="img" aria-label="${dotLabel}" title="${dotLabel}"></span>
                         <div class="as-sidebar-item-info">
                             <div class="as-sidebar-item-title">${assignment.title}</div>
-                            <div class="as-sidebar-item-meta">${assignment.class_name} &middot; Due ${assignment.due_date}</div>
+                            <div class="as-sidebar-item-meta">Due ${assignment.due_date}</div>
                         </div>
-                        <span class="as-sidebar-status-dot" style="--as-dot-color:${dotColor};"></span>
                     </div>`;
             });
             sidebarHtml += window.buildCollapsibleClassGroup(
