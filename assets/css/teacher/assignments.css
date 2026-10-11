@@ -32,7 +32,7 @@
     padding: 16px;
     border-bottom: 1px solid rgba(255,255,255,0.07);
     font-size: 11px;
-    font-weight: 800;
+    font-weight: 500;
     letter-spacing: 1.5px;
     color: var(--dm-muted, #9b9c92);
     text-transform: uppercase;
@@ -57,7 +57,7 @@
 .as-sidebar-class-label {
     padding: 8px 16px 4px;
     font-size: 10px;
-    font-weight: 700;
+    font-weight: 500;
     color: var(--dm-muted, #9b9c92);
     text-transform: uppercase;
     letter-spacing: 0.8px;
@@ -93,7 +93,7 @@
 .as-sidebar-item-info { flex: 1; min-width: 0; }
 .as-sidebar-item-title {
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 400;
     color: var(--dm-soft, #c2c3b7);
     white-space: nowrap;
     overflow: hidden;
@@ -155,7 +155,7 @@
 .as-panel-empty-title {
     margin: 0;
     font-size: 20px;
-    font-weight: 500;
+    font-weight: 400;
     letter-spacing: -0.015em;
     color: var(--as-dp-text);
 }
@@ -207,7 +207,7 @@
     margin: 0;
     font-size: 28px;
     line-height: 1.15;
-    font-weight: 500;
+    font-weight: 400;
     letter-spacing: -0.025em;
     color: var(--as-dp-text);
     overflow-wrap: anywhere;
@@ -232,7 +232,7 @@
     padding: 2px 11px;
     border: 1px solid var(--as-dp-line-strong);
     border-radius: 999px;
-    font-weight: 500;
+    font-weight: 400;
     color: var(--as-dp-soft);
 }
 
@@ -271,7 +271,7 @@
 }
 .as-dp-prog-num {
     font-size: 22px;
-    font-weight: 500;
+    font-weight: 400;
     letter-spacing: -0.02em;
     font-variant-numeric: tabular-nums;
 }
@@ -356,7 +356,7 @@
     padding: 16px 0;
     color: var(--as-dp-muted);
 }
-.as-dp-name { font-weight: 500; overflow-wrap: anywhere; color: var(--as-dp-soft); }
+.as-dp-name { font-weight: 400; overflow-wrap: anywhere; color: var(--as-dp-soft); }
 .is-missing .as-dp-name { color: var(--as-dp-muted); }
 .as-dp-status { display: flex; flex-direction: column; gap: 1px; color: var(--as-dp-soft); }
 .as-dp-status-main { display: flex; align-items: center; gap: 8px; }
@@ -377,7 +377,7 @@
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    font-weight: 500;
+    font-weight: 400;
     color: var(--as-dp-accent);
     text-decoration: none;
 }
@@ -523,6 +523,9 @@
 }
 @media (max-width: 899px) {
     .as-desktop-only-btn { display: none !important; }
+}
+@media (min-width: 900px) {
+    .as-sidebar-header .as-new-btn { font-weight: 500; }
 }
 
 /* ═══════════════════════════════════════════
@@ -923,6 +926,7 @@
 }
 .as-form-title--desktop {
     font-size: 18px;
+    font-weight: 500;
 }
 
 .as-form-close-btn {
