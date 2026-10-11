@@ -150,7 +150,7 @@ html body .sidebar.dm-menu .dm-mark { box-sizing: border-box; width: 40px; heigh
 html body .sidebar.dm-menu .dm-mark--initials {
   display: grid; place-items: center;
   background: #20201f; border: 1px solid var(--dm-line);
-  color: #b9bcc1; font: 600 15px/1 var(--dm-font); text-transform: uppercase;
+  color: #c2c3b7; font: 600 15px/1 var(--dm-font); text-transform: uppercase;
 }
 html body .sidebar.dm-menu .dm-brand-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 html body .sidebar.dm-menu .dm-brand-name {
@@ -465,6 +465,10 @@ html body .sidebar.dm-menu .dm-kbd { color: #c2c3b7; }
 html body .sidebar.dm-menu .dm-toggle,
 html.dm-collapsed body .sidebar.dm-menu .dm-toggle { color: #c2c3b7; }
 html body .sidebar.dm-menu .dm-account-root::after { background: #c2c3b7; }
+/* Group headings: #c2c3b7. */
+html body .sidebar.dm-menu .sidebar-links::before,
+html body .sidebar.dm-menu .dm-sep--a,
+html body .sidebar.dm-menu .dm-sep--b { color: #c2c3b7; }
 html body .sidebar.dm-menu .dm-account-root .initials-avatar { background-color: #2d2d2c; color: #c2c3b7; font-weight: 500; }
 html body { --card-bg: var(--dm-card); }
 /* Left panel, main panel and info panel are ONE colour (--dm-page), the same as the page itself
