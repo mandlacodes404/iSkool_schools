@@ -93,7 +93,7 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
     <link rel="stylesheet" href="assets/css/teacher/assignments.css?v=2.7">
     <link rel="stylesheet" href="assets/css/teacher/resources.css?v=2.2">
     <link rel="stylesheet" href="assets/css/teacher/sbo.css?v=2.2">
-    <link rel="stylesheet" href="assets/css/teacher/evaluations.css?v=2.7">
+    <link rel="stylesheet" href="assets/css/teacher/evaluations.css?v=2.8">
     <link rel="stylesheet" href="assets/css/teacher/grades.css?v=3.1">
     <link rel="stylesheet" href="assets/css/teacher/teacher_calendar.css?v=1.3">
     <title>Dashboard - <?= htmlspecialchars($schoolName) ?></title>
@@ -1577,7 +1577,7 @@ document.addEventListener('DOMContentLoaded', function () {
 <script src="assets/js/teacher/class-picker.js?v=1.1"></script>
 <script src="assets/js/teacher/quizzes.js?v=8.1"></script>
 <script src="assets/js/teacher/announcements.js?v=6.0"></script>
-<script src="assets/js/teacher/evaluations.js?v=5.0"></script>
+<script src="assets/js/teacher/evaluations.js?v=5.1"></script>
 <script src="assets/js/teacher/resources.js?v=4.6"></script>
 <script src="assets/js/teacher/grades.js?v=5.1"></script>
 <script src="assets/js/teacher/assignments.js?v=5.2"></script>
