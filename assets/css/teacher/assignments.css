@@ -100,7 +100,7 @@
     text-overflow: ellipsis;
 }
 .as-sidebar-item.active .as-sidebar-item-title { color: var(--dm-text, #f0efec); }
-.as-sidebar-item-meta { font-size: 11px; font-weight: 300; color: var(--dm-faint, #7a7b73); margin-top: 2px; }
+.as-sidebar-item-meta { font-size: 11px; color: var(--dm-faint, #7a7b73); margin-top: 2px; }
 
 /* Right panel */
 .as-main-panel {
