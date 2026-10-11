@@ -107,34 +107,36 @@ function renderTeacherGrades(data) {
     if (!data || data.length === 0) {
         sidebarHtml = `<p class="gr-empty-state-inline">No assessments found.</p>`;
     } else {
+        // One group per class (terms are merged into the same class folder)
+        const classGroups = new Map();
         data.forEach(termData => {
-            sidebarHtml += `<div class="gr-sidebar-term-label">TERM ${termData.term}</div>`;
-            termData.classes.forEach((cls, clsIdx) => {
-                const classGroupId = `gr-class-group-${termData.term}-${clsIdx}`;
-                let itemsHtml = '';
-                cls.quizzes.forEach(quiz => {
-                    itemsHtml += `
-                        <div class="gr-sidebar-item" id="gr-sidebar-${quiz.id}"
-                            onclick="selectDesktopGradeQuiz(${quiz.id})">
-                            <div class="gr-sidebar-item-icon">
-                                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
-                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                    <polyline points="14 2 14 8 20 8"></polyline>
-                                </svg>
-                            </div>
-                            <div class="gr-sidebar-item-info">
-                                <div class="gr-sidebar-item-title">${escapeHtml(quiz.title)}</div>
-                                <div class="gr-sidebar-item-meta">${escapeHtml(quiz.created_at)}</div>
-                            </div>
-                        </div>`;
-                });
-                sidebarHtml += window.buildCollapsibleClassGroup(
-                    classGroupId,
-                    'gr-sidebar-class-label',
-                    escapeHtml(cls.class_name),
-                    itemsHtml
-                );
+            termData.classes.forEach(cls => {
+                if (!classGroups.has(cls.class_name)) classGroups.set(cls.class_name, []);
+                classGroups.get(cls.class_name).push(...cls.quizzes);
             });
+        });
+
+        let clsIdx = 0;
+        classGroups.forEach((quizzes, className) => {
+            const classGroupId = `gr-class-group-${clsIdx++}`;
+            let itemsHtml = '';
+            quizzes.forEach(quiz => {
+                itemsHtml += `
+                    <div class="gr-sidebar-item" id="gr-sidebar-${quiz.id}"
+                        onclick="selectDesktopGradeQuiz(${quiz.id})">
+                        <span class="gr-sidebar-dot" aria-hidden="true"></span>
+                        <div class="gr-sidebar-item-info">
+                            <div class="gr-sidebar-item-title">${escapeHtml(quiz.title)}</div>
+                            <div class="gr-sidebar-item-meta">${escapeHtml(quiz.created_at)}</div>
+                        </div>
+                    </div>`;
+            });
+            sidebarHtml += window.buildCollapsibleClassGroup(
+                classGroupId,
+                'gr-sidebar-class-label',
+                escapeHtml(className),
+                itemsHtml
+            );
         });
     }
 

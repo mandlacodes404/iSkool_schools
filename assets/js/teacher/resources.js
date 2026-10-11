@@ -93,10 +93,10 @@ function renderTeacherResources(data) {
                 itemsHtml += `
                     <div class="rs-sidebar-item" id="rs-sidebar-${flatIndex}"
                         onclick="selectDesktopResource(${flatIndex})">
-                        <div class="rs-sidebar-item-icon">${getTeacherFileIcon(item.ext, isVideo)}</div>
+                        <span class="rs-sidebar-dot" aria-hidden="true"></span>
                         <div class="rs-sidebar-item-info">
                             <div class="rs-sidebar-item-title">${item.title}</div>
-                            <div class="rs-sidebar-item-meta">${isVideo ? 'VIDEO' : item.ext.toUpperCase()} &middot; ${item.uploaded_at}</div>
+                            <div class="rs-sidebar-item-meta">${item.uploaded_at}</div>
                         </div>
                     </div>`;
             });

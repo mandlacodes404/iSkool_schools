@@ -111,46 +111,37 @@ function renderTeacherQuizzes(data) {
     if (!terms || terms.length === 0) {
         sidebarHtml = `<p class="teacher-empty-state" style="padding:16px;font-size:13px;">No quizzes found.</p>`;
     } else {
+        // One folder per class (terms are merged into the same class folder)
+        const classGroups = new Map();
         terms.forEach(termData => {
-            const isActive = termData.term === currentTerm;
-            sidebarHtml += `
-                <div class="qz-sidebar-term">
-                    <div class="qz-sidebar-term-label">
-                        TERM ${termData.term}
-                        ${isActive ? '<span class="qz-sidebar-term-active">ACTIVE</span>' : ''}
-                    </div>`;
-            termData.classes.forEach((cls, clsIdx) => {
-                const classGroupId = `qz-class-group-${termData.term}-${clsIdx}`;
-                let itemsHtml = '';
-                cls.quizzes.forEach(quiz => {
-                    const statusColor = quiz.status === 'Open' ? '#f28c38'
-                        : quiz.status === 'Scheduled' ? '#1e90ff' : '#6b7280';
-                    itemsHtml += `
-                        <div class="qz-sidebar-item" id="qz-sidebar-${quiz.id}"
-                            data-title="${escapeHtml(quiz.title)}"
-                            onclick="selectDesktopQuiz(${quiz.id})">
-                            <div class="qz-sidebar-item-icon">
-                                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
-                                    <line x1="18" y1="20" x2="18" y2="10"></line>
-                                    <line x1="12" y1="20" x2="12" y2="4"></line>
-                                    <line x1="6" y1="20" x2="6" y2="14"></line>
-                                </svg>
-                            </div>
-                            <div class="qz-sidebar-item-info">
-                                <div class="qz-sidebar-item-title">${escapeHtml(quiz.title)}</div>
-                                <div class="qz-sidebar-item-meta">${escapeHtml(quiz.duration)} min</div>
-                            </div>
-                            <span class="qz-sidebar-status-dot" style="background:${statusColor};"></span>
-                        </div>`;
-                });
-                sidebarHtml += window.buildCollapsibleClassGroup(
-                    classGroupId,
-                    'qz-sidebar-class-label',
-                    escapeHtml(cls.class_name),
-                    itemsHtml
-                );
+            termData.classes.forEach(cls => {
+                if (!classGroups.has(cls.class_name)) classGroups.set(cls.class_name, []);
+                classGroups.get(cls.class_name).push(...cls.quizzes);
             });
-            sidebarHtml += `</div>`;
+        });
+
+        let clsIdx = 0;
+        classGroups.forEach((quizzes, className) => {
+            const classGroupId = `qz-class-group-${clsIdx++}`;
+            let itemsHtml = '';
+            quizzes.forEach(quiz => {
+                itemsHtml += `
+                    <div class="qz-sidebar-item" id="qz-sidebar-${quiz.id}"
+                        data-title="${escapeHtml(quiz.title)}"
+                        onclick="selectDesktopQuiz(${quiz.id})">
+                        <span class="qz-sidebar-dot" aria-hidden="true"></span>
+                        <div class="qz-sidebar-item-info">
+                            <div class="qz-sidebar-item-title">${escapeHtml(quiz.title)}</div>
+                            ${quiz.start_time ? `<div class="qz-sidebar-item-meta">${escapeHtml(quiz.start_time)}</div>` : ''}
+                        </div>
+                    </div>`;
+            });
+            sidebarHtml += window.buildCollapsibleClassGroup(
+                classGroupId,
+                'qz-sidebar-class-label',
+                escapeHtml(className),
+                itemsHtml
+            );
         });
     }
 
@@ -164,7 +155,7 @@ function renderTeacherQuizzes(data) {
         qzEmptyCta   = 'Create a quiz';
     } else if (qzThisTerm.length === 0) {
         qzEmptyTitle = 'No quizzes this term yet';
-        qzEmptyBody  = 'Pick one from an earlier term in the list, or start a new one.';
+        qzEmptyBody  = 'Pick one from the list, or start a new one.';
         qzEmptyCta   = 'Create a quiz';
     } else {
         qzEmptyTitle = 'Pick a quiz to manage';
@@ -191,7 +182,7 @@ function renderTeacherQuizzes(data) {
                 min-height: 500px;
             }
 
-            /* Left sidebar */
+/* Left sidebar — same list pane as assignments.css */
             .qz-sidebar {
                 width: 280px;
                 min-width: 240px;
@@ -199,6 +190,7 @@ function renderTeacherQuizzes(data) {
                 display: flex;
                 flex-direction: column;
                 overflow: hidden;
+                font-family: var(--dm-font, 'Geist', 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif);
             }
             .qz-sidebar-header {
                 padding: 16px;
@@ -206,9 +198,13 @@ function renderTeacherQuizzes(data) {
                 font-size: 11px;
                 font-weight: 800;
                 letter-spacing: 1.5px;
-                color: #ffffff;
+                color: var(--dm-muted, #9b9c92);
                 text-transform: uppercase;
                 flex-shrink: 0;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 10px;
             }
             .qz-sidebar-scroll {
                 flex: 1;
@@ -219,74 +215,56 @@ function renderTeacherQuizzes(data) {
                 .qz-sidebar-scroll::-webkit-scrollbar { width: 8px; }
             }
             .qz-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
-            .qz-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+            .qz-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; transition: background 0.15s ease; }
+            .qz-sidebar-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
 
-            .qz-sidebar-term { margin-bottom: 4px; }
-            .qz-sidebar-term-label {
-                display: flex;
-                align-items: center;
-                gap: 6px;
+            .qz-sidebar-class-label {
                 padding: 8px 16px 4px;
                 font-size: 10px;
-                font-weight: 800;
-                letter-spacing: 1px;
-                color: #555e6a;
-                text-transform: uppercase;
-            }
-            .qz-sidebar-term-active {
-                background: var(--dm-ac-bg, rgba(79,209,197,0.15));
-                color: var(--dm-ac, #4fd1c5);
-                font-size: 9px;
-                padding: 2px 6px;
-                border-radius: 4px;
-                border: 1px solid var(--dm-ac-line-strong, rgba(79,209,197,0.3));
-            }
-            .qz-sidebar-class-label {
-                padding: 4px 16px 2px;
-                font-size: 10px;
                 font-weight: 700;
-                color: #8b949e;
+                color: var(--dm-muted, #9b9c92);
                 text-transform: uppercase;
                 letter-spacing: 0.8px;
             }
-            /* Extra vertical breathing room for the toggle row specifically */
             .qz-sidebar-class-label.tchr-sidebar-class-label--toggle {
                 padding-top: 8px;
                 padding-bottom: 6px;
             }
+            .qz-sidebar-class-label.tchr-sidebar-class-label--toggle:hover { color: var(--dm-soft, #c2c3b7); }
+
             .qz-sidebar-item {
                 display: flex;
                 align-items: center;
                 gap: 10px;
-                padding: 10px 16px 10px 32px;
+                margin: 0 8px;
+                padding: 10px 8px 10px 24px;
+                border-radius: 8px;
                 cursor: pointer;
                 border-left: 3px solid transparent;
                 transition: all 0.15s ease;
             }
-            .qz-sidebar-item:hover {
-                background: rgba(255,255,255,0.04);
+            .qz-sidebar-item:hover { background: rgba(255,255,255,0.04); }
+            .qz-sidebar-item.active { background: #383838; }
+            .qz-sidebar-dot {
+                flex: none;
+                box-sizing: border-box;
+                width: 7px;
+                height: 7px;
+                border-radius: 50%;
+                border: 1.5px solid var(--dm-faint, #7a7b73);
             }
-            .qz-sidebar-item.active {
-                background: var(--dm-ac-sel, rgba(79,209,197,0.08));
-                border-left-color: var(--dm-ac-bar, #4fd1c5);
-            }
-            .qz-sidebar-item-icon { flex-shrink: 0; opacity: 0.7; }
+            .qz-sidebar-dot.is-done { background: #22c55e; border-color: #22c55e; }
             .qz-sidebar-item-info { flex: 1; min-width: 0; }
             .qz-sidebar-item-title {
-                font-size: 13px;
+                font-size: 14px;
                 font-weight: 600;
-                color: #c9d1d9;
+                color: var(--dm-soft, #c2c3b7);
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
-            .qz-sidebar-item.active .qz-sidebar-item-title { color: #e2e8f0; }
-            .qz-sidebar-item-meta { font-size: 11px; color: #555e6a; margin-top: 2px; }
-            .qz-sidebar-status-dot {
-                width: 7px; height: 7px;
-                border-radius: 50%;
-                flex-shrink: 0;
-            }
+            .qz-sidebar-item.active .qz-sidebar-item-title { color: var(--dm-text, #f0efec); }
+            .qz-sidebar-item-meta { font-size: 11px; color: var(--dm-faint, #7a7b73); margin-top: 2px; }
 
             /* Right panel */
             .qz-main-panel {
@@ -309,10 +287,10 @@ function renderTeacherQuizzes(data) {
                 --q-line2:rgba(255,255,255,0.14);
                 --q-hover:rgba(255,255,255,0.055);
                 --q-active:rgba(255,255,255,0.095);
-                --q-text:#e8eaed;
-                --q-soft:#b6bbc3;
-                --q-muted:#8a9099;
-                --q-faint:#5f656e;
+                --q-text:#f0efec;
+                --q-soft:#c2c3b7;
+                --q-muted:#9b9c92;
+                --q-faint:#7a7b73;
                 --q-accent:var(--dm-ac, #4fd1c5);
                 --q-danger:#f4776f;
             }
@@ -671,7 +649,7 @@ function renderTeacherQuizzes(data) {
                 background: #151a21; border: 1px solid rgba(255,255,255,0.14);
                 border-radius: 9px; padding: 9px 14px;
                 font: 400 13px/1.4 'Geist','Nunito',system-ui,-apple-system,'Segoe UI',sans-serif;
-                color: #e8eaed; opacity: 0; pointer-events: none; z-index: 9999;
+                color: #f0efec; opacity: 0; pointer-events: none; z-index: 9999;
                 transition: opacity .2s, transform .2s;
             }
             .qz2-toast.on { opacity: 1; transform: translate(-50%, 0); }
@@ -1652,9 +1630,6 @@ window.toggleQuizStatus = async function(quizId, currentStatus) {
             if (q) q.status = updatedStatus;
 
             if (isDesktop) {
-                // Keep the left list's status dot in step with the panel
-                const dot = document.querySelector(`#qz-sidebar-${quizId} .qz-sidebar-status-dot`);
-                if (dot) dot.style.background = statusColor;
                 if (String(window._activeDesktopQuizId) === String(quizId)) {
                     window.selectDesktopQuiz(quizId, { quiet: true });
                 }

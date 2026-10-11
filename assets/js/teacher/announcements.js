@@ -103,43 +103,21 @@ function renderTeacherAnnouncements(data) {
             let itemsHtml = '';
             group.items.forEach(ann => {
                 const flatIndex = window._allAnnouncementsFlat.findIndex(a => a.id === ann.id);
-                const preview = ann.message.length > 60
-                    ? ann.message.substring(0, 60) + '...'
-                    : ann.message;
-
-                // School items get a slightly different icon colour (orange = school broadcast)
-                const iconStroke = group.is_school ? '#f59e0b' : '#4fd1c5';
-
-                const editedTag = ann.is_edited ? `<span class="an-edited-tag">Edited</span>` : '';
-
                 itemsHtml += `
-                    <div class="an-sidebar-item${group.is_school ? ' an-school-item' : ''}" id="an-sidebar-${flatIndex}"
+                    <div class="an-sidebar-item" id="an-sidebar-${flatIndex}"
                         data-title="${ann.title.replace(/"/g, '&quot;')}"
                         onclick="selectDesktopAnnouncement(${flatIndex})">
-                        <div class="an-sidebar-item-icon">
-                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="${iconStroke}" stroke-width="2" fill="none">
-                                <path d="M11 5L6 9H2v6h4l5 4V5z"/>
-                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
-                            </svg>
-                        </div>
+                        <span class="an-sidebar-dot" aria-hidden="true"></span>
                         <div class="an-sidebar-item-info">
-                            <div class="an-sidebar-item-title">${ann.title}${editedTag}</div>
-                            <div class="an-sidebar-item-meta">${preview}</div>
+                            <div class="an-sidebar-item-title">${ann.title}</div>
+                            <div class="an-sidebar-item-meta">${ann.display_date}</div>
                         </div>
                     </div>`;
             });
 
-            // Label — school group gets a distinct teal label, class groups get the muted style
-            const labelInnerHtml = group.is_school
-                ? `<svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" class="an-school-icon">
-                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                        <polyline points="9 22 9 12 15 12 15 22"/>
-                    </svg>
-                    From School`
-                : group.class_name;
-            const labelClass = group.is_school
-                ? 'an-sidebar-class-label an-sidebar-school-label'
-                : 'an-sidebar-class-label';
+            // Label — plain class name (school broadcasts are just another group)
+            const labelInnerHtml = group.is_school ? 'From School' : group.class_name;
+            const labelClass = 'an-sidebar-class-label';
 
             sidebarHtml += window.buildCollapsibleClassGroup(
                 classGroupId,

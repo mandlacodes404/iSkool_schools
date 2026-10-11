@@ -95,16 +95,10 @@ function renderTeacherEvaluations(data) {
                 itemsHtml += `
                     <div class="ev-sidebar-item" id="ev-sidebar-${key}"
                         onclick="selectDesktopEval(${gIdx}, ${eIdx})">
-                        <div class="ev-sidebar-item-icon">
-                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
-                                <line x1="18" y1="20" x2="18" y2="10"></line>
-                                <line x1="12" y1="20" x2="12" y2="4"></line>
-                                <line x1="6" y1="20" x2="6" y2="14"></line>
-                            </svg>
-                        </div>
+                        <span class="ev-sidebar-dot" aria-hidden="true"></span>
                         <div class="ev-sidebar-item-info">
                             <div class="ev-sidebar-item-title">${ev.title}</div>
-                            <div class="ev-sidebar-item-meta">${ev.response_count} response${ev.response_count !== 1 ? 's' : ''}</div>
+                            ${ev.display_date ? `<div class="ev-sidebar-item-meta">${ev.display_date}</div>` : ''}
                         </div>
                     </div>`;
             });
