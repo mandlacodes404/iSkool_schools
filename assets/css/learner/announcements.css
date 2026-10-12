@@ -27,7 +27,6 @@
     --lan-line-strong: rgba(255,255,255,0.14);
     --lan-hover:  rgba(255,255,255,0.055);
     --lan-active: rgba(255,255,255,0.095);
-    --lan-side-bg: #12161c;   /* same as the assignments list pane; change both together */
     /* Type weights for the whole desktop page (Geist). Tune here. */
     --lan-w-strong: 500;  /* title, status chip, group labels, unread rows */
     --lan-w-medium: 400;  /* values, small actions */
@@ -51,7 +50,7 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    background: var(--lan-side-bg);
+    background: transparent;   /* same as the detail pane, which is transparent too */
     border-right: 1px solid var(--lan-line);
 }
 .lan-lh {
@@ -134,14 +133,10 @@
 
 /* Collapsible sender group (same as the teacher groups on the assignments list) */
 .lan-gl {
-    position: sticky;
-    top: 0;
-    z-index: 1;
     display: flex;
     align-items: center;
     gap: 6px;
     padding: 12px 14px 6px;
-    background: var(--lan-side-bg);
     color: var(--lan-muted);
     font-size: 10px;
     font-weight: var(--lan-w-strong, 500);
