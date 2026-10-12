@@ -235,7 +235,8 @@ function saveAssignmentPageState() {
         panelScroll:   (document.querySelector('.las-body') || {}).scrollTop || 0,
         mobileSearch: document.getElementById('lasMobileSearch')?.value || '',
         openFolders: Array.from(document.querySelectorAll('.las-mobile-folder-body:not(.collapsed)')).map(el => el.id),
-        openDesktopGroups: Array.from(document.querySelectorAll('.las-desktop-teacher-body:not(.collapsed)')).map(el => el.id),
+        // Desktop teacher groups the learner has folded away (open is the default)
+        collapsedTeachers: Array.from(window._lasCollapsed || []),
     };
     if (window.learnerPageState) window.learnerPageState.set('assignments', state);
     else sessionStorage.setItem('assignmentPageState', JSON.stringify(state));
@@ -280,14 +281,9 @@ function restoreAssignmentPageState() {
                     if (chev) chev.classList.toggle('open', open);
                 });
             }
-            if (Array.isArray(state.openDesktopGroups)) {
-                document.querySelectorAll('.las-desktop-teacher-body').forEach(body => {
-                    const open = state.openDesktopGroups.includes(body.id);
-                    body.classList.toggle('collapsed', !open);
-                    const header = body.previousElementSibling;
-                    const chevron = header ? header.querySelector('.las-desktop-teacher-chevron') : null;
-                    if (chevron) chevron.classList.toggle('open', open);
-                });
+            if (Array.isArray(state.collapsedTeachers)) {
+                window._lasCollapsed = new Set(state.collapsedTeachers);
+                if (typeof window.lasRenderDesktopList === 'function') window.lasRenderDesktopList();
             }
             const selectedIdx = state.selectedId
                 ? (window._allLearnerAssignmentsFlat || []).findIndex(task => String(task.id) === String(state.selectedId))
@@ -734,7 +730,7 @@ function lasTaskState(task) {
     const done = hasLearnerAssignmentSubmission(task);
     const days = lasDaysLeft(task);
     if (done) return { key: 'done', group: 'Submitted', color: '#22c55e', badge: 'Done', days };
-    if (task.is_past_due) return { key: 'closed', group: 'Closed', color: '#6b7280', badge: 'Closed', days };
+    if (task.is_past_due) return { key: 'closed', group: 'Closed', color: '#7a7b73', badge: 'Closed', days };
     let badge = 'No due date';
     if (days !== null) {
         badge = days < 0 ? 'Overdue' : days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : lasFmtDay(lasDueMs(task)).replace(/^\w+ /, '');
@@ -742,7 +738,7 @@ function lasTaskState(task) {
     return {
         key: 'todo',
         group: days !== null && days <= 7 ? 'Due soon' : 'Later',
-        color: days !== null && days <= 3 ? '#e67e22' : '#4fd1c5',
+        color: days !== null && days <= 3 ? '#f4776f' : '#c2c3b7',
         badge, days
     };
 }
@@ -779,31 +775,72 @@ window.lasRenderDesktopList = function () {
         (!term || `${i.task.title || ''} ${i.task.class_name || ''} ${i.task.teacher || ''}`.toLowerCase().includes(term))
     );
 
-    const FAR = 8.64e15;
+    // Group by teacher, in the order the page already sorts them (most recent work first),
+    // the same way the teacher pages group by class. Rows keep the flat order inside a group.
+    const groups = [];
+    const byTeacher = new Map();
+    visible.forEach(item => {
+        const teacher = item.task.teacher || 'Teacher';
+        let g = byTeacher.get(teacher);
+        if (!g) { g = { teacher, rows: [] }; byTeacher.set(teacher, g); groups.push(g); }
+        g.rows.push(item);
+    });
+
+    if (!window._lasCollapsed) window._lasCollapsed = new Set();
+    const STATE_TEXT = { done: 'Submitted', closed: 'Closed', todo: 'Not submitted' };
+    const CHEV = '<svg class="las-gl-chev" viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+
     let html = '';
-    ['Due soon', 'Later', 'Submitted', 'Closed'].forEach(group => {
-        const rows = visible.filter(i => i.s.group === group).sort((a, b) => {
-            const A = lasDueMs(a.task) || FAR, B = lasDueMs(b.task) || FAR;
-            return (group === 'Due soon' || group === 'Later') ? A - B : (lasDueMs(b.task) - lasDueMs(a.task));
-        });
-        if (!rows.length) return;
-        html += `<div class="las-gh">${group}</div>`;
+    groups.forEach(({ teacher, rows }) => {
+        // a search always shows every match, whatever was folded away
+        const collapsed = !term && window._lasCollapsed.has(teacher);
+        html += `
+            <div class="las-group">
+                <div class="las-gl" role="button" tabindex="0" aria-expanded="${collapsed ? 'false' : 'true'}"
+                     data-teacher="${escapeLearnerAssignmentHtml(teacher)}"
+                     onclick="lasToggleGroup(this)" onkeydown="lasGroupKeydown(event, this)">
+                    ${CHEV}<span class="las-gl-name">${escapeLearnerAssignmentHtml(teacher)}</span>
+                </div>
+                <div class="las-gb${collapsed ? ' collapsed' : ''}">`;
         rows.forEach(({ task, idx, s }) => {
-            const meta = [task.class_name, task.teacher].filter(Boolean).join(' &middot; ');
             const active = showActive && idx === window._learnerAssignmentSelectedIdx ? ' active' : '';
+            const stateText = STATE_TEXT[s.key] || '';
             html += `
-                <div class="las-sidebar-item${active}" id="las-sidebar-${idx}" onclick="selectDesktopLearnerAssignment(${idx})">
-                    <span class="las-sidebar-status-dot" style="background:${s.color};"></span>
-                    <div class="las-sidebar-item-info">
-                        <div class="las-sidebar-item-title">${task.title}</div>
-                        <div class="las-sidebar-item-meta">${meta}</div>
-                    </div>
-                    <span class="las-row-badge" style="color:${s.color};">${escapeLearnerAssignmentHtml(s.badge)}</span>
-                </div>`;
+                    <div class="las-sidebar-item${active}" id="las-sidebar-${idx}" onclick="selectDesktopLearnerAssignment(${idx})">
+                        <span class="las-sidebar-dot${s.key === 'done' ? ' is-done' : ''}" role="img" aria-label="${stateText}" title="${stateText}"></span>
+                        <div class="las-sidebar-item-info">
+                            <div class="las-sidebar-item-title">${task.title}</div>
+                            <div class="las-sidebar-item-meta">${escapeLearnerAssignmentHtml(formatAssignmentDueDate(task.due_date))}</div>
+                        </div>
+                    </div>`;
         });
+        html += `
+                </div>
+            </div>`;
     });
     list.innerHTML = html || `<div class="las-list-empty">${items.length ? 'No assignments match.' : "Your teachers haven't posted any assignments yet."}</div>`;
     list.scrollTop = keepScroll;
+};
+
+// Fold / unfold one teacher group. The DOM is updated in place so the list does not jump.
+window.lasToggleGroup = function (headerEl) {
+    if (!headerEl) return;
+    const body = headerEl.nextElementSibling;
+    if (!body) return;
+    const teacher = headerEl.dataset.teacher || '';
+    if (!window._lasCollapsed) window._lasCollapsed = new Set();
+    const nowCollapsed = !body.classList.contains('collapsed');
+    body.classList.toggle('collapsed', nowCollapsed);
+    headerEl.setAttribute('aria-expanded', nowCollapsed ? 'false' : 'true');
+    if (nowCollapsed) window._lasCollapsed.add(teacher);
+    else window._lasCollapsed.delete(teacher);
+    saveAssignmentPageState();
+};
+
+window.lasGroupKeydown = function (e, headerEl) {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    e.preventDefault();
+    window.lasToggleGroup(headerEl);
 };
 
 window.lasSetFilter = function (key) {
@@ -819,7 +856,9 @@ window.lasDesktopSearch = function (val) {
 // ↑ / ↓ move through the list
 window.lasListKeydown = function (e) {
     if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    // rows inside a folded group are hidden, so ↑ / ↓ step over them
     const ids = Array.from(document.querySelectorAll('#las-list .las-sidebar-item'))
+        .filter(el => el.offsetParent !== null)
         .map(el => parseInt(el.id.replace('las-sidebar-', ''), 10));
     if (!ids.length) return;
     e.preventDefault();
@@ -834,7 +873,7 @@ window.lasListKeydown = function (e) {
 window.lasEnsureSelection = function () {
     if (window.innerWidth < 900) return;
     if (document.querySelector('#las-list .las-sidebar-item.active')) return;
-    const first = document.querySelector('#las-list .las-sidebar-item');
+    const first = Array.from(document.querySelectorAll('#las-list .las-sidebar-item')).find(el => el.offsetParent !== null);
     if (first) window.selectDesktopLearnerAssignment(parseInt(first.id.replace('las-sidebar-', ''), 10));
 };
 
@@ -880,6 +919,8 @@ window.lasInitDesktop = function () {
     window._lasFilter = 'all';
     window._lasTerm = '';
     window._lasEditingId = null;
+    // keep which teacher groups are folded if the page is rebuilt (restore may overwrite it)
+    if (!window._lasCollapsed) window._lasCollapsed = new Set();
     window.lasRenderDesktopList();
     window.lasInitSplit();
 };
@@ -973,13 +1014,13 @@ window.selectDesktopLearnerAssignment = function(flatIdx) {
     const sender = task.teacher || 'Teacher';
 
     // ── Status chip ──
-    let statusLabel = 'Not submitted', statusDot = '#e67e22', statusCls = '';
+    let statusLabel = 'Not submitted', statusDot = '#9b9c92', statusCls = '';
     if (isDone) { statusLabel = 'Submitted'; statusDot = '#22c55e'; statusCls = ' las-panel-status--ok'; }
-    else if (isClosed) { statusLabel = 'Closed'; statusDot = '#6b7280'; }
+    else if (isClosed) { statusLabel = 'Closed'; statusDot = '#7a7b73'; }
 
     // ── Primary action (sticky header, right-aligned) ──
     let actionHtml;
-    if (isClosed) actionHtml = '<span class="las-act-text" style="color:#8b949e;">Submission closed</span>';
+    if (isClosed) actionHtml = '<span class="las-act-text">Submission closed</span>';
     else if (isDone) actionHtml = `<button type="button" class="las-pri" onclick="lasStartEdit('${lasAttr(task.id)}')">Update submission</button>`;
     else actionHtml = `<button type="button" class="las-pri" onclick="lasFocusComposer('${formId}')">Add your work</button>`;
 
@@ -1034,7 +1075,8 @@ window.selectDesktopLearnerAssignment = function(flatIdx) {
 
     // Keep the selected row visible inside the list (scrolls the list only)
     const listBox = document.getElementById('las-list');
-    if (listBox && sidebarItem) {
+    // (a row inside a folded group has no box, so there is nothing to scroll to)
+    if (listBox && sidebarItem && sidebarItem.offsetParent !== null) {
         const top = sidebarItem.offsetTop, bottom = top + sidebarItem.offsetHeight;
         if (top < listBox.scrollTop + 34) listBox.scrollTop = Math.max(0, top - 34);
         else if (bottom > listBox.scrollTop + listBox.clientHeight) listBox.scrollTop = bottom - listBox.clientHeight;
