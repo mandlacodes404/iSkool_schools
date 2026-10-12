@@ -200,6 +200,10 @@ function renderSyllabusPage(data) {
         <style>
             /* ══════════════════════════════════════════
                DESKTOP SPLIT LAYOUT  (≥ 900px)
+               Follows the learner assignments page: Geist, 400/500 weights, the teacher
+               text ladder, rings in the list, neutral chips and cards. Colour tokens are
+               literal values from teacher_desktop_menu.css so nothing here depends on
+               which --dm-* variables the learner shell defines.
                ══════════════════════════════════════════ */
             @media (min-width: 900px) {
                 .syl-desktop-layout { display: flex !important; }
@@ -212,15 +216,26 @@ function renderSyllabusPage(data) {
 
             .syl-desktop-layout {
                 --syl-listw: 320px;
+                /* Teacher palette */
+                --syl-text:   #f0efec;
+                --syl-soft:   #c2c3b7;
+                --syl-muted:  #9b9c92;
+                --syl-faint:  #7a7b73;
+                --syl-accent: #4fd1c5;
+                --syl-line:        rgba(255,255,255,0.07);
+                --syl-line-strong: rgba(255,255,255,0.14);
+                --syl-hover:  rgba(255,255,255,0.055);
+                --syl-active: rgba(255,255,255,0.095);
+                --syl-side-bg: #12161c;   /* same as the assignments list pane; change both together */
                 /* Type weights for the whole desktop page (Geist). Tune here. */
-                --syl-w-strong: 500;  /* title, status chip, group labels, primary button */
-                --syl-w-medium: 450;  /* list rows, filter chips, values, small actions */
+                --syl-w-strong: 500;  /* title, status chip, group label, selected row */
+                --syl-w-medium: 400;  /* values, small actions */
                 display: flex;
                 gap: 0;
                 min-height: 500px;
                 font-family: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
                 font-weight: 400;
-                font-variant-numeric: tabular-nums; /* marks, dates and counts line up */
+                font-variant-numeric: tabular-nums; /* dates and counts line up */
                 -webkit-font-smoothing: antialiased; /* keeps light weights from looking heavy on dark */
                 -moz-osx-font-smoothing: grayscale;
             }
@@ -235,12 +250,12 @@ function renderSyllabusPage(data) {
                 display: flex;
                 flex-direction: column;
                 overflow: hidden;
-                background: #12161c;
-                border-right: 1px solid rgba(255,255,255,0.07);
+                background: var(--syl-side-bg);
+                border-right: 1px solid var(--syl-line);
             }
             .syl-lh {
                 padding: 12px 12px 10px;
-                border-bottom: 1px solid rgba(255,255,255,0.07);
+                border-bottom: 1px solid var(--syl-line);
                 flex-shrink: 0;
             }
             .syl-desktop-search-wrap { position: relative; }
@@ -250,7 +265,7 @@ function renderSyllabusPage(data) {
                 top: 50%;
                 transform: translateY(-50%);
                 pointer-events: none;
-                color: #7d8794;
+                color: var(--syl-faint);
             }
             .syl-desktop-search {
                 width: 100%;
@@ -259,94 +274,115 @@ function renderSyllabusPage(data) {
                 padding: 0 10px 0 33px;
                 border-radius: 8px;
                 background: rgba(255,255,255,0.05);
-                border: 1px solid rgba(255,255,255,0.07);
-                color: #e6edf3;
+                border: 1px solid var(--syl-line);
+                color: var(--syl-text);
                 font-size: 13px;
+                font-weight: 400;
                 font-family: inherit;
                 transition: border-color 0.2s;
             }
-            .syl-desktop-search:focus { outline: none; border-color: #4fd1c5; }
-            .syl-desktop-search::placeholder { color: #7d8794; }
-            .syl-chips { display: flex; gap: 6px; margin-top: 10px; overflow: hidden; }
+            .syl-desktop-search:focus { outline: none; border-color: var(--syl-accent); }
+            .syl-desktop-search::placeholder { color: var(--syl-faint); }
+
+            /* Term pills stay under the search bar; the active pill is neutral, like the teacher chips */
+            .syl-chips { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; row-gap: 6px; }
             .syl-chip {
                 height: 26px;
                 padding: 0 10px;
                 border-radius: 999px;
-                border: 1px solid rgba(255,255,255,0.07);
+                border: 1px solid var(--syl-line);
                 background: none;
-                color: #9aa4b2;
+                color: var(--syl-muted);
                 font-family: inherit;
                 font-size: 12px;
-                font-weight: var(--syl-w-medium, 600);
+                font-weight: 400;
                 white-space: nowrap;
                 cursor: pointer;
             }
-            .syl-chip:hover { color: #e6edf3; }
+            .syl-chip:hover { color: var(--syl-text); background: var(--syl-hover); }
             .syl-chip.on {
-                background: rgba(79,209,197,0.1);
-                border-color: rgba(79,209,197,0.4);
-                color: #4fd1c5;
+                background: var(--syl-active);
+                border-color: var(--syl-line-strong);
+                color: var(--syl-text);
+                font-weight: var(--syl-w-strong, 500);
             }
+            .syl-chip:focus-visible { outline: 2px solid var(--syl-accent); outline-offset: 1px; }
+            .syl-chip .syl-cd { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--syl-soft); margin-right: 6px; vertical-align: 1px; }
+
             .syl-sidebar-scroll {
                 flex: 1;
                 min-height: 0;
                 overflow-y: auto;
                 position: relative;
                 outline: none;
+                padding-bottom: 8px;
             }
-            .syl-sidebar-scroll:focus-visible { outline: 2px solid #4fd1c5; outline-offset: -2px; }
+            .syl-sidebar-scroll:focus-visible { outline: 2px solid var(--syl-accent); outline-offset: -2px; }
             .syl-sidebar-scroll::-webkit-scrollbar { width: 8px; }
             .syl-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
             .syl-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; transition: background 0.15s ease; }
             .syl-sidebar-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
+
+            /* Group label: same small uppercase label as the assignments list, with the subject count */
             .syl-gh {
                 position: sticky;
                 top: 0;
                 z-index: 1;
-                background: #12161c;
-                font-size: 11px;
-                font-weight: var(--syl-w-strong, 700);
-                letter-spacing: 0.6px;
-                text-transform: uppercase;
-                color: #7d8794;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 6px;
                 padding: 12px 14px 6px;
+                background: var(--syl-side-bg);
+                color: var(--syl-muted);
+                font-size: 10px;
+                font-weight: var(--syl-w-strong, 500);
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
             }
+            .syl-gh i { font-style: normal; font-weight: 400; color: var(--syl-faint); }
+
+            /* Row: plain ring, subject, updated date */
             .syl-sidebar-item {
                 display: flex;
                 align-items: center;
                 gap: 10px;
-                height: 52px;
-                padding: 0 14px;
+                min-height: 48px;
+                padding: 6px 14px;
                 cursor: pointer;
-                border-left: 3px solid transparent;
             }
-            .syl-sidebar-item:hover { background: rgba(255,255,255,0.04); }
-            .syl-sidebar-item.active {
-                background: rgba(79,209,197,0.1);
-                border-left-color: #4fd1c5;
+            .syl-sidebar-item:hover { background: var(--syl-hover); }
+            .syl-sidebar-item.active { background: var(--syl-active); }
+            .syl-sidebar-dot {
+                width: 7px;
+                height: 7px;
+                box-sizing: border-box;
+                border-radius: 50%;
+                border: 1.5px solid var(--syl-faint);
+                background: transparent;
+                flex-shrink: 0;
             }
-            .syl-sidebar-status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
             .syl-sidebar-item-info { flex: 1; min-width: 0; }
             .syl-sidebar-item-title {
-                font-size: 13px;
-                font-weight: var(--syl-w-medium, 600);
-                color: #e6edf3;
+                font-size: 14px;
+                font-weight: 400;
+                color: var(--syl-soft);
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
             .syl-sidebar-item-meta {
-                font-size: 12px;
-                color: #7d8794;
-                margin-top: 1px;
+                font-size: 11px;
+                font-weight: 400;
+                color: var(--syl-faint);
+                margin-top: 2px;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
-            .syl-row-badge { font-size: 12px; font-weight: var(--syl-w-medium, 600); flex-shrink: 0; }
-            /* the selected row keeps one step more weight so it still reads as current */
-            .syl-sidebar-item.active .syl-sidebar-item-title { font-weight: var(--syl-w-strong, 700); }
-            .syl-list-empty { padding: 40px 20px; text-align: center; color: #7d8794; font-size: 13px; }
+            /* the selected row reads as current through brighter text and one step more weight */
+            .syl-sidebar-item.active .syl-sidebar-item-title { color: var(--syl-text); font-weight: var(--syl-w-strong, 500); }
+            .syl-list-empty { padding: 40px 20px; text-align: center; color: var(--syl-faint); font-size: 13px; }
 
             /* ── Resize handle ── */
             .syl-split {
@@ -378,7 +414,7 @@ function renderSyllabusPage(data) {
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                color: #555e6a;
+                color: var(--syl-faint);
                 gap: 12px;
                 padding: 40px;
             }
@@ -391,7 +427,7 @@ function renderSyllabusPage(data) {
                 align-items: center;
                 gap: 12px;
                 padding: 0 28px;
-                border-bottom: 1px solid rgba(255,255,255,0.07);
+                border-bottom: 1px solid var(--syl-line);
                 flex-shrink: 0;
             }
 
@@ -402,9 +438,9 @@ function renderSyllabusPage(data) {
                 min-width: 0;
                 font-family: inherit;
                 font-size: 18px;
-                font-weight: var(--syl-w-strong, 700);
+                font-weight: var(--syl-w-strong, 500);
                 line-height: 1.25;
-                color: #e6edf3;
+                color: var(--syl-text);
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
@@ -419,37 +455,18 @@ function renderSyllabusPage(data) {
                 height: 23px;
                 padding: 0 8px;
                 border-radius: 6px;
-                border: 1px solid rgba(255,255,255,0.07);
+                border: 1px solid var(--syl-line);
                 font-size: 11px;
-                font-weight: var(--syl-w-strong, 700);
+                font-weight: var(--syl-w-strong, 500);
                 line-height: 1;
                 letter-spacing: 0.5px;
                 text-transform: uppercase;
                 white-space: nowrap;
-                color: #9aa4b2;
+                color: var(--syl-muted);
             }
-            .syl-panel-status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+            .syl-panel-status--cur { background: var(--syl-active); border-color: var(--syl-line-strong); color: var(--syl-text); }
             .syl-dsp { flex: 1; }
-            .syl-act-text { font-weight: var(--syl-w-medium, 600); font-size: 13px; flex-shrink: 0; }
-            .syl-pri {
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                line-height: 1;
-                height: 34px;
-                padding: 0 18px;
-                border-radius: 8px;
-                background: #4fd1c5;
-                color: #0d1117;
-                font-weight: var(--syl-w-strong, 700);
-                font-size: 13px;
-                text-decoration: none;
-                flex-shrink: 0;
-                cursor: pointer;
-            }
-            .syl-pri:hover { background: #38b2ac; }
-            .syl-pri--warn { background: #e67e22; }
-            .syl-pri--warn:hover { background: #d06f1c; }
+            .syl-muted { color: var(--syl-muted); font-size: 13px; flex-shrink: 0; }
             .syl-dbody { flex: 1; min-height: 0; display: flex; }
             .syl-body { flex: 1; min-width: 0; overflow-y: auto; padding: 28px; }
             .syl-body::-webkit-scrollbar { width: 8px; }
@@ -457,68 +474,57 @@ function renderSyllabusPage(data) {
             .syl-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
             .syl-body::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
             .syl-read { max-width: 760px; }
-            .syl-lead { color: #c9d1d9; line-height: 1.7; margin: 0 0 20px; font-size: 14px; }
+            .syl-lead { color: var(--syl-soft); line-height: 1.7; margin: 0 0 20px; font-size: 14px; }
 
             /* ── Context rail (hides when the detail pane is under 900px wide) ── */
             .syl-rail {
                 width: 280px;
                 flex-shrink: 0;
-                border-left: 1px solid rgba(255,255,255,0.07);
+                border-left: 1px solid var(--syl-line);
                 padding: 24px 20px;
                 overflow-y: auto;
             }
             .syl-rail h4 {
                 margin: 0 0 14px;
                 font-size: 12px;
-                font-weight: var(--syl-w-strong, 700);
+                font-weight: var(--syl-w-strong, 500);
                 letter-spacing: 0.6px;
                 text-transform: uppercase;
-                color: #7d8794;
+                color: var(--syl-muted);
             }
             .syl-kv {
                 display: flex;
                 justify-content: space-between;
                 gap: 10px;
                 padding: 10px 0;
-                border-bottom: 1px solid rgba(255,255,255,0.07);
+                border-bottom: 1px solid var(--syl-line);
                 font-size: 13px;
             }
-            .syl-kv span { color: #9aa4b2; }
-            .syl-kv b { font-weight: var(--syl-w-medium, 600); text-align: right; color: #e6edf3; }
+            .syl-kv span { color: var(--syl-muted); }
+            .syl-kv b { font-weight: var(--syl-w-medium, 400); text-align: right; color: var(--syl-text); }
             @container (max-width: 899px) { .syl-rail { display: none; } }
 
-            /* ── Syllabus: rows, topics, assessment bar, rail ── */
-            .syl-chips { flex-wrap: wrap; row-gap: 6px; overflow: visible; }
-            .syl-chip .syl-cd { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #4fd1c5; margin-right: 6px; vertical-align: 1px; }
-            .syl-gh { display: flex; justify-content: space-between; }
-            .syl-gh i { font-style: normal; font-weight: var(--syl-w-medium, 600); color: #7d8794; }
-            .syl-ft {
-                width: 34px; height: 34px; border-radius: 8px; flex-shrink: 0; display: grid; place-items: center;
-                font-size: 11px; font-weight: var(--syl-w-strong, 700); background: rgba(79,209,197,0.1); color: #4fd1c5;
-            }
-            .syl-tm { font-size: 12px; color: #7d8794; flex-shrink: 0; }
-            .syl-muted { color: #7d8794; font-size: 13px; flex-shrink: 0; }
-            .syl-panel-status--cur { background: rgba(79,209,197,0.1); border-color: rgba(79,209,197,0.35); color: #4fd1c5; }
+            /* ── Syllabus: note, topics, assessment bar, rail links ── */
             .syl-note2 {
-                border-left: 3px solid rgba(79,209,197,0.4); background: rgba(255,255,255,0.03); border-radius: 8px;
-                padding: 12px 14px; color: #c9d1d9; line-height: 1.65; font-size: 14px; margin-bottom: 8px; white-space: pre-line;
+                border: 1px solid var(--syl-line); border-left: 3px solid var(--syl-line-strong); background: transparent; border-radius: 8px;
+                padding: 12px 14px; color: var(--syl-soft); line-height: 1.65; font-size: 14px; margin-bottom: 8px; white-space: pre-line;
             }
-            .syl-note2 small { display: block; font-size: 11px; font-weight: var(--syl-w-strong, 700); letter-spacing: 0.6px; text-transform: uppercase; color: #7d8794; margin-bottom: 4px; }
-            .syl-h3 { font-size: 12px; font-weight: var(--syl-w-strong, 700); letter-spacing: 0.6px; text-transform: uppercase; color: #7d8794; margin: 26px 0 10px; }
+            .syl-note2 small { display: block; font-size: 11px; font-weight: var(--syl-w-strong, 500); letter-spacing: 0.6px; text-transform: uppercase; color: var(--syl-muted); margin-bottom: 4px; }
+            .syl-h3 { font-size: 12px; font-weight: var(--syl-w-strong, 500); letter-spacing: 0.6px; text-transform: uppercase; color: var(--syl-muted); margin: 26px 0 10px; }
             .syl-tl { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 0 28px; }
-            .syl-tl li { display: flex; gap: 14px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.07); font-size: 14px; color: #c9d1d9; }
-            .syl-tl li span { color: #7d8794; font-weight: var(--syl-w-strong, 700); font-size: 12px; width: 18px; flex-shrink: 0; padding-top: 2px; }
+            .syl-tl li { display: flex; gap: 14px; padding: 10px 0; border-bottom: 1px solid var(--syl-line); font-size: 14px; color: var(--syl-soft); }
+            .syl-tl li span { color: var(--syl-faint); font-weight: var(--syl-w-medium, 400); font-size: 12px; width: 18px; flex-shrink: 0; padding-top: 2px; }
             .syl-stack { display: flex; height: 10px; border-radius: 5px; overflow: hidden; gap: 2px; margin: 4px 0 14px; }
-            .syl-wrow { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.07); font-size: 14px; color: #c9d1d9; }
+            .syl-wrow { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--syl-line); font-size: 14px; color: var(--syl-soft); }
             .syl-wrow i { width: 9px; height: 9px; border-radius: 3px; flex-shrink: 0; }
-            .syl-wrow b { margin-left: auto; font-weight: var(--syl-w-strong, 700); }
+            .syl-wrow b { margin-left: auto; font-weight: var(--syl-w-medium, 400); color: var(--syl-text); }
             .syl-more {
                 display: block; width: 100%; text-align: left; padding: 9px 0; cursor: pointer;
-                background: none; border: 0; border-bottom: 1px solid rgba(255,255,255,0.07); font-family: inherit;
+                background: none; border: 0; border-bottom: 1px solid var(--syl-line); font-family: inherit;
             }
-            .syl-more b { display: block; font-size: 13px; font-weight: var(--syl-w-medium, 600); color: #e6edf3; }
-            .syl-more small { color: #7d8794; font-size: 12px; }
-            .syl-more:hover b { color: #4fd1c5; }
+            .syl-more b { display: block; font-size: 13px; font-weight: var(--syl-w-medium, 400); color: var(--syl-text); }
+            .syl-more small { color: var(--syl-faint); font-size: 12px; }
+            .syl-more:hover b { color: var(--syl-accent); }
             .syl-rail h4.syl-rail-sub { margin: 28px 0 4px; }
 
 
@@ -832,15 +838,6 @@ function sylEsc(v) {
     return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 function sylKey(b) { return `${b.term}|${b.subject}|${b.teacher}`; }
-function sylAbbr(subject) {
-    const w = String(subject || '').trim().split(/\s+/).filter(Boolean);
-    if (!w.length) return '?';
-    return (w.length > 1 ? w[0][0] + w[1][0] : w[0].slice(0, 2)).toUpperCase();
-}
-function sylShortDate(v) {
-    const d = new Date(v);
-    return isNaN(d) ? '' : d.getDate() + ' ' + d.toLocaleString('en-GB', { month: 'short' });
-}
 function sylFullDate(v) {
     const d = new Date(v);
     return isNaN(d) ? '' : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -871,15 +868,13 @@ window.sylRenderDesktopList = function () {
 
     let html = `<div class="syl-gh"><span>Term ${active}${active === cur ? ' &middot; Current' : ''}</span><i>${visible.length}</i></div>`;
     visible.forEach(({ b, idx }) => {
-        const n = (b.topics || []).length;
         html += `
             <div class="syl-sidebar-item${showActive && idx === window._sylSelectedIdx ? ' active' : ''}" id="syl-sidebar-${idx}" onclick="selectDesktopSyllabusBrief(${idx})">
-                <span class="syl-ft">${sylEsc(sylAbbr(b.subject))}</span>
+                <span class="syl-sidebar-dot" aria-hidden="true"></span>
                 <div class="syl-sidebar-item-info">
                     <div class="syl-sidebar-item-title">${sylEsc(b.subject)}</div>
-                    <div class="syl-sidebar-item-meta">${sylEsc(b.teacher)} &middot; ${n} topic${n === 1 ? '' : 's'}</div>
+                    <div class="syl-sidebar-item-meta">${sylEsc(sylFullDate(b.updated_at))}</div>
                 </div>
-                <span class="syl-tm">${sylEsc(sylShortDate(b.updated_at))}</span>
             </div>`;
     });
     list.innerHTML = visible.length ? html : `<div class="syl-list-empty">No subjects match.</div>`;
@@ -1016,9 +1011,15 @@ window.selectDesktopSyllabusBrief = function (idx) {
     if (window.learnerPageState) wireSyllabusScrollState();
 };
 
-// Nunito 400/600/700 for the desktop syllabus page. 600 is the medium weight, so load it
-// explicitly instead of letting the browser quietly fall back to 700 (or 400).
+// Desktop type is Geist 300/400/500 (see the desktop block of the inline CSS above). Nunito stays loaded for the mobile views.
 function sylEnsureFont() {
+    if (!document.getElementById('syl-geist-font')) {
+        const g = document.createElement('link');
+        g.id = 'syl-geist-font';
+        g.rel = 'stylesheet';
+        g.href = 'https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500&display=swap';
+        document.head.appendChild(g);
+    }
     if (document.getElementById('syl-nunito-font')) return;
     const link = document.createElement('link');
     link.id = 'syl-nunito-font';
