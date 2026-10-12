@@ -1084,9 +1084,15 @@ window.selectDesktopLearnerAssignment = function(flatIdx) {
     if (window.learnerPageState) wireAssignmentScrollState();
 };
 
-// Nunito 400/600/700 for the desktop assignments page. 600 is the medium weight, so load it
-// explicitly instead of letting the browser quietly fall back to 700 (or 400).
+// Desktop type is Geist 300/400/500 (see assignments.css). Nunito stays loaded for the mobile views.
 function lasEnsureFont() {
+    if (!document.getElementById('las-geist-font')) {
+        const g = document.createElement('link');
+        g.id = 'las-geist-font';
+        g.rel = 'stylesheet';
+        g.href = 'https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500&display=swap';
+        document.head.appendChild(g);
+    }
     if (document.getElementById('las-nunito-font')) return;
     const link = document.createElement('link');
     link.id = 'las-nunito-font';

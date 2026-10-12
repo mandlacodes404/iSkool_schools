@@ -336,7 +336,7 @@
 .las-panel-status--ok { background: rgba(34,197,94,0.08); border-color: rgba(34,197,94,0.3); color: var(--las-ok); }
 .las-h3 { font-size: 12px; font-weight: var(--las-w-strong, 500); letter-spacing: 0.6px; text-transform: uppercase; color: var(--las-muted); margin: 26px 0 10px; }
 .las-muted { color: var(--las-muted); font-size: 13px; line-height: 1.6; margin: 0; }
-.las-comp { border: 1px solid var(--las-line); border-radius: 12px; background: #12161c; padding: 16px; }
+.las-comp { border: 1px solid var(--las-line); border-radius: 12px; background: transparent; padding: 16px; }
 .las-lbl { display: block; font-size: 12px; font-weight: var(--las-w-medium, 400); color: var(--las-muted); margin: 16px 0 6px; }
 .las-lbl--first { margin-top: 0; }
 .las-lbl em { font-style: normal; font-weight: 400; color: var(--las-faint); }
@@ -371,10 +371,10 @@
 .las-subtxt { margin: 12px 0 0; white-space: pre-wrap; color: var(--las-soft); font-size: 14px; line-height: 1.7; }
 .las-file {
     display: flex; align-items: center; gap: 12px; max-width: 440px;
-    border: 1px solid var(--las-line); border-radius: 10px; padding: 10px 12px; background: #12161c;
+    border: 1px solid var(--las-line); border-radius: 10px; padding: 10px 12px; background: transparent;
 }
 .las-comp .las-file { margin-top: 12px; background: rgba(255,255,255,0.03); }
-.las-fi { width: 34px; height: 34px; border-radius: 8px; background: rgba(79,209,197,0.1); color: var(--las-accent); display: grid; place-items: center; flex-shrink: 0; }
+.las-fi { width: 34px; height: 34px; border-radius: 8px; background: rgba(255,255,255,0.05); color: var(--las-soft); display: grid; place-items: center; flex-shrink: 0; }
 .las-fx { flex: 1; min-width: 0; }
 .las-fx b { display: block; font-size: 13px; color: var(--las-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .las-fx small { display: block; color: var(--las-faint); font-size: 12px; }
