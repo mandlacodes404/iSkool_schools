@@ -3939,7 +3939,7 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/grades.js?v=10.2"></script>
 <script src="assets/js/learner/evaluations.js?v=7.1"></script>
 <script src="assets/js/learner/discussions.js?v=11.2"></script>
-<script src="assets/js/learner/syllabus.js?v=4.0"></script>
+<script src="assets/js/learner/syllabus.js?v=4.1"></script>
 <script src="assets/js/learner/learner_calendar.js?v=2.3"></script>
 <script src="assets/js/learner/desktop_menu.js?v=1.4"></script>
 <script src="assets/js/learner/mobile_menu.js?v=1.4"></script>

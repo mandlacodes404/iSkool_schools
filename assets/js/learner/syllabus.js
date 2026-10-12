@@ -226,7 +226,6 @@ function renderSyllabusPage(data) {
                 --syl-line-strong: rgba(255,255,255,0.14);
                 --syl-hover:  rgba(255,255,255,0.055);
                 --syl-active: rgba(255,255,255,0.095);
-                --syl-side-bg: #12161c;   /* same as the assignments list pane; change both together */
                 /* Type weights for the whole desktop page (Geist). Tune here. */
                 --syl-w-strong: 500;  /* title, status chip, group label, selected row */
                 --syl-w-medium: 400;  /* values, small actions */
@@ -250,7 +249,7 @@ function renderSyllabusPage(data) {
                 display: flex;
                 flex-direction: column;
                 overflow: hidden;
-                background: var(--syl-side-bg);
+                background: transparent;   /* same as the detail pane, which is transparent too */
                 border-right: 1px solid var(--syl-line);
             }
             .syl-lh {
@@ -325,15 +324,11 @@ function renderSyllabusPage(data) {
 
             /* Group label: same small uppercase label as the assignments list, with the subject count */
             .syl-gh {
-                position: sticky;
-                top: 0;
-                z-index: 1;
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
                 gap: 6px;
                 padding: 12px 14px 6px;
-                background: var(--syl-side-bg);
                 color: var(--syl-muted);
                 font-size: 10px;
                 font-weight: var(--syl-w-strong, 500);
