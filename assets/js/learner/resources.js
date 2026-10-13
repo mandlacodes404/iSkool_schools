@@ -93,7 +93,8 @@ function saveResourcePageState() {
         panelScroll:   (document.querySelector('.lrs-pvw') || {}).scrollTop || 0,
         mobileSearch: document.getElementById('lrsMobileSearch')?.value || '',
         openFolders: Array.from(document.querySelectorAll('.lrs-mobile-folder-body:not(.collapsed)')).map(el => el.id),
-        openDesktopGroups: Array.from(document.querySelectorAll('.lrs-desktop-teacher-body:not(.collapsed)')).map(el => el.id),
+        // Desktop teacher groups the learner has folded away (open is the default)
+        collapsedTeachers: Array.from(window._lrsCollapsed || []),
     };
     if (window.learnerPageState) window.learnerPageState.set('resources', state);
     else sessionStorage.setItem('resourcePageState', JSON.stringify(state));
@@ -138,14 +139,9 @@ function restoreResourcePageState() {
                     if (chev) chev.classList.toggle('open', open);
                 });
             }
-            if (Array.isArray(state.openDesktopGroups)) {
-                document.querySelectorAll('.lrs-desktop-teacher-body').forEach(body => {
-                    const open = state.openDesktopGroups.includes(body.id);
-                    body.classList.toggle('collapsed', !open);
-                    const header = body.previousElementSibling;
-                    const chevron = header ? header.querySelector('.lrs-desktop-teacher-chevron') : null;
-                    if (chevron) chevron.classList.toggle('open', open);
-                });
+            if (Array.isArray(state.collapsedTeachers)) {
+                window._lrsCollapsed = new Set(state.collapsedTeachers);
+                if (typeof window.lrsRenderDesktopList === 'function') window.lrsRenderDesktopList();
             }
             const selectedIdx = state.selectedId
                 ? (window._allLearnerResourcesFlat || []).findIndex(file => String(file.id) === String(state.selectedId))
@@ -421,7 +417,7 @@ window.toggleLrsMobileFolder = function(id, headerEl) {
 };
 
 // ─────────────────────────────────────────────
-// DESKTOP LIST: teacher groups, type chips, search
+// DESKTOP LIST: folding teacher groups, type chips, search
 // ─────────────────────────────────────────────
 window._lrsFilter = 'all';
 window._lrsTerm = '';
@@ -486,13 +482,32 @@ window.lrsRenderDesktopList = function () {
         (!term || `${file.title || ''} ${file.teacher || ''} ${file.ext || ''}`.toLowerCase().includes(term))
     );
 
-    const order = [];
-    visible.forEach(i => { if (!order.includes(i.file.teacher)) order.push(i.file.teacher); });
+    // Group by teacher, in the order the page already sorts them (most recent file first),
+    // the same way the assignments and announcements lists group. Rows keep their order inside a group.
+    const groups = [];
+    const byTeacher = new Map();
+    visible.forEach(item => {
+        const teacher = item.file.teacher || 'Teacher';
+        let g = byTeacher.get(teacher);
+        if (!g) { g = { teacher, rows: [] }; byTeacher.set(teacher, g); groups.push(g); }
+        g.rows.push(item);
+    });
+
+    if (!window._lrsCollapsed) window._lrsCollapsed = new Set();
+    const CHEV = '<svg class="lrs-gl-chev" viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>';
 
     let html = '';
-    order.forEach(teacher => {
-        const rows = visible.filter(i => i.file.teacher === teacher);
-        html += `<div class="lrs-gh"><span>${escapeResourceHtml(teacher)}</span><i>${rows.length}</i></div>`;
+    groups.forEach(({ teacher, rows }) => {
+        // a search always shows every match, whatever was folded away
+        const collapsed = !term && window._lrsCollapsed.has(teacher);
+        html += `
+            <div class="lrs-group">
+                <div class="lrs-gl" role="button" tabindex="0" aria-expanded="${collapsed ? 'false' : 'true'}"
+                     data-teacher="${escapeResourceHtml(teacher)}"
+                     onclick="lrsToggleGroup(this)" onkeydown="lrsGroupKeydown(event, this)">
+                    ${CHEV}<span class="lrs-gl-name">${escapeResourceHtml(teacher)}</span>
+                </div>
+                <div class="lrs-gb${collapsed ? ' collapsed' : ''}">`;
         rows.forEach(({ file, idx, kind }) => {
             const meta = (kind === 'vid' ? 'YouTube' : (file.size || 'N/A')) + ' &middot; ' + escapeResourceHtml(lrsShortDate(file));
             const active = showActive && idx === window._learnerResourceSelectedIdx ? ' active' : '';
@@ -506,9 +521,33 @@ window.lrsRenderDesktopList = function () {
                     <span class="lrs-tm">${escapeResourceHtml(lrsRelTime(file))}</span>
                 </div>`;
         });
+        html += `
+                </div>
+            </div>`;
     });
     list.innerHTML = html || `<div class="lrs-list-empty">${items.length ? 'No resources match.' : "Your teachers haven't posted any resources yet."}</div>`;
     list.scrollTop = keepScroll;
+};
+
+// Fold / unfold one teacher group. The DOM is updated in place so the list does not jump.
+window.lrsToggleGroup = function (headerEl) {
+    if (!headerEl) return;
+    const body = headerEl.nextElementSibling;
+    if (!body) return;
+    const teacher = headerEl.dataset.teacher || '';
+    if (!window._lrsCollapsed) window._lrsCollapsed = new Set();
+    const nowCollapsed = !body.classList.contains('collapsed');
+    body.classList.toggle('collapsed', nowCollapsed);
+    headerEl.setAttribute('aria-expanded', nowCollapsed ? 'false' : 'true');
+    if (nowCollapsed) window._lrsCollapsed.add(teacher);
+    else window._lrsCollapsed.delete(teacher);
+    saveResourcePageState();
+};
+
+window.lrsGroupKeydown = function (e, headerEl) {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    e.preventDefault();
+    window.lrsToggleGroup(headerEl);
 };
 
 window.lrsSetFilter = function (key) { window._lrsFilter = key; window.lrsRenderDesktopList(); };
@@ -520,7 +559,9 @@ window.lrsDesktopSearch = function (val) {
 // ↑ / ↓ move through the list
 window.lrsListKeydown = function (e) {
     if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    // rows inside a folded group are hidden, so ↑ / ↓ step over them
     const ids = Array.from(document.querySelectorAll('#lrs-list .lrs-sidebar-item'))
+        .filter(el => el.offsetParent !== null)
         .map(el => parseInt(el.id.replace('lrs-sidebar-', ''), 10));
     if (!ids.length) return;
     e.preventDefault();
@@ -535,7 +576,7 @@ window.lrsListKeydown = function (e) {
 window.lrsEnsureSelection = function () {
     if (window.innerWidth < 900) return;
     if (document.querySelector('#lrs-list .lrs-sidebar-item.active')) return;
-    const first = document.querySelector('#lrs-list .lrs-sidebar-item');
+    const first = Array.from(document.querySelectorAll('#lrs-list .lrs-sidebar-item')).find(el => el.offsetParent !== null);
     if (first) window.selectDesktopLearnerResource(parseInt(first.id.replace('lrs-sidebar-', ''), 10));
 };
 
@@ -580,6 +621,8 @@ window.lrsInitSplit = function () {
 window.lrsInitDesktop = function () {
     window._lrsFilter = 'all';
     window._lrsTerm = '';
+    // keep which teacher groups are folded if the page is rebuilt (restore may overwrite it)
+    if (!window._lrsCollapsed) window._lrsCollapsed = new Set();
     window.lrsRenderDesktopList();
     window.lrsInitSplit();
 };
@@ -668,7 +711,8 @@ window.selectDesktopLearnerResource = function(flatIdx) {
 
     // Keep the selected row visible inside the list (scrolls the list only)
     const listBox = document.getElementById('lrs-list');
-    if (listBox && sidebarItem) {
+    // (a row inside a folded group has no box, so there is nothing to scroll to)
+    if (listBox && sidebarItem && sidebarItem.offsetParent !== null) {
         const top = sidebarItem.offsetTop, bottom = top + sidebarItem.offsetHeight;
         if (top < listBox.scrollTop + 34) listBox.scrollTop = Math.max(0, top - 34);
         else if (bottom > listBox.scrollTop + listBox.clientHeight) listBox.scrollTop = bottom - listBox.clientHeight;
@@ -751,9 +795,15 @@ window.openResourceMenu = function(btn) {
     window.open(path, '_blank');
 };
 
-// Nunito 400/600/700 for the desktop resources page. 600 is the medium weight, so load it
-// explicitly instead of letting the browser quietly fall back to 700 (or 400).
+// Desktop type is Geist 300/400/500 (see resources.css). Nunito stays loaded for the mobile views.
 function lrsEnsureFont() {
+    if (!document.getElementById('lrs-geist-font')) {
+        const g = document.createElement('link');
+        g.id = 'lrs-geist-font';
+        g.rel = 'stylesheet';
+        g.href = 'https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500&display=swap';
+        document.head.appendChild(g);
+    }
     if (document.getElementById('lrs-nunito-font')) return;
     const link = document.createElement('link');
     link.id = 'lrs-nunito-font';
