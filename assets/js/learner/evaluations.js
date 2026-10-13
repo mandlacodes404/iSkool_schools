@@ -35,7 +35,8 @@ function saveEvaluationPageState() {
         panelScroll:   panel ? panel.scrollTop : 0,
         mobileSearch: document.getElementById('levMobileSearch')?.value || '',
         openFolders: Array.from(document.querySelectorAll('.lev-mobile-folder-body:not(.collapsed)')).map(el => el.id),
-        openDesktopGroups: Array.from(document.querySelectorAll('.lev-desktop-teacher-body:not(.collapsed)')).map(el => el.id),
+        // Desktop teacher groups the learner has folded away (open is the default)
+        collapsedTeachers: Array.from(window._levCollapsed || []),
     };
     if (window.learnerPageState) window.learnerPageState.set('evaluations', state);
     else sessionStorage.setItem('evaluationPageState', JSON.stringify(state));
@@ -80,14 +81,9 @@ function restoreEvaluationPageState() {
                     if (chev) chev.classList.toggle('open', open);
                 });
             }
-            if (Array.isArray(state.openDesktopGroups)) {
-                document.querySelectorAll('.lev-desktop-teacher-body').forEach(body => {
-                    const open = state.openDesktopGroups.includes(body.id);
-                    body.classList.toggle('collapsed', !open);
-                    const header = body.previousElementSibling;
-                    const chevron = header ? header.querySelector('.lev-desktop-teacher-chevron') : null;
-                    if (chevron) chevron.classList.toggle('open', open);
-                });
+            if (Array.isArray(state.collapsedTeachers)) {
+                window._levCollapsed = new Set(state.collapsedTeachers);
+                if (typeof window.levRenderDesktopList === 'function') window.levRenderDesktopList();
             }
             const selectedIdx = state.selectedId
                 ? (window._allLearnerEvaluationsFlat || []).findIndex(evaluation => String(evaluation.id) === String(state.selectedId))
@@ -608,10 +604,11 @@ window.openMobileLearnerEvaluationById = function(evaluationId) {
 };
 
 // ─────────────────────────────────────────────
-// DESKTOP LIST: To do / Completed groups, chips, search
+// DESKTOP LIST: teacher groups, filter chips, search
 // ─────────────────────────────────────────────
 window._levFilter = 'all';
 window._levTerm = '';
+window._levCollapsed = window._levCollapsed || new Set();
 
 window.levRenderDesktopList = function () {
     const list = document.getElementById('lev-list');
@@ -636,29 +633,71 @@ window.levRenderDesktopList = function () {
         return ok && (!term || `${ev.title || ''} ${ev.teacher || ''}`.toLowerCase().includes(term));
     });
 
+    // Group by teacher, in the order the page already sorts them, the same way the
+    // learner assignments list groups by teacher.
+    const groups = [];
+    const byTeacher = new Map();
+    visible.forEach(item => {
+        const key = String(item.ev.teacher || 'Teacher');
+        let g = byTeacher.get(key);
+        if (!g) { g = { key, rows: [] }; byTeacher.set(key, g); groups.push(g); }
+        g.rows.push(item);
+    });
+
+    if (!window._levCollapsed) window._levCollapsed = new Set();
+    const CHEV = '<svg class="lev-gl-chev" viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+
     let html = '';
-    [['To do', false], ['Completed', true]].forEach(([label, done]) => {
-        const rows = visible.filter(({ ev }) => !!ev.submitted === done);
-        if (!rows.length) return;
-        html += `<div class="lev-gh"><span>${label}</span><i>${rows.length}</i></div>`;
+    groups.forEach(({ key, rows }) => {
+        // a search always shows every match, whatever was folded away
+        const collapsed = !term && window._levCollapsed.has(key);
+        html += `
+            <div class="lev-group">
+                <div class="lev-gl" role="button" tabindex="0" aria-expanded="${collapsed ? 'false' : 'true'}"
+                     data-teacher="${escapeLearnerEvaluationHtml(key)}"
+                     onclick="levToggleGroup(this)" onkeydown="levGroupKeydown(event, this)">
+                    ${CHEV}<span class="lev-gl-name">${escapeLearnerEvaluationHtml(key)}</span>
+                </div>
+                <div class="lev-gb${collapsed ? ' collapsed' : ''}">`;
         rows.forEach(({ ev, idx }) => {
-            const teacher = ev.teacher || 'Teacher';
-            const initials = ev.teacher_initials || getLearnerEvaluationInitials(teacher);
-            const n = (ev.statements || []).length;
+            const done = !!ev.submitted;
             const active = showActive && idx === window._learnerEvaluationSelectedIdx ? ' active' : '';
             html += `
-                <div class="lev-sidebar-item lev-row${active}" id="lev-sidebar-${idx}" onclick="selectDesktopLearnerEvaluation(${idx})">
-                    <span class="lev-ava">${escapeLearnerEvaluationHtml(initials)}</span>
-                    <div class="lev-sidebar-item-info">
-                        <div class="lev-sidebar-item-title${done ? '' : ' lev-unread'}">${escapeLearnerEvaluationHtml(ev.title || 'Evaluation')}</div>
-                        <div class="lev-sidebar-item-meta">${escapeLearnerEvaluationHtml(teacher)} &middot; ${n} statement${n === 1 ? '' : 's'}</div>
-                    </div>
-                    <span class="lev-rr">${done ? '<span class="lev-tm">Done</span>' : '<span class="lev-udot"></span>'}</span>
-                </div>`;
+                    <div class="lev-sidebar-item${active}" id="lev-sidebar-${idx}" onclick="selectDesktopLearnerEvaluation(${idx})">
+                        <span class="lev-sidebar-dot${done ? ' is-done' : ''}" role="img" aria-label="${done ? 'Completed' : 'To do'}" title="${done ? 'Completed' : 'To do'}"></span>
+                        <div class="lev-sidebar-item-info">
+                            <div class="lev-sidebar-item-title">${escapeLearnerEvaluationHtml(ev.title || 'Evaluation')}</div>
+                            ${ev.display_date ? `<div class="lev-sidebar-item-meta">${escapeLearnerEvaluationHtml(ev.display_date)}</div>` : ''}
+                        </div>
+                    </div>`;
         });
+        html += `
+                </div>
+            </div>`;
     });
     list.innerHTML = html || `<div class="lev-list-empty">${items.length ? 'No evaluations match.' : "Your teachers haven't posted any evaluations yet."}</div>`;
     list.scrollTop = keep;
+};
+
+// Fold / unfold one teacher group. The DOM is updated in place so the list does not jump.
+window.levToggleGroup = function (headerEl) {
+    if (!headerEl) return;
+    const body = headerEl.nextElementSibling;
+    if (!body) return;
+    const key = headerEl.dataset.teacher || '';
+    if (!window._levCollapsed) window._levCollapsed = new Set();
+    const nowCollapsed = !body.classList.contains('collapsed');
+    body.classList.toggle('collapsed', nowCollapsed);
+    headerEl.setAttribute('aria-expanded', nowCollapsed ? 'false' : 'true');
+    if (nowCollapsed) window._levCollapsed.add(key);
+    else window._levCollapsed.delete(key);
+    saveEvaluationPageState();
+};
+
+window.levGroupKeydown = function (e, headerEl) {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    e.preventDefault();
+    window.levToggleGroup(headerEl);
 };
 
 window.levSetFilter = function (key) { window._levFilter = key; window.levRenderDesktopList(); };
@@ -669,7 +708,9 @@ window.levDesktopSearch = function (val) {
 
 window.levListKeydown = function (e) {
     if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    // rows inside a folded group are hidden, so up / down step over them
     const ids = Array.from(document.querySelectorAll('#lev-list .lev-sidebar-item'))
+        .filter(el => el.offsetParent !== null)
         .map(el => parseInt(el.id.replace('lev-sidebar-', ''), 10));
     if (!ids.length) return;
     e.preventDefault();
@@ -684,7 +725,7 @@ window.levListKeydown = function (e) {
 window.levEnsureSelection = function () {
     if (window.innerWidth < 900) return;
     if (document.querySelector('#lev-list .lev-sidebar-item.active')) return;
-    const first = document.querySelector('#lev-list .lev-sidebar-item');
+    const first = Array.from(document.querySelectorAll('#lev-list .lev-sidebar-item')).find(el => el.offsetParent !== null);
     if (first) window.selectDesktopLearnerEvaluation(parseInt(first.id.replace('lev-sidebar-', ''), 10));
 };
 
@@ -860,7 +901,7 @@ window.selectDesktopLearnerEvaluation = function (idx) {
     if (!done) window.levUpdateProgress();
 
     const box = document.getElementById('lev-list');
-    if (box && row) {
+    if (box && row && row.offsetParent !== null) {
         const top = row.offsetTop, bottom = top + row.offsetHeight;
         if (top < box.scrollTop + 34) box.scrollTop = Math.max(0, top - 34);
         else if (bottom > box.scrollTop + box.clientHeight) box.scrollTop = bottom - box.clientHeight;
@@ -897,8 +938,8 @@ window.handleEvalSubmit = async function(e, id) {
     }
 };
 
-// Nunito 400/600/700 for the desktop evaluations page. 600 is the medium weight, so load it
-// explicitly instead of letting the browser quietly fall back to 700 (or 400).
+// Nunito 400/600/700 for the MOBILE evaluations list (.lev-mobile-*). The desktop page uses Geist,
+// which learner_dashboard.php already loads. Keep this loader: the global Nunito link only has weight 600.
 function levEnsureFont() {
     if (document.getElementById('lev-nunito-font')) return;
     const link = document.createElement('link');
