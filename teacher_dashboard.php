@@ -103,7 +103,7 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=13.2">
     <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_menu.css?v=2.3">
-    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_menu.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_menu.css?v=1.1">
     <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_settings.css?v=1.0">
     <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_settings.css?v=1.2">   
     <script>
