@@ -501,4 +501,6 @@
   hook('loadLearnerSettings', showHome);
   hook('loadLearnerPersonalInfo', showPersonal);
   window.loadLearnerPassword = showPassword;
+  // shared with mobile_class.js (the My Class page uses the same sheets and toast)
+  window.msUI = { open: openSheet, close: closeSheet, toast: toast, ico: ico };
 })();

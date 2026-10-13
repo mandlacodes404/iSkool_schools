@@ -1,0 +1,39 @@
+/* assets/css/learner/mobile_class.css
+   Learner "My Class" page for phones (max-width: 768px). Load it AFTER learner_dashboard.css and
+   mobile_settings.css (it reuses the .ms-* groups, rows and sheets from there), then mobile_class.js.
+   Desktop and tablet keep the existing My Class markup exactly as it is.
+
+   To undo it all: remove the two include lines and the <div class="lmc-m ms"> block in learner_dashboard.php. */
+
+.lmc-m { display: none; }
+
+@media (max-width: 768px) {
+
+  /* swap the old mobile layout for the Settings-style one */
+  #myClassContent .lmc-dh,
+  #myClassContent .lmc-body { display: none !important; }
+  #myClassContent .lmc-m { display: block; }
+
+  /* #myClassContent already has 16px padding; Settings content starts 32px from the edge */
+  #myClassContent .lmc-m.ms { padding-left: 16px; padding-right: 16px; }
+  .lmc-m > .ms-gt:first-child { padding-top: 6px; }
+
+  /* read-only rows: same look as Settings rows, but no tap highlight */
+  .lmc-m .ms-r--static { cursor: default; }
+  .lmc-m .ms-r--static:active { background: none; }
+  .lmc-m .ms-rv { max-width: 50%; text-align: right; overflow-wrap: anywhere; }
+
+  /* linked / not linked: the page only flips data-linked, no markup is rebuilt */
+  .lmc-parent[data-linked="1"] .mc-off,
+  .lmc-parent[data-linked="0"] .mc-on { display: none !important; }
+
+  /* parent picker sheet (the sheet is appended to <body>, so these are not scoped under .ms) */
+  .ms-sheet .mc-opt { gap: 12px; }
+  .ms-sheet .mc-av { display: grid; place-items: center; width: 34px; height: 34px; flex: none; border-radius: 50%; background: #3a3a39; color: #cfcfcb; font: 600 13px/1 'Geist', system-ui, sans-serif; }
+  .ms-sheet .mc-nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ms-sheet .mc-opt .mc-tick { margin-left: auto; color: #4fd1c5; opacity: 0; transition: opacity .15s; }
+  .ms-sheet .mc-opt.is-on { background: rgba(79,209,197,.1); color: #ecece9; }
+  .ms-sheet .mc-opt.is-on .mc-tick { opacity: 1; }
+  .ms-sheet .ms-sh-b.is-primary:disabled { opacity: .4; cursor: default; }
+  .ms-sheet .mc-list { margin: 0 0 2px; }
+}

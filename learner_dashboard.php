@@ -253,6 +253,7 @@ if (!empty($joinedClassIds)) {
     <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=3.0">
     <link rel="stylesheet" href="assets/css/learner/mobile_menu.css?v=1.7">
     <link rel="stylesheet" href="assets/css/learner/mobile_settings.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/learner/mobile_class.css?v=1.0">
     <link rel="stylesheet" href="assets/css/learner/desktop_settings.css?v=1.2">   <!-- new -->
     <script>
     // Desktop sidebar: restore the saved collapsed state BEFORE first paint (no flash).
@@ -696,6 +697,48 @@ if (!empty($joinedClassIds)) {
             $lmcMulti = count($myClasses) > 1;
             $lmcNames = implode(', ', array_column($myClasses, 'name'));
             ?>
+            <!-- ═══ MOBILE (phones only, max-width 768px): Settings-style My Class. Styles in mobile_class.css, sheet in mobile_class.js ═══ -->
+            <?php
+            $lmcParentsJson = json_encode(array_map(function ($p) {
+                return ['name' => (string)$p['name'], 'email' => (string)$p['email']];
+            }, $parentsInClass), JSON_UNESCAPED_UNICODE);
+            ?>
+            <div class="lmc-m ms">
+                <div class="ms-gt"><?= $lmcMulti ? 'My classes' : 'My class' ?></div>
+                <div class="ms-g">
+                    <?php foreach ($myClasses as $c): ?>
+                    <div class="ms-r ms-r--static">
+                        <svg class="ms-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                        <span class="ms-rt"><b>Class</b><span><?= $lmcMulti ? 'One of your classes' : 'Your current class' ?></span></span>
+                        <span class="ms-rv ms-ok"><?= htmlspecialchars($c['name']) ?></span>
+                    </div>
+                    <?php endforeach; ?>
+                    <?php if ($currentYearId > 0): ?>
+                    <div class="ms-r ms-r--static">
+                        <svg class="ms-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>
+                        <span class="ms-rt"><b>Academic year</b><span>Current school year</span></span>
+                        <span class="ms-rv ms-ok"><?= htmlspecialchars($currentYearName) ?></span>
+                    </div>
+                    <?php endif; ?>
+                </div>
+
+                <div class="ms-gt">Parent link</div>
+                <div class="ms-g lmc-parent" data-linked="<?= $parentLink ? '1' : '0' ?>" data-current="<?= htmlspecialchars((string)$parentLink, ENT_QUOTES, 'UTF-8') ?>">
+                    <div class="ms-r ms-r--static">
+                        <svg class="ms-i ms-ok mc-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                        <svg class="ms-i ms-warn mc-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+                        <span class="ms-rt"><b>Parent</b><span class="mc-on">A parent has access to your progress</span><span class="mc-off">No parent linked to your account yet</span></span>
+                        <span class="ms-rv ms-ok mc-on">Linked</span>
+                        <span class="ms-rv ms-warn mc-off">Not linked</span>
+                    </div>
+                    <button type="button" class="ms-r" data-mc="manage" data-class="<?= (int)($joinedClassIds[0] ?? 0) ?>" data-parents="<?= htmlspecialchars($lmcParentsJson, ENT_QUOTES, 'UTF-8') ?>">
+                        <svg class="ms-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        <span class="ms-rt"><b class="mc-on">Manage parent link</b><b class="mc-off">Link my parent</b><span>Choose who sees your progress</span></span>
+                        <svg class="ms-i ms-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                    </button>
+                </div>
+            </div>
+
             <!-- ═══ DESKTOP HEADER (hidden below 900px) ═══ -->
             <div class="lmc-dh lmc-d-only">
                 <h2 class="lmc-dh-title">My Class</h2>
@@ -3965,7 +4008,8 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/learner_calendar.js?v=2.3"></script>
 <script src="assets/js/learner/desktop_menu.js?v=1.4"></script>
 <script src="assets/js/learner/mobile_menu.js?v=1.4"></script>
-<script src="assets/js/learner/mobile_settings.js?v=1.2"></script>
+<script src="assets/js/learner/mobile_settings.js?v=1.3"></script>
+<script src="assets/js/learner/mobile_class.js?v=1.0"></script>
 <script src="assets/js/learner/desktop_settings.js?v=1.1"></script>
 <script>window.ISKOOL_SETTINGS = { sendResetUrl: 'auth/password/send_reset_link.php' };</script>
 <?php include 'includes/global_viewer.php'; ?>
