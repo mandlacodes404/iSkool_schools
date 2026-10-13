@@ -249,7 +249,7 @@ if (!empty($joinedClassIds)) {
     <link rel="stylesheet" href="assets/css/learner/grades.css?v=3.4">
     <link rel="stylesheet" href="assets/css/learner/resources.css?v=2.6">
      <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=4.7">
-     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=13.4">
+     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=13.5">
     <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=3.0">
     <link rel="stylesheet" href="assets/css/learner/mobile_menu.css?v=1.5">
     <link rel="stylesheet" href="assets/css/learner/mobile_settings.css?v=1.0">
@@ -692,13 +692,22 @@ if (!empty($joinedClassIds)) {
             $myClasses = [];
             while ($c = $res->fetch_assoc()) { $myClasses[] = $c; }
             $resStmt->close();
+            // Desktop: several classes, or a long name, shrink the big class name
+            $lmcMulti = count($myClasses) > 1;
+            $lmcNames = implode(', ', array_column($myClasses, 'name'));
             ?>
+            <!-- ═══ DESKTOP HEADER (hidden below 900px) ═══ -->
+            <div class="lmc-dh lmc-d-only">
+                <h2 class="lmc-dh-title">My Class</h2>
+                <?php if ($currentYearId > 0): ?><span class="lmc-chip"><?= htmlspecialchars($currentYearName) ?></span><?php endif; ?>
+            </div>
+            <div class="lmc-body">
             <div class="lmc-wrap">
                 <!-- ═══ CLASS ═══ -->
                 <div class="lmc-col">
                     <div class="lmc-panel-title">My Class</div>
                     <?php foreach ($myClasses as $c): ?>
-                        <div class="lmc-class-card">
+                        <div class="lmc-class-card<?= ($lmcMulti || strlen($c['name']) > 10) ? ' lmc-class-card--compact' : '' ?>">
                             <div class="lmc-class-icon">
                                 <svg viewBox="0 0 24 24" width="20" height="20" stroke="#63b3ed" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
@@ -707,7 +716,7 @@ if (!empty($joinedClassIds)) {
                             <div class="lmc-class-body">
                                 <div class="lmc-class-label">Class</div>
                                 <div class="lmc-class-name"><?= htmlspecialchars($c['name']) ?></div>
-                                <div class="lmc-class-sub"><?= htmlspecialchars($currentYearName) ?></div>
+                                <div class="lmc-class-sub"><span class="lmc-d-only"><?= htmlspecialchars($schoolName) ?> &middot; </span><?= htmlspecialchars($currentYearName) ?></div>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -734,7 +743,7 @@ if (!empty($joinedClassIds)) {
                             </div>
                         </div>
                         <button type="button" class="toggle-parent-link lmc-toggle-btn" onclick="toggleParentDropdown()">
-                            <?= $parentLink ? 'Manage Parent Link' : 'Link My Parent' ?>
+                            <span class="lmc-m-only"><?= $parentLink ? 'Manage Parent Link' : 'Link My Parent' ?></span><span class="lmc-d-only"><?= $parentLink ? 'Manage' : 'Link my parent' ?></span>
                         </button>
                         <div class="parent-dropdown lmc-parent-dropdown" id="parentDropdown" style="display:none;">
                             <?php if (!empty($parentsInClass)): ?>
@@ -748,7 +757,10 @@ if (!empty($joinedClassIds)) {
                                             </option>
                                         <?php endforeach; ?>
                                     </select>
-                                    <button type="submit" class="join-class-btn lmc-save-btn">Save</button>
+                                    <div class="lmc-actions">
+                                        <button type="button" class="lmc-cancel-btn" onclick="toggleParentDropdown()">Cancel</button>
+                                        <button type="submit" class="join-class-btn lmc-save-btn">Save</button>
+                                    </div>
                                 </form>
                             <?php else: ?>
                                 <p class="lmc-empty-note">No parents in class yet.</p>
@@ -757,6 +769,16 @@ if (!empty($joinedClassIds)) {
                     </div>
                 </div>
             </div>
+
+            <!-- ═══ DESKTOP DETAILS RAIL (hidden below 900px) ═══ -->
+            <aside class="lmc-rail lmc-d-only">
+                <h4>Details</h4>
+                <div class="lmc-kv"><span>School</span><b><?= htmlspecialchars($schoolName) ?></b></div>
+                <div class="lmc-kv"><span>Class</span><b><?= htmlspecialchars($lmcNames) ?></b></div>
+                <?php if ($currentYearId > 0): ?><div class="lmc-kv"><span>Year</span><b><?= htmlspecialchars($currentYearName) ?></b></div><?php endif; ?>
+                <div class="lmc-kv"><span>Parent</span><b<?= $parentLink ? ' class="lmc-ok"' : '' ?>><?= $parentLink ? 'Linked' : 'Not linked' ?></b></div>
+            </aside>
+            </div><!-- /.lmc-body -->
         <?php else: ?>
             <div class="lmc-empty-wrap">
                 <svg viewBox="0 0 24 24" width="40" height="40" stroke="#63b3ed" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">

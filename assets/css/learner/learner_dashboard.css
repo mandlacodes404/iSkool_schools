@@ -936,6 +936,280 @@ iframe {
     }
 }
 
+/* ═══════════════════════════════════════════════════════════════════════
+   MY CLASS — DESKTOP (900px and up)
+   Same look as the learner Assignments / Announcements pages: Geist 400/500,
+   the teacher text ladder, hairlines instead of boxed cards, a 64px header
+   and a details rail. The rules above stay as they are for mobile / tablet.
+   Colour tokens are literal values from teacher_desktop_menu.css.
+   ═══════════════════════════════════════════════════════════════════════ */
+.lmc-d-only { display: none; }      /* desktop-only pieces of markup */
+.lmc-actions { display: contents; } /* mobile: Save sits directly in the form, as before */
+.lmc-cancel-btn { display: none; }
+
+@media (min-width: 900px) {
+    .my-class-content {
+        --lmc-text:   #f0efec;
+        --lmc-soft:   #c2c3b7;
+        --lmc-muted:  #9b9c92;
+        --lmc-faint:  #7a7b73;
+        --lmc-accent: #4fd1c5;
+        --lmc-ok:     #22c55e;
+        --lmc-line:        rgba(255,255,255,0.07);
+        --lmc-line-strong: rgba(255,255,255,0.14);
+        --lmc-hover:  rgba(255,255,255,0.055);
+        --lmc-active: rgba(255,255,255,0.095);
+    }
+    .my-class-content.active {
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        padding: 0;
+        overflow: hidden;
+        font-family: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+        font-weight: 400;
+        -webkit-font-smoothing: antialiased; /* keeps light weights from looking heavy on dark */
+        -moz-osx-font-smoothing: grayscale;
+    }
+    .lmc-m-only { display: none; }
+
+    /* ── Header ── */
+    .lmc-dh {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        height: 64px;
+        box-sizing: border-box;
+        padding: 0 28px;
+        border-bottom: 1px solid var(--lmc-line);
+        flex-shrink: 0;
+    }
+    /* id prefix so a host-level heading rule cannot recolour the title */
+    #myClassContent .lmc-dh-title {
+        margin: 0;
+        font-family: inherit;
+        font-size: 18px;
+        font-weight: 500;
+        line-height: 1.25;
+        color: var(--lmc-text);
+    }
+    .lmc-chip {
+        display: inline-flex;
+        align-items: center;
+        height: 23px;
+        padding: 0 8px;
+        border: 1px solid var(--lmc-line);
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 500;
+        line-height: 1;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        color: var(--lmc-muted);
+    }
+
+    /* ── Body: main column + details rail ── */
+    .lmc-body { flex: 1; min-height: 0; display: flex; container-type: inline-size; }
+    .lmc-wrap {
+        display: block;
+        flex: 1;
+        min-width: 0;
+        max-width: none;
+        margin: 0;
+        padding: 28px;
+        box-sizing: border-box;
+        overflow-y: auto;
+    }
+    .lmc-wrap::-webkit-scrollbar { width: 8px; }
+    .lmc-wrap::-webkit-scrollbar-track { background: transparent; }
+    .lmc-wrap::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+    .lmc-wrap::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
+    .lmc-col { max-width: 760px; }
+    .lmc-col + .lmc-col { margin-top: 32px; padding-top: 28px; border-top: 1px solid var(--lmc-line); }
+    .lmc-col:first-child .lmc-panel-title { display: none; } /* the header already says My Class */
+    .lmc-panel-title {
+        margin: 0 0 10px;
+        padding: 0;
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.6px;
+        color: var(--lmc-muted);
+    }
+
+    /* ── Class: the headline ── */
+    .lmc-class-card {
+        display: block;
+        background: none;
+        border: 0;
+        border-radius: 0;
+        padding: 0;
+    }
+    .lmc-class-card + .lmc-class-card { margin-top: 24px; }
+    .lmc-class-card .lmc-class-icon { display: none; }
+    .lmc-class-card .lmc-class-label {
+        margin: 0;
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.6px;
+        color: var(--lmc-muted);
+    }
+    .lmc-class-card .lmc-class-name {
+        margin-top: 12px;
+        font-size: 72px;
+        font-weight: 300;
+        letter-spacing: -0.03em;
+        line-height: 1;
+        color: var(--lmc-text);
+    }
+    .lmc-class-card .lmc-class-sub {
+        margin-top: 12px;
+        font-size: 14px;
+        color: var(--lmc-muted);
+    }
+    /* several classes, or a long name: a title-sized headline instead */
+    .lmc-class-card--compact .lmc-class-name { font-size: 28px; font-weight: 500; letter-spacing: -0.01em; line-height: 1.2; }
+    .lmc-class-card--compact .lmc-class-sub { margin-top: 6px; }
+    .lmc-class-sub .lmc-d-only,
+    .lmc-toggle-btn .lmc-d-only { display: inline; }
+
+    /* ── Parent link: one quiet bordered row, form opens underneath ── */
+    .lmc-parent-block {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        background: none;
+        border: 1px solid var(--lmc-line);
+        border-radius: 12px;
+        padding: 0;
+    }
+    .lmc-parent-top { grid-column: 1; grid-row: 1; min-width: 0; margin: 0; padding: 16px; }
+    /* status dot: empty ring until a parent is linked, then filled green (like the lists) */
+    .lmc-parent-icon {
+        width: 8px;
+        height: 8px;
+        box-sizing: border-box;
+        border-radius: 50%;
+        background: transparent;
+        border: 1.5px solid var(--lmc-faint);
+    }
+    .lmc-parent-icon svg { display: none; }
+    .lmc-parent-icon--linked { background: var(--lmc-ok); border-color: var(--lmc-ok); }
+    .lmc-parent-block .lmc-class-label { display: none; }
+    .lmc-parent-block .lmc-class-name {
+        font-size: 15px;
+        font-weight: 500;
+        letter-spacing: 0;
+        line-height: 1.3;
+        color: var(--lmc-text);
+    }
+    .lmc-parent-block .lmc-class-sub { margin-top: 2px; font-size: 13px; color: var(--lmc-muted); }
+
+    .lmc-toggle-btn {
+        grid-column: 2;
+        grid-row: 1;
+        width: auto;
+        height: 34px;
+        margin: 0 16px 0 0;
+        padding: 0 14px;
+        border-radius: 8px;
+        border: 1px solid var(--lmc-line-strong);
+        background: rgba(255,255,255,0.05);
+        color: var(--lmc-text);
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 400;
+    }
+    .lmc-toggle-btn:hover { background: var(--lmc-active); }
+    .lmc-toggle-btn:focus-visible { outline: 2px solid var(--lmc-accent); outline-offset: 1px; }
+
+    .lmc-parent-dropdown {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        margin: 0;
+        padding: 16px;
+        border-top: 1px solid var(--lmc-line);
+    }
+    .lmc-parent-form { gap: 0; }
+    .lmc-form-label {
+        margin-bottom: 6px;
+        font-size: 12px;
+        font-weight: 400;
+        letter-spacing: 0;
+        text-transform: none;
+        color: var(--lmc-muted);
+    }
+    .lmc-parent-form select {
+        height: 34px;
+        padding: 0 32px 0 12px;
+        border-radius: 8px;
+        border: 1px solid var(--lmc-line);
+        background: rgba(255,255,255,0.05) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239b9c92' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 12px center / 14px;
+        color: var(--lmc-text);
+        color-scheme: dark;
+        font-family: inherit;
+        font-size: 13px;
+        -webkit-appearance: none;
+        appearance: none;
+    }
+    .lmc-parent-form select:focus { outline: none; border-color: var(--lmc-accent); }
+    .lmc-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+    .lmc-actions .lmc-cancel-btn,
+    .lmc-actions .lmc-save-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        align-self: auto;
+        height: 34px;
+        margin: 0;
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 500;
+        line-height: 1;
+        cursor: pointer;
+    }
+    .lmc-actions .lmc-cancel-btn { padding: 0 16px; border: 1px solid var(--lmc-line); background: none; color: var(--lmc-muted); }
+    .lmc-actions .lmc-cancel-btn:hover { color: var(--lmc-text); background: var(--lmc-hover); }
+    .lmc-actions .lmc-save-btn { padding: 0 20px; border: 0; background: var(--lmc-accent); color: #0d1117; }
+    .lmc-actions .lmc-save-btn:hover { background: #38b2ac; }
+    .lmc-empty-note { color: var(--lmc-faint); }
+
+    /* ── Details rail (hides when the page area is under 900px wide) ── */
+    .lmc-rail {
+        display: block;
+        width: 280px;
+        box-sizing: border-box;
+        flex-shrink: 0;
+        padding: 24px 20px;
+        border-left: 1px solid var(--lmc-line);
+        overflow-y: auto;
+    }
+    .lmc-rail h4 {
+        margin: 0 0 14px;
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.6px;
+        text-transform: uppercase;
+        color: var(--lmc-muted);
+    }
+    .lmc-kv {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--lmc-line);
+        font-size: 13px;
+    }
+    .lmc-kv span { color: var(--lmc-muted); }
+    .lmc-kv b { font-weight: 400; text-align: right; color: var(--lmc-text); overflow-wrap: anywhere; }
+    .lmc-kv b.lmc-ok { color: var(--lmc-ok); }
+    @container (max-width: 899px) { .lmc-rail { display: none; } }
+
+    /* ── Not in a class yet ── */
+    .lmc-empty-wrap { flex: 1; color: var(--lmc-faint); }
+    .lmc-empty-wrap svg { stroke: var(--lmc-faint); }
+}
+
 /* ── SPLASH HANDOFF ──────────────────────────────────────────────────────
    Continuation of the splash screen started on index.php (the login page)
    for logged-in users. Visually identical to #animation-wrapper /
