@@ -41,6 +41,16 @@
     }
 }
 
+/* ── DESKTOP SPLIT PAGES: warm grey instead of the old navy ──
+   The list and detail panes are transparent, so this is the colour they both show.
+   Same grey the mobile app already uses (#20201f). Only pages with a split layout
+   (quiz, evaluations, announcements, assignments, syllabus...) are affected; Home is not. */
+@media (min-width: 900px) {
+    #api-content-area:has(.lqz-flat-layout) {
+        background-color: #20201f;
+    }
+}
+
 /* 2. Make the scrollbar look professional (Matches Chrome/Edge/Safari) */
 #api-content-area::-webkit-scrollbar {
     width: 6px;
