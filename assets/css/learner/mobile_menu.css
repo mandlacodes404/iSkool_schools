@@ -266,7 +266,10 @@ html body .dm-pop .dm-pop-item {
 }
 html body .dm-pop .dm-pop-item:active { background: var(--dm-hover); }
 html body .dm-pop .dm-pop-item.is-danger { color: #f08a84; }
-html body .dm-pop .dm-pop-item[data-act="keys"], html body .dm-pop .dm-pop-ver { display: none; }
+html body .dm-pop .dm-pop-item[data-act="keys"] { display: none; }
+/* Version line: same element and text as the desktop account menu, sized for the sheet.
+   Padding matches the rows above (12px) so the text lines up with their labels. */
+html body .dm-pop .dm-pop-ver { display: block; margin: 0; padding: 12px 12px 0; color: var(--dm-faint); font: 400 13px/1.3 var(--dm-font); }
 html body .dm-pop .dm-pop-sep { height: 1px; margin: 6px 12px; background: var(--dm-line); }
 
 /* -- Search (built by mobile_menu.js) -------------------------------------- */
