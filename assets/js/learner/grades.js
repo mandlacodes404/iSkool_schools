@@ -540,7 +540,7 @@ window.grRenderDesktopList = function () {
     const visible = groups.map((g, gi) => ({ g, gi }))
         .filter(({ g, gi }) => grQuizzes(gi, term).length && (!q || String(g.group || '').toLowerCase().includes(q)));
 
-    let html = `<div class="gr-gh"><span>Term ${term}${term === cur ? ' &middot; Current' : ''}</span><i>${visible.length}</i></div>`;
+    let html = `<div class="gr-gh">Term ${term}${term === cur ? ' &middot; Current' : ''}</div>`;
     visible.forEach(({ g, gi }) => {
         const L = grQuizzes(gi, term), m = grCalc(L);
         const pend = L.filter(x => Number(x.publish_marks) !== 1).length;
@@ -788,7 +788,7 @@ window.selectDesktopGradeSubject = function (gi, term, keepOpen) {
         <div class="gr-dh">
             <h2 class="gr-dh-title">${escHtml(group.group)}</h2>
             <span class="gr-panel-status">Term ${t}</span>
-            ${t === cur ? '<span class="gr-panel-status" style="background:rgba(79,209,197,0.1);border-color:rgba(79,209,197,0.35);color:#4fd1c5;">Current</span>' : ''}
+            ${t === cur ? '<span class="gr-panel-status"><span class="gr-cd"></span>Current</span>' : ''}
             <span class="gr-dsp"></span>
         </div>
         <div class="gr-dbody">
@@ -2763,9 +2763,15 @@ window.closeQuizReviewModal = function () {
     if (modal) modal.remove();
 };
 
-// Nunito 400/600/700 for the desktop grades page. 600 is the medium weight, so load it
-// explicitly instead of letting the browser quietly fall back to 700 (or 400).
+// Desktop type is Geist 300/400/500 (see grades.css). Nunito stays loaded for the mobile views.
 function grEnsureFont() {
+    if (!document.getElementById('gr-geist-font')) {
+        const g = document.createElement('link');
+        g.id = 'gr-geist-font';
+        g.rel = 'stylesheet';
+        g.href = 'https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500&display=swap';
+        document.head.appendChild(g);
+    }
     if (document.getElementById('gr-nunito-font')) return;
     const link = document.createElement('link');
     link.id = 'gr-nunito-font';
