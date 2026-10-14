@@ -163,7 +163,7 @@ window.loadManual = async function(containerId = 'api-content-area') {
         const classData  = classRes.ok ? await classRes.json().catch(() => null) : null;
         if (classData) homeData.myClass = classData;
 
-        const manualStyleHref = 'assets/css/learner/manual.css?v=7.7';
+        const manualStyleHref = 'assets/css/learner/manual.css?v=7.8';
         const existingManualStyle = document.getElementById('manual-style');
         if (existingManualStyle) {
             existingManualStyle.href = manualStyleHref;
@@ -405,7 +405,7 @@ window.LHD = {
         </button>`;
     },
     empty(icon, title, text) {
-        return `<div class="lhd-empty">${this.tile(icon, '#8b949e', 20)}<div><div class="lhd-row-title">${title}</div><div class="lhd-empty-text">${text}</div></div></div>`;
+        return `<div class="lhd-empty">${this.tile(icon, '#9b9c92', 20)}<div><div class="lhd-row-title">${title}</div><div class="lhd-empty-text">${text}</div></div></div>`;
     },
     section(title, count, inner) {
         return `<section class="lhd-sec"><div class="lhd-sec-head"><h2>${title}</h2>${count ? `<span class="lhd-count">${count}</span>` : ''}</div>${inner}</section>`;
