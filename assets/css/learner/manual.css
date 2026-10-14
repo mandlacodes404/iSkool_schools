@@ -1042,7 +1042,7 @@
 /* featured card */
 .lhd-hero { border: 1px solid var(--lhd-line); border-radius: 14px; padding: 28px 30px; }
 .lhd-hero-top { display: flex; align-items: center; gap: 10px; }
-.lhd-hero-label { font-size: 12px; font-weight: 500; letter-spacing: 0.6px; text-transform: uppercase; color: var(--lhd-mute); }
+.lhd-hero-label { font-size: 12px; font-weight: 500; letter-spacing: 0.6px; text-transform: uppercase; color: var(--lhd-soft); }
 .lhd-hero-title { margin-top: 14px !important; font-size: 30px; letter-spacing: -0.6px; line-height: 1.15; }
 .lhd-hero-text { margin: 8px 0 0; max-width: 520px; font-size: 15px; font-weight: 400; line-height: 1.6; color: var(--lhd-mute); }
 .lhd-hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 20px; margin-top: 22px; }
@@ -1057,7 +1057,7 @@
 .lhd-chip { font-size: 12px; font-weight: 500; border-radius: 10px; padding: 2px 9px; white-space: nowrap;
             background: color-mix(in srgb, var(--c) 14%, transparent); color: var(--c); }
 .lhd-sec-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-.lhd-sec-head h2 { font-size: 12px; font-weight: 500; letter-spacing: 0.6px; text-transform: uppercase; color: var(--lhd-mute); }
+.lhd-sec-head h2 { font-size: 12px; font-weight: 500; letter-spacing: 0.6px; text-transform: uppercase; color: var(--lhd-soft); }
 .lhd-count { font-size: 11px; font-weight: 500; color: var(--lhd-mute); background: rgba(255,255,255,0.06); border-radius: 20px; padding: 1px 8px; }
 
 /* list rows */
