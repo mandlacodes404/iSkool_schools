@@ -52,8 +52,8 @@
     transition: background 0.3s;
 }
 #api-content-area::-webkit-scrollbar-thumb:hover {
-    /* Turns teal when they actually grab the scroller */
-    background: rgba(79, 209, 197, 0.5); 
+    /* Turns soft grey-beige when they actually grab the scroller */
+    background: #c2c3b7; 
 }
 #api-content-area::-webkit-scrollbar-track {
     background: transparent;
