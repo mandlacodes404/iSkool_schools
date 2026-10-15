@@ -566,4 +566,167 @@
     html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .icp-item mark,
     html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .icp-item mark,
     html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .icp-item mark { background: #d8efeb; color: #17655f; }
+
+    /* Grades keeps its rich desktop workflow (distribution, mark entry, and
+       manual response grading) on the same local semantic palette. */
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] #api-content-area {
+        --dm-bg: #f4f3ee;
+        --dm-page: #faf9f5;
+        --dm-card: #ffffff;
+        --dm-raise: #ffffff;
+        --dm-hover: #f2f1ec;
+        --dm-active: #e7e6e0;
+        --dm-line: #dfded8;
+        --dm-line-strong: #d0cfc8;
+        --dm-text: #282924;
+        --dm-soft: #53544e;
+        --dm-muted: #73746d;
+        --dm-faint: #8b8b83;
+        --dm-accent: #187a72;
+        --dm-danger: #bd4a43;
+        background: #faf9f5 !important;
+        color: #282924;
+        color-scheme: light;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-sidebar {
+        background: #f4f3ee !important; border-right-color: #dfded8 !important;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-sidebar-header { border-color: #dfded8; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-sidebar-item:hover { background: #ecebe5; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-sidebar-item.active { background: #e2e1db; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-main-panel { background: #faf9f5 !important; color: #282924; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-sidebar-scroll::-webkit-scrollbar-thumb,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-main-panel::-webkit-scrollbar-thumb { background: #d0cfc8; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-dp,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-dp-empty {
+        --gr-dp-line: #dfded8;
+        --gr-dp-line-strong: #d0cfc8;
+        --gr-dp-hover: #f2f1ec;
+        --gr-dp-active: #e9e8e2;
+        --gr-dp-raise: #ffffff;
+        --gr-dp-text: #282924;
+        --gr-dp-soft: #53544e;
+        --gr-dp-muted: #73746d;
+        --gr-dp-faint: #8b8b83;
+        --gr-dp-accent: #187a72;
+        --gr-dp-danger: #bd4a43;
+        --gr-dp-warn: #a85d00;
+        color: #282924;
+        color-scheme: light;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-dp-btn--primary { color: #ffffff; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-dp-table tbody tr:hover td { background: #f6f5f0; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] select.gr-dp-in option { background: #ffffff; color: #282924; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-oe-learner-card {
+        background: #ffffff; border-color: #dfded8;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-oe-learner-card:hover { border-color: #bdbcb4; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-oe-learner-name,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-oe-question-text { color: #282924; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-oe-learner-score,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-oe-question-points,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-oe-grade-field-label { color: #73746d; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-oe-question-block { border-color: #ebeae5; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-oe-answer-text {
+        background: #f7f6f1; border-color: #dfded8; color: #454640;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-oe-warning-text,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-oe-pending-footer { color: #805100; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-oe-badge--pending { background: #fff3df; border-color: #edc77d; color: #805100; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-oe-badge--graded { background: #eaf7ed; border-color: #aad9b5; color: #176d38; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-oe-release-message.is-success,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-oe-saved-note { color: #176d38; }
+
+    /* Calendar is a standalone canvas rather than a split layout. */
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] #api-content-area {
+        background: #faf9f5 !important; color: #282924; color-scheme: light;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-page-title,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-month-label,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-cell-has-events .full-cal-day-num,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-upcoming-title-text { color: #282924; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-legend-item,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-day-num,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-upcoming-title,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-upcoming-empty { color: #73746d; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-main,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-upcoming-card,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-upcoming-empty {
+        background: #ffffff; border-color: #dfded8;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-nav-row,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-grid { border-color: #dfded8; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-day-header,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-cell { border-color: #ebeae5; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-cell:hover { background: #f7f6f1; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-cell-empty { background: #f4f3ee; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-cell-today,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-cell-today:hover { background: #edf6f4; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-nav-btn {
+        background: #ffffff; border-color: #d7d6cf; color: #53544e;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-nav-btn:hover {
+        background: #e9f3f1; border-color: #a8d2cd; color: #17655f;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-add-btn {
+        background: #252624; color: #ffffff;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-add-btn:hover { background: #3a3b37; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-pill-more { background: #f2f1ec !important; color: #73746d !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-upcoming-card:hover { border-color: #a8d2cd; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-upcoming-meta { color: #8b8b83; }
+
+    /* Calendar’s reminder/academic dialog has its own shell. */
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] #fullCalModal { background: rgba(38, 39, 35, .30); }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-modal-box {
+        background: #ffffff; border-color: #dfded8; box-shadow: 0 18px 52px rgba(31, 32, 29, .18);
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-modal-head span { color: #282924; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-modal-close { color: #73746d; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-modal-close:hover { color: #282924; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-tab-btn { border-color: #d7d6cf; color: #73746d; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-tab-btn--reminder.active { background: #e9f3f1; border-color: #78bbb3; color: #17655f; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-tab-btn--academic.active { background: #fceaf3; border-color: #e8a9c9; color: #a72f69; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-modal-error { color: #bd4a43; }
+
+    /* Shared grades modals and the calendar modal form controls. */
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .teacher-modal-overlay { background: rgba(38, 39, 35, .30) !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .teacher-modal-box {
+        background: #ffffff !important; border-color: #dfded8 !important; color: #282924 !important;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .teacher-modal-header,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .teacher-modal-footer { border-color: #ebeae5 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .teacher-modal-header { color: #282924 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .teacher-modal-input,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .teacher-modal-input {
+        background: #ffffff !important; border-color: #d7d6cf !important; color: #282924 !important; color-scheme: light !important;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .teacher-modal-label,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .teacher-modal-label { color: #53544e !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .teacher-modal-cancel,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .teacher-modal-cancel { background: #ffffff !important; border-color: #d7d6cf !important; color: #454640 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .teacher-modal-submit,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .teacher-modal-submit { background: #252624 !important; border-color: #252624 !important; color: #ffffff !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .teacher-modal-close { color: #73746d !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .teacher-modal-close:hover { color: #282924 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .teacher-modal-input:focus,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .teacher-modal-input:focus { border-color: #187a72 !important; box-shadow: 0 0 0 3px rgba(24, 122, 114, .13) !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .teacher-modal-submit:hover:not(:disabled),
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .teacher-modal-submit:hover:not(:disabled) { background: #3a3b37 !important; }
+
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .tchr-desktop-search-wrap { border-color: #dfded8; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .tchr-desktop-search {
+        background: #ffffff; border-color: #d7d6cf; color: #282924;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .tchr-desktop-search::placeholder { color: #8b8b83; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .tchr-desktop-search:focus { border-color: #187a72; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .teacher-desktop-create.active {
+        background: #e9f3f1; box-shadow: inset 0 0 0 1px #a8d2cd; color: #17655f;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .tchr-info-rail { border-color: #dfded8; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .tchr-info-rail-header { border-color: #dfded8; color: #73746d; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .tchr-info-rail-body p { color: #73746d; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .tchr-info-rail-body strong { color: #282924; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .tchr-info-rail-toggle { color: #73746d; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .tchr-info-rail-toggle:hover { background: #f2f1ec; color: #282924; }
 }
