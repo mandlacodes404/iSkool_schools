@@ -524,6 +524,191 @@
     font-size: 14px;
 }
 
+/* ═══════════════════════════════════════════
+   DESKTOP UPLOAD FORM (right panel, >= 900px)
+   Same look as the syllabus release form (.sbo-dp-form in sbo.css).
+   Every rule is scoped under .tchr-create-form--resource, a class only the
+   desktop panel carries, so the mobile modal that shares the .rs-* and
+   .teacher-modal-* classes is untouched.
+   ═══════════════════════════════════════════ */
+.tchr-create-form--resource {
+    --rs-f-line:        var(--dm-line, rgba(255,255,255,0.07));
+    --rs-f-line-strong: var(--dm-line-strong, rgba(255,255,255,0.14));
+    --rs-f-hover:       var(--dm-hover, rgba(255,255,255,0.055));
+    --rs-f-active:      var(--dm-active, rgba(255,255,255,0.095));
+    --rs-f-text:        var(--dm-text, #f0efec);
+    --rs-f-soft:        var(--dm-soft, #c2c3b7);
+    --rs-f-muted:       var(--dm-muted, #9b9c92);
+    --rs-f-faint:       var(--dm-faint, #7a7b73);
+    --rs-f-accent:      var(--dm-accent, #4fd1c5);
+    max-width: 660px;
+    margin-right: 0;
+    margin-left: max(0px, calc((100% - 860px) / 2));
+    color-scheme: dark;
+}
+.tchr-create-form--resource :focus-visible {
+    outline: 2px solid var(--rs-f-accent);
+    outline-offset: 2px;
+}
+
+/* header */
+.tchr-create-form--resource .tchr-create-crumb {
+    margin: 0 0 8px;
+    font-size: 13px;
+    color: var(--rs-f-muted);
+}
+.tchr-create-form--resource .rs-panel-form-header {
+    margin: 0;
+    padding: 0;
+    border-bottom: none;
+    align-items: flex-start;
+}
+.tchr-create-form--resource .rs-panel-form-title {
+    font-size: 28px;
+    line-height: 1.15;
+    font-weight: 500;
+    letter-spacing: -0.025em;
+    color: var(--rs-f-text);
+}
+.tchr-create-form--resource .rs-panel-form-close-btn { color: var(--rs-f-faint); transition: color 0.15s ease; }
+.tchr-create-form--resource .rs-panel-form-close-btn:hover { color: var(--rs-f-text); }
+
+/* sections + fields */
+.tchr-create-form--resource .rs-form-section { margin-top: 36px; }
+.tchr-create-form--resource .rs-form-h {
+    margin: 0 0 10px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--rs-f-text);
+}
+.tchr-create-form--resource .rs-form-fld { margin-top: 20px; }
+.tchr-create-form--resource .rs-form-h + .rs-form-fld { margin-top: 0; }
+.tchr-create-form--resource .rs-form-opt {
+    margin-left: 8px;
+    font-weight: 400;
+    color: var(--rs-f-faint);
+}
+.tchr-create-form--resource .teacher-modal-label {
+    margin: 0 0 7px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--rs-f-soft);
+}
+.tchr-create-form--resource .teacher-modal-input {
+    margin: 0;
+    padding: 9px 12px;
+    border: 1px solid var(--rs-f-line-strong);
+    border-radius: 8px;
+    background: transparent;
+    font: inherit;
+    color: var(--rs-f-text);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.tchr-create-form--resource .teacher-modal-input::placeholder { color: var(--rs-f-faint); }
+.tchr-create-form--resource .teacher-modal-input:focus {
+    outline: none;
+    border-color: var(--rs-f-accent);
+    box-shadow: 0 0 0 3px rgba(79,209,197,0.15);
+}
+.tchr-create-form--resource #resourceClassPicker { width: 100%; }
+
+/* file / video toggle */
+.tchr-create-form--resource .rs-form-section-gap { margin-bottom: 0; }
+.tchr-create-form--resource .rs-type-toggle-btn {
+    flex: none;
+    height: 32px;
+    padding: 0 14px;
+    border: 1px solid var(--rs-f-line-strong);
+    border-radius: 8px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--rs-f-muted);
+    transition: background 0.15s ease, color 0.15s ease;
+}
+.tchr-create-form--resource .rs-type-toggle-btn:hover { background: var(--rs-f-hover); }
+.tchr-create-form--resource .rs-type-toggle-btn.active {
+    background: var(--rs-f-active);
+    border-color: var(--rs-f-line-strong);
+    color: var(--rs-f-text);
+}
+
+/* file drop */
+.tchr-create-form--resource .teacher-file-drop {
+    padding: 28px 20px;
+    border: 1px dashed var(--rs-f-line-strong);
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--rs-f-muted);
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+.tchr-create-form--resource .teacher-file-drop:hover { background: var(--rs-f-hover); }
+.tchr-create-form--resource .teacher-file-drop.dragover {
+    border-color: var(--rs-f-accent);
+    background: rgba(79,209,197,0.05);
+}
+.tchr-create-form--resource .teacher-file-drop svg { stroke: var(--rs-f-faint); }
+.tchr-create-form--resource .rs-drop-hint { color: var(--rs-f-faint); }
+.tchr-create-form--resource .rs-file-name-display { color: var(--rs-f-soft); }
+.tchr-create-form--resource .rs-video-warning {
+    font-size: 13px;
+    color: var(--rs-f-muted);
+}
+.tchr-create-form--resource .rs-video-warning strong { color: var(--rs-f-text); }
+
+/* email notification: same box as the assignments and quiz forms */
+.tchr-create-form--resource .rs-email-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px;
+    border: 1px solid rgba(79,209,197,0.15);
+    border-radius: 10px;
+    background: rgba(79,209,197,0.05);
+    font-size: 13px;
+    color: var(--rs-f-soft);
+    cursor: pointer;
+}
+.tchr-create-form--resource .rs-email-box input {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    margin: 1px 0 0;
+    accent-color: var(--rs-f-accent);
+    cursor: pointer;
+}
+.tchr-create-form--resource .rs-form-error { margin-top: 12px; }
+
+/* actions: right-aligned row under a hairline */
+.tchr-create-form--resource .rs-panel-form-actions {
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px solid var(--rs-f-line);
+}
+.tchr-create-form--resource .rs-panel-form-cancel-btn,
+.tchr-create-form--resource .rs-panel-form-submit-btn {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 32px;
+    padding: 0 14px;
+    border-radius: 8px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+.tchr-create-form--resource .rs-panel-form-cancel-btn {
+    background: none;
+    border: 1px solid var(--rs-f-line-strong);
+    color: var(--rs-f-text);
+    transition: background 0.15s ease;
+}
+.tchr-create-form--resource .rs-panel-form-cancel-btn:hover { background: var(--rs-f-hover); }
+
 /* ── Delete modal ── */
 .rs-delete-modal-box {
     max-width: 380px;

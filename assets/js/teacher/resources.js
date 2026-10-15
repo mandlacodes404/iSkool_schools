@@ -472,50 +472,56 @@ function openUploadResourcePanel(panel) {
                 <button onclick="fetchTeacherResources()" class="rs-panel-form-close-btn">&times;</button>
             </div>
 
-            <label class="teacher-modal-label">Resource Title</label>
-            <input type="text" id="resourceTitle" class="teacher-modal-input" placeholder="e.g. Chapter 3 Notes">
-
-            <label class="teacher-modal-label">Select Class</label>
-            <div id="resourceClassPicker"></div>
-
-            <label class="teacher-modal-label">Resource Type</label>
-            <div class="rs-form-section-gap">
-                <button id="rsTypeFile" onclick="rsSetType('file')" class="rs-type-toggle-btn active">
-                    📎 File
-                </button>
-                <button id="rsTypeVideo" onclick="rsSetType('video')" class="rs-type-toggle-btn">
-                    ▶ Video (YouTube)
-                </button>
-            </div>
-
-            <div id="rsFileSection">
-                <label class="teacher-modal-label">Select File (Max 10MB)</label>
-                <div class="teacher-file-drop" id="teacherFileDropArea">
-                    <svg viewBox="0 0 24 24" width="32" height="32" stroke="#4fd1c5" stroke-width="1.5" fill="none">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="17 8 12 3 7 8"></polyline>
-                        <line x1="12" y1="3" x2="12" y2="15"></line>
-                    </svg>
-                    <p>Click or drag file here</p>
-                    <p class="rs-drop-hint">PDF, DOC, PPT, JPG, PNG, ZIP</p>
-                    <input type="file" id="resourceFile" accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.zip" class="rs-hidden-file-input">
+            <section class="rs-form-section">
+                <h3 class="rs-form-h">Details</h3>
+                <div class="rs-form-fld">
+                    <label class="teacher-modal-label" for="resourceTitle">Resource Title</label>
+                    <input type="text" id="resourceTitle" class="teacher-modal-input" placeholder="e.g. Chapter 3 Notes" autocomplete="off">
                 </div>
-                <div id="resourceFileName" class="rs-file-name-display"></div>
-            </div>
+                <div class="rs-form-fld">
+                    <span class="teacher-modal-label" id="rsClassLabel">Select Class</span>
+                    <div id="resourceClassPicker" aria-labelledby="rsClassLabel"></div>
+                </div>
+            </section>
 
-            <div id="rsVideoSection" class="rs-video-section">
-                <label class="teacher-modal-label">YouTube URL</label>
-                <input type="text" id="resourceVideoUrl" class="teacher-modal-input"
-                    placeholder="e.g. https://www.youtube.com/watch?v=...">
-                <p class="rs-video-warning">
-                    ⚠️ Set the video to <strong>Unlisted</strong> on YouTube so only learners with the link can watch it.
-                </p>
-            </div>
+            <section class="rs-form-section">
+                <h3 class="rs-form-h">Resource type</h3>
+                <div class="rs-form-section-gap">
+                    <button id="rsTypeFile" onclick="rsSetType('file')" class="rs-type-toggle-btn active">File</button>
+                    <button id="rsTypeVideo" onclick="rsSetType('video')" class="rs-type-toggle-btn">Video (YouTube)</button>
+                </div>
 
-            <label class="teacher-modal-label rs-email-label">
-                <input type="checkbox" id="resourceForceEmail">
-                Also send email notification
-            </label>
+                <div id="rsFileSection" class="rs-form-fld">
+                    <label class="teacher-modal-label">Select File<span class="rs-form-opt">Max 10MB</span></label>
+                    <div class="teacher-file-drop" id="teacherFileDropArea">
+                        <svg viewBox="0 0 24 24" width="28" height="28" stroke="currentColor" stroke-width="1.5" fill="none">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        <p>Click or drag file here</p>
+                        <p class="rs-drop-hint">PDF, DOC, PPT, JPG, PNG, ZIP</p>
+                        <input type="file" id="resourceFile" accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.zip" class="rs-hidden-file-input">
+                    </div>
+                    <div id="resourceFileName" class="rs-file-name-display"></div>
+                </div>
+
+                <div id="rsVideoSection" class="rs-video-section rs-form-fld">
+                    <label class="teacher-modal-label" for="resourceVideoUrl">YouTube URL</label>
+                    <input type="text" id="resourceVideoUrl" class="teacher-modal-input"
+                        placeholder="e.g. https://www.youtube.com/watch?v=...">
+                    <p class="rs-video-warning">
+                        Set the video to <strong>Unlisted</strong> on YouTube so only learners with the link can watch it.
+                    </p>
+                </div>
+            </section>
+
+            <section class="rs-form-section">
+                <label class="rs-email-box">
+                    <input type="checkbox" id="resourceForceEmail">
+                    <span>Also send email notification</span>
+                </label>
+            </section>
 
             <div id="uploadResourceError" class="rs-form-error"></div>
 

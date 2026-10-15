@@ -2015,10 +2015,10 @@ window.openCreateQuiz = async function() {
             if (newBtn) newBtn.classList.add('active');
         }
 
-        const titleMargin = isDesktop ? '0 0 20px' : '0 0 24px';
+        const titleMargin = isDesktop ? '0' : '0 0 24px';
 
         target.innerHTML = `
-            <div class="${isDesktop ? 'tchr-create-form tchr-create-form--quiz' : ''}" style="max-width:${isDesktop ? '860px' : '760px'};margin:0 auto;padding-top:0;">
+            <div class="${isDesktop ? 'tchr-create-form tchr-create-form--quiz' : ''}" ${isDesktop ? '' : 'style="max-width:760px;margin:0 auto;padding-top:0;"'}>
                 ${isDesktop ? '<p class="tchr-create-crumb">Quizzes</p>' : ''}
                 <div style="display:flex;align-items:center;justify-content:space-between;margin:${titleMargin};">
                     <h2 class="cq-create-title" style="margin:0;${isDesktop ? '' : 'color:var(--dm-ac, #4fd1c5);font-size:22px;font-weight:800;'}">Create a New Quiz</h2>
@@ -2045,6 +2045,42 @@ window.openCreateQuiz = async function() {
                     .cq-preview-textarea { width:100%; min-height:110px; resize:vertical; background:rgba(255,255,255,0.025); border:1px solid rgba(255,255,255,0.08); border-radius:10px; color:#8b949e; padding:12px; font-family:inherit; line-height:1.5; }
                     .cq-full-preview { max-height:560px; overflow:auto; padding-right:4px; }
                     @media (max-width: 760px) { .cq-grid { grid-template-columns:1fr; } .cq-section { padding:15px; } }
+
+                    /* ── Desktop create form (the wrapper class below is only added on desktop) ──
+                       Flat sections, same look as the syllabus release form (.sbo-dp-form in sbo.css).
+                       Colours come from the --q-* tokens declared on #qz-main-panel. ── */
+                    .tchr-create-form--quiz { width:100%; max-width:760px; margin:0; padding:40px 32px 72px; box-sizing:border-box; container-type:inline-size; font-family:var(--q-font, 'Geist', 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif); font-size:14px; line-height:1.5; color:var(--q-text, #f0efec); color-scheme:dark; }
+                    .tchr-create-form--quiz :focus-visible { outline:2px solid var(--q-accent, #4fd1c5); outline-offset:2px; }
+                    .tchr-create-form--quiz .tchr-create-crumb { margin:0 0 8px; font-size:13px; color:var(--q-muted, #9b9c92); }
+                    .tchr-create-form--quiz .cq-create-title { font-size:28px; line-height:1.15; font-weight:500; letter-spacing:-0.025em; color:var(--q-text, #f0efec); }
+
+                    .tchr-create-form--quiz .cq-section { background:none; border:none; border-radius:0; padding:0; margin:36px 0 0; }
+                    .tchr-create-form--quiz .cq-step { display:none; }
+                    .tchr-create-form--quiz .cq-section-title { margin:0 0 10px; font-size:14px; font-weight:500; color:var(--q-text, #f0efec); }
+                    .tchr-create-form--quiz .cq-section-help { margin:0 0 20px; font-size:13px; line-height:1.5; color:var(--q-muted, #9b9c92); }
+
+                    .tchr-create-form--quiz .teacher-modal-label { margin:20px 0 7px; font-size:13px; font-weight:500; color:var(--q-soft, #c2c3b7); }
+                    .tchr-create-form--quiz .teacher-modal-label:first-child,
+                    .tchr-create-form--quiz .cq-section-help + .teacher-modal-label,
+                    .tchr-create-form--quiz #cqQuestionsContainer > div > div:first-child + .teacher-modal-label { margin-top:0; }
+                    .tchr-create-form--quiz .teacher-modal-input { padding:9px 12px; border:1px solid var(--q-line2, rgba(255,255,255,0.14)); border-radius:8px; background:transparent; font:inherit; color:var(--q-text, #f0efec); transition:border-color 0.15s ease, box-shadow 0.15s ease; }
+                    .tchr-create-form--quiz .teacher-modal-input::placeholder { color:var(--q-faint, #7a7b73); }
+                    .tchr-create-form--quiz .teacher-modal-input:focus { outline:none; border-color:var(--q-accent, #4fd1c5); box-shadow:0 0 0 3px rgba(79,209,197,0.15); }
+                    .tchr-create-form--quiz select.teacher-modal-input { height:38px; }
+                    .tchr-create-form--quiz input[type="file"] { background:transparent !important; border-color:var(--q-line2, rgba(255,255,255,0.14)) !important; }
+                    @container (max-width: 520px) { .tchr-create-form--quiz .cq-grid { grid-template-columns:1fr; } }
+
+                    /* Question blocks: flat, hairline border (the inline border stays so validation can still turn it red) */
+                    .tchr-create-form--quiz #cqQuestionsContainer > div { background:transparent !important; }
+                    .tchr-create-form--quiz .cq-add-btn { width:auto !important; display:inline-flex; align-items:center; gap:7px; height:32px; margin:4px 0 20px !important; padding:0 14px !important; background:none !important; border:1px solid var(--q-line2, rgba(255,255,255,0.14)) !important; border-radius:8px !important; color:var(--q-text, #f0efec) !important; font:inherit; font-size:13px !important; font-weight:500 !important; }
+                    .tchr-create-form--quiz .cq-add-btn:hover { background:var(--q-hover, rgba(255,255,255,0.055)) !important; }
+
+                    /* Actions: right-aligned row under a hairline */
+                    .tchr-create-form--quiz .cq-form-actions { display:flex; justify-content:flex-end; gap:8px; margin:32px 0 0; padding-top:20px; border-top:1px solid var(--q-line, rgba(255,255,255,0.07)); }
+                    .tchr-create-form--quiz .cq-form-cancel-btn,
+                    .tchr-create-form--quiz .cq-form-submit-btn { display:inline-flex; align-items:center; gap:7px; height:32px; padding:0 14px; border-radius:8px; font:inherit; font-size:13px; font-weight:500; white-space:nowrap; }
+                    .tchr-create-form--quiz .cq-form-cancel-btn { background:none; border:1px solid var(--q-line2, rgba(255,255,255,0.14)); color:var(--q-text, #f0efec); transition:background 0.15s ease; }
+                    .tchr-create-form--quiz .cq-form-cancel-btn:hover { background:var(--q-hover, rgba(255,255,255,0.055)); }
                 </style>
 
                 <form id="createQuizForm" enctype="multipart/form-data">
@@ -2212,7 +2248,7 @@ window.openCreateQuiz = async function() {
                         This quiz contains open-ended questions. After all learners submit, you will need to manually grade their responses before you can release marks.
                     </div>
                     <div id="cqQuestionsContainer"></div>
-                    <button type="button" onclick="addCqQuestion()"
+                    <button type="button" onclick="addCqQuestion()" class="cq-add-btn"
                         style="width:100%;margin-top:8px;margin-bottom:16px;background:var(--dm-ac-bg-soft, rgba(79,209,197,0.08));
                                border:1px var(--dm-ac-dash, dashed) var(--dm-ac-line-strong, rgba(79,209,197,0.4));color:var(--dm-ac, #4fd1c5);border-radius:8px;
                                padding:10px;cursor:pointer;font-size:13px;font-weight:700;">
@@ -2237,13 +2273,13 @@ window.openCreateQuiz = async function() {
 
                     <div id="cqError" style="color:#ff5555;font-size:14px;margin-top:8px;display:none;"></div>
 
-                    <div style="display:flex;gap:12px;margin-top:16px;margin-bottom:32px;">
+                    <div class="cq-form-actions" ${isDesktop ? '' : 'style="display:flex;gap:12px;margin-top:16px;margin-bottom:32px;"'}>
                         <button type="button" onclick="fetchTeacherQuizzes()"
-                            class="teacher-modal-cancel" style="flex:1;padding:13px;">
+                            class="teacher-modal-cancel cq-form-cancel-btn" ${isDesktop ? '' : 'style="flex:1;padding:13px;"'}>
                             Cancel
                         </button>
-                        <button type="submit" class="teacher-modal-submit"
-                            id="cqSubmitBtn" style="flex:2;padding:13px;font-size:14px;">
+                        <button type="submit" class="teacher-modal-submit cq-form-submit-btn"
+                            id="cqSubmitBtn" ${isDesktop ? '' : 'style="flex:2;padding:13px;font-size:14px;"'}>
                             Create Quiz
                         </button>
                     </div>
