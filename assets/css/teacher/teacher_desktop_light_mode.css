@@ -730,3 +730,126 @@
     html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .tchr-info-rail-toggle { color: #73746d; }
     html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .tchr-info-rail-toggle:hover { background: #f2f1ec; color: #282924; }
 }
+
+
+/* ═══ Floating layers in light mode: account popover, Settings modal, Home modals ═══
+   (merged from teacher_desktop_light_modals.css; it must stay below teacher_desktop_settings.css in load order, which this sheet already does) ═══ */
+@media (min-width: 769px) {
+
+/* ── 1. Variables: Settings modal, its dialogs and toast, and the account popover ─────────── */
+html[data-teacher-theme="light"] .dsm,
+html[data-teacher-theme="light"] .ds-ov,
+html[data-teacher-theme="light"] .ds-toast,
+html[data-teacher-theme="light"] .dm-pop {
+  --ds-bg: #ffffff;        /* content panel */
+  --ds-rail: #faf9f5;      /* left rail */
+  --ds-raise: #ffffff;     /* search box and inputs */
+  --ds-sel: #ebeae4;       /* selected nav item */
+  --ds-hover: rgba(38,39,35,.055);
+  --ds-line: #ebeae5;      /* row dividers */
+  --ds-edge: #dfded8;      /* modal edge, rail divider */
+  --ds-field: #d7d6cf;     /* input, search and button borders */
+  --ds-text: #282924;
+  --ds-soft: #53544e;
+  --ds-muted: #73746d;
+  --ds-faint: #8b8b83;
+  --ds-btn: #252624;       /* primary button */
+  --ds-btn-text: #ffffff;
+  --ds-danger: #bd4a43;
+  --ds-warn: #a85d00;
+  --lm-focus: #8a8a82;
+  --lm-ring: rgba(38,39,35,.08);
+}
+
+/* ── 2. Account popover (avatar menu) ─────────────────────────────────────────────────────── */
+html[data-teacher-theme="light"] .dm-pop {
+  box-shadow: 0 12px 32px rgba(31,32,29,.12), 0 2px 6px rgba(31,32,29,.05);
+}
+html[data-teacher-theme="light"] .dm-pop-sep { background: rgba(38,39,35,.09); }
+html[data-teacher-theme="light"] .dm-pop-kbd { color: var(--ds-muted); }
+html[data-teacher-theme="light"] .dm-pop-ver { color: var(--ds-faint); }
+html[data-teacher-theme="light"] .dm-pop-item:focus-visible { outline-color: var(--lm-focus); }
+html[data-teacher-theme="light"] .dm-pop-item.is-danger:hover { background: rgba(189,74,67,.08); }
+
+/* ── 3. Quick search and shortcuts: lighter backdrop (the panels already follow the theme) ── */
+html[data-teacher-theme="light"] .dm-palette,
+html[data-teacher-theme="light"] .dm-keys { background: rgba(38,39,35,.30); }
+
+/* ── 4. Settings modal ────────────────────────────────────────────────────────────────────── */
+html[data-teacher-theme="light"] .dsm { background: rgba(38,39,35,.30); }
+html[data-teacher-theme="light"] .ds { box-shadow: 0 18px 52px rgba(31,32,29,.18); }
+html[data-teacher-theme="light"] .ds-panel { scrollbar-color: #d0cfc8 transparent; }
+html[data-teacher-theme="light"] .ds-search:focus-within { border-color: var(--lm-focus); }
+html[data-teacher-theme="light"] .ds .ds-search input { color-scheme: light; }
+html[data-teacher-theme="light"] .ds-av-face { background: #e9e8e2; color: #555650; }
+
+/* buttons */
+html[data-teacher-theme="light"] .ds-b:hover { background: rgba(38,39,35,.05); }
+html[data-teacher-theme="light"] .ds-b.is-p:hover { background: #3a3b37; border-color: #3a3b37; color: #ffffff; }
+html[data-teacher-theme="light"] .ds-b.is-d,
+html[data-teacher-theme="light"] .ds-b.is-d:hover { background: rgba(189,74,67,.10); }
+html[data-teacher-theme="light"] .ds-b.is-d:hover { background: rgba(189,74,67,.16); }
+html[data-teacher-theme="light"] .ds-b.is-t:hover { background: rgba(189,74,67,.08); }
+html[data-teacher-theme="light"] .ds-spin { border-color: rgba(255,255,255,.28); border-top-color: #ffffff; }
+
+/* fields (change password) */
+html[data-teacher-theme="light"] .ds .ds-f input { color-scheme: light; }
+html[data-teacher-theme="light"] .ds .ds-f input:hover { border-color: #bdbcb4; }
+html[data-teacher-theme="light"] .ds .ds-f input:focus { border-color: var(--lm-focus); box-shadow: 0 0 0 3px var(--lm-ring); }
+html[data-teacher-theme="light"] .ds .ds-f.is-bad input,
+html[data-teacher-theme="light"] .ds .ds-f.is-bad input:focus { border-color: var(--ds-danger); }
+html[data-teacher-theme="light"] .ds-banner { background: rgba(189,74,67,.08); }
+
+/* Appearance (theme chooser) */
+html[data-teacher-theme="light"] .ds-theme-option:hover { border-color: #bdbcb4; background: #f7f6f1; }
+html[data-teacher-theme="light"] .ds-theme-swatch { border-color: rgba(38,39,35,.14); }
+
+/* confirm dialogs and toast */
+html[data-teacher-theme="light"] .ds-ov { background: rgba(38,39,35,.30); }
+html[data-teacher-theme="light"] .ds-dl { box-shadow: 0 18px 52px rgba(31,32,29,.18); }
+html[data-teacher-theme="light"] .ds-toast { background: #252624; border-color: transparent; color: #faf9f5; box-shadow: 0 8px 26px rgba(31,32,29,.22); }
+html[data-teacher-theme="light"] .ds-toast.is-bad { background: #fbeceb; border-color: #f0c7c4; color: #a53c36; }
+
+/* ── 5. Home modals: Add to Calendar (#reminderModal), Add a class / subject (#teacherSubjectModal) ── */
+html[data-teacher-theme="light"] .mini-cal-modal {
+  --lm-focus: #8a8a82;
+  --lm-ring: rgba(38,39,35,.08);
+  background: rgba(38,39,35,.30);
+}
+html[data-teacher-theme="light"] .mini-cal-modal button:focus-visible,
+html[data-teacher-theme="light"] .mini-cal-modal .teacher-modal-input:focus-visible { outline-color: var(--lm-focus); }
+html[data-teacher-theme="light"] .mini-cal-modal .mini-cal-modal-box {
+  background: #ffffff; border-color: #dfded8; color: #53544e;
+  box-shadow: 0 18px 52px rgba(31,32,29,.18);
+}
+html[data-teacher-theme="light"] .mini-cal-modal .mini-cal-modal-title { color: #282924; }
+html[data-teacher-theme="light"] .mini-cal-modal .mini-cal-modal-close { color: #73746d; }
+html[data-teacher-theme="light"] .mini-cal-modal .mini-cal-modal-close:hover { background: rgba(38,39,35,.055); color: #282924; }
+
+/* tabs: grey track, the active tab is a white chip */
+html[data-teacher-theme="light"] .mini-cal-modal .mini-cal-tab-row { background: #f4f3ee; border-color: #dfded8; }
+html[data-teacher-theme="light"] .mini-cal-modal .mini-cal-tab-btn { color: #73746d; }
+html[data-teacher-theme="light"] .mini-cal-modal .mini-cal-tab-btn:hover { color: #282924; }
+html[data-teacher-theme="light"] .mini-cal-modal .mini-cal-tab-btn--reminder.active,
+html[data-teacher-theme="light"] .mini-cal-modal .mini-cal-tab-btn--academic.active {
+  background: #ffffff; color: #282924; box-shadow: 0 0 0 1px #dfded8, 0 1px 2px rgba(31,32,29,.06);
+}
+
+/* fields */
+html[data-teacher-theme="light"] .mini-cal-modal .teacher-modal-label { color: #53544e; }
+html[data-teacher-theme="light"] .mini-cal-modal .teacher-modal-input {
+  background-color: #ffffff; border-color: #d7d6cf; color: #282924; color-scheme: light;
+}
+html[data-teacher-theme="light"] .mini-cal-modal .teacher-modal-input:hover { border-color: #bdbcb4; }
+html[data-teacher-theme="light"] .mini-cal-modal .teacher-modal-input:focus { border-color: var(--lm-focus); box-shadow: 0 0 0 3px var(--lm-ring); }
+html[data-teacher-theme="light"] .mini-cal-modal .teacher-modal-input::placeholder { color: #94948c; }
+html[data-teacher-theme="light"] .mini-cal-modal select.teacher-modal-input option { background: #ffffff; color: #282924; }
+
+/* error and actions */
+html[data-teacher-theme="light"] .mini-cal-modal .mini-cal-form-error { color: #bd4a43; }
+html[data-teacher-theme="light"] .mini-cal-modal .teacher-modal-cancel { background: #ffffff; border-color: #d7d6cf; color: #454640; }
+html[data-teacher-theme="light"] .mini-cal-modal .teacher-modal-cancel:hover { background: #f2f1ec; color: #282924; }
+html[data-teacher-theme="light"] .mini-cal-modal .teacher-modal-submit { background: #252624; color: #ffffff; }
+html[data-teacher-theme="light"] .mini-cal-modal .teacher-modal-submit:hover { background: #3a3b37; }
+
+}

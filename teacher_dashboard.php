@@ -107,7 +107,7 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
     <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_menu.css?v=1.1">
     <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_settings.css?v=1.0">
     <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_settings.css?v=1.3">
-    <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_light_mode.css?v=1.3">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_light_mode.css?v=1.4">
     <script>
     // Desktop sidebar: restore the saved collapsed state BEFORE first paint (no flash).
     // With no saved choice, screens narrower than 1440px start as a rail.
