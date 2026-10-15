@@ -992,3 +992,85 @@
 .tdh-guide .manual-container .section:hover { border-color: var(--tdh-line); }
 .tdh-guide .manual-container .section p, .tdh-guide .manual-container ul li { font-size: 14px; font-weight: 400; line-height: 1.65; color: var(--tdh-text); }
 .tdh-guide .manual-container strong { font-weight: var(--tdh-w-strong); color: var(--tdh-bright); }
+
+/* ─────────────────────────────────────────────
+   DESKTOP MODALS — Add to Calendar (#reminderModal) and Add a class / Add subject
+   (#teacherSubjectModal). Same recipe as the desktop home and the Settings modal:
+   panel grey #1a1a19, hairline outline, Geist 400/500, #c2c3b7 text, #f0efec for
+   titles and focus, neutral buttons. Desktop only (>= 769px): below that the
+   base .mini-cal-* rules above still apply, so the mobile modal is unchanged.
+   Scoped under .mini-cal-modal because .teacher-modal-label / -input / -cancel /
+   -submit are shared with other teacher pages and must not change there.
+   Literal colours, because the subject modal sits outside .tdh.
+   ───────────────────────────────────────────── */
+@media (min-width: 769px) {
+    .mini-cal-modal {
+        background: rgba(0,0,0,0.6);
+        font-family: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+        font-weight: 400;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+    .mini-cal-modal *, .mini-cal-modal *::before, .mini-cal-modal *::after { box-sizing: border-box; }
+    .mini-cal-modal button:focus-visible,
+    .mini-cal-modal .teacher-modal-input:focus-visible { outline: 2px solid #4fd1c5; outline-offset: 2px; }
+
+    .mini-cal-modal .mini-cal-modal-box {
+        width: 420px;
+        max-width: calc(100vw - 48px);
+        max-height: calc(100vh - 48px);
+        overflow-y: auto;
+        padding: 24px;
+        background: #1a1a19;
+        border: 1px solid rgba(255,255,255,0.14);
+        border-radius: 12px;
+        box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+        color: #c2c3b7;
+    }
+    .mini-cal-modal .mini-cal-modal-header { margin-bottom: 20px; }
+    .mini-cal-modal .mini-cal-modal-title { font-size: 18px; font-weight: 500; letter-spacing: -0.3px; color: #f0efec; }
+    .mini-cal-modal .mini-cal-modal-close {
+        width: 32px; height: 32px; margin: -6px -8px -6px 0; padding: 0;
+        display: flex; align-items: center; justify-content: center;
+        border-radius: 8px; font-size: 22px; line-height: 1; color: #9b9c92; cursor: pointer;
+    }
+    .mini-cal-modal .mini-cal-modal-close:hover { background: rgba(255,255,255,0.055); color: #f0efec; }
+
+    /* tabs: one neutral segmented control; the active tab is just the Settings selected grey */
+    .mini-cal-modal .mini-cal-tab-row { gap: 2px; padding: 3px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.14); border-radius: 10px; }
+    .mini-cal-modal .mini-cal-tab-btn {
+        height: 32px; padding: 0 8px; border: 0; border-radius: 7px;
+        background: transparent; color: #9b9c92; font-size: 13px; font-weight: 500;
+    }
+    .mini-cal-modal .mini-cal-tab-btn:hover { color: #f0efec; }
+    .mini-cal-modal .mini-cal-tab-btn--reminder.active,
+    .mini-cal-modal .mini-cal-tab-btn--academic.active { border: 0; background: rgba(255,255,255,0.095); color: #f0efec; }
+
+    /* fields */
+    .mini-cal-modal .teacher-modal-label { display: block; margin: 0 0 6px; font-size: 13px; font-weight: 500; letter-spacing: 0; text-transform: none; color: #9b9c92; }
+    .mini-cal-modal .teacher-modal-label.mini-cal-form-label-spaced { margin-top: 16px; }
+    .mini-cal-modal .teacher-modal-input {
+        display: block; width: 100%; height: 40px; padding: 0 12px;
+        background: transparent; border: 1px solid rgba(255,255,255,0.14); border-radius: 8px;
+        color: #f0efec; font-family: inherit; font-size: 14px; font-weight: 400;
+        box-shadow: none; outline: none; color-scheme: dark;
+    }
+    .mini-cal-modal .teacher-modal-input:hover { border-color: rgba(255,255,255,0.3); }
+    .mini-cal-modal .teacher-modal-input:focus { border-color: rgba(255,255,255,0.45); box-shadow: 0 0 0 3px rgba(255,255,255,0.06); }
+    .mini-cal-modal .teacher-modal-input::placeholder { color: #8b8c83; opacity: 1; }
+    .mini-cal-modal select.teacher-modal-input {
+        appearance: none; -webkit-appearance: none; padding-right: 36px; cursor: pointer;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239b9c92' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+        background-repeat: no-repeat; background-position: right 12px center; background-size: 16px;
+    }
+    .mini-cal-modal select.teacher-modal-input option { background: #1a1a19; color: #f0efec; }
+
+    /* error + actions */
+    .mini-cal-modal .mini-cal-form-error { margin-top: 12px; font-size: 13px; color: #f28b82; }
+    .mini-cal-modal .mini-cal-form-actions { justify-content: flex-end; gap: 10px; margin-top: 24px; }
+    .mini-cal-modal .mini-cal-form-actions .mini-cal-form-btn-half { flex: 0 0 auto; min-width: 96px; height: 40px; padding: 0 22px; border-radius: 8px; font-size: 14px; font-weight: 500; letter-spacing: 0; text-transform: none; box-shadow: none; cursor: pointer; }
+    .mini-cal-modal .teacher-modal-cancel { background: none; border: 1px solid rgba(255,255,255,0.14); color: #c2c3b7; }
+    .mini-cal-modal .teacher-modal-cancel:hover { background: rgba(255,255,255,0.055); color: #f0efec; }
+    .mini-cal-modal .teacher-modal-submit { background: #c2c3b7; background-image: none; border: 0; color: #0d1117; }
+    .mini-cal-modal .teacher-modal-submit:hover { background: #adaea2; }
+}
