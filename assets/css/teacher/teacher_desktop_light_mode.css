@@ -308,4 +308,262 @@
     }
     html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .icp-item mark { background: #d8efeb; color: #17655f; }
     html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .icp-footer { border-color: #ebeae5; }
+
+    /* Resources, Syllabus, and Evaluations use the same desktop split-view
+       contract as the first rollout screens. Keep their tokens local to the
+       active API canvas so unfinished teacher pages retain the dark theme. */
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] #api-content-area,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] #api-content-area,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] #api-content-area {
+        --dm-bg: #f4f3ee;
+        --dm-page: #faf9f5;
+        --dm-card: #ffffff;
+        --dm-raise: #ffffff;
+        --dm-hover: #f2f1ec;
+        --dm-active: #e7e6e0;
+        --dm-line: #dfded8;
+        --dm-line-strong: #d0cfc8;
+        --dm-text: #282924;
+        --dm-soft: #53544e;
+        --dm-muted: #73746d;
+        --dm-faint: #8b8b83;
+        --dm-accent: #187a72;
+        --dm-danger: #bd4a43;
+        background: #faf9f5 !important;
+        color: #282924;
+        color-scheme: light;
+    }
+
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .rs-sidebar,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .sbo-sidebar,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .ev-sidebar {
+        background: #f4f3ee !important;
+        border-right-color: #dfded8 !important;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .rs-sidebar-header,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .sbo-sidebar-header,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .ev-sidebar-header { border-color: #dfded8; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .rs-sidebar-item:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .sbo-sidebar-item:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .ev-sidebar-item:hover { background: #ecebe5; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .rs-sidebar-item.active,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .sbo-sidebar-item.active,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .ev-sidebar-item.active { background: #e2e1db; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .rs-main-panel,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .sbo-main-panel,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .ev-main-panel { background: #faf9f5 !important; color: #282924; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .rs-sidebar-scroll::-webkit-scrollbar-thumb,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .rs-main-panel::-webkit-scrollbar-thumb,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .sbo-sidebar-scroll::-webkit-scrollbar-thumb,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .sbo-main-panel::-webkit-scrollbar-thumb,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .ev-sidebar-scroll::-webkit-scrollbar-thumb,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .ev-main-panel::-webkit-scrollbar-thumb { background: #d0cfc8; }
+
+    /* Resource previews and the complete upload flow. */
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .rs-panel-content,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .rs-panel-empty { color: #282924; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .rs-panel-preview { background: #ffffff; border-color: #dfded8; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .rs-panel-open-btn {
+        background: #ffffff; border-color: #d7d6cf; color: #282924;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .rs-panel-open-btn:hover { background: #f2f1ec; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .rs-panel-delete-btn { border-color: rgba(189, 74, 67, .38); color: #bd4a43; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .rs-panel-delete-btn:hover { background: rgba(189, 74, 67, .08); }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .tchr-create-form--resource {
+        --rs-f-line: #dfded8;
+        --rs-f-line-strong: #d0cfc8;
+        --rs-f-hover: #f2f1ec;
+        --rs-f-active: #e9e8e2;
+        --rs-f-text: #282924;
+        --rs-f-soft: #53544e;
+        --rs-f-muted: #73746d;
+        --rs-f-faint: #8b8b83;
+        --rs-f-accent: #187a72;
+        color-scheme: light;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .tchr-create-form--resource .rs-email-box {
+        background: #edf6f4; border-color: #b9ddd8;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .tchr-create-form--resource .teacher-file-drop.dragover {
+        background: #edf6f4; border-color: #187a72;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .rs-type-toggle-btn.active {
+        background: #e9f3f1; border-color: #a8d2cd; color: #17655f;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .rs-video-warning strong { color: #282924; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .rs-form-error,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .rs-error-message { color: #bd4a43; }
+
+    /* Syllabus and Evaluation detail/release forms are token-based. Their
+       explicit token values also cover dynamic topic, statement, and weight
+       rows created after the page first renders. */
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .sbo-dp,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .sbo-panel-empty {
+        --sbo-dp-line: #dfded8;
+        --sbo-dp-line-strong: #d0cfc8;
+        --sbo-dp-hover: #f2f1ec;
+        --sbo-dp-active: #e9e8e2;
+        --sbo-dp-text: #282924;
+        --sbo-dp-soft: #53544e;
+        --sbo-dp-muted: #73746d;
+        --sbo-dp-faint: #8b8b83;
+        --sbo-dp-accent: #187a72;
+        --sbo-dp-danger: #bd4a43;
+        --sbo-dp-warn: #a85d00;
+        color: #282924;
+        color-scheme: light;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .ev-dp,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .ev-panel-empty {
+        --ev-dp-line: #dfded8;
+        --ev-dp-line-strong: #d0cfc8;
+        --ev-dp-hover: #f2f1ec;
+        --ev-dp-active: #e9e8e2;
+        --ev-dp-raise: #ffffff;
+        --ev-dp-text: #282924;
+        --ev-dp-soft: #53544e;
+        --ev-dp-muted: #73746d;
+        --ev-dp-faint: #8b8b83;
+        --ev-dp-accent: #187a72;
+        --ev-dp-danger: #bd4a43;
+        color: #282924;
+        color-scheme: light;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .sbo-dp-btn--primary,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .ev-dp-btn--primary { color: #ffffff; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .sbo-dp-btn--danger,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .ev-dp-btn--danger { border-color: rgba(189, 74, 67, .38); }
+
+    /* All three pages use the shared dialog foundation for delete actions;
+       Resources also uses it for the tablet upload dialog. */
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .teacher-modal-overlay,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .teacher-modal-overlay,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .teacher-modal-overlay { background: rgba(38, 39, 35, .30) !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .teacher-modal-box,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .teacher-modal-box,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .teacher-modal-box {
+        background: #ffffff !important; border-color: #dfded8 !important; color: #282924 !important;
+        box-shadow: 0 18px 52px rgba(31, 32, 29, .18);
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .teacher-modal-header,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .teacher-modal-header,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .teacher-modal-header { border-color: #ebeae5 !important; color: #282924 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .teacher-modal-footer,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .teacher-modal-footer,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .teacher-modal-footer { border-color: #ebeae5 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .teacher-modal-input,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .teacher-modal-input,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .teacher-modal-input {
+        background: #ffffff !important; border-color: #d7d6cf !important; color: #282924 !important; color-scheme: light !important;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .teacher-modal-label,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .teacher-modal-label,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .teacher-modal-label { color: #53544e !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .teacher-modal-input::placeholder,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .teacher-modal-input::placeholder,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .teacher-modal-input::placeholder { color: #94948c !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .teacher-modal-input:focus,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .teacher-modal-input:focus,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .teacher-modal-input:focus { border-color: #187a72 !important; box-shadow: 0 0 0 3px rgba(24, 122, 114, .13) !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .teacher-modal-close,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .teacher-modal-close,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .teacher-modal-close { color: #73746d !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .teacher-modal-close:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .teacher-modal-close:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .teacher-modal-close:hover { color: #282924 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .teacher-modal-cancel,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .teacher-modal-cancel,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .teacher-modal-cancel { background: #ffffff !important; border-color: #d7d6cf !important; color: #454640 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .teacher-modal-submit,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .teacher-modal-submit,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .teacher-modal-submit { background: #252624 !important; border-color: #252624 !important; color: #ffffff !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .teacher-modal-submit:hover:not(:disabled),
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .teacher-modal-submit:hover:not(:disabled),
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .teacher-modal-submit:hover:not(:disabled) { background: #3a3b37 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .rs-delete-confirm-btn,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .sbo-delete-confirm-btn,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .ev-delete-confirm-btn { background: #bd4a43 !important; border-color: #bd4a43 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .rs-delete-modal-text,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .sbo-delete-modal-text,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .ev-delete-modal-text { color: #53544e !important; }
+
+    /* Search, primary actions, and supporting information rail. */
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .tchr-desktop-search-wrap,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .tchr-desktop-search-wrap,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .tchr-desktop-search-wrap { border-color: #dfded8; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .tchr-desktop-search,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .tchr-desktop-search,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .tchr-desktop-search {
+        background: #ffffff; border-color: #d7d6cf; color: #282924;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .tchr-desktop-search::placeholder,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .tchr-desktop-search::placeholder,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .tchr-desktop-search::placeholder { color: #8b8b83; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .tchr-desktop-search:focus,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .tchr-desktop-search:focus,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .tchr-desktop-search:focus { border-color: #187a72; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .teacher-desktop-create.active,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .teacher-desktop-create.active,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .teacher-desktop-create.active {
+        background: #e9f3f1; box-shadow: inset 0 0 0 1px #a8d2cd; color: #17655f;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .tchr-info-rail,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .tchr-info-rail,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .tchr-info-rail { border-color: #dfded8; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .tchr-info-rail-header,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .tchr-info-rail-header,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .tchr-info-rail-header { border-color: #dfded8; color: #73746d; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .tchr-info-rail-body p,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .tchr-info-rail-body p,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .tchr-info-rail-body p { color: #73746d; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .tchr-info-rail-body strong,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .tchr-info-rail-body strong,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .tchr-info-rail-body strong { color: #282924; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .tchr-info-rail-toggle,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .tchr-info-rail-toggle,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .tchr-info-rail-toggle { color: #73746d; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .tchr-info-rail-toggle:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .tchr-info-rail-toggle:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .tchr-info-rail-toggle:hover { background: #f2f1ec; color: #282924; }
+
+    /* Class selection appears in all three release forms. */
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .icp-input,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .icp-input,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .icp-input { background: #ffffff; border-color: #d7d6cf; color: #282924; color-scheme: light; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .icp-input::placeholder,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .icp-input::placeholder,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .icp-input::placeholder,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .icp-clear-btn,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .icp-clear-btn,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .icp-clear-btn,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .icp-empty,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .icp-empty,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .icp-empty,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .icp-footer,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .icp-footer,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .icp-footer { color: #73746d; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .icp-input:focus,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .icp-input:focus,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .icp-input:focus { background: #ffffff; border-color: #187a72; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .icp-input.icp-has-selection,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .icp-input.icp-has-selection,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .icp-input.icp-has-selection { background: #e9f3f1; border-color: #78bbb3; color: #17655f; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .icp-dropdown,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .icp-dropdown,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .icp-dropdown { background: #ffffff; border-color: #d7d6cf; box-shadow: 0 12px 32px rgba(31, 32, 29, .16); }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .icp-item,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .icp-item,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .icp-item { color: #454640; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .icp-item:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .icp-item.icp-highlighted,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .icp-item:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .icp-item.icp-highlighted,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .icp-item:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .icp-item.icp-highlighted { background: #f2f1ec; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .icp-item.icp-item-active,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .icp-item.icp-item-active,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .icp-item.icp-item-active { background: #e9f3f1; border-left-color: #187a72; color: #17655f; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .icp-item mark,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .icp-item mark,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .icp-item mark { background: #d8efeb; color: #17655f; }
 }
