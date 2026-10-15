@@ -74,9 +74,15 @@ window.fetchSyllabus = async function() {
         console.error('Syllabus fetch error:', err);
         if (apiArea) {
             apiArea.innerHTML = `
+                <style>
+                    @media (min-width: 900px) {
+                        .syl-retry-btn { background: #c2c3b7 !important; }
+                        .syl-retry-btn:hover { background: #adaea2 !important; }
+                    }
+                </style>
                 <div style="text-align:center;margin-top:60px;padding:20px;">
                     <p style="color:#ff5555;">Unable to load syllabus.</p>
-                    <button onclick="window.syllabusCache=null; fetchSyllabus()"
+                    <button class="syl-retry-btn" onclick="window.syllabusCache=null; fetchSyllabus()"
                             style="background:#4fd1c5;border:none;padding:8px 16px;
                                    border-radius:8px;color:#0d1117;font-weight:700;cursor:pointer;">
                         Try Again
@@ -957,7 +963,7 @@ window.selectDesktopSyllabusBrief = function (idx) {
     const isCur = Number(b.term) === Number(window._sylCurrentTerm);
     const topics = b.topics || [];
     const assess = b.assessments || [];
-    const COL = ['#4fd1c5', '#a78bfa', '#f28c38', '#f472b6', '#fdd663', '#34d399'];
+    const COL = ['#c2c3b7', '#a78bfa', '#f28c38', '#f472b6', '#fdd663', '#34d399'];
 
     const noteHtml = b.notes
         ? `<div class="syl-note2"><small>Note from ${sylEsc(b.teacher)}</small>${sylEsc(b.notes)}</div>` : '';

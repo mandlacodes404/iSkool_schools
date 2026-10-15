@@ -264,7 +264,7 @@
     height: 34px;
     padding: 0 18px;
     border-radius: 8px;
-    background: var(--gr-accent);
+    background: #c2c3b7;
     color: #0d1117;
     font-weight: var(--gr-w-strong, 500);
     font-size: 13px;
@@ -272,7 +272,7 @@
     flex-shrink: 0;
     cursor: pointer;
 }
-.gr-pri:hover { background: #38b2ac; }
+.gr-pri:hover { background: #adaea2; }
 .gr-pri--warn { background: var(--gr-lo); }
 .gr-pri--warn:hover { background: #e0625a; }
 .gr-dbody { flex: 1; min-height: 0; display: flex; }
@@ -335,12 +335,12 @@
 .gr-card b { display: block; font-size: 26px; font-weight: 300; margin: 6px 0 2px; line-height: 1.1; color: var(--gr-text); }
 .gr-card span.gr-cap { font-size: 12px; color: var(--gr-muted); }
 .gr-bar1 { height: 4px; border-radius: 2px; background: rgba(255,255,255,0.08); margin: 10px 0 8px; overflow: hidden; }
-.gr-bar1 i { display: block; height: 100%; background: var(--gr-accent); }
+.gr-bar1 i { display: block; height: 100%; background: #c2c3b7; }
 .gr-info {
     width: 16px; height: 16px; padding: 0; border-radius: 50%; flex-shrink: 0; cursor: pointer; display: inline-grid; place-items: center;
     border: 1px solid var(--gr-line-strong); background: none; color: var(--gr-muted);
 }
-.gr-info:hover, .gr-info:focus-visible { color: var(--gr-accent); border-color: var(--gr-accent); outline: none; }
+.gr-info:hover, .gr-info:focus-visible { color: #c2c3b7; border-color: #c2c3b7; outline: none; }
 .gr-info svg { width: 10px; height: 10px; }
 .gr-h3 { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: var(--gr-w-strong, 500); letter-spacing: 0.6px; text-transform: uppercase; color: var(--gr-muted); margin: 26px 0 10px; }
 .gr-table { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -373,11 +373,11 @@
 .gr-ov-msg { color: var(--gr-faint); font-size: 13px; padding: 18px 0 6px; font-weight: 400; }
 .gr-ov-rng { position: relative; margin: 56px 40px 0; height: 10px; }
 .gr-ov-tr { position: absolute; inset: 0; border-radius: 5px; background: rgba(255,255,255,0.07); }
-.gr-ov-band { position: absolute; top: 0; bottom: 0; border-radius: 5px; background: rgba(79,209,197,0.22); }
+.gr-ov-band { position: absolute; top: 0; bottom: 0; border-radius: 5px; background: rgba(194,195,183,0.22); }
 .gr-ov-avg { position: absolute; top: -6px; bottom: -6px; width: 2px; margin-left: -1px; background: var(--gr-mid); border-radius: 1px; }
-.gr-ov-you { position: absolute; top: 50%; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; background: var(--gr-accent); border: 3px solid var(--gr-text); box-shadow: 0 0 0 3px rgba(79,209,197,0.25); }
-.gr-ov-you em { position: absolute; bottom: 26px; left: 50%; transform: translateX(-50%); white-space: nowrap; font-style: normal; font-size: 12px; font-weight: var(--gr-w-strong, 500); background: var(--gr-accent); color: #0d1117; padding: 3px 9px; border-radius: 999px; }
-.gr-ov-you em::after { content: ''; position: absolute; top: 100%; left: 50%; margin-left: -5px; border: 5px solid transparent; border-top-color: var(--gr-accent); }
+.gr-ov-you { position: absolute; top: 50%; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; background: #c2c3b7; border: 3px solid var(--gr-text); box-shadow: 0 0 0 3px rgba(194,195,183,0.25); }
+.gr-ov-you em { position: absolute; bottom: 26px; left: 50%; transform: translateX(-50%); white-space: nowrap; font-style: normal; font-size: 12px; font-weight: var(--gr-w-strong, 500); background: #c2c3b7; color: #0d1117; padding: 3px 9px; border-radius: 999px; }
+.gr-ov-you em::after { content: ''; position: absolute; top: 100%; left: 50%; margin-left: -5px; border: 5px solid transparent; border-top-color: #c2c3b7; }
 .gr-ov-end { position: absolute; top: 50%; transform: translateY(-50%); font-size: 11px; color: var(--gr-faint); font-weight: 400; }
 .gr-ov-lbl { position: absolute; transform: translateX(-50%); white-space: nowrap; font-size: 12px; font-weight: 400; color: var(--gr-muted); text-align: center; }
 .gr-ov-lbl b { color: var(--gr-text); font-weight: var(--gr-w-medium, 400); }
@@ -385,7 +385,7 @@
 .gr-ov-meta { font-size: 12px; color: var(--gr-faint); font-weight: 400; }
 .gr-ov-key { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--gr-faint); margin-top: 14px; font-weight: 400; }
 .gr-ov-key span::before { content: ''; display: inline-block; width: 10px; height: 6px; border-radius: 3px; margin-right: 6px; vertical-align: 1px; }
-.gr-ov-key .k1::before { background: rgba(79,209,197,0.35); }
+.gr-ov-key .k1::before { background: rgba(194,195,183,0.35); }
 .gr-ov-key .k2::before { background: var(--gr-mid); width: 2px; height: 12px; vertical-align: -2px; }
 
 /* Rail: other subjects */
