@@ -299,6 +299,24 @@ function renderTeacherQuizzes(data) {
                 --q-btn-line:rgba(194,195,183,0.40);
                 --q-danger:#f4776f;
             }
+            html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] #qz-main-panel {
+                --q-line:#dfded8;
+                --q-line2:#d0cfc8;
+                --q-hover:#f2f1ec;
+                --q-active:#e7e6e0;
+                --q-text:#282924;
+                --q-soft:#53544e;
+                --q-muted:#73746d;
+                --q-faint:#8b8b83;
+                --q-accent:#187a72;
+                --q-btn:#252624;
+                --q-btn-on:#ffffff;
+                --q-btn-hover:#3a3b37;
+                --q-btn-tint:#e9f3f1;
+                --q-btn-line:#a8d2cd;
+                --q-danger:#bd4a43;
+                color-scheme:light;
+            }
             #qz-main-panel .qz2 {
                 width:100%;
                 margin:0;

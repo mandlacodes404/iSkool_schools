@@ -106,7 +106,8 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
     <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_menu.css?v=2.4">
     <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_menu.css?v=1.1">
     <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_settings.css?v=1.0">
-    <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_settings.css?v=1.3">   
+    <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_settings.css?v=1.3">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_light_mode.css?v=1.1">
     <script>
     // Desktop sidebar: restore the saved collapsed state BEFORE first paint (no flash).
     // With no saved choice, screens narrower than 1440px start as a rail.
@@ -1583,9 +1584,9 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
-<script src="assets/js/teacher/dashboard.js?v=13.5"></script>
+<script src="assets/js/teacher/dashboard.js?v=13.6"></script>
 <script src="assets/js/teacher/class-picker.js?v=1.1"></script>
-<script src="assets/js/teacher/quizzes.js?v=8.3"></script>
+<script src="assets/js/teacher/quizzes.js?v=8.4"></script>
 <script src="assets/js/teacher/announcements.js?v=6.0"></script>
 <script src="assets/js/teacher/evaluations.js?v=5.1"></script>
 <script src="assets/js/teacher/resources.js?v=4.7"></script>

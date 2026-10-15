@@ -488,7 +488,14 @@ html body .tchr-info-rail { background: var(--dm-page) !important; }
    canvas stays dark unless Home is active, keeping unfinished screens outside
    this first light-mode rollout. */
 @media (min-width: 769px) {
-  html[data-teacher-theme="light"] {
+  /* Keep these tokens local to the desktop navigation. Teacher feature pages
+     also consume --dm-* tokens, so setting them on <html> would accidentally
+     recolour unfinished pages. */
+  html[data-teacher-theme="light"] body .sidebar.dm-menu,
+  html[data-teacher-theme="light"] .dm-tip,
+  html[data-teacher-theme="light"] .dm-pop,
+  html[data-teacher-theme="light"] .dm-palette,
+  html[data-teacher-theme="light"] .dm-keys {
     --dm-bg: #f4f3ee;
     --dm-card: #ffffff;
     --dm-raise: #ffffff;

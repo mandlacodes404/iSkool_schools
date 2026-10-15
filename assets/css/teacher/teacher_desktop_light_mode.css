@@ -1,0 +1,311 @@
+/* Desktop light-mode rollout. This sheet is loaded last and opts pages in
+   individually. It is inert on mobile and for teacher pages not listed here. */
+@media (min-width: 769px) {
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] #api-content-area,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] #api-content-area,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] #api-content-area {
+        --dm-bg: #f4f3ee;
+        --dm-page: #faf9f5;
+        --dm-card: #ffffff;
+        --dm-raise: #ffffff;
+        --dm-hover: #f2f1ec;
+        --dm-active: #e7e6e0;
+        --dm-line: #dfded8;
+        --dm-line-strong: #d0cfc8;
+        --dm-text: #282924;
+        --dm-soft: #53544e;
+        --dm-muted: #73746d;
+        --dm-faint: #8b8b83;
+        --dm-accent: #187a72;
+        --dm-danger: #bd4a43;
+        background: #faf9f5 !important;
+        color: #282924;
+        color-scheme: light;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] #api-content-area {
+        --q-line: #dfded8;
+        --q-line2: #d0cfc8;
+        --q-hover: #f2f1ec;
+        --q-active: #e7e6e0;
+        --q-text: #282924;
+        --q-soft: #53544e;
+        --q-muted: #73746d;
+        --q-faint: #8b8b83;
+        --q-accent: #187a72;
+        --q-btn: #252624;
+        --q-btn-on: #ffffff;
+        --q-btn-hover: #3a3b37;
+        --q-btn-tint: #e9f3f1;
+        --q-btn-line: #a8d2cd;
+        --q-danger: #bd4a43;
+    }
+
+    /* List panes are warm grey; the detail and create canvas is paper-white. */
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .qz-sidebar,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-sidebar,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-sidebar {
+        background: #f4f3ee !important;
+        border-right: 1px solid #dfded8;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .qz-sidebar-item:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-sidebar-item:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-sidebar-item:hover { background: #ecebe5; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .qz-sidebar-item.active,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-sidebar-item.active,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-sidebar-item.active { background: #e2e1db; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .qz-sidebar-scroll::-webkit-scrollbar-thumb,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-sidebar-scroll::-webkit-scrollbar-thumb,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-sidebar-scroll::-webkit-scrollbar-thumb,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .qz-main-panel::-webkit-scrollbar-thumb,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-main-panel::-webkit-scrollbar-thumb,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-main-panel::-webkit-scrollbar-thumb { background: #d0cfc8; }
+
+    /* Shared modals and create/edit form fields. All three features use these
+       primitives, including delete, integrity and compose flows. */
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .teacher-modal-overlay,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .teacher-modal-overlay,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .teacher-modal-overlay { background: rgba(38, 39, 35, .30) !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .teacher-modal-box,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .teacher-modal-box,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .teacher-modal-box {
+        background: #ffffff !important; border-color: #dfded8 !important; color: #282924 !important;
+        box-shadow: 0 18px 52px rgba(31, 32, 29, .18);
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .teacher-modal-header,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .teacher-modal-header,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .teacher-modal-header,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .teacher-modal-footer,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .teacher-modal-footer,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .teacher-modal-footer { border-color: #ebeae5 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .teacher-modal-input,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .teacher-modal-input,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .teacher-modal-input {
+        background: #ffffff !important; border-color: #d7d6cf !important; color: #282924 !important; color-scheme: light !important;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .teacher-modal-input::placeholder,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .teacher-modal-input::placeholder,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .teacher-modal-input::placeholder { color: #94948c !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .teacher-modal-input:focus,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .teacher-modal-input:focus,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .teacher-modal-input:focus {
+        border-color: #187a72 !important; box-shadow: 0 0 0 3px rgba(24, 122, 114, .13) !important;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .teacher-modal-label,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .teacher-modal-label,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .teacher-modal-label { color: #53544e !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .teacher-modal-cancel,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .teacher-modal-cancel,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .teacher-modal-cancel {
+        background: #ffffff !important; border-color: #d7d6cf !important; color: #454640 !important;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .teacher-modal-submit,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .teacher-modal-submit,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .teacher-modal-submit {
+        background: #252624 !important; border-color: #252624 !important; color: #ffffff !important;
+    }
+
+    /* Assignments: detail, submissions table, and new-assignment form. */
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-dp,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-panel-empty,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-form-wrap--desktop {
+        --as-dp-line: #dfded8;
+        --as-dp-line-strong: #d0cfc8;
+        --as-dp-hover: #f2f1ec;
+        --as-dp-active: #e9e8e2;
+        --as-dp-raise: #ffffff;
+        --as-dp-text: #282924;
+        --as-dp-soft: #53544e;
+        --as-dp-muted: #73746d;
+        --as-dp-faint: #8b8b83;
+        --as-dp-accent: #187a72;
+        --as-dp-danger: #bd4a43;
+        color: #282924;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-dp-table tbody tr:hover td { background: #f6f5f0; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-form-wrap--desktop,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-form-header--desktop { border-color: #dfded8; color: #282924; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-form-title,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-form-close-btn { color: #282924; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-file-input {
+        background: #ffffff; border-color: #d7d6cf; color: #53544e;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-term-banner,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-email-checkbox-label {
+        background: #edf6f4; border-color: #b9ddd8; color: #454640;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-term-banner-title { color: #187a72; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-term-banner-subtitle { color: #73746d; }
+
+    /* Announcement reading, compose and edit panels. */
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-main-panel,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-content,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-empty {
+        background: #faf9f5 !important; color: #282924 !important;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-content,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-form-actions { border-color: #dfded8 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-title,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-form-title,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-message,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-content strong { color: #282924 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-meta,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-empty p,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-edit-hint { color: #73746d !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-note,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-schoolwide-note {
+        background: #f4f3ee !important; border-color: #dfded8 !important; color: #53544e !important;
+    }
+
+    /* Quiz detail tokens are declared in its injected stylesheet. This covers
+       the form surface and notification appended outside the detail root. */
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz {
+        color-scheme: light !important; background: #faf9f5;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .qz2-toast {
+        background: #ffffff !important; border-color: #dfded8 !important; color: #282924 !important;
+        box-shadow: 0 8px 26px rgba(31, 32, 29, .16);
+    }
+    /* Complete the shared dialogs, list chrome, and desktop-only form states. */
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .teacher-modal-header,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .teacher-modal-header,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .teacher-modal-header { color: #282924 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .teacher-modal-close,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .teacher-modal-close,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .teacher-modal-close,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-form-close-btn,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-form-close-btn { color: #73746d !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .teacher-modal-close:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .teacher-modal-close:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .teacher-modal-close:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-form-close-btn:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-form-close-btn:hover { color: #282924 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .teacher-modal-submit:hover:not(:disabled),
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .teacher-modal-submit:hover:not(:disabled),
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .teacher-modal-submit:hover:not(:disabled) { background: #3a3b37 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-delete-confirm-btn,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-delete-confirm-btn { background: #bd4a43 !important; border-color: #bd4a43 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-delete-modal-text,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-delete-modal-text { color: #53544e !important; }
+
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .qz-sidebar-header,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-sidebar-header,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-sidebar-header { border-color: #dfded8; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .qz-sidebar-scroll::-webkit-scrollbar-thumb:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-sidebar-scroll::-webkit-scrollbar-thumb:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-sidebar-scroll::-webkit-scrollbar-thumb:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .qz-main-panel::-webkit-scrollbar-thumb:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-main-panel::-webkit-scrollbar-thumb:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-main-panel::-webkit-scrollbar-thumb:hover { background: #bdbcb4; }
+
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-file-input::file-selector-button,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz input[type="file"]::file-selector-button {
+        background: #f2f1ec; border: 1px solid #d7d6cf; border-radius: 6px; color: #454640; margin-right: 10px; padding: 5px 9px;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-email-checkbox { accent-color: #187a72; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-form-error,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-form-error { color: #bd4a43; }
+
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-form-header { border-color: #dfded8; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-email-label { color: #53544e; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-loader { background: rgba(250, 249, 245, .82); color: #53544e; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-loader-spinner { border-color: rgba(24, 122, 114, .2); border-top-color: #187a72; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-loader-text { color: #53544e; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-edit-btn { background: #ffffff; border-color: #d7d6cf; color: #282924; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-edit-btn:hover { background: #f2f1ec; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-delete-btn { border-color: rgba(189, 74, 67, .38); color: #bd4a43; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-delete-btn:hover { background: rgba(189, 74, 67, .08); }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-edited-tag { color: #a85d00; background: #fff3df; border-color: #edc77d; }
+
+    /* Quiz creation and editing inject a little CSS of their own.  Use the
+       form root to override those inline dark swatches without touching the
+       mobile form, which deliberately stays on the existing palette. */
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz .cq-section-title,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz .cq-learner-question { color: #282924 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz .cq-section-help,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz .cq-preview-label,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz .cq-learner-meta,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz [style*="color:#8b949e"] { color: #73746d !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz [style*="color:#c9d1d9"],
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz [style*="color:#e2e8f0"] { color: #454640 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz .cq-preview-card,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz .cq-learner-card,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz .cq-mode-card,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz #cqSummaryBar { background: #ffffff !important; border-color: #dfded8 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz .cq-preview-textarea,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz .cq-learner-choice { background: #f7f6f1 !important; border-color: #dfded8 !important; color: #53544e !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz .cq-learner-radio { border-color: #a7a79e; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz #cqSummaryBar { color: #187a72 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz #cqSummaryBar [style*="rgba(255,255,255"] { color: #c7c6be !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz #cqPublishMarksOpenMessage { background: #fff3df !important; border-color: #edc77d !important; color: #805100 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz #cqMultiPageOptions,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz #cqOpenEndedBanner { background: #edf6f4 !important; border-color: #b9ddd8 !important; color: #17655f !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz #cqError { color: #bd4a43 !important; }
+
+    /* Search, contextual rails, and the class picker appear inside creation
+       flows, so they need their own conversion rather than inheriting the
+       old dark literals from the shared dashboard scripts. */
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-desktop-search-wrap,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .tchr-desktop-search-wrap,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .tchr-desktop-search-wrap { border-color: #dfded8; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-desktop-search,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .tchr-desktop-search,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .tchr-desktop-search {
+        background: #ffffff; border-color: #d7d6cf; color: #282924;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-desktop-search::placeholder,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .tchr-desktop-search::placeholder,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .tchr-desktop-search::placeholder { color: #8b8b83; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-desktop-search:focus,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .tchr-desktop-search:focus,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .tchr-desktop-search:focus { border-color: #187a72; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .teacher-desktop-create.active,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .teacher-desktop-create.active,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .teacher-desktop-create.active {
+        background: #e9f3f1; box-shadow: inset 0 0 0 1px #a8d2cd; color: #17655f;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-info-rail,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .tchr-info-rail,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .tchr-info-rail { border-color: #dfded8; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-info-rail-header,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .tchr-info-rail-header,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .tchr-info-rail-header { border-color: #dfded8; color: #73746d; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-info-rail-body p,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .tchr-info-rail-body p,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .tchr-info-rail-body p { color: #73746d; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-info-rail-body strong,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .tchr-info-rail-body strong,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .tchr-info-rail-body strong { color: #282924; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-info-rail-toggle,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .tchr-info-rail-toggle,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .tchr-info-rail-toggle { color: #73746d; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-info-rail-toggle:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .tchr-info-rail-toggle:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .tchr-info-rail-toggle:hover { background: #f2f1ec; color: #282924; }
+
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .icp-input {
+        background: #ffffff; border-color: #d7d6cf; color: #282924; color-scheme: light;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .icp-input::placeholder,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .icp-clear-btn,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .icp-empty,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .icp-footer { color: #73746d; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .icp-clear-btn:hover { color: #282924; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .icp-input:focus { background: #ffffff; border-color: #187a72; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .icp-input.icp-has-selection {
+        background: #e9f3f1; border-color: #78bbb3; color: #17655f;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .icp-dropdown {
+        background: #ffffff; border-color: #d7d6cf; box-shadow: 0 12px 32px rgba(31, 32, 29, .16);
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .icp-list::-webkit-scrollbar-thumb { background: #d0cfc8; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .icp-item { color: #454640; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .icp-item:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .icp-item.icp-highlighted { background: #f2f1ec; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .icp-item.icp-item-active,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .icp-item.icp-item-active.icp-highlighted {
+        background: #e9f3f1; border-left-color: #187a72; color: #17655f;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .icp-item mark { background: #d8efeb; color: #17655f; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .icp-footer { border-color: #ebeae5; }
+}

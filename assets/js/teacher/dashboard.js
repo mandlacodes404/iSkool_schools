@@ -1533,6 +1533,7 @@ window.openTeacherSnapshotDetail = async function(type, itemId) {
     // ─────────────────────────────────────────────
     window.setTeacherActive = function(page) {
         document.documentElement.classList.toggle('teacher-home-active', page === 'teacher_manual');
+        document.documentElement.dataset.teacherPage = page || '';
         document.querySelectorAll('.sidebar a, #mobileBottomNav a').forEach(link => {
             link.classList.toggle('active', link.getAttribute('data-page') === page);
         });
@@ -1547,6 +1548,7 @@ window.openTeacherSnapshotDetail = async function(type, itemId) {
             window.setTopNavTab(topNavTabs[page] || null);
         }
     };
+    window.setTeacherActive(sessionStorage.getItem('lastTeacherPage') || 'teacher_manual');
 
     // ─────────────────────────────────────────────
     // SIDEBAR TOGGLE — MOBILE
