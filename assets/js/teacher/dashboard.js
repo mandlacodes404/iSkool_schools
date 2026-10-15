@@ -711,17 +711,9 @@ document.addEventListener('DOMContentLoaded', function () {
             apiArea.innerHTML = renderMobileHomePanel(window.teacherSnapshotCache);
             window.loadMobileHomeClasses();
         } else {
-            apiArea.innerHTML = `
-                <div class="dashboard-home-layout">
-                    <div class="dashboard-snapshot-panel">
-                        ${renderSnapshotPanel(window.teacherSnapshotCache)}
-                    </div>
-                    <div class="dashboard-manual-panel">
-                        ${window.teacherManualCache}
-                    </div>
-                </div>`;
+            apiArea.innerHTML = buildTeacherDesktopHome(window.teacherSnapshotCache, window.teacherManualCache);
 
-            window.loadCalendar(window.calendarState.month, window.calendarState.year);
+            window.loadCalendar(window.calendarState.month, window.calendarState.year); window.loadDesktopHomeClasses();
         }
         afterTeacherHomeRender();
         return;
@@ -754,17 +746,9 @@ document.addEventListener('DOMContentLoaded', function () {
             apiArea.innerHTML = renderMobileHomePanel(snapshot);
             window.loadMobileHomeClasses();
         } else {
-            apiArea.innerHTML = `
-                <div class="dashboard-home-layout">
-                    <div class="dashboard-snapshot-panel">
-                        ${renderSnapshotPanel(snapshot)}
-                    </div>
-                    <div class="dashboard-manual-panel">
-                        ${manualHtml}
-                    </div>
-                </div>`;
+            apiArea.innerHTML = buildTeacherDesktopHome(snapshot, manualHtml);
                 
-    window.loadCalendar(window.calendarState.month, window.calendarState.year);
+    window.loadCalendar(window.calendarState.month, window.calendarState.year); window.loadDesktopHomeClasses();
 
         }
         afterTeacherHomeRender();
@@ -876,6 +860,229 @@ function renderSnapshotPanel(data) {
          <div id="snap-calendar"></div>`;
     return html;
 }
+
+// ─────────────────────────────────────────────
+// DESKTOP HOME ("Focus" layout, .tdh-*)
+// Desktop only; mobile keeps renderMobileHomePanel(). Mirrors the learner
+// desktop home (buildDesktopHome in manual.js): one featured card (the
+// latest quiz), your classes, what is coming and what you posted, with the
+// calendar and Coming up in a side column. A teacher with nothing yet gets
+// the getting-started variant. Data: get_dashboard_snapshot.php (quiz,
+// assignment, announcement, trail, upcoming, teacher_name) and
+// get_teacher_classes_summary.php. The calendar is the existing
+// renderCalendar() mounted in #snap-calendar.
+// ─────────────────────────────────────────────
+window.TDH = {
+    days: ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
+    colors: { quiz:'#4fd1c5', assignment:'#a78bfa', announcement:'#f59e0b', resource:'#f472b6', academic:'#f472b6', reminder:'#f59e0b' },
+    names:  { quiz:'Quiz', assignment:'Assignment', announcement:'Announcement', resource:'Resource', reminder:'Reminder' },
+    icons: {
+        quiz: '<line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>',
+        assignment: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>',
+        announcement: '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>',
+        resource: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
+        guide: '<path d="M2 5.5C4 4.5 7 4.5 12 7c5-2.5 8-2.5 10-1.5V19c-2-1-5-1-10 1.5C7 18 4 18 2 19z"/><path d="M12 7v13"/>',
+        classes: '<path d="M3 21h18"/><path d="M5 21V8l7-5 7 5v13"/><path d="M10 21v-6h4v6"/>',
+        calendar: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+        chevron: '<path d="m9 6 6 6-6 6"/>'
+    },
+    esc(s) {
+        return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+    },
+    svg(name, size = 19) {
+        return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${this.icons[name] || ''}</svg>`;
+    },
+    tile(icon, color) { return `<span class="tdh-tile" style="--c:${color}">${this.svg(icon, 19)}</span>`; },
+    chip(text) { return text ? `<span class="tdh-chip">${this.esc(text)}</span>` : ''; },
+    row(o) {
+        return `<button type="button" class="tdh-row" onclick="${o.go}">
+            ${this.tile(o.icon, o.color)}
+            <span class="tdh-row-text"><span class="tdh-row-title">${this.esc(o.title)}</span><span class="tdh-row-meta">${this.esc(o.meta)}</span></span>
+            ${this.chip(o.chip)}
+            ${o.when ? `<span class="tdh-when">${this.esc(o.when)}</span>` : ''}
+            ${o.chevron ? `<span class="tdh-chev">${this.svg('chevron', 18)}</span>` : ''}
+        </button>`;
+    },
+    empty(icon, title, text, actionHtml = '') {
+        return `<div class="tdh-empty">${this.tile(icon, '#8b949e')}<div class="tdh-empty-body"><div class="tdh-row-title">${title}</div><div class="tdh-empty-text">${text}</div>${actionHtml ? `<div class="tdh-empty-action">${actionHtml}</div>` : ''}</div></div>`;
+    },
+    section(title, count, inner, action = '', id = '') {
+        return `<section class="tdh-sec"><div class="tdh-sec-head"><h2>${title}</h2><span class="tdh-count"${id ? ` id="${id}"` : ''}>${count || ''}</span>${action}</div>${inner}</section>`;
+    },
+    hero(o) {
+        return `<section class="tdh-hero" aria-label="${o.aria}">
+            <div class="tdh-hero-top">${this.tile(o.icon, '#4fd1c5')}<span class="tdh-hero-label">${o.label}</span>${this.chip(o.chip)}</div>
+            <h2 class="tdh-hero-title">${this.esc(o.title)}</h2>
+            <p class="tdh-hero-text">${this.esc(o.text)}</p>
+            <div class="tdh-hero-actions">
+                <button type="button" class="tdh-btn" onclick="${o.go}">${o.cta}</button>
+                ${o.link ? `<button type="button" class="tdh-link" onclick="${o.linkGo}">${o.link}</button>` : ''}
+            </div>
+        </section>`;
+    }
+};
+
+// Where a click on the desktop home goes. Quizzes, assignments and
+// announcements open the exact item (openTeacherSnapshotDetail); everything
+// else opens its section page.
+window.openTeacherHomeSection = function(type) {
+    const fn = { quiz:'fetchTeacherQuizzes', assignment:'fetchTeacherAssignments', announcement:'fetchTeacherAnnouncements',
+                 resource:'fetchTeacherResources', academic:'fetchTeacherCalendar', reminder:'fetchTeacherCalendar' }[type];
+    if (fn && typeof window[fn] === 'function') return window[fn]();
+};
+window.openTeacherHomeItem = function(type, id) {
+    if (id && (type === 'quiz' || type === 'assignment' || type === 'announcement')) return window.openTeacherSnapshotDetail(type, id);
+    return window.openTeacherHomeSection(type);
+};
+window.openTeacherGuide = function() { document.getElementById('tdh-guide')?.showModal(); };
+
+function buildTeacherDesktopHome(data, manualHtml) {
+    const T = window.TDH, esc = T.esc.bind(T);
+    data = data || {};
+    const quiz = data.quiz, assignment = data.assignment, announcement = data.announcement;
+    const trail = data.trail || [];
+    const upcoming = data.upcoming || data.week_events || [];
+    const name = data.teacher_name || '';
+    const welcome = !quiz && !assignment && !announcement && !trail.length && !upcoming.length;
+
+    // ── Heading ──
+    const h = new Date().getHours();
+    const title = welcome
+        ? `Welcome to iSkool${name ? ', ' + name : ''}`
+        : `Good ${h < 12 ? 'morning' : h < 18 ? 'afternoon' : 'evening'}${name ? ', ' + name : ''}`;
+    const bits = [];
+    if (assignment) bits.push(`${assignment.title} is due ${assignment.due_date}`);
+    if (quiz && quiz.status === 'Open') bits.push(`${quiz.title} is open`);
+    const sub = welcome
+        ? 'Add your classes and create your first quiz. Everything you post will show up here.'
+        : (bits.length ? bits.join(' and ') + '.' : 'You’re all caught up.');
+
+    // ── Featured card: latest quiz, or the getting-started card ──
+    const hero = quiz
+        ? T.hero({ aria: 'Latest quiz', icon: 'quiz', label: 'Latest quiz', chip: quiz.status || '', title: quiz.title,
+                   text: `${quiz.class_name}${quiz.start_time && quiz.start_time !== 'Not set' ? ', start date ' + quiz.start_time : ', no start date set'}`,
+                   cta: 'Open quiz', go: `openTeacherHomeItem('quiz',${Number(quiz.id) || 0})`,
+                   link: 'See all quizzes', linkGo: "openTeacherHomeSection('quiz')" })
+        : T.hero({ aria: 'Getting started', icon: 'guide', label: welcome ? 'Getting started' : 'Quizzes', title: 'Create your first quiz',
+                   text: 'Pick a class, add your questions and open it to your learners. Assignments, announcements and resources work the same way.',
+                   cta: 'Go to quizzes', go: "openTeacherHomeSection('quiz')",
+                   link: 'Open the guide', linkGo: 'openTeacherGuide()' });
+
+    // ── Your classes (filled by loadDesktopHomeClasses) ──
+    const classes = T.section('Your classes', '',
+        `<div id="tdh-classes"><div class="tdh-empty tdh-loading">Loading classes…</div></div>`,
+        `<button type="button" class="tdh-btn-ghost tdh-sec-action" onclick="openAddClassFlow()">+ Add class</button>`, 'tdh-classes-count');
+
+    // ── At a glance (or "Start here" when there is nothing yet) ──
+    let middle;
+    if (welcome) {
+        const start = [
+            ['assignment', 'Post an assignment', 'Give a class work with a due date.'],
+            ['announcement', 'Send an announcement', 'Share news with a class.'],
+            ['resource', 'Upload a resource', 'Share notes and files with learners.']
+        ];
+        middle = T.section('Start here', '', `<div class="tdh-list">${start.map(s => T.row({
+            go: `openTeacherHomeSection('${s[0]}')`, icon: s[0], color: T.colors[s[0]], title: s[1], meta: s[2], chevron: true })).join('')}</div>`);
+    } else {
+        const glance = [];
+        if (assignment) {
+            const n = Number(assignment.days_left);
+            glance.push(T.row({ go: `openTeacherHomeItem('assignment',${Number(assignment.id) || 0})`, icon: 'assignment', color: T.colors.assignment,
+                title: assignment.title, meta: `Assignment, ${assignment.class_name}, due ${assignment.due_date}`,
+                chip: n <= 0 ? 'Due today' : n === 1 ? 'Tomorrow' : `In ${n} days`, chevron: true }));
+        }
+        if (announcement) {
+            glance.push(T.row({ go: `openTeacherHomeItem('announcement',${Number(announcement.id) || 0})`, icon: 'announcement', color: T.colors.announcement,
+                title: announcement.title, meta: `Announcement, ${announcement.class_name}, ${announcement.created_at}`, chevron: true }));
+        }
+        middle = T.section('At a glance', glance.length,
+            glance.length ? `<div class="tdh-list">${glance.join('')}</div>`
+                          : T.empty('assignment', 'Nothing upcoming', 'Assignments with a due date and your latest announcement will appear here.'));
+    }
+
+    // ── Recent activity (skipped in the getting-started view) ──
+    const recent = welcome ? '' : T.section('Recent activity', trail.length,
+        trail.length
+            ? `<div class="tdh-list">${trail.map(it => T.row({
+                  go: `openTeacherHomeItem('${esc(it.type)}',${Number(it.id) || 0})`, icon: T.icons[it.type] ? it.type : 'assignment',
+                  color: T.colors[it.type] || T.colors.assignment, title: it.title,
+                  meta: `${T.names[it.type] || 'Item'}${it.class_name ? ', ' + it.class_name : ''}`, when: it.time_label })).join('')}</div>`
+            : T.empty('announcement', 'Nothing yet', 'Quizzes, assignments, announcements and resources you create will show up here.'));
+
+    // ── Coming up ──
+    const comingUp = T.section('Coming up', '',
+        upcoming.length
+            ? `<div class="tdh-list">${upcoming.map(e => {
+                  const d = new Date(String(e.date || '') + 'T00:00:00'), ok = !isNaN(d);
+                  const kind = e.type === 'academic' ? (e.label || 'School event') : (T.names[e.type] || e.label || '');
+                  return `<div class="tdh-ev">
+                      <div class="tdh-ev-date"><div class="tdh-ev-dow">${ok ? T.days[d.getDay()] : ''}</div><div class="tdh-ev-day">${ok ? d.getDate() : ''}</div></div>
+                      <div class="tdh-row-text"><span class="tdh-row-title">${esc(e.type === 'assignment' ? e.title + ' due' : e.title)}</span><span class="tdh-ev-kind" style="color:${T.colors[e.type] || T.colors.reminder}">${esc(kind)}${e.class_name ? ' · ' + esc(e.class_name) : ''}</span></div>
+                  </div>`; }).join('')}</div>`
+            : T.empty('calendar', 'No dates yet', 'Due dates, quizzes and school events from the next 30 days will show here.'));
+
+    return `
+        <div class="tdh">
+            <header class="tdh-head"><h1>${esc(title)}</h1><p>${esc(sub)}</p></header>
+            <div class="tdh-cols">
+                <div class="tdh-primary">${hero}${classes}${middle}${recent}</div>
+                <aside class="tdh-aside">
+                    <section class="tdh-cal" aria-label="Calendar"><div id="snap-calendar"></div></section>
+                    ${comingUp}
+                </aside>
+            </div>
+            ${welcome ? '' : `
+            <section class="tdh-strip" aria-label="Guide">
+                <div><div class="tdh-strip-title">New to iSkool?</div><div class="tdh-strip-text">A short guide walks you through the teacher dashboard.</div></div>
+                <button type="button" class="tdh-btn-ghost" onclick="openTeacherGuide()">Open the guide</button>
+            </section>`}
+            <dialog id="tdh-guide" class="tdh-guide" aria-label="iSkool guide" onclick="if(event.target===this)this.close()">
+                <div class="tdh-guide-head"><h2>Guide</h2><button type="button" class="tdh-btn-ghost" onclick="this.closest('dialog').close()">Close</button></div>
+                ${manualHtml || ''}
+            </dialog>
+        </div>
+        ${TEACHER_SUBJECT_MODAL_HTML}`;
+}
+
+// Paints "Your classes" on the desktop home. Same source and add-subject
+// flow as the mobile list (get_teacher_classes_summary.php, openAddClassFlow,
+// openAddSubjectFlow). The last result is cached so a repeat visit paints
+// instantly, then refreshes.
+window.loadDesktopHomeClasses = async function() {
+    const T = window.TDH, esc = T.esc.bind(T);
+    const paint = classes => {
+        const box = document.getElementById('tdh-classes');
+        if (!box) return;
+        const count = document.getElementById('tdh-classes-count');
+        if (count) count.textContent = classes.length || '';
+        if (!classes.length) {
+            box.innerHTML = T.empty('classes', 'No classes yet',
+                'Classes you post to appear here on their own. Add the ones you teach and name your subject for each.',
+                `<button type="button" class="tdh-btn" onclick="openAddClassFlow()">Add a class</button>`);
+            return;
+        }
+        box.innerHTML = `<div class="tdh-classes">${classes.map(c => `
+            <div class="tdh-class">
+                <div class="tdh-class-name">${esc(c.name)}</div>
+                <div class="tdh-class-sub">${c.needs_subject
+                    ? `<button type="button" class="tdh-link" data-id="${Number(c.id) || 0}" data-name="${esc(c.name)}" onclick="openAddSubjectFlow(Number(this.dataset.id), this.dataset.name)">+ Add subject</button>`
+                    : esc(c.subject_name)}</div>
+                <span class="tdh-chip">${Number(c.learner_count) || 0} learner${Number(c.learner_count) === 1 ? '' : 's'}</span>
+            </div>`).join('')}</div>`;
+    };
+    if (window.teacherClassesCache) paint(window.teacherClassesCache);
+    try {
+        const res  = await fetch('api/teacher/get_teacher_classes_summary.php');
+        const data = await res.json();
+        window.teacherClassesCache = data.classes || [];
+        paint(window.teacherClassesCache);
+    } catch (e) {
+        if (!window.teacherClassesCache) {
+            const box = document.getElementById('tdh-classes');
+            if (box) box.innerHTML = `<div class="tdh-empty">Failed to load classes.</div>`;
+        }
+    }
+};
 
 // ─────────────────────────────────────────────
 // MOBILE HOME PANEL
@@ -1160,6 +1367,8 @@ window.saveTeacherSubject = async function() {
         if (data.success) {
             closeTeacherSubjectModal();
             window.loadMobileHomeClasses();
+            window.teacherClassesCache = null;   // desktop home: refetch so the new subject shows
+            window.loadDesktopHomeClasses?.();
         } else {
             err.textContent = data.error || 'Failed to save.';
             err.style.display = 'block';
