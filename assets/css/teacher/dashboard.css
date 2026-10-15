@@ -993,6 +993,48 @@
 .tdh-guide .manual-container .section p, .tdh-guide .manual-container ul li { font-size: 14px; font-weight: 400; line-height: 1.65; color: var(--tdh-text); }
 .tdh-guide .manual-container strong { font-weight: var(--tdh-w-strong); color: var(--tdh-bright); }
 
+/* The first light-mode slice is intentionally restricted to Teacher Home.
+   The menu owns the page-canvas switch; these tokens restyle only the Home
+   components when that canvas is active. Mobile stays untouched. */
+@media (min-width: 769px) {
+    html[data-teacher-theme="light"].teacher-home-active .tdh {
+        --tdh-text: #353632;
+        --tdh-bright: #1f201d;
+        --tdh-mute: #70716a;
+        --tdh-faint: #898a82;
+        --tdh-teal: #187a72;
+        --tdh-line: #dfded8;
+        --tdh-soft: #ebeae5;
+        --tdh-hover: #f3f2ed;
+        --tdh-active: #e8e7e1;
+        --tdh-surface: #ffffff;
+    }
+    html[data-teacher-theme="light"].teacher-home-active .tdh-hero,
+    html[data-teacher-theme="light"].teacher-home-active .tdh-list,
+    html[data-teacher-theme="light"].teacher-home-active .tdh-class,
+    html[data-teacher-theme="light"].teacher-home-active .tdh-empty,
+    html[data-teacher-theme="light"].teacher-home-active .tdh .tdh-cal,
+    html[data-teacher-theme="light"].teacher-home-active .tdh-strip {
+        background: var(--tdh-surface);
+        box-shadow: 0 1px 2px rgba(29, 30, 26, .035);
+    }
+    html[data-teacher-theme="light"].teacher-home-active .tdh-btn {
+        background: #252624;
+        color: #ffffff;
+    }
+    html[data-teacher-theme="light"].teacher-home-active .tdh-btn:hover { background: #3a3b37; }
+    html[data-teacher-theme="light"].teacher-home-active .tdh .cal-cell.cal-today .cal-day-num {
+        background: #252624;
+        color: #ffffff;
+    }
+    html[data-teacher-theme="light"].teacher-home-active .tdh .cal-tooltip,
+    html[data-teacher-theme="light"].teacher-home-active .tdh-guide,
+    html[data-teacher-theme="light"].teacher-home-active .tdh-guide-head {
+        background: #ffffff;
+    }
+    html[data-teacher-theme="light"].teacher-home-active .tdh-guide::backdrop { background: rgba(31, 32, 29, .28); }
+}
+
 /* ─────────────────────────────────────────────
    DESKTOP MODALS — Add to Calendar (#reminderModal) and Add a class / Add subject
    (#teacherSubjectModal). Same recipe as the desktop home and the Settings modal:

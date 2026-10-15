@@ -33,6 +33,7 @@ $stmtTeacher->close();
 
 $teacherFullName = trim($teacherName . ' ' . $teacherSurname);
 $teacherEmail    = $_SESSION['email'];
+$teacherThemeStorageKey = 'iskoolTeacherDesktopTheme:' . hash('sha256', ($_SESSION['current_school_db'] ?? '') . '|' . $teacherEmail);
 
 $tFirstInitial   = !empty($teacherName)    ? strtoupper(substr(trim($teacherName), 0, 1))    : '';
 $tLastInitial    = !empty($teacherSurname) ? strtoupper(substr(trim($teacherSurname), 0, 1)) : '';
@@ -114,6 +115,15 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
             var s = localStorage.getItem('iskoolTeacherMenuCollapsed');
             if (s === '1' || (s === null && window.innerWidth < 1440)) document.documentElement.classList.add('dm-collapsed');
         } catch (e) {}
+        // Light mode is intentionally desktop-only. Applying the saved value before
+        // <body> is painted prevents a visible dark-to-light flash on Home.
+        window.ISKOOL_TEACHER_THEME_KEY = <?php echo json_encode($teacherThemeStorageKey); ?>;
+        try {
+            var theme = localStorage.getItem(window.ISKOOL_TEACHER_THEME_KEY);
+            document.documentElement.dataset.teacherTheme = theme === 'light' ? 'light' : 'dark';
+        } catch (e) {
+            document.documentElement.dataset.teacherTheme = 'dark';
+        }
     })();
     </script>
 <script>

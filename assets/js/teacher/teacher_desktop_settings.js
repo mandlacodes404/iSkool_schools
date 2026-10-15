@@ -29,6 +29,7 @@
     user: '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
     lock: '<rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
     bell: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>',
     out: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/>',
     eye: '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12"/><circle cx="12" cy="12" r="3"/>',
     eyeoff: '<path d="M9.9 4.2A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-2.2 3.2"/><path d="M6.6 6.6A16.8 16.8 0 0 0 2 12s3.6 7 10 7a10 10 0 0 0 5.4-1.6"/><path d="M14.1 14.1a3 3 0 1 1-4.2-4.2"/><path d="m2 2 20 20"/>',
@@ -59,6 +60,23 @@
 
   /* ── State ──────────────────────────────────────────────────────────── */
   var modal = null, modalKey = null, modalFrom = null, curPane = 'profile';
+
+  function themeKey() { return window.ISKOOL_TEACHER_THEME_KEY || 'iskoolTeacherDesktopTheme'; }
+  function currentTheme() {
+    return document.documentElement.dataset.teacherTheme === 'light' ? 'light' : 'dark';
+  }
+  function applyTheme(theme) {
+    theme = theme === 'light' ? 'light' : 'dark';
+    document.documentElement.dataset.teacherTheme = theme;
+    try { localStorage.setItem(themeKey(), theme); } catch (e) {}
+    if (modal) {
+      modal.querySelectorAll('[data-theme-choice]').forEach(function (button) {
+        var selected = button.getAttribute('data-theme-choice') === theme;
+        button.classList.toggle('on', selected);
+        button.setAttribute('aria-pressed', String(selected));
+      });
+    }
+  }
 
   /* ── Confirm dialogs and toast ──────────────────────────────────────── */
   var dlg = null, restoreFocus = null, onKey = null;
@@ -266,9 +284,26 @@
   var TABS = [
     ['profile', 'Profile', 'user', 'profile photo picture avatar name email account details'],
     ['security', 'Password', 'lock', 'password security change forgot reset'],
-    ['notif', 'Notifications', 'bell', 'notifications alerts push sync help iphone android browser']
+    ['notif', 'Notifications', 'bell', 'notifications alerts push sync help iphone android browser'],
+    ['appearance', 'Appearance', 'sun', 'appearance theme light dark colour color desktop']
   ];
   var SIGNOUT_KW = 'sign out log out logout leave';
+
+  function appearancePane() {
+    var theme = currentTheme();
+    function option(value, title, description) {
+      var selected = value === theme;
+      return '<button type="button" class="ds-theme-option' + (selected ? ' on' : '') + '" data-theme-choice="' + value + '" aria-pressed="' + selected + '">' +
+        '<span class="ds-theme-swatch ds-theme-swatch--' + value + '" aria-hidden="true"><i></i><i></i></span>' +
+        '<span class="ds-theme-copy"><b>' + title + '</b><span>' + description + '</span></span></button>';
+    }
+    return '<section class="ds-pane" data-pane="appearance" hidden><h2 class="ds-h">Appearance</h2>' +
+      '<p class="ds-foot ds-appearance-note">Choose how iSkool looks on desktop. The mobile app keeps its current colours.</p>' +
+      '<div class="ds-list"><div class="ds-r ds-r--appearance"><span class="ds-rt"><b>Desktop theme</b><span>Your choice is saved on this browser for this school account.</span></span>' +
+      '<div class="ds-theme-options" role="group" aria-label="Desktop theme">' +
+        option('light', 'Light', 'Bright, paper-like workspace') + option('dark', 'Dark', 'Current iSkool appearance') +
+      '</div></div></div></section>';
+  }
 
   function goPane(p) {
     if (!modal) return;
@@ -333,6 +368,7 @@
             '<div class="ds-r"><span class="ds-rt"><b>Sync notifications</b><span>Fix missing alerts on this device</span></span><span class="ds-rv ' + (ps.c || '') + '" id="dsPushVal">' + esc(ps.t) + '</span><button type="button" class="ds-b" data-go="push">Sync now</button></div>' +
             '<div class="ds-r"><span class="ds-rt"><b>Notification help</b><span>Steps for iPhone, Android, and browsers</span></span><button type="button" class="ds-b" data-go="pushhelp">View steps</button></div>' +
           '</div></section>' +
+          appearancePane() +
         '</div>' +
         '<button type="button" class="ds-x" data-go="close" aria-label="Close settings">' + ico('x') + '</button>' +
       '</div>';
@@ -343,6 +379,8 @@
     m.addEventListener('mousedown', function (e) { if (e.target === m) closeModal(); });
     root.addEventListener('click', function (e) {
       var t = e.target.closest('[data-tab]'); if (t) { goPane(t.getAttribute('data-tab')); return; }
+      var themeChoice = e.target.closest('[data-theme-choice]');
+      if (themeChoice) { applyTheme(themeChoice.getAttribute('data-theme-choice')); return; }
       var eye = e.target.closest('[data-eye]');
       if (eye) {
         var inp = $(eye.getAttribute('data-eye')), show = inp.type === 'password';

@@ -691,6 +691,7 @@ document.addEventListener('DOMContentLoaded', function () {
    window.loadTeacherManual = async function() {
     sessionStorage.setItem("lastTeacherPage", "teacher_manual");
     if (typeof window.setTeacherActive === 'function') window.setTeacherActive("teacher_manual");
+    document.documentElement.classList.add('teacher-home-active');
     // Home has no signature colour. Every other page calls
     // configureTeacherHeader, but Home never did, so after visiting any
     // coloured section (Assignments, Resources, ...) Home kept that
@@ -1531,6 +1532,7 @@ window.openTeacherSnapshotDetail = async function(type, itemId) {
     // ACTIVE STATE
     // ─────────────────────────────────────────────
     window.setTeacherActive = function(page) {
+        document.documentElement.classList.toggle('teacher-home-active', page === 'teacher_manual');
         document.querySelectorAll('.sidebar a, #mobileBottomNav a').forEach(link => {
             link.classList.toggle('active', link.getAttribute('data-page') === page);
         });
