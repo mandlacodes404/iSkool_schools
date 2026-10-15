@@ -292,6 +292,11 @@ function renderTeacherQuizzes(data) {
                 --q-muted:#9b9c92;
                 --q-faint:#7a7b73;
                 --q-accent:var(--dm-ac, #4fd1c5);
+                --q-btn:#c2c3b7;
+                --q-btn-on:#0d1117;
+                --q-btn-hover:#adaea2;
+                --q-btn-tint:rgba(194,195,183,0.10);
+                --q-btn-line:rgba(194,195,183,0.40);
                 --q-danger:#f4776f;
             }
             #qz-main-panel .qz2 {
@@ -532,13 +537,13 @@ function renderTeacherQuizzes(data) {
                 background:var(--q-hover);
             }
             #qz-main-panel .qz2-btn.qz2-pri {
-                background:var(--q-accent);
-                border-color:var(--q-accent);
-                color:var(--dm-ac-on, #04211f);
+                background:var(--q-btn);
+                border-color:var(--q-btn);
+                color:var(--q-btn-on);
             }
             #qz-main-panel .qz2-btn.qz2-pri:hover {
-                background:var(--q-accent);
-                filter:brightness(1.08);
+                background:var(--q-btn-hover);
+                border-color:var(--q-btn-hover);
             }
             #qz-main-panel .qz2-btn.qz2-dng {
                 color:var(--q-danger);
@@ -556,7 +561,7 @@ function renderTeacherQuizzes(data) {
             }
             #qz-main-panel .qz2-btn.qz2-pri:disabled:not(.is-loading),
             #qz-main-panel .qz2-btn.qz2-pri:disabled:not(.is-loading):hover {
-                background:var(--q-accent);
+                background:var(--q-btn);
             }
             #qz-main-panel .qz2-sw {
                 width:38px;
@@ -642,6 +647,18 @@ function renderTeacherQuizzes(data) {
                 #qz-main-panel .qz2 * { animation: none !important; transition: none !important; }
             }
 
+            /* ── Buttons use #c2c3b7, not the accent teal (desktop panel only) ──
+               The create / edit forms put their "+ Add Question", "Add" and
+               "+ Insert {blank}" buttons together with inline var(--dm-ac...) styles,
+               so one attribute selector recolours them without touching each one.
+               !important is needed to beat those inline styles. --q-accent still drives
+               the progress bar, text links and the publish switch. "+ New" is untouched. */
+            #qz-main-panel button[style*="--dm-ac"] {
+                background:var(--q-btn-tint) !important;
+                border-color:var(--q-btn-line) !important;
+                color:var(--q-btn) !important;
+            }
+
             /* Toast lives on <body>, so it is not scoped to the panel */
             .qz2-toast {
                 position: fixed; bottom: 30px; left: 50%;
@@ -656,6 +673,9 @@ function renderTeacherQuizzes(data) {
             .qz2-toast.qz2-toast-err { border-color: rgba(244,119,111,0.45); color: #f4776f; }
             @media (prefers-reduced-motion: reduce) { .qz2-toast { transition: none; } }
             .teacher-quiz-action-btn.edit { background: var(--dm-ac-bg, rgba(79,209,197,0.1)); color: var(--dm-ac, #4fd1c5); border-color: var(--dm-ac-line, rgba(79,209,197,0.25)); }
+            @media (min-width: 900px) {
+                .teacher-quiz-action-btn.edit { background: rgba(194,195,183,0.1); color: #c2c3b7; border-color: rgba(194,195,183,0.3); }
+            }
             .teacher-quiz-action-btn.delete { background: rgba(248,81,73,0.1); color: #f85149; border-color: rgba(248,81,73,0.25); }
             @media (max-width: 899px) {
                 .qz-desktop-only-btn { display: none !important; }

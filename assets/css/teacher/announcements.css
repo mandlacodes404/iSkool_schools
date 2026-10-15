@@ -2188,3 +2188,25 @@
 .an-delete-confirm-btn {
     background: #e74c3c;
 }
+
+/* ─────────────────────────────────────────────
+   DESKTOP BUTTONS — #c2c3b7 instead of the accent teal (>= 900px only).
+   Solid buttons: #c2c3b7 with #0d1117 text. Tinted buttons: a #c2c3b7 tint, outline and text.
+   Mobile keeps the teal rules above. The "+ New" button (.teacher-upload-btn /
+   .teacher-desktop-create) is deliberately not touched here.
+   ───────────────────────────────────────────── */
+@media (min-width: 900px) {
+    .teacher-modal-submit { background: #c2c3b7; color: #0d1117; }
+    .teacher-modal-submit:hover:not(:disabled) { background: #adaea2; }
+
+    .teacher-quiz-action-btn.publish { background: #c2c3b7; color: #0d1117; }
+    .teacher-quiz-action-btn.results,
+    .teacher-edit-marks-btn,
+    .cal-add-btn {
+        background: rgba(194,195,183,0.1);
+        border-color: rgba(194,195,183,0.3);
+        color: #c2c3b7;
+    }
+    .teacher-edit-marks-btn:hover,
+    .cal-add-btn:hover { background: rgba(194,195,183,0.2); }
+}
