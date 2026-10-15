@@ -88,7 +88,7 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
     <meta name="msapplication-navbutton-color" content="#0d1117">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
-    <link rel="stylesheet" href="assets/css/teacher/dashboard.css?v=4.8">
+    <link rel="stylesheet" href="assets/css/teacher/dashboard.css?v=4.9">
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
     <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=7.1">
     <link rel="stylesheet" href="assets/css/teacher/assignments.css?v=3.3">
@@ -103,10 +103,10 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Geist:wght@400..600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=13.4">
-    <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_menu.css?v=2.3">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_menu.css?v=2.4">
     <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_menu.css?v=1.1">
     <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_settings.css?v=1.0">
-    <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_settings.css?v=1.2">   
+    <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_settings.css?v=1.3">   
     <script>
     // Desktop sidebar: restore the saved collapsed state BEFORE first paint (no flash).
     // With no saved choice, screens narrower than 1440px start as a rail.
@@ -1583,7 +1583,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
-<script src="assets/js/teacher/dashboard.js?v=13.4"></script>
+<script src="assets/js/teacher/dashboard.js?v=13.5"></script>
 <script src="assets/js/teacher/class-picker.js?v=1.1"></script>
 <script src="assets/js/teacher/quizzes.js?v=8.3"></script>
 <script src="assets/js/teacher/announcements.js?v=6.0"></script>
@@ -1598,6 +1598,6 @@ document.addEventListener('DOMContentLoaded', function () {
 <script src="assets/js/teacher/teacher_mobile_menu.js?v=1.0"></script>
 <script>window.ISKOOL_TEACHER = <?= json_encode(['name'=>$teacherFullName,'email'=>$teacherEmail,'initials'=>$teacherInitials], JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?>;</script>
 <script src="assets/js/teacher/teacher_mobile_settings.js?v=1.0"></script>
-<script src="assets/js/teacher/teacher_desktop_settings.js?v=1.1"></script>
+<script src="assets/js/teacher/teacher_desktop_settings.js?v=1.2"></script>
 </body>
 </html>
