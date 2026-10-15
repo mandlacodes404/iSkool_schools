@@ -269,7 +269,7 @@
     height: 34px;
     padding: 0 18px;
     border-radius: 8px;
-    background: var(--lrs-accent);
+    background: #c2c3b7;
     color: #0d1117;
     font-weight: var(--lrs-w-strong, 500);
     font-size: 13px;
@@ -277,7 +277,7 @@
     flex-shrink: 0;
     cursor: pointer;
 }
-.lrs-pri:hover { background: #38b2ac; }
+.lrs-pri:hover { background: #adaea2; }
 .lrs-pri--warn { background: var(--lrs-danger); }
 .lrs-pri--warn:hover { background: #e0625a; }
 .lrs-dbody { flex: 1; min-height: 0; display: flex; }

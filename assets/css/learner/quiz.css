@@ -219,5 +219,22 @@
     .quiz-start-btn {
         font-family: inherit;
         font-weight: 500;
+        background: #c2c3b7;
+    }
+
+    .quiz-start-btn:hover {
+        background: #adaea2;
+        box-shadow: 0 4px 12px rgba(194, 195, 183, 0.2);
+    }
+
+    /* "Try Again" button in the quiz list error state. Its colours are inline styles
+       (teal bg, white text), so !important is needed to override them on desktop only. */
+    .lqz-retry-btn {
+        background: #c2c3b7 !important;
+        color: #0d1117 !important;
+    }
+
+    .lqz-retry-btn:hover {
+        background: #adaea2 !important;
     }
 }

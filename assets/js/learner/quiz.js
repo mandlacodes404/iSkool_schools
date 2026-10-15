@@ -171,7 +171,7 @@ window.fetchQuizzes = async function() {
             apiArea.innerHTML = `
                 <div style="text-align:center; margin-top:50px; padding:20px;">
                     <p style="color: #ff5555;">Unable to load quizzes at the moment.</p>
-                    <button onclick="window.learnerQuizCache=null; fetchQuizzes()" 
+                    <button class="lqz-retry-btn" onclick="window.learnerQuizCache=null; fetchQuizzes()" 
                             style="background:#4fd1c5; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; color:white;">
                         Try Again
                     </button>
@@ -742,7 +742,7 @@ function renderQuizCards(groupedData) {
                 height: 34px;
                 padding: 0 18px;
                 border-radius: 8px;
-                background: #4fd1c5;
+                background: #c2c3b7;
                 color: #0d1117;
                 font-weight: var(--lqz-w-strong);
                 font-size: 13px;
@@ -750,7 +750,7 @@ function renderQuizCards(groupedData) {
                 flex-shrink: 0;
                 cursor: pointer;
             }
-            .lqz-pri:hover { background: #38b2ac; }
+            .lqz-pri:hover { background: #adaea2; }
             .lqz-pri--warn { background: #e67e22; }
             .lqz-pri--warn:hover { background: #d06f1c; }
             .lqz-dbody { flex: 1; min-height: 0; display: flex; }

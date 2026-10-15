@@ -280,7 +280,7 @@
     height: 34px;
     padding: 0 18px;
     border-radius: 8px;
-    background: var(--las-accent);
+    background: #c2c3b7;
     color: #0d1117;
     font-weight: var(--las-w-strong, 500);
     font-size: 13px;
@@ -288,7 +288,7 @@
     flex-shrink: 0;
     cursor: pointer;
 }
-.las-pri:hover { background: #38b2ac; }
+.las-pri:hover { background: #adaea2; }
 .las-pri--warn { background: var(--las-danger); }
 .las-pri--warn:hover { background: #e0625a; }
 .las-dbody { flex: 1; min-height: 0; display: flex; }
@@ -360,8 +360,8 @@
 .las-comp-cancel, .las-comp-submit { height: 34px; padding: 0 16px; border-radius: 8px; font: inherit; font-size: 13px; font-weight: var(--las-w-strong, 500); cursor: pointer; }
 .las-comp-cancel { color: var(--las-muted); border: 1px solid var(--las-line); background: none; }
 .las-comp-cancel:hover { color: var(--las-text); background: var(--las-hover); }
-.las-comp-submit { color: #0d1117; border: 0; background: var(--las-accent); min-width: 150px; }
-.las-comp-submit:hover { background: #38b2ac; }
+.las-comp-submit { color: #0d1117; border: 0; background: #c2c3b7; min-width: 150px; }
+.las-comp-submit:hover { background: #adaea2; }
 .las-comp-submit .btn-spinner span { background: #0d1117; }
 .las-okrow { display: flex; align-items: center; gap: 8px; color: var(--las-ok); font-weight: var(--las-w-medium, 400); font-size: 13px; }
 .las-subtxt { margin: 12px 0 0; white-space: pre-wrap; color: var(--las-soft); font-size: 14px; line-height: 1.7; }
