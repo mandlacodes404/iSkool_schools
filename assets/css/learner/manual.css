@@ -1055,8 +1055,8 @@
 #api-content-area .lhd h2.lhd-hero-title { margin: 14px 0 0; font-size: 32px; letter-spacing: -0.8px; line-height: 1.15; }
 .lhd-hero-text { margin: 6px 0 0; max-width: 520px; font-size: 15px; font-weight: 400; line-height: 1.6; color: var(--lhd-text); }
 .lhd-hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 20px; margin-top: 20px; }
-.lhd-btn { height: 40px; padding: 0 22px; border: 0; border-radius: 8px; background: var(--lhd-teal); color: #0d1117; font-size: 14px; font-weight: var(--lhd-w-strong); cursor: pointer; }
-.lhd-btn:hover { background: #38b2ac; }
+.lhd-btn { height: 40px; padding: 0 22px; border: 0; border-radius: 8px; background: #c2c3b7; color: #0d1117; font-size: 14px; font-weight: var(--lhd-w-strong); cursor: pointer; }
+.lhd-btn:hover { background: #adaea2; }
 .lhd-link { padding: 0; border: 0; background: none; font-size: 14px; font-weight: 400; color: var(--lhd-text); cursor: pointer; }
 .lhd-link:hover { color: var(--lhd-bright); }
 
@@ -1110,7 +1110,7 @@
 .lhd .cal-day-label { font-size: 11px; font-weight: 400; letter-spacing: 0; text-transform: none; color: var(--lhd-faint); }
 .lhd .cal-cell { min-height: 34px; }
 .lhd .cal-day-num, .lhd .cal-cell.cal-today .cal-day-num { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 12px; font-weight: 400; color: var(--lhd-text); }
-.lhd .cal-cell.cal-today .cal-day-num { background: var(--lhd-teal); color: #0d1117; font-weight: var(--lhd-w-strong); }
+.lhd .cal-cell.cal-today .cal-day-num { background: #c2c3b7; color: #0d1117; font-weight: var(--lhd-w-strong); }
 .lhd .cal-tooltip { background: #12161c; border: 1px solid var(--lhd-line); }
 .lhd .cal-tooltip-item { font-weight: 400; }
 .lhd .cal-tooltip-item + .cal-tooltip-item { border-top-color: var(--lhd-soft); }
