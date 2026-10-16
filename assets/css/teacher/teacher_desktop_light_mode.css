@@ -854,12 +854,17 @@ html[data-teacher-theme="light"] .mini-cal-modal .teacher-modal-submit:hover { b
 
 }
 
-
-/* ═══ Fraunces titles: Assignments + Quizzes detail panels (desktop, light and dark) ═══
-   Trial. Delete this whole block to revert. */
+/* ═══ Fraunces titles: detail-panel headings on Assignments, Quizzes, Announcements,
+   Evaluations, Grades, Resources and Syllabus (desktop, light and dark). Trial:
+   delete this whole block to revert. ═══ */
 @media (min-width: 769px) {
   html[data-teacher-page="teacher_assignments"] .as-dp-title,
-  html[data-teacher-page="teacher_quizzes"] #qz-main-panel .qz2 h1 {
+  html[data-teacher-page="teacher_quizzes"] #qz-main-panel .qz2 h1,
+  html[data-teacher-page="teacher_announcements"] .an-panel-title,
+  html[data-teacher-page="teacher_evaluations"] .ev-dp-title,
+  html[data-teacher-page="teacher_grades"] .gr-dp-title,
+  html[data-teacher-page="teacher_resources"] .rs-panel-title,
+  html[data-teacher-page="teacher_syllabus"] .sbo-dp-title {
     font-family: 'Fraunces', Georgia, serif;
     font-size: 30px;
     line-height: 1.2;
@@ -867,7 +872,10 @@ html[data-teacher-theme="light"] .mini-cal-modal .teacher-modal-submit:hover { b
     letter-spacing: -0.01em;
   }
   html[data-teacher-page="teacher_assignments"] .as-panel-empty-title,
-  html[data-teacher-page="teacher_quizzes"] #qz-main-panel .qz2-empty h1 {
+  html[data-teacher-page="teacher_quizzes"] #qz-main-panel .qz2-empty h1,
+  html[data-teacher-page="teacher_evaluations"] .ev-panel-empty-title,
+  html[data-teacher-page="teacher_grades"] .gr-dp-empty-title,
+  html[data-teacher-page="teacher_syllabus"] .sbo-panel-empty-title {
     font-family: 'Fraunces', Georgia, serif;
     font-size: 22px;
     line-height: 1.2;
