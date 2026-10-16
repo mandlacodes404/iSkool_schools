@@ -897,3 +897,146 @@
     .las-desktop-layout .las-submission-cancel,
     .las-desktop-layout .las-submission-submit { font-weight: var(--las-w-strong, 500); }
 }
+
+/* ═══ Light mode: learner Assignments (desktop) ════════════════════════════════════════════════════════════
+   The desktop Assignments page is driven by the --las-* variables above, so most of light mode is the variable
+   block below, the same way the Home page does it with --lhd-* and the Quiz page with --lqz-*. The rest fixes the
+   colours that are hard-coded: the search box, scrollbars, resize handle, primary and submit buttons, the
+   submission composer and file cards, the error message, the status colours assignments.js writes inline, the
+   phone-style list and submission form shown between 769px and 899px, and the fetch error state. Same palette
+   as the Home page, the sidebar and the Quiz page.
+   Applies only when <html data-learner-theme="light"> on 769px and wider. Dark mode and phones are untouched, and
+   assignments.js needs no change. To remove it, delete this block. */
+@media (min-width: 769px) {
+
+/* palette: titles near-black, body text grey, lines the same warm greys as the sidebar and Home */
+html[data-learner-theme="light"] .las-desktop-layout {
+    --las-text:   #282924;   /* titles and the selected row */
+    --las-soft:   #53544e;   /* body text */
+    --las-muted:  #73746d;
+    --las-faint:  #7d7e76;
+    --las-accent: #187a72;   /* focus rings, links and the search focus border */
+    --las-ok:     #15803d;   /* "Submitted": the ring, the chip and the tick row */
+    --las-danger: #bd4a43;
+    --las-line:        #dfded8;
+    --las-line-strong: #d0cfc8;
+    --las-hover:  rgba(38,39,35,.055);
+    --las-active: rgba(38,39,35,.075);
+    /* the layout sets no text colour of its own, so anything unstyled would inherit the dark page's white */
+    color: var(--las-text);
+    color-scheme: light;
+}
+
+/* filter box: white, like the sidebar's search button */
+html[data-learner-theme="light"] .las-desktop-search { background: #ffffff; }
+
+/* scrollbars (the dark ones are white at 10% and vanish on a light page) */
+html[data-learner-theme="light"] .las-sidebar-scroll::-webkit-scrollbar-thumb,
+html[data-learner-theme="light"] .las-body::-webkit-scrollbar-thumb { background: rgba(38,39,35,.16); }
+html[data-learner-theme="light"] .las-sidebar-scroll::-webkit-scrollbar-thumb:hover,
+html[data-learner-theme="light"] .las-body::-webkit-scrollbar-thumb:hover { background: rgba(38,39,35,.30); }
+
+/* resize handle between the list and the detail pane */
+html[data-learner-theme="light"] .las-split:hover,
+html[data-learner-theme="light"] .las-split.drag,
+html[data-learner-theme="light"] .las-split:focus-visible {
+    background: linear-gradient(90deg, transparent 2px, #187a72 2px, #187a72 4px, transparent 4px);
+}
+
+/* primary button in the header (Add your work / Update submission): dark, like the Home button */
+html[data-learner-theme="light"] .las-pri { background: #252624; color: #ffffff; }
+html[data-learner-theme="light"] .las-pri:hover { background: #3a3b37; }
+html[data-learner-theme="light"] .las-pri--warn { background: var(--las-danger); }
+html[data-learner-theme="light"] .las-pri--warn:hover { background: #a63f38; }
+
+/* "Submitted" chip: the green tint is built from the dark-mode green, so it is rebuilt from the darker one */
+html[data-learner-theme="light"] .las-panel-status--ok { background: rgba(21,128,61,.07); border-color: rgba(21,128,61,.28); }
+
+/* submission composer, submitted-work card and file cards: white cards, fields one step back */
+html[data-learner-theme="light"] .las-comp { background: #ffffff; }
+html[data-learner-theme="light"] .las-comp-textarea { background: #faf9f5; }
+html[data-learner-theme="light"] .las-comp-file::file-selector-button { background: #faf9f5; }
+html[data-learner-theme="light"] .las-file { background: #ffffff; }
+html[data-learner-theme="light"] .las-comp .las-file { background: #faf9f5; }
+html[data-learner-theme="light"] .las-fi { background: rgba(38,39,35,.06); }
+
+/* Submit assignment / Update submission */
+html[data-learner-theme="light"] .las-comp-submit { background: #252624; color: #ffffff; }
+html[data-learner-theme="light"] .las-comp-submit:hover { background: #3a3b37; }
+html[data-learner-theme="light"] .las-comp-submit .btn-spinner span { background: #ffffff; }
+
+/* error under the form (shared with the phone-style form, so this covers both): the dark-mode pink is unreadable on light */
+html[data-learner-theme="light"] .las-submission-error { color: #a8332c; border-color: rgba(189,74,67,.35); background: rgba(189,74,67,.08); }
+
+/* status colours assignments.js writes inline (lasTaskState and the status chip), darkened so they read on a light page.
+   Text first (the "Time left" value in the Details rail), then the dot in the status chip. */
+html[data-learner-theme="light"] .las-desktop-layout [style*="#22c55e" i] { color: #15803d !important; }
+html[data-learner-theme="light"] .las-desktop-layout [style*="#f4776f" i] { color: #bd4a43 !important; }
+html[data-learner-theme="light"] .las-desktop-layout [style*="#7a7b73" i] { color: #73746d !important; }
+html[data-learner-theme="light"] .las-desktop-layout [style*="#c2c3b7" i] { color: #53544e !important; }
+html[data-learner-theme="light"] .las-panel-status-dot[style*="#22c55e" i] { background: #16a34a !important; }
+html[data-learner-theme="light"] .las-panel-status-dot[style*="#9b9c92" i] { background: #8b8b83 !important; }
+html[data-learner-theme="light"] .las-panel-status-dot[style*="#7a7b73" i] { background: #73746d !important; }
+
+/* ── 769px to 899px: the split layout starts at 900px, so until then the phone-style list, detail view and
+      submission form are what show. Their colours are hard-coded for a dark page. ── */
+html[data-learner-theme="light"] .las-mobile-folder-header { border-bottom-color: #dfded8; }
+html[data-learner-theme="light"] .las-mobile-folder-header:active,
+html[data-learner-theme="light"] .las-mobile-folder-header:not(.las-mobile-folder-header--collapsed) { background: rgba(38,39,35,.04); }
+html[data-learner-theme="light"] .las-mobile-folder-name,
+html[data-learner-theme="light"] .las-mobile-row-title { color: #282924; }
+html[data-learner-theme="light"] .las-mobile-folder-count { color: #73746d; background: rgba(38,39,35,.06); }
+html[data-learner-theme="light"] .las-mobile-folder-chevron,
+html[data-learner-theme="light"] .las-mobile-row-chevron { color: #8b8b83; }
+html[data-learner-theme="light"] .las-mobile-row::after { background: #ebeae5; }
+html[data-learner-theme="light"] .las-mobile-row:active { background: rgba(38,39,35,.04); }
+/* row due date: the base rule first, then the done / pending variants (same specificity, so order matters) */
+html[data-learner-theme="light"] .las-mobile-row-meta { color: #73746d; }
+html[data-learner-theme="light"] .las-mobile-row-meta--done { color: #6b4fc7; }
+html[data-learner-theme="light"] .las-mobile-row-meta--pending { color: #b85f12; }
+html[data-learner-theme="light"] .las-mobile-search-wrap svg { color: #282924; }
+html[data-learner-theme="light"] .las-mobile-search { background: #ffffff; border: 1px solid #dfded8; color: #282924; }
+html[data-learner-theme="light"] .las-mobile-search:focus { border-color: #bdbcb4; }
+html[data-learner-theme="light"] .las-mobile-search::placeholder { color: #8b8b83; }
+html[data-learner-theme="light"] .las-mobile-empty-title { color: #282924; }
+html[data-learner-theme="light"] .las-mobile-empty-body { color: #73746d; }
+html[data-learner-theme="light"] .las-mobile-list [stroke="#a78bfa" i] { stroke: #6b4fc7; }
+html[data-learner-theme="light"] .las-status-dot--done { background: #16a34a; }
+html[data-learner-theme="light"] .las-status-dot--pending { background: #d97706; }
+
+/* phone-style assignment detail */
+html[data-learner-theme="light"] .las-mobile-detail-avatar { border-color: rgba(107,79,199,.35); background: rgba(107,79,199,.08); color: #6b4fc7; }
+html[data-learner-theme="light"] .las-mobile-detail-author-name,
+html[data-learner-theme="light"] .las-mobile-detail-title { color: #282924; }
+html[data-learner-theme="light"] .las-mobile-detail-author-role,
+html[data-learner-theme="light"] .las-mobile-detail-posted,
+html[data-learner-theme="light"] .las-mobile-detail-meta { color: #73746d; }
+html[data-learner-theme="light"] .las-mobile-detail-meta { border-bottom-color: #dfded8; }
+html[data-learner-theme="light"] .las-mobile-detail-role-badge { color: #6b4fc7; }
+html[data-learner-theme="light"] .las-mobile-detail-role-sep { color: #8b8b83; }
+html[data-learner-theme="light"] .las-mobile-detail-status { color: #53544e; border-color: #dfded8; background: #ffffff; }
+html[data-learner-theme="light"] .las-mobile-detail-desc { color: #53544e; }
+html[data-learner-theme="light"] .las-mobile-detail-link { color: #6b4fc7; border-color: rgba(107,79,199,.35); background: rgba(107,79,199,.08); }
+html[data-learner-theme="light"] .las-mobile-detail-action { color: #ffffff; background: #252624; border-color: #252624; }
+html[data-learner-theme="light"] .las-mobile-detail-action--locked { color: #73746d; background: rgba(38,39,35,.04); border-color: #dfded8; }
+
+/* phone-style submission form */
+html[data-learner-theme="light"] .las-submission-form { border-color: #dfded8; background: #ffffff; }
+html[data-learner-theme="light"] .las-submission-form-heading { color: #282924; }
+html[data-learner-theme="light"] .las-submission-form-help,
+html[data-learner-theme="light"] .las-submission-current-file,
+html[data-learner-theme="light"] .las-submission-label span { color: #73746d; }
+html[data-learner-theme="light"] .las-submission-label { color: #53544e; }
+html[data-learner-theme="light"] .las-submission-textarea,
+html[data-learner-theme="light"] .las-submission-file { color: #282924; background: #faf9f5; border-color: #d0cfc8; }
+html[data-learner-theme="light"] .las-submission-textarea:focus,
+html[data-learner-theme="light"] .las-submission-file:focus { border-color: #187a72; box-shadow: 0 0 0 3px rgba(24,122,114,.14); }
+html[data-learner-theme="light"] .las-submission-current-file a { color: #187a72; }
+html[data-learner-theme="light"] .las-submission-cancel { color: #53544e; border-color: #dfded8; background: #ffffff; }
+html[data-learner-theme="light"] .las-submission-submit { color: #ffffff; border-color: #252624; background: #252624; }
+html[data-learner-theme="light"] .las-submission-submit .btn-spinner span { background: #ffffff; }
+
+/* fetch error state ("Unable to load assignments") */
+html[data-learner-theme="light"] .las-error-state p { color: #bd4a43; }
+
+}

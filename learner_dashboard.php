@@ -244,7 +244,7 @@ if (!empty($joinedClassIds)) {
     <link rel="stylesheet" href="assets/css/learner/quiz.css?v=6.1">
     <link rel="stylesheet" href="assets/css/learner/manual.css?v=8.3">
     <link rel="stylesheet" href="assets/css/learner/announcements.css?v=3.6">
-    <link rel="stylesheet" href="assets/css/learner/assignments.css?v=3.5">
+    <link rel="stylesheet" href="assets/css/learner/assignments.css?v=3.6">
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
     <link rel="stylesheet" href="assets/css/learner/grades.css?v=3.6">
     <link rel="stylesheet" href="assets/css/learner/resources.css?v=2.7">
