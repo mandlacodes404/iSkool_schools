@@ -587,3 +587,77 @@ html body .lqz-flat-layout > :has(.lqz-sidebar-scroll, .lrs-sidebar-scroll, .lev
     transition: none !important; animation: none !important;
   }
 }
+
+/* ═══ Light mode: sidebar, quick search, shortcuts, rail tooltips and the Join a class dialog ═══════════════
+   Applies only when <html data-learner-theme="light"> (set from Settings > Appearance) and the window is 769px or
+   wider. Same palette as the teacher light mode. The Settings modal and the account popover are in
+   desktop_settings.css. Dark mode and phones are untouched. To remove it, delete this block. */
+@media (min-width: 769px) {
+
+html[data-learner-theme="light"] {
+  --dm-bg: #f4f3ee;        /* sidebar */
+  --dm-page: #faf9f5;      /* page and panes */
+  --dm-card: #ffffff;
+  --dm-raise: #ffffff;     /* quick search, shortcuts sheet, Join a class dialog */
+  --dm-hover: rgba(38,39,35,.055);
+  --dm-active: rgba(38,39,35,.075);
+  --dm-line: #dfded8;
+  --dm-line-strong: #d0cfc8;
+  --dm-text: #282924;
+  --dm-soft: #53544e;
+  --dm-muted: #73746d;
+  --dm-faint: #8b8b83;
+  --dm-ac: #5e5d59;
+  --dm-ac-on: #ffffff;
+  --dm-ac-text: var(--dm-soft);
+  --dm-ac-sel: rgba(38,39,35,.075);
+  --dm-ac-bg: rgba(38,39,35,.06);
+  --dm-ac-bg-soft: rgba(38,39,35,.035);
+  --dm-ac-line: rgba(38,39,35,.10);
+  --dm-ac-line-strong: rgba(38,39,35,.18);
+  --dm-accent: var(--dm-ac);
+  --dm-danger: #bd4a43;
+  color-scheme: light;
+}
+
+/* sidebar: the dark re-tone block hard-codes these, so each one is set again here */
+html[data-learner-theme="light"] body .sidebar.dm-menu .dm-item { color: var(--dm-soft); }
+html[data-learner-theme="light"] body .sidebar.dm-menu .dm-item.active { background: var(--dm-active); color: var(--dm-text); }
+html[data-learner-theme="light"] body .sidebar.dm-menu .dm-search { color: var(--dm-soft); background: #ffffff; }
+html[data-learner-theme="light"] body .sidebar.dm-menu .dm-kbd { color: var(--dm-muted); }
+html[data-learner-theme="light"] body .sidebar.dm-menu .dm-toggle,
+html[data-learner-theme="light"].dm-collapsed body .sidebar.dm-menu .dm-toggle { color: var(--dm-muted); }
+html[data-learner-theme="light"] body .sidebar.dm-menu .dm-account-root::after { background: var(--dm-soft); }
+html[data-learner-theme="light"] body .sidebar.dm-menu .sidebar-links::before,
+html[data-learner-theme="light"] body .sidebar.dm-menu .dm-sep--a { color: var(--dm-muted); }
+html[data-learner-theme="light"] body .sidebar.dm-menu .dm-account-root .initials-avatar { background-color: #e9e8e2; color: #555650; }
+html[data-learner-theme="light"] body .sidebar.dm-menu .dm-mark--initials { background: #ffffff; color: var(--dm-soft); }
+
+html[data-learner-theme="light"] body .sidebar.dm-menu .dm-item:hover,
+html[data-learner-theme="light"] body .sidebar.dm-menu .dm-search:hover,
+html[data-learner-theme="light"] body .sidebar.dm-menu .dm-toggle:hover { color: var(--dm-text); }
+
+/* Join a class form in the sidebar */
+html[data-learner-theme="light"] body .sidebar.dm-menu .join-class-form { background: #ffffff; }
+html[data-learner-theme="light"] body .sidebar.dm-menu .join-class-form select { background: #ffffff; color-scheme: light; }
+html[data-learner-theme="light"] body .sidebar.dm-menu .join-class-form select:hover { border-color: #bdbcb4; }
+html[data-learner-theme="light"] body .sidebar.dm-menu .join-class-form .join-class-btn:hover { background: #3a3b37; color: #ffffff; }
+
+/* rail tooltip: a dark pill, like Claude's */
+html[data-learner-theme="light"] .dm-tip { background: #252624; border-color: transparent; color: #faf9f5; box-shadow: 0 6px 18px rgba(31,32,29,.22); }
+html[data-learner-theme="light"] .dm-tip kbd { color: #b9b9b1; }
+
+/* quick search, shortcuts sheet and Join a class dialog: lighter backdrop and shadow */
+html[data-learner-theme="light"] .dm-palette,
+html[data-learner-theme="light"] .dm-keys,
+html[data-learner-theme="light"] .dm-join { background: rgba(38,39,35,.30); }
+html[data-learner-theme="light"] .dm-palette-panel,
+html[data-learner-theme="light"] .dm-keys-panel,
+html[data-learner-theme="light"] .dm-join-panel { box-shadow: 0 18px 52px rgba(31,32,29,.18); }
+html[data-learner-theme="light"] .dm-join-body .dm-note { border-color: rgba(189,74,67,.28); background: rgba(189,74,67,.08); }
+html[data-learner-theme="light"] .dm-join-body select { background: #ffffff; color-scheme: light; }
+html[data-learner-theme="light"] .dm-join-body select:hover { border-color: #bdbcb4; }
+html[data-learner-theme="light"] .dm-join-body .join-class-btn:hover,
+html[data-learner-theme="light"] .dm-join-btn--go:hover { background: #3a3b37; color: #ffffff; }
+
+}

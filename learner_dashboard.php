@@ -242,7 +242,7 @@ if (!empty($joinedClassIds)) {
     <title>Dashboard - <?= htmlspecialchars($schoolName) ?></title>
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
     <link rel="stylesheet" href="assets/css/learner/quiz.css?v=6.0">
-    <link rel="stylesheet" href="assets/css/learner/manual.css?v=8.2">
+    <link rel="stylesheet" href="assets/css/learner/manual.css?v=8.3">
     <link rel="stylesheet" href="assets/css/learner/announcements.css?v=3.6">
     <link rel="stylesheet" href="assets/css/learner/assignments.css?v=3.5">
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
@@ -250,7 +250,7 @@ if (!empty($joinedClassIds)) {
     <link rel="stylesheet" href="assets/css/learner/resources.css?v=2.7">
      <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=4.8">
      <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=13.6">
-    <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=3.0">
+    <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=3.1">
     <link rel="stylesheet" href="assets/css/learner/mobile_menu.css?v=1.7">
     <link rel="stylesheet" href="assets/css/learner/mobile_settings.css?v=1.0">
     <link rel="stylesheet" href="assets/css/learner/mobile_class.css?v=1.0">

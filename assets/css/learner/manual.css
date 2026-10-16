@@ -1137,3 +1137,81 @@
 .lhd-guide .manual-container strong { font-weight: var(--lhd-w-strong); color: var(--lhd-bright); }
 
 @media (max-width: 1100px) { .lhd { padding: 32px 28px 48px; } }
+
+/* ═══ Light mode: learner Home (desktop) ═══════════════════════════════════════════════════════════════
+   The desktop Home is driven by the --lhd-* variables, so most of light mode is the variable block below. The rest
+   fixes the few colours that are hard-coded above: the primary button, today's date, the tooltip, the guide dialog
+   and the bright icon colours the script passes in. Applies only when <html data-learner-theme="light"> on 769px
+   and wider. To remove it, delete this block. */
+@media (min-width: 769px) {
+
+html[data-learner-theme="light"] .lhd,
+html[data-learner-theme="light"] .lhd-guide {
+  --lhd-text: #53544e;     /* body text */
+  --lhd-bright: #282924;   /* hover and emphasis */
+  --lhd-mute: #73746d;
+  --lhd-faint: #7d7e76;
+  --lhd-teal: #187a72;
+  --lhd-line: #dfded8;     /* outer border of a card or list */
+  --lhd-soft: #ebeae5;     /* hairline between rows */
+  --lhd-hover: rgba(38,39,35,.055);
+  --lhd-active: rgba(38,39,35,.075);
+}
+html[data-learner-theme="light"] .manual-container { --accent-teal: #187a72; }
+
+/* titles are near-black, body text stays grey */
+html[data-learner-theme="light"] .lhd h1,
+html[data-learner-theme="light"] .lhd h2,
+html[data-learner-theme="light"] #api-content-area .lhd h1,
+html[data-learner-theme="light"] #api-content-area .lhd h2,
+html[data-learner-theme="light"] .lhd-row-title,
+html[data-learner-theme="light"] .lhd-strip-title,
+html[data-learner-theme="light"] .lhd .cal-month-title { color: var(--lhd-bright); }
+
+/* cards and lists are the whitest step */
+html[data-learner-theme="light"] .lhd-hero,
+html[data-learner-theme="light"] .lhd-list,
+html[data-learner-theme="light"] .lhd-strip,
+html[data-learner-theme="light"] .lhd .learner-cal-panel { background: #ffffff; }
+
+/* primary button and today's date */
+html[data-learner-theme="light"] .lhd-btn { background: #252624; color: #ffffff; }
+html[data-learner-theme="light"] .lhd-btn:hover { background: #3a3b37; }
+html[data-learner-theme="light"] .lhd .cal-cell.cal-today .cal-day-num { background: #252624; color: #ffffff; }
+
+/* calendar hover card: a dark pill so its light text stays readable */
+html[data-learner-theme="light"] .lhd .cal-tooltip { background: #252624; border-color: #252624; }
+
+/* "How iSkool works" guide dialog */
+html[data-learner-theme="light"] .lhd-guide,
+html[data-learner-theme="light"] .lhd-guide-head { background: #ffffff; }
+html[data-learner-theme="light"] .lhd-guide::backdrop { background: rgba(38,39,35,.30); }
+html[data-learner-theme="light"] .lhd-guide .manual-container .section { background-color: transparent !important; }
+
+/* calendar dots */
+html[data-learner-theme="light"] .dot-assignment { background: #6b4fc7; }
+html[data-learner-theme="light"] .dot-quiz { background: #c99a00; }
+html[data-learner-theme="light"] .dot-quiz-done { background: #187a72; }
+html[data-learner-theme="light"] .dot-reminder { background: #d97706; }
+html[data-learner-theme="light"] .dot-academic { background: #c2418a; }
+
+/* bright icon colours passed in by manual.js, darkened so they read on a light page */
+html[data-learner-theme="light"] .lhd [style*="#4fd1c5" i] { --c: #187a72 !important; }
+html[data-learner-theme="light"] .lhd .lhd-ev-kind[style*="#4fd1c5" i] { color: #187a72 !important; }
+html[data-learner-theme="light"] .lhd [stroke="#4fd1c5" i] { stroke: #187a72; }
+html[data-learner-theme="light"] .lhd [style*="#a78bfa" i] { --c: #6b4fc7 !important; }
+html[data-learner-theme="light"] .lhd .lhd-ev-kind[style*="#a78bfa" i] { color: #6b4fc7 !important; }
+html[data-learner-theme="light"] .lhd [stroke="#a78bfa" i] { stroke: #6b4fc7; }
+html[data-learner-theme="light"] .lhd [style*="#f59e0b" i] { --c: #a85d00 !important; }
+html[data-learner-theme="light"] .lhd .lhd-ev-kind[style*="#f59e0b" i] { color: #a85d00 !important; }
+html[data-learner-theme="light"] .lhd [stroke="#f59e0b" i] { stroke: #a85d00; }
+html[data-learner-theme="light"] .lhd [style*="#fdd663" i] { --c: #9a6b00 !important; }
+html[data-learner-theme="light"] .lhd .lhd-ev-kind[style*="#fdd663" i] { color: #9a6b00 !important; }
+html[data-learner-theme="light"] .lhd [stroke="#fdd663" i] { stroke: #9a6b00; }
+html[data-learner-theme="light"] .lhd [style*="#f28c38" i] { --c: #b85f12 !important; }
+html[data-learner-theme="light"] .lhd .lhd-ev-kind[style*="#f28c38" i] { color: #b85f12 !important; }
+html[data-learner-theme="light"] .lhd [stroke="#f28c38" i] { stroke: #b85f12; }
+html[data-learner-theme="light"] .lhd [style*="#8b949e" i] { --c: #73746d !important; }
+html[data-learner-theme="light"] .lhd .lhd-ev-kind[style*="#8b949e" i] { color: #73746d !important; }
+html[data-learner-theme="light"] .lhd [stroke="#8b949e" i] { stroke: #73746d; }
+}
