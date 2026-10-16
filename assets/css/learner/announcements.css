@@ -710,3 +710,98 @@
     .lan-desktop-layout .lan-auth b { font-weight: var(--lan-w-strong, 500); }
     .lan-desktop-layout .lan-edited-tag { font-weight: var(--lan-w-strong, 500); }
 }
+
+/* ═══ Light mode: learner Announcements (desktop) ═══════════════════════════════════════════════════════════
+   The desktop Announcements page is driven by the --lan-* variables above, so most of light mode is the variable
+   block below, the same way the Home page does it with --lhd-*, the Quiz page with --lqz-* and the Assignments page
+   with --las-*. The rest fixes the colours that are hard-coded: the search box, scrollbars, resize handle, the
+   highlighted words in an edited message, the icon in the empty detail pane, the phone-style list and detail view
+   shown between 769px and 899px, and the fetch error. Same palette as the Home page, the sidebar, the Quiz page
+   and the Assignments page.
+   Applies only when <html data-learner-theme="light"> on 769px and wider. Dark mode and phones are untouched, and
+   announcements.js needs no change. To remove it, delete this block. */
+@media (min-width: 769px) {
+
+/* palette: titles near-black, body text grey, lines the same warm greys as the sidebar and Home */
+html[data-learner-theme="light"] .lan-desktop-layout {
+    --lan-text:   #282924;   /* titles, the selected row and the unread dot */
+    --lan-soft:   #53544e;   /* body text */
+    --lan-muted:  #73746d;
+    --lan-faint:  #7d7e76;
+    --lan-accent: #187a72;   /* focus rings, the "More from" hover and the search focus border */
+    --lan-line:        #dfded8;
+    --lan-line-strong: #d0cfc8;
+    --lan-hover:  rgba(38,39,35,.055);
+    --lan-active: rgba(38,39,35,.075);
+    /* the layout sets no text colour of its own, so anything unstyled would inherit the dark page's white */
+    color: var(--lan-text);
+    color-scheme: light;
+}
+
+/* filter box: white, like the sidebar's search button */
+html[data-learner-theme="light"] .lan-desktop-search { background: #ffffff; }
+
+/* scrollbars (the dark ones are white at 10% and vanish on a light page) */
+html[data-learner-theme="light"] .lan-sidebar-scroll::-webkit-scrollbar-thumb,
+html[data-learner-theme="light"] .lan-body::-webkit-scrollbar-thumb { background: rgba(38,39,35,.16); }
+html[data-learner-theme="light"] .lan-sidebar-scroll::-webkit-scrollbar-thumb:hover,
+html[data-learner-theme="light"] .lan-body::-webkit-scrollbar-thumb:hover { background: rgba(38,39,35,.30); }
+
+/* resize handle between the list and the detail pane */
+html[data-learner-theme="light"] .lan-split:hover,
+html[data-learner-theme="light"] .lan-split.drag,
+html[data-learner-theme="light"] .lan-split:focus-visible {
+    background: linear-gradient(90deg, transparent 2px, #187a72 2px, #187a72 4px, transparent 4px);
+}
+
+/* changed words in an edited message: the teal tint is built from the dark-mode teal, so it is rebuilt from the darker one */
+html[data-learner-theme="light"] .lan-msg .an-edited-highlight { background: rgba(24,122,114,.12); }
+
+/* megaphone in the empty detail pane: its stroke is set in announcements.js, and the dark-mode teal at 30% all but vanishes on white */
+html[data-learner-theme="light"] .lan-panel-empty svg[stroke="#4fd1c5" i] { stroke: #187a72; }
+
+/* ── 769px to 899px: the split layout starts at 900px, so until then the phone-style list and detail view
+      are what show. Their colours are hard-coded for a dark page. ── */
+html[data-learner-theme="light"] .lan-mobile-folder-header { border-bottom-color: #dfded8; }
+html[data-learner-theme="light"] .lan-mobile-folder-header:active,
+html[data-learner-theme="light"] .lan-mobile-folder-header:not(.lan-mobile-folder-header--collapsed) { background: rgba(38,39,35,.04); }
+html[data-learner-theme="light"] .lan-mobile-folder-name,
+html[data-learner-theme="light"] .lan-mobile-card-title { color: #282924; }
+html[data-learner-theme="light"] .lan-mobile-folder-count { color: #73746d; background: rgba(38,39,35,.06); }
+html[data-learner-theme="light"] .lan-mobile-folder-chevron,
+html[data-learner-theme="light"] .lan-mobile-card-chevron { color: #8b8b83; }
+html[data-learner-theme="light"] .lan-mobile-card::after { background: #ebeae5; }
+html[data-learner-theme="light"] .lan-mobile-card:active { background: rgba(38,39,35,.04); }
+html[data-learner-theme="light"] .lan-mobile-card-date { color: #73746d; }
+html[data-learner-theme="light"] .lan-mobile-search-wrap svg { color: #282924; }
+html[data-learner-theme="light"] .lan-mobile-search { background: #ffffff; border: 1px solid #dfded8; color: #282924; }
+html[data-learner-theme="light"] .lan-mobile-search:focus { border-color: #bdbcb4; }
+html[data-learner-theme="light"] .lan-mobile-search::placeholder { color: #8b8b83; }
+html[data-learner-theme="light"] .lan-mobile-empty-title { color: #282924; }
+html[data-learner-theme="light"] .lan-mobile-empty-body { color: #73746d; }
+/* folder and megaphone icons: the two oranges announcements.js sets as strokes, darkened so they read on white */
+html[data-learner-theme="light"] .lan-mobile-list [stroke="#f28c38" i] { stroke: #b85f12; }
+html[data-learner-theme="light"] .lan-mobile-list [stroke="#d29522" i] { stroke: #9a6b00; }
+
+/* phone-style announcement detail */
+html[data-learner-theme="light"] .lan-mobile-detail-avatar { border-color: rgba(184,95,18,.35); background: rgba(184,95,18,.08); color: #b85f12; }
+html[data-learner-theme="light"] .lan-mobile-detail-author-name,
+html[data-learner-theme="light"] .lan-mobile-detail-title { color: #282924; }
+html[data-learner-theme="light"] .lan-mobile-detail-title { border-bottom-color: #dfded8; }
+html[data-learner-theme="light"] .lan-mobile-detail-author-role,
+html[data-learner-theme="light"] .lan-mobile-detail-posted { color: #73746d; }
+html[data-learner-theme="light"] .lan-mobile-detail-role-badge { color: #b85f12; }
+html[data-learner-theme="light"] .lan-mobile-detail-role-sep { color: #8b8b83; }
+html[data-learner-theme="light"] .lan-mobile-detail-message { color: #53544e; }
+
+/* "Edited" tag, "Edited <date>" line and highlighted words (phone-style views only; the desktop pane uses its own chip and highlight).
+   Rebuilt from a darker orange so the 9px tag and the 12px line stay readable on white. The highlight is scoped to the
+   detail view so it cannot reach the desktop highlight above. */
+html[data-learner-theme="light"] .lan-edited-tag { color: #b8553a; background: rgba(184,85,58,.08); border-color: rgba(184,85,58,.35); }
+html[data-learner-theme="light"] .lan-edited-meta { color: #b8553a; }
+html[data-learner-theme="light"] .lan-mobile-detail .an-edited-highlight { color: #b8553a; }
+
+/* fetch error ("Error loading announcements.") */
+html[data-learner-theme="light"] .lan-error-state { color: #bd4a43; }
+
+}
