@@ -40,7 +40,8 @@
     eyeoff: '<path d="M9.9 4.2A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-2.2 3.2"/><path d="M6.6 6.6A16.8 16.8 0 0 0 2 12s3.6 7 10 7a10 10 0 0 0 5.4-1.6"/><path d="M14.1 14.1a3 3 0 1 1-4.2-4.2"/><path d="m2 2 20 20"/>',
     check: '<path d="M20 6 9 17l-5-5"/>',
     search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
-    x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>'
+    x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>'
   };
   function ico(n, cls) { return '<svg class="ds-i' + (cls ? ' ' + cls : '') + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + P[n] + '</svg>'; }
 
@@ -70,6 +71,33 @@
   var formDirty = null;      // set while the Personal info form is on screen
   var formReset = null;
   var loadSeq = 0;           // so a slow, older profile request can't overwrite a newer one
+
+  /* ── Desktop theme (light / dark) ───────────────────────────────────── *
+     Saved in localStorage and set on <html data-learner-theme>. Dark is the default; only "light" is ever written to
+     the attribute's CSS. For no flash on load, also set it from a tiny inline script in the page <head>. */
+  function themeKey() { return window.ISKOOL_LEARNER_THEME_KEY || 'iskoolLearnerDesktopTheme'; }
+  function currentTheme() {
+    return document.documentElement.dataset.learnerTheme === 'light' ? 'light' : 'dark';
+  }
+  function applyTheme(theme) {
+    theme = theme === 'light' ? 'light' : 'dark';
+    document.documentElement.dataset.learnerTheme = theme;
+    try { localStorage.setItem(themeKey(), theme); } catch (e) {}
+    if (modal) {
+      modal.querySelectorAll('[data-theme-choice]').forEach(function (button) {
+        var selected = button.getAttribute('data-theme-choice') === theme;
+        button.classList.toggle('on', selected);
+        button.setAttribute('aria-pressed', String(selected));
+      });
+    }
+  }
+  // Fallback if the <head> script isn't there: restore the saved choice as soon as this file runs.
+  try {
+    var savedTheme = localStorage.getItem(themeKey());
+    if (!document.documentElement.dataset.learnerTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
+      document.documentElement.dataset.learnerTheme = savedTheme;
+    }
+  } catch (e) {}
 
   function fetchProfile() {
     return fetch('api/learner/get_learner_profile.php', { credentials: 'same-origin' })
@@ -405,9 +433,26 @@
     ['profile', 'Profile', 'user', 'profile photo picture avatar name email gender account details'],
     ['personal', 'Personal info', 'card', 'personal information date of birth id number address guardian parent relationship emergency contact medical notes allergies phone'],
     ['security', 'Password', 'lock', 'password security change forgot reset'],
-    ['notif', 'Notifications', 'bell', 'notifications alerts push sync help iphone android browser']
+    ['notif', 'Notifications', 'bell', 'notifications alerts push sync help iphone android browser'],
+    ['appearance', 'Appearance', 'sun', 'appearance theme light dark colour color desktop']
   ];
   var SIGNOUT_KW = 'sign out log out logout leave';
+
+  function appearancePane() {
+    var theme = currentTheme();
+    function option(value, title, description) {
+      var selected = value === theme;
+      return '<button type="button" class="ds-theme-option' + (selected ? ' on' : '') + '" data-theme-choice="' + value + '" aria-pressed="' + selected + '">' +
+        '<span class="ds-theme-swatch ds-theme-swatch--' + value + '" aria-hidden="true"><i></i><i></i></span>' +
+        '<span class="ds-theme-copy"><b>' + title + '</b><span>' + description + '</span></span></button>';
+    }
+    return '<section class="ds-pane" data-pane="appearance" hidden><h2 class="ds-h">Appearance</h2>' +
+      '<p class="ds-foot ds-appearance-note">Choose how iSkool looks on desktop. Phones keep their current colours.</p>' +
+      '<div class="ds-list"><div class="ds-r ds-r--appearance"><span class="ds-rt"><b>Desktop theme</b><span>Your choice is saved on this browser.</span></span>' +
+      '<div class="ds-theme-options" role="group" aria-label="Desktop theme">' +
+        option('light', 'Light', 'Bright, paper-like workspace') + option('dark', 'Dark', 'Current iSkool appearance') +
+      '</div></div></div></section>';
+  }
 
   function goPane(p) {
     if (!modal) return;
@@ -474,6 +519,7 @@
             '<div id="dsForms"></div>' +
           '</section>' +
           passwordPane() +
+          appearancePane() +
           '<section class="ds-pane" data-pane="notif" hidden><h2 class="ds-h">Notifications</h2><div class="ds-list">' +
             '<div class="ds-r"><span class="ds-rt"><b>Sync notifications</b><span>Fix missing alerts on this device</span></span><span class="ds-rv ' + (ps.c || '') + '" id="dsPushVal">' + esc(ps.t) + '</span><button type="button" class="ds-b" data-go="push">Sync now</button></div>' +
             '<div class="ds-r"><span class="ds-rt"><b>Notification help</b><span>Steps for iPhone, Android, and browsers</span></span><button type="button" class="ds-b" data-go="pushhelp">View steps</button></div>' +
@@ -488,6 +534,8 @@
     m.addEventListener('mousedown', function (e) { if (e.target === m) requestClose(); });
     root.addEventListener('click', function (e) {
       var t = e.target.closest('[data-tab]'); if (t) { goPane(t.getAttribute('data-tab')); return; }
+      var themeChoice = e.target.closest('[data-theme-choice]');
+      if (themeChoice) { applyTheme(themeChoice.getAttribute('data-theme-choice')); return; }
       var eye = e.target.closest('[data-eye]');
       if (eye) {
         var inp = $(eye.getAttribute('data-eye')), show = inp.type === 'password';

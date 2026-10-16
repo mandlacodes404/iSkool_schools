@@ -236,3 +236,127 @@
 }
 
 }
+
+
+/* -- Appearance: the Light / Dark chooser in Settings (same as the teacher modal) -- */
+@media (min-width: 769px) {
+  .ds-appearance-note { max-width: 560px; margin-top: 8px; }
+  .ds-r--appearance { align-items: flex-start; padding-top: 18px; padding-bottom: 18px; }
+  .ds-r--appearance .ds-rt { padding-top: 3px; }
+  .ds-theme-options { display: grid; grid-template-columns: repeat(2, minmax(0, 168px)); gap: 10px; flex: none; }
+  .ds-theme-option {
+    display: flex; align-items: center; gap: 10px; min-width: 0; min-height: 68px; padding: 9px;
+    border: 1px solid var(--ds-field); border-radius: 11px; background: var(--ds-raise); color: var(--ds-soft);
+    cursor: pointer; text-align: left; transition: border-color .15s, background .15s, box-shadow .15s;
+  }
+  .ds-theme-option:hover { border-color: #696965; background: #262625; }
+  .ds-theme-option.on { border-color: var(--ds-soft); box-shadow: 0 0 0 1px var(--ds-soft); }
+  .ds-theme-option:focus-visible { outline: 2px solid var(--ds-soft); outline-offset: 2px; }
+  .ds-theme-swatch {
+    display: grid; grid-template-columns: 8px 1fr; grid-template-rows: 1fr; width: 48px; height: 42px; flex: none;
+    overflow: hidden; border: 1px solid rgba(255,255,255,.18); border-radius: 7px;
+  }
+  .ds-theme-swatch i { display: block; }
+  .ds-theme-swatch--light { background: #faf9f5; }
+  .ds-theme-swatch--light i:first-child { background: #f0efe9; border-right: 1px solid #dfded8; }
+  .ds-theme-swatch--light i:last-child { background: linear-gradient(145deg, #ffffff 0 54%, #f1f0eb 54%); }
+  .ds-theme-swatch--dark { background: #151515; }
+  .ds-theme-swatch--dark i:first-child { background: #111111; border-right: 1px solid #30302f; }
+  .ds-theme-swatch--dark i:last-child { background: linear-gradient(145deg, #1a1a19 0 54%, #151515 54%); }
+  .ds-theme-copy { display: flex; flex-direction: column; min-width: 0; gap: 2px; }
+  .ds-theme-copy b { color: var(--ds-text); font: 450 13.5px/1.2 var(--ds-font); }
+  .ds-theme-copy span { color: var(--ds-muted); font-size: 11.5px; line-height: 1.3; }
+  @media (max-width: 900px) {
+    .ds-r--appearance { display: block; }
+    .ds-theme-options { margin-top: 14px; }
+  }
+}
+
+
+/* ═══ Light mode for the floating layers: Settings modal, its dialogs and toast, and the account popover ═══
+   Applies only when <html data-learner-theme="light"> and the window is 769px or wider. Same palette as the teacher
+   light modals. Focus is a neutral grey; for teal, set --lm-focus to #187a72 and --lm-ring to rgba(24,122,114,.13). */
+@media (min-width: 769px) {
+
+html[data-learner-theme="light"] .dsm,
+html[data-learner-theme="light"] .ds-ov,
+html[data-learner-theme="light"] .ds-toast,
+html[data-learner-theme="light"] .dm-pop {
+  --ds-bg: #ffffff;
+  --ds-rail: #faf9f5;
+  --ds-raise: #ffffff;
+  --ds-sel: #ebeae4;
+  --ds-hover: rgba(38,39,35,.055);
+  --ds-line: #ebeae5;
+  --ds-edge: #dfded8;
+  --ds-field: #d7d6cf;
+  --ds-text: #282924;
+  --ds-soft: #53544e;
+  --ds-muted: #73746d;
+  --ds-faint: #8b8b83;
+  --ds-btn: #252624;
+  --ds-btn-text: #ffffff;
+  --ds-danger: #bd4a43;
+  --ds-warn: #a85d00;
+  --lm-focus: #8a8a82;
+  --lm-ring: rgba(38,39,35,.08);
+}
+
+/* account popover */
+html[data-learner-theme="light"] .dm-pop { box-shadow: 0 12px 32px rgba(31,32,29,.12), 0 2px 6px rgba(31,32,29,.05); }
+html[data-learner-theme="light"] .dm-pop-sep { background: rgba(38,39,35,.09); }
+html[data-learner-theme="light"] .dm-pop-kbd { color: var(--ds-muted); }
+html[data-learner-theme="light"] .dm-pop-ver { color: var(--ds-faint); }
+html[data-learner-theme="light"] .dm-pop-item:focus-visible { outline-color: var(--lm-focus); }
+html[data-learner-theme="light"] .dm-pop-item.is-danger:hover { background: rgba(189,74,67,.08); }
+
+/* Settings modal */
+html[data-learner-theme="light"] .dsm { background: rgba(38,39,35,.30); }
+html[data-learner-theme="light"] .ds { box-shadow: 0 18px 52px rgba(31,32,29,.18); }
+html[data-learner-theme="light"] .ds-panel { scrollbar-color: #d0cfc8 transparent; }
+html[data-learner-theme="light"] .ds-search:focus-within { border-color: var(--lm-focus); }
+html[data-learner-theme="light"] .ds .ds-search input { color-scheme: light; }
+html[data-learner-theme="light"] .ds-av-face { background: #e9e8e2; color: #555650; }
+
+/* buttons */
+html[data-learner-theme="light"] .ds-b:hover { background: rgba(38,39,35,.05); }
+html[data-learner-theme="light"] .ds-b.is-p:hover { background: #3a3b37; border-color: #3a3b37; color: #ffffff; }
+html[data-learner-theme="light"] .ds-b.is-d,
+html[data-learner-theme="light"] .ds-b.is-d:hover { background: rgba(189,74,67,.10); }
+html[data-learner-theme="light"] .ds-b.is-d:hover { background: rgba(189,74,67,.16); }
+html[data-learner-theme="light"] .ds-b.is-t:hover { background: rgba(189,74,67,.08); }
+html[data-learner-theme="light"] .ds-spin { border-color: rgba(255,255,255,.28); border-top-color: #ffffff; }
+
+/* fields: password, Personal info (inputs, selects, textareas) */
+html[data-learner-theme="light"] .ds .ds-f input,
+html[data-learner-theme="light"] .ds .ds-f select,
+html[data-learner-theme="light"] .ds .ds-f textarea { color-scheme: light; }
+html[data-learner-theme="light"] .ds .ds-f input:hover,
+html[data-learner-theme="light"] .ds .ds-f select:hover,
+html[data-learner-theme="light"] .ds .ds-f textarea:hover { border-color: #bdbcb4; }
+html[data-learner-theme="light"] .ds .ds-f input:focus,
+html[data-learner-theme="light"] .ds .ds-f select:focus,
+html[data-learner-theme="light"] .ds .ds-f textarea:focus { border-color: var(--lm-focus); box-shadow: 0 0 0 3px var(--lm-ring); }
+html[data-learner-theme="light"] .ds .ds-f.is-bad input,
+html[data-learner-theme="light"] .ds .ds-f.is-bad select,
+html[data-learner-theme="light"] .ds .ds-f.is-bad textarea,
+html[data-learner-theme="light"] .ds .ds-f.is-bad input:focus,
+html[data-learner-theme="light"] .ds .ds-f.is-bad select:focus,
+html[data-learner-theme="light"] .ds .ds-f.is-bad textarea:focus { border-color: var(--ds-danger); }
+html[data-learner-theme="light"] .ds .ds-f select option { background: #ffffff; color: #282924; }
+html[data-learner-theme="light"] .ds-banner { background: rgba(189,74,67,.08); }
+
+/* Personal info: unsaved-changes bar */
+html[data-learner-theme="light"] .ds-bar { box-shadow: 0 8px 24px rgba(31,32,29,.14); }
+
+/* Appearance chooser */
+html[data-learner-theme="light"] .ds-theme-option:hover { border-color: #bdbcb4; background: #f7f6f1; }
+html[data-learner-theme="light"] .ds-theme-swatch { border-color: rgba(38,39,35,.14); }
+
+/* confirm dialogs and toast */
+html[data-learner-theme="light"] .ds-ov { background: rgba(38,39,35,.30); }
+html[data-learner-theme="light"] .ds-dl { box-shadow: 0 18px 52px rgba(31,32,29,.18); }
+html[data-learner-theme="light"] .ds-toast { background: #252624; border-color: transparent; color: #faf9f5; box-shadow: 0 8px 26px rgba(31,32,29,.22); }
+html[data-learner-theme="light"] .ds-toast.is-bad { background: #fbeceb; border-color: #f0c7c4; color: #a53c36; }
+
+}
