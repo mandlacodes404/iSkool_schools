@@ -944,3 +944,139 @@
    same muted colour as the date rather than a state-specific accent. */
 .lev-mobile-row-status--done,
 .lev-mobile-row-status--pending { color: inherit; }
+/* ═══ Light mode: learner Evaluations (desktop) ════════════════════════════════════════════════════════════
+   The desktop Evaluations page is driven by the --lev-* variables above, so most of light mode is the variable
+   block below, the same way the Home page does it with --lhd-*, the Quiz page with --lqz-* and Assignments with
+   --las-*. The rest fixes the colours that are hard-coded: the search box, scrollbars, resize handle, the submit
+   button, the progress bar, the numbered statement badges, the 5-point scale, the comments box, the status dots
+   evaluations.js writes inline, the phone-style list and detail form shown between 769px and 899px, the
+   completed state and the fetch error. Same palette as the Home page, the sidebar, Quiz and Assignments.
+   Applies only when <html data-learner-theme="light"> on 769px and wider. Dark mode and phones are untouched, and
+   evaluations.js needs no change. To remove it, delete this block. */
+@media (min-width: 769px) {
+
+/* palette: titles near-black, body text grey, lines the same warm greys as the sidebar and Home */
+html[data-learner-theme="light"] .lev-desktop-layout {
+    --lev-text:   #282924;   /* titles and the selected row */
+    --lev-soft:   #53544e;   /* body text */
+    --lev-muted:  #73746d;
+    --lev-faint:  #7d7e76;
+    --lev-accent: #187a72;   /* focus rings, links and the search focus border */
+    --lev-line:        #dfded8;
+    --lev-line-strong: #d0cfc8;
+    --lev-hover:  rgba(38,39,35,.055);
+    --lev-active: rgba(38,39,35,.075);
+    color-scheme: light;
+}
+
+/* filter box: white, like the sidebar's search button */
+html[data-learner-theme="light"] .lev-desktop-search { background: #ffffff; }
+
+/* scrollbars (the dark ones are white at 10% and vanish on a light page) */
+html[data-learner-theme="light"] .lev-sidebar-scroll::-webkit-scrollbar-thumb,
+html[data-learner-theme="light"] .lev-body::-webkit-scrollbar-thumb { background: rgba(38,39,35,.16); }
+html[data-learner-theme="light"] .lev-sidebar-scroll::-webkit-scrollbar-thumb:hover,
+html[data-learner-theme="light"] .lev-body::-webkit-scrollbar-thumb:hover { background: rgba(38,39,35,.30); }
+
+/* resize handle between the list and the detail pane */
+html[data-learner-theme="light"] .lev-split:hover,
+html[data-learner-theme="light"] .lev-split.drag,
+html[data-learner-theme="light"] .lev-split:focus-visible {
+    background: linear-gradient(90deg, transparent 2px, #187a72 2px, #187a72 4px, transparent 4px);
+}
+
+/* green "completed" dot in the list */
+html[data-learner-theme="light"] .lev-sidebar-dot.is-done { background: #16a34a; border-color: #16a34a; }
+
+/* status dots in the header chip: evaluations.js writes #22c55e / #e67e22 inline, darkened so they read on light */
+html[data-learner-theme="light"] .lev-panel-status-dot[style*="#22c55e" i] { background: #16a34a !important; }
+html[data-learner-theme="light"] .lev-panel-status-dot[style*="#e67e22" i] { background: #d97706 !important; }
+
+/* "Submit feedback": dark, like the Home button (its disabled state keeps the same fade) */
+html[data-learner-theme="light"] .lev-pri { background: #252624; color: #ffffff; }
+html[data-learner-theme="light"] .lev-pri:hover { background: #3a3b37; }
+html[data-learner-theme="light"] .lev-pri:disabled:hover { background: #252624; }
+
+/* progress bar and the numbered statement badges: the light-grey fills become the same dark as the button */
+html[data-learner-theme="light"] .lev-pbar { background: rgba(38,39,35,.10); }
+html[data-learner-theme="light"] .lev-pbar i { background: #252624; }
+html[data-learner-theme="light"] .lev-qn.done { background: #252624; border-color: #252624; color: #ffffff; }
+
+/* 5-point scale: unselected ring, hover, selected card and the focus ring */
+html[data-learner-theme="light"] .lev-lo span::before { border-color: #bdbcb4; }
+html[data-learner-theme="light"] .lev-lo:hover span { border-color: #bdbcb4; }
+html[data-learner-theme="light"] .lev-lo input:checked + span { border-color: #252624; background: rgba(38,39,35,.05); }
+html[data-learner-theme="light"] .lev-lo input:checked + span::before {
+    border-color: #252624;
+    background: radial-gradient(circle, #252624 45%, transparent 50%);
+}
+html[data-learner-theme="light"] .lev-lo input:focus-visible + span { outline-color: #252624; }
+
+/* comments box */
+html[data-learner-theme="light"] .lev-cmt textarea { background: #faf9f5; }
+html[data-learner-theme="light"] .lev-cmt textarea:focus { border-color: #187a72; }
+
+/* completed state (desktop) */
+html[data-learner-theme="light"] .lev-fin svg { stroke: #16a34a; }
+html[data-learner-theme="light"] .lev-panel-empty svg[stroke="#4fd1c5" i] { stroke: #187a72; }
+
+/* ── Phone-style list and detail form: below 900px the desktop layout is hidden and these are what show.
+      Their colours are hard-coded for a dark page. ── */
+html[data-learner-theme="light"] .lev-mobile-folder-header { border-bottom-color: #dfded8; }
+html[data-learner-theme="light"] .lev-mobile-folder-header:active,
+html[data-learner-theme="light"] .lev-mobile-folder-header:not(.lev-mobile-folder-header--collapsed) { background: rgba(38,39,35,.04); }
+html[data-learner-theme="light"] .lev-mobile-folder-name,
+html[data-learner-theme="light"] .lev-mobile-row-title { color: #282924; }
+html[data-learner-theme="light"] .lev-mobile-folder-count { color: #73746d; background: rgba(38,39,35,.06); }
+html[data-learner-theme="light"] .lev-mobile-folder-chevron,
+html[data-learner-theme="light"] .lev-mobile-row-chevron { color: #8b8b83; }
+html[data-learner-theme="light"] .lev-mobile-row::after { background: #ebeae5; }
+html[data-learner-theme="light"] .lev-mobile-row:active { background: rgba(38,39,35,.04); }
+html[data-learner-theme="light"] .lev-mobile-row-meta { color: #73746d; }
+html[data-learner-theme="light"] .lev-mobile-search-wrap svg { color: #282924; }
+html[data-learner-theme="light"] .lev-mobile-search { background: #ffffff; border: 1px solid #dfded8; color: #282924; }
+html[data-learner-theme="light"] .lev-mobile-search:focus { border-color: #bdbcb4; }
+html[data-learner-theme="light"] .lev-mobile-search::placeholder { color: #8b8b83; }
+html[data-learner-theme="light"] .lev-mobile-empty-title { color: #282924; }
+html[data-learner-theme="light"] .lev-mobile-empty-body { color: #73746d; }
+
+/* the blue accent (#4fa8fd) is used on the folder and row icons, the badge, the avatar, the description bar,
+   the statement bar and the selected option; it becomes a darker blue on light */
+html[data-learner-theme="light"] .lev-mobile-list [stroke="#4fa8fd" i],
+html[data-learner-theme="light"] .lev-mobile-detail [stroke="#4fa8fd" i] { stroke: #1d6fb8; }
+html[data-learner-theme="light"] .lev-mobile-detail-badge,
+html[data-learner-theme="light"] .lev-mobile-detail-avatar { color: #1d6fb8; border-color: rgba(29,111,184,.35); background: rgba(29,111,184,.08); }
+html[data-learner-theme="light"] .lev-mobile-detail-role-badge { color: #1d6fb8; }
+html[data-learner-theme="light"] .lev-mobile-detail-role-sep { color: #8b8b83; }
+html[data-learner-theme="light"] .lev-mobile-detail-title { color: #282924; border-bottom-color: #dfded8; }
+html[data-learner-theme="light"] .lev-mobile-detail-author-name { color: #282924; }
+html[data-learner-theme="light"] .lev-mobile-detail-author-role,
+html[data-learner-theme="light"] .lev-mobile-detail-posted { color: #73746d; }
+
+html[data-learner-theme="light"] .lev-mobile-detail .eval-description { background: rgba(38,39,35,.03); border-left-color: #1d6fb8; color: #53544e; }
+html[data-learner-theme="light"] .lev-mobile-detail .question-text { color: #282924; border-left-color: #1d6fb8; }
+html[data-learner-theme="light"] .lev-mobile-detail .option-label span { color: #53544e; background: #ffffff; border-color: #dfded8; }
+html[data-learner-theme="light"] .lev-mobile-detail .option-label span::before { border-color: #bdbcb4; }
+html[data-learner-theme="light"] .lev-mobile-detail .option-label:hover span { color: #282924; background: rgba(29,111,184,.05); border-color: rgba(29,111,184,.40); }
+html[data-learner-theme="light"] .lev-mobile-detail .option-label:hover span::before { border-color: #1d6fb8; }
+html[data-learner-theme="light"] .lev-mobile-detail .option-label input[type="radio"]:checked + span { color: #282924; background: rgba(29,111,184,.08); border-color: #1d6fb8; }
+html[data-learner-theme="light"] .lev-mobile-detail .option-label input[type="radio"]:checked + span::before {
+    background: #1d6fb8;
+    border-color: #1d6fb8;
+    box-shadow: 0 0 0 3px rgba(29,111,184,.15);
+}
+html[data-learner-theme="light"] .lev-mobile-detail .lev-comments-field label { color: #282924; }
+html[data-learner-theme="light"] .lev-mobile-detail .lev-comments-field textarea { color: #282924; background: #faf9f5; border-color: #d0cfc8; }
+html[data-learner-theme="light"] .lev-mobile-detail .lev-comments-field textarea:focus { outline: none; border-color: #187a72; box-shadow: 0 0 0 3px rgba(24,122,114,.14); }
+html[data-learner-theme="light"] .lev-mobile-detail .eval-submit-btn { background: #252624; color: #ffffff; }
+html[data-learner-theme="light"] .lev-mobile-detail .eval-submit-btn:hover { background: #3a3b37; }
+
+/* completed state (phone-style detail) */
+html[data-learner-theme="light"] .lev-completed-title { color: #15803d; }
+html[data-learner-theme="light"] .lev-completed-copy { color: #73746d; }
+html[data-learner-theme="light"] .lev-completed-state [stroke="#22c55e" i] { stroke: #16a34a; }
+
+/* fetch error state */
+html[data-learner-theme="light"] .eval-error-state { color: #bd4a43; }
+
+}

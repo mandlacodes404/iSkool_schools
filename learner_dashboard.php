@@ -4002,7 +4002,7 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/resources.js?v=8.8"></script>
 <script src="assets/js/learner/announcements.js?v=9.4"></script>
 <script src="assets/js/learner/grades.js?v=10.3"></script>
-<script src="assets/js/learner/evaluations.js?v=7.2"></script>
+<script src="assets/js/learner/evaluations.js?v=7.3"></script>
 <script src="assets/js/learner/discussions.js?v=11.2"></script>
 <script src="assets/js/learner/syllabus.js?v=4.3"></script>
 <script src="assets/js/learner/learner_calendar.js?v=2.3"></script>
