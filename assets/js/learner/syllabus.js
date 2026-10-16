@@ -79,6 +79,13 @@ window.fetchSyllabus = async function() {
                         .syl-retry-btn { background: #c2c3b7 !important; }
                         .syl-retry-btn:hover { background: #adaea2 !important; }
                     }
+                    /* Light mode: this error markup is built without the page's main stylesheet, so its light rules live here.
+                       Same recipe as the Quiz page's Try Again: the dark rule above is !important, so these are too. */
+                    @media (min-width: 769px) {
+                        html[data-learner-theme="light"] .syl-retry-btn { background: #252624 !important; color: #ffffff !important; }
+                        html[data-learner-theme="light"] .syl-retry-btn:hover { background: #3a3b37 !important; }
+                        html[data-learner-theme="light"] p:has(+ .syl-retry-btn) { color: #bd4a43 !important; }
+                    }
                 </style>
                 <div style="text-align:center;margin-top:60px;padding:20px;">
                     <p style="color:#ff5555;">Unable to load syllabus.</p>
@@ -166,7 +173,14 @@ function renderSyllabusPage(data) {
 
     if (!briefs.length) {
         return `
-            <div style="text-align:center;margin-top:80px;padding:20px;">
+            <style>
+                /* Light mode: this message is built without the page's main stylesheet. Its greys are inline, hence !important on the text. */
+                @media (min-width: 769px) {
+                    html[data-learner-theme="light"] .syl-empty p[style*="#8b949e" i] { color: #73746d !important; }
+                    html[data-learner-theme="light"] .syl-empty svg[stroke="#8b949e" i] { stroke: #8b8b83; }
+                }
+            </style>
+            <div class="syl-empty" style="text-align:center;margin-top:80px;padding:20px;">
                 <svg viewBox="0 0 24 24" width="48" height="48" stroke="#8b949e"
                      stroke-width="1.5" fill="none" style="margin-bottom:16px;">
                     <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
@@ -699,6 +713,109 @@ function renderSyllabusPage(data) {
             @media (max-width: 480px) {
                 .syl-cards-grid { grid-template-columns: 1fr; }
                 .syl-wrapper { padding: 16px 14px; }
+            }
+
+            /* ═══ Light mode: learner Syllabus (desktop) ═══════════════════════════════════════════════════════════════
+               The desktop Syllabus page is driven by the --syl-* variables above, so most of light mode is the variable
+               block below, the same way the Home page does it with --lhd-*, the Quiz page with --lqz-*, the Assignments page
+               with --las-* and the Announcements page with --lan-*. The rest fixes the colours that are hard-coded: the search
+               box, scrollbars, resize handle, the icon in the empty detail pane, the assessment bar and its legend (colours
+               set inline by selectDesktopSyllabusBrief), and the phone-style page shown between 769px and 899px (title, term
+               tabs, brief cards, topic lists and weighting bars, whose colours are set inline by renderBriefCard). Same
+               palette as the Home page, the sidebar and the Quiz, Assignments and Announcements pages.
+               Applies only when <html data-learner-theme="light"> on 769px and wider. Dark mode and phones are untouched.
+               To remove it, delete this block. */
+            @media (min-width: 769px) {
+
+                /* palette: titles near-black, body text grey, lines the same warm greys as the sidebar and Home */
+                html[data-learner-theme="light"] .syl-desktop-layout {
+                    --syl-text:   #282924;   /* titles, the selected row and the values in the Details rail */
+                    --syl-soft:   #53544e;   /* body text */
+                    --syl-muted:  #73746d;
+                    --syl-faint:  #7d7e76;
+                    --syl-accent: #187a72;   /* focus rings, the "Other subjects" hover and the search focus border */
+                    --syl-line:        #dfded8;
+                    --syl-line-strong: #d0cfc8;
+                    --syl-hover:  rgba(38,39,35,.055);
+                    --syl-active: rgba(38,39,35,.075);
+                    /* the layout sets no text colour of its own, so anything unstyled would inherit the dark page's white */
+                    color: var(--syl-text);
+                    color-scheme: light;
+            }
+
+            /* filter box: white, like the sidebar's search button */
+            html[data-learner-theme="light"] .syl-desktop-search { background: #ffffff; }
+
+            /* scrollbars (the dark ones are white at 10% and vanish on a light page) */
+            html[data-learner-theme="light"] .syl-sidebar-scroll::-webkit-scrollbar-thumb,
+            html[data-learner-theme="light"] .syl-body::-webkit-scrollbar-thumb { background: rgba(38,39,35,.16); }
+            html[data-learner-theme="light"] .syl-sidebar-scroll::-webkit-scrollbar-thumb:hover,
+            html[data-learner-theme="light"] .syl-body::-webkit-scrollbar-thumb:hover { background: rgba(38,39,35,.30); }
+
+            /* resize handle between the list and the detail pane */
+            html[data-learner-theme="light"] .syl-split:hover,
+            html[data-learner-theme="light"] .syl-split.drag,
+            html[data-learner-theme="light"] .syl-split:focus-visible {
+                background: linear-gradient(90deg, transparent 2px, #187a72 2px, #187a72 4px, transparent 4px);
+            }
+
+            /* book icon in the empty detail pane: its stroke is set in the markup, and the dark-mode teal at 30% all but vanishes on white */
+            html[data-learner-theme="light"] .syl-panel-empty svg[stroke="#4fd1c5" i] { stroke: #187a72; }
+
+            /* assessment colours the JS writes inline (COL in selectDesktopSyllabusBrief, barColours in renderBriefCard), each matched by
+               its value and swapped for a darker one that holds up on white. Fills first: the weighting bar and legend squares on desktop,
+               and the bars in the phone-style cards. The percentages in those cards are text and come further down. */
+            html[data-learner-theme="light"] .syl-stack > [style*="#c2c3b7" i],
+            html[data-learner-theme="light"] .syl-wrow > i[style*="#c2c3b7" i] { background: #8b8b83 !important; }
+            html[data-learner-theme="light"] .syl-stack > [style*="#a78bfa" i],
+            html[data-learner-theme="light"] .syl-wrow > i[style*="#a78bfa" i],
+            html[data-learner-theme="light"] .syl-assess-bar[style*="#a78bfa" i] { background: #6b4fc7 !important; }
+            html[data-learner-theme="light"] .syl-stack > [style*="#f28c38" i],
+            html[data-learner-theme="light"] .syl-wrow > i[style*="#f28c38" i],
+            html[data-learner-theme="light"] .syl-assess-bar[style*="#f28c38" i] { background: #d97706 !important; }
+            html[data-learner-theme="light"] .syl-stack > [style*="#f472b6" i],
+            html[data-learner-theme="light"] .syl-wrow > i[style*="#f472b6" i],
+            html[data-learner-theme="light"] .syl-assess-bar[style*="#f472b6" i] { background: #db2777 !important; }
+            html[data-learner-theme="light"] .syl-stack > [style*="#fdd663" i],
+            html[data-learner-theme="light"] .syl-wrow > i[style*="#fdd663" i],
+            html[data-learner-theme="light"] .syl-assess-bar[style*="#fdd663" i] { background: #c99a00 !important; }
+            html[data-learner-theme="light"] .syl-stack > [style*="#34d399" i],
+            html[data-learner-theme="light"] .syl-wrow > i[style*="#34d399" i],
+            html[data-learner-theme="light"] .syl-assess-bar[style*="#34d399" i] { background: #16a34a !important; }
+            html[data-learner-theme="light"] .syl-assess-bar[style*="#4fd1c5" i] { background: #187a72 !important; }
+
+            /* ── 769px to 899px: the split layout starts at 900px, so until then the phone-style page is what shows.
+                  Its colours are hard-coded for a dark page. ── */
+            html[data-learner-theme="light"] .syl-page-title { color: #282924; }
+            html[data-learner-theme="light"] .syl-page-title svg[stroke="#4fd1c5" i] { stroke: #187a72; }
+
+            /* term tabs: base, hover, then active (same specificity, so order matters) */
+            html[data-learner-theme="light"] .syl-tab { border-color: #dfded8; color: #73746d; }
+            html[data-learner-theme="light"] .syl-tab:hover { border-color: #187a72; color: #187a72; }
+            html[data-learner-theme="light"] .syl-tab-active { background: rgba(24,122,114,.10); border-color: #187a72; color: #187a72; }
+            html[data-learner-theme="light"] .syl-current-badge { background: rgba(24,122,114,.12); color: #187a72; }
+
+            /* brief cards: white with a warm-grey line, flat (no hover), like the cards on the other pages */
+            html[data-learner-theme="light"] .syl-card { background: #ffffff; border: 1px solid #dfded8; }
+            html[data-learner-theme="light"] .syl-subject { color: #282924; }
+            html[data-learner-theme="light"] .syl-teacher,
+            html[data-learner-theme="light"] .syl-updated,
+            html[data-learner-theme="light"] .syl-section-title { color: #73746d; }
+            html[data-learner-theme="light"] .syl-topics li { color: #53544e; border-bottom-color: #ebeae5; }
+            html[data-learner-theme="light"] .syl-topics li::before { background: #187a72; }
+            html[data-learner-theme="light"] .syl-assess-row { border-bottom-color: #ebeae5; }
+            html[data-learner-theme="light"] .syl-assess-type { color: #53544e; }
+            html[data-learner-theme="light"] .syl-assess-bar-wrap { background: rgba(38,39,35,.08); }
+            html[data-learner-theme="light"] .syl-notes { color: #73746d; background: rgba(38,39,35,.03); border-left-color: rgba(24,122,114,.35); }
+
+            /* weighting percentages in the cards (text, so the darker tone of each colour) */
+            html[data-learner-theme="light"] .syl-assess-weight[style*="#4fd1c5" i] { color: #187a72 !important; }
+            html[data-learner-theme="light"] .syl-assess-weight[style*="#a78bfa" i] { color: #6b4fc7 !important; }
+            html[data-learner-theme="light"] .syl-assess-weight[style*="#f28c38" i] { color: #b85f12 !important; }
+            html[data-learner-theme="light"] .syl-assess-weight[style*="#f472b6" i] { color: #be185d !important; }
+            html[data-learner-theme="light"] .syl-assess-weight[style*="#fdd663" i] { color: #9a6b00 !important; }
+            html[data-learner-theme="light"] .syl-assess-weight[style*="#34d399" i] { color: #15803d !important; }
+
             }
         </style>
 
