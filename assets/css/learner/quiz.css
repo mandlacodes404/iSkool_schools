@@ -238,3 +238,124 @@
         background: #adaea2 !important;
     }
 }
+
+/* ═══ Light mode: learner Quiz (desktop) ═══════════════════════════════════════════════════════════════════
+   The desktop Quiz page is driven by the --lqz-* variables (declared in the <style> that quiz.js injects), so most of
+   light mode is the variable block below, the same way the Home page does it with --lhd-*. The rest fixes the colours
+   that are hard-coded: the search box, scrollbars, resize handle, primary button, the green "handed in" dot, the status
+   colours quiz.js writes inline, the phone-style list shown between 769px and 899px, the instructions screen and the
+   "Try Again" error state. Same palette as the Home page and the sidebar.
+   Applies only when <html data-learner-theme="light"> on 769px and wider. Dark mode and phones are untouched, and
+   quiz.js needs no change. To remove it, delete this block. */
+@media (min-width: 769px) {
+
+/* palette: titles near-black, body text grey, lines the same warm greys as the sidebar and Home */
+html[data-learner-theme="light"] .lqz-desktop-layout {
+    --lqz-text:   #282924;   /* titles and the selected row */
+    --lqz-soft:   #53544e;   /* body text */
+    --lqz-muted:  #73746d;
+    --lqz-faint:  #7d7e76;
+    --lqz-accent: #187a72;   /* focus rings and the search focus border */
+    --lqz-line:        #dfded8;
+    --lqz-line-strong: #d0cfc8;
+    --lqz-hover:  rgba(38,39,35,.055);
+    --lqz-active: rgba(38,39,35,.075);
+    color-scheme: light;
+}
+
+/* filter box: white, like the sidebar's search button */
+html[data-learner-theme="light"] .lqz-desktop-search { background: #ffffff; }
+
+/* scrollbars (the dark ones are white at 10% and vanish on a light page) */
+html[data-learner-theme="light"] .lqz-sidebar-scroll::-webkit-scrollbar-thumb,
+html[data-learner-theme="light"] .lqz-body::-webkit-scrollbar-thumb { background: rgba(38,39,35,.16); }
+html[data-learner-theme="light"] .lqz-sidebar-scroll::-webkit-scrollbar-thumb:hover,
+html[data-learner-theme="light"] .lqz-body::-webkit-scrollbar-thumb:hover { background: rgba(38,39,35,.30); }
+
+/* resize handle between the list and the detail pane */
+html[data-learner-theme="light"] .lqz-split:hover,
+html[data-learner-theme="light"] .lqz-split.drag,
+html[data-learner-theme="light"] .lqz-split:focus-visible {
+    background: linear-gradient(90deg, transparent 2px, #187a72 2px, #187a72 4px, transparent 4px);
+}
+
+/* the dot on a row turns green once the quiz is handed in */
+html[data-learner-theme="light"] .lqz-sidebar-dot.is-done { background: #16a34a; border-color: #16a34a; }
+
+/* primary button (Start quiz / Continue quiz): dark, like the Home button */
+html[data-learner-theme="light"] .lqz-pri { background: #252624; color: #ffffff; }
+html[data-learner-theme="light"] .lqz-pri:hover { background: #3a3b37; }
+html[data-learner-theme="light"] .lqz-pri--warn { background: #b85f12; }
+html[data-learner-theme="light"] .lqz-pri--warn:hover { background: #a0520f; }
+
+/* detail pane: the "marks are available" note and the unfinished-attempt warning */
+html[data-learner-theme="light"] .lqz-panel-marks-note--ready,
+html[data-learner-theme="light"] .lqz-panel-marks-note--ready strong { color: #15803d; }
+html[data-learner-theme="light"] .lqz-panel-inst-list li.lqz-panel-inst-warn { color: #b85f12; }
+
+/* status colours quiz.js writes inline (lqzQuizState), darkened so they read on a light page.
+   Text first (Completed / Pending / Closed / countdown), then the dot in the status chip. */
+html[data-learner-theme="light"] .lqz-desktop-layout [style*="#fdd663" i] { color: #9a6b00 !important; }
+html[data-learner-theme="light"] .lqz-desktop-layout [style*="#22c55e" i] { color: #15803d !important; }
+html[data-learner-theme="light"] .lqz-desktop-layout [style*="#e67e22" i] { color: #b85f12 !important; }
+html[data-learner-theme="light"] .lqz-desktop-layout [style*="#4fd1c5" i] { color: #187a72 !important; }
+html[data-learner-theme="light"] .lqz-desktop-layout [style*="#9aa4b2" i] { color: #73746d !important; }
+html[data-learner-theme="light"] .lqz-panel-status-dot[style*="#fdd663" i] { background: #c99a00 !important; }
+html[data-learner-theme="light"] .lqz-panel-status-dot[style*="#22c55e" i] { background: #16a34a !important; }
+html[data-learner-theme="light"] .lqz-panel-status-dot[style*="#e67e22" i] { background: #d97706 !important; }
+html[data-learner-theme="light"] .lqz-panel-status-dot[style*="#4fd1c5" i] { background: #187a72 !important; }
+
+/* ── 769px to 899px: the split layout starts at 900px, so until then the phone-style list is what shows.
+      Its colours are hard-coded for a dark page. ── */
+html[data-learner-theme="light"] .lqz-mobile-folder-header { border-bottom-color: #dfded8; }
+html[data-learner-theme="light"] .lqz-mobile-folder-header:active,
+html[data-learner-theme="light"] .lqz-mobile-folder-header:not(.lqz-mobile-folder-header--collapsed) { background: rgba(38,39,35,.04); }
+html[data-learner-theme="light"] .lqz-mobile-folder-name,
+html[data-learner-theme="light"] .lqz-mobile-row-title { color: #282924; }
+html[data-learner-theme="light"] .lqz-mobile-folder-count { color: #73746d; background: rgba(38,39,35,.06); }
+html[data-learner-theme="light"] .lqz-mobile-folder-chevron,
+html[data-learner-theme="light"] .lqz-mobile-row-chevron { color: #8b8b83; }
+html[data-learner-theme="light"] .lqz-mobile-row::after { background: #ebeae5; }
+html[data-learner-theme="light"] .lqz-mobile-row:active:not([style*="opacity"]) { background: rgba(38,39,35,.04); }
+html[data-learner-theme="light"] .lqz-mobile-row-meta { color: #73746d; }
+html[data-learner-theme="light"] .lqz-mobile-search-wrap svg { color: #282924; }
+html[data-learner-theme="light"] .lqz-mobile-search { background: #ffffff; border: 1px solid #dfded8; color: #282924; }
+html[data-learner-theme="light"] .lqz-mobile-search:focus { border-color: #bdbcb4; }
+html[data-learner-theme="light"] .lqz-mobile-search::placeholder { color: #8b8b83; }
+html[data-learner-theme="light"] .lqz-mobile-empty-title { color: #282924; }
+html[data-learner-theme="light"] .lqz-mobile-empty-body { color: #73746d; }
+html[data-learner-theme="light"] .lqz-mobile-list [style*="#fdd663" i] { color: #9a6b00 !important; }
+html[data-learner-theme="light"] .lqz-mobile-list [style*="#22c55e" i] { color: #15803d !important; }
+html[data-learner-theme="light"] .lqz-mobile-list [style*="#e67e22" i] { color: #b85f12 !important; }
+html[data-learner-theme="light"] .lqz-mobile-list [style*="#4fd1c5" i] { color: #187a72 !important; }
+html[data-learner-theme="light"] .lqz-mobile-list [stroke="#fdd663" i] { stroke: #9a6b00; }
+
+/* ── Instructions screen (opened from the phone-style list; the desktop panel starts a quiz directly) ── */
+html[data-learner-theme="light"] .inst-container h2[style*="#e2e8f0" i],
+html[data-learner-theme="light"] .inst-container h3[style*="#c9d1d9" i] { color: #282924 !important; }
+html[data-learner-theme="light"] .inst-container .quiz-info-box { background: rgba(38,39,35,.03); border-color: #dfded8; color: #53544e; }
+html[data-learner-theme="light"] .inst-container .inst-list li { color: #53544e; }
+html[data-learner-theme="light"] .inst-container .inst-list li[style*="#e67e22" i] { color: #b85f12 !important; }
+html[data-learner-theme="light"] .inst-container .inst-list li::before { color: #187a72; }
+html[data-learner-theme="light"] .inst-container .ai-box { background: rgba(24,122,114,.06); border-color: rgba(24,122,114,.30); }
+html[data-learner-theme="light"] .inst-container .ai-box h4[style*="#4fd1c5" i] { color: #187a72 !important; }
+html[data-learner-theme="light"] .inst-container .ai-box h4[style*="#8b949e" i],
+html[data-learner-theme="light"] .inst-container .ai-box p[style*="#8b949e" i] { color: #73746d !important; }
+html[data-learner-theme="light"] .inst-container .start-btn { background: #252624; border-color: #252624; color: #ffffff; }
+html[data-learner-theme="light"] .inst-container .start-btn:hover { background: #3a3b37; border-color: #3a3b37; }
+html[data-learner-theme="light"] .inst-container .start-btn[style*="#e67e22" i] { background-color: #b85f12 !important; }
+html[data-learner-theme="light"] #api-content-area:has(.inst-container)::-webkit-scrollbar-thumb { background: rgba(38,39,35,.16); }
+html[data-learner-theme="light"] #api-content-area:has(.inst-container)::-webkit-scrollbar-thumb:hover { background: rgba(38,39,35,.30); }
+
+/* "Try Again" in the quiz list error state. Its colours are inline and quiz.css already forces its desktop
+   colours with !important, so this needs !important too. */
+html[data-learner-theme="light"] .lqz-retry-btn { background: #252624 !important; color: #ffffff !important; }
+html[data-learner-theme="light"] .lqz-retry-btn:hover { background: #3a3b37 !important; }
+html[data-learner-theme="light"] p:has(+ .lqz-retry-btn) { color: #bd4a43 !important; }
+
+}
+
+/* the instructions card is a dark panel on desktop; on a light page it becomes a white one (below 900px it has no card) */
+@media (min-width: 900px) {
+    html[data-learner-theme="light"] .inst-container { background-color: #ffffff; border-color: #dfded8; }
+}
