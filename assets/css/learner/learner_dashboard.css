@@ -2393,3 +2393,89 @@ iframe {
 @media (prefers-reduced-motion: reduce) {
     .jcs, .jcs-panel { animation: none !important; transition: none !important; }
 }
+/* ═══ Light mode: learner My Class (desktop) ═══════════════════════════════════════════════════════════════
+   The desktop My Class page is driven by the --lmc-* variables (declared in the MY CLASS - DESKTOP section above),
+   so most of light mode is the variable block below, the same way Home does it with --lhd-*, Quiz with --lqz-*,
+   Assignments with --las-*, Evaluations with --lev-* and Resources with --lrs-*. The rest fixes the colours that
+   are hard-coded: the scrollbar, the "Manage / Link my parent" button, the parent select and the Save button.
+   Between 769px and 899px the page uses the older flat cards (dark #161b22 panels, blue and green tinted
+   buttons), so those get their own small section. Same palette as the Home page, the sidebar and the other pages.
+   Applies only when <html data-learner-theme="light"> on 769px and wider. Dark mode and phones are untouched, and
+   learner_dashboard.php needs no change. To remove it, delete this block. */
+
+/* palette: titles near-black, body text grey, lines the same warm greys as the sidebar and Home */
+@media (min-width: 769px) {
+html[data-learner-theme="light"] .my-class-content {
+    --lmc-text:   #282924;   /* titles, the big class name and values */
+    --lmc-soft:   #53544e;
+    --lmc-muted:  #73746d;
+    --lmc-faint:  #7d7e76;
+    --lmc-accent: #187a72;   /* focus rings and the select focus border */
+    --lmc-ok:     #15803d;   /* the linked dot and "Linked" in the rail */
+    --lmc-line:        #dfded8;
+    --lmc-line-strong: #d0cfc8;
+    --lmc-hover:  rgba(38,39,35,.055);
+    --lmc-active: rgba(38,39,35,.075);
+    /* the page sets no text colour of its own, so anything unstyled would inherit the dark page's white */
+    color: var(--lmc-text);
+    color-scheme: light;
+}
+}
+
+/* ── Desktop (900px and up) ── */
+@media (min-width: 900px) {
+
+/* scrollbar (the dark one is white at 10% and vanishes on a light page) */
+html[data-learner-theme="light"] .lmc-wrap::-webkit-scrollbar-thumb { background: rgba(38,39,35,.16); }
+html[data-learner-theme="light"] .lmc-wrap::-webkit-scrollbar-thumb:hover { background: rgba(38,39,35,.30); }
+
+/* "Manage" / "Link my parent": white, like the other secondary buttons */
+html[data-learner-theme="light"] .lmc-toggle-btn { background: #ffffff; }
+html[data-learner-theme="light"] .lmc-toggle-btn:hover { background: var(--lmc-active); }
+
+/* parent select: white, light dropdown list, and a darker chevron (the dark one is #9b9c92) */
+html[data-learner-theme="light"] .lmc-parent-form select {
+    background-color: #ffffff;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2373746d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    color-scheme: light;
+}
+
+/* Save: dark, like the Home button (the dark-mode one is teal with dark text) */
+html[data-learner-theme="light"] .lmc-actions .lmc-save-btn { background: #252624; color: #ffffff; }
+html[data-learner-theme="light"] .lmc-actions .lmc-save-btn:hover { background: #3a3b37; }
+
+}
+
+/* ── Between 769px and 899px: the flat cards. The desktop header, rail and big class name are hidden here. ── */
+@media (min-width: 769px) and (max-width: 899px) {
+
+html[data-learner-theme="light"] .lmc-panel-title { color: #187a72; }
+
+/* class card and parent-link card: white with a hairline instead of the dark #161b22 panel */
+html[data-learner-theme="light"] .lmc-class-card,
+html[data-learner-theme="light"] .lmc-parent-block { background: #ffffff; border-color: #dfded8; }
+html[data-learner-theme="light"] .lmc-class-label { color: #73746d; }
+html[data-learner-theme="light"] .lmc-class-name { color: #282924; }
+html[data-learner-theme="light"] .lmc-class-sub { color: #73746d; }
+
+/* icon tiles: the blue (#63b3ed) and green (#68d391) strokes are written inline in learner_dashboard.php */
+html[data-learner-theme="light"] .lmc-class-icon { background: rgba(29,111,184,.08); }
+html[data-learner-theme="light"] .lmc-parent-icon--linked { background: rgba(21,128,61,.08); }
+html[data-learner-theme="light"] .my-class-content [stroke="#63b3ed" i] { stroke: #1d6fb8; }
+html[data-learner-theme="light"] .my-class-content [stroke="#68d391" i] { stroke: #15803d; }
+
+/* "Manage Parent Link": blue tint, darker blue */
+html[data-learner-theme="light"] .lmc-toggle-btn { background: rgba(29,111,184,.08); color: #1d6fb8; border-color: rgba(29,111,184,.30); }
+html[data-learner-theme="light"] .lmc-toggle-btn:hover { background: rgba(29,111,184,.14); }
+
+/* parent select and Save */
+html[data-learner-theme="light"] .lmc-form-label { color: #73746d; }
+html[data-learner-theme="light"] .lmc-parent-form select { background-color: #ffffff; border-color: #d0cfc8; color: #282924; color-scheme: light; }
+html[data-learner-theme="light"] .lmc-save-btn { background: rgba(21,128,61,.08); color: #15803d; border-color: rgba(21,128,61,.30); }
+html[data-learner-theme="light"] .lmc-save-btn:hover { background: rgba(21,128,61,.14); }
+
+/* empty notes and the "Not joined any class yet" state */
+html[data-learner-theme="light"] .lmc-empty-note,
+html[data-learner-theme="light"] .lmc-empty-wrap { color: #73746d; }
+
+}
