@@ -853,3 +853,25 @@ html[data-teacher-theme="light"] .mini-cal-modal .teacher-modal-submit { backgro
 html[data-teacher-theme="light"] .mini-cal-modal .teacher-modal-submit:hover { background: #3a3b37; }
 
 }
+
+
+/* ═══ Fraunces titles: Assignments + Quizzes detail panels (desktop, light and dark) ═══
+   Trial. Delete this whole block to revert. */
+@media (min-width: 769px) {
+  html[data-teacher-page="teacher_assignments"] .as-dp-title,
+  html[data-teacher-page="teacher_quizzes"] #qz-main-panel .qz2 h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 30px;
+    line-height: 1.2;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+  html[data-teacher-page="teacher_assignments"] .as-panel-empty-title,
+  html[data-teacher-page="teacher_quizzes"] #qz-main-panel .qz2-empty h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 22px;
+    line-height: 1.2;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+}
