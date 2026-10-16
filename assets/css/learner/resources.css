@@ -606,3 +606,99 @@
     line-height: 1.5;
 }
 .lrs-mobile-search-empty svg { opacity: 0.5; }
+/* ═══ Light mode: learner Resources (desktop) ══════════════════════════════════════════════════════════════
+   The desktop Resources page is driven by the --lrs-* variables above, so most of light mode is the variable
+   block below, the same way the Home page does it with --lhd-*, the Quiz page with --lqz-*, Assignments with
+   --las-* and Evaluations with --lev-*. The rest fixes the colours that are hard-coded: the search box,
+   scrollbars, resize handle, the primary button, the file tiles, the preview canvas, the status colours
+   resources.js writes inline on icons, and the phone-style list shown between 769px and 899px (folders, file
+   rows, inline video cards), plus the fetch error. Same palette as the Home page, the sidebar, Quiz, Assignments
+   and Evaluations.
+   Applies only when <html data-learner-theme="light"> on 769px and wider. Dark mode and phones are untouched, and
+   resources.js needs no change. To remove it, delete this block. */
+@media (min-width: 769px) {
+
+/* palette: titles near-black, body text grey, lines the same warm greys as the sidebar and Home */
+html[data-learner-theme="light"] .lrs-desktop-layout {
+    --lrs-text:   #282924;   /* titles and the selected row */
+    --lrs-soft:   #53544e;   /* body text */
+    --lrs-muted:  #73746d;
+    --lrs-faint:  #7d7e76;
+    --lrs-accent: #187a72;   /* focus rings, links and the search focus border */
+    --lrs-danger: #bd4a43;
+    --lrs-line:        #dfded8;
+    --lrs-line-strong: #d0cfc8;
+    --lrs-hover:  rgba(38,39,35,.055);
+    --lrs-active: rgba(38,39,35,.075);
+    /* the layout sets no text colour of its own, so anything unstyled would inherit the dark page's white */
+    color: var(--lrs-text);
+    color-scheme: light;
+}
+
+/* filter box: white, like the sidebar's search button */
+html[data-learner-theme="light"] .lrs-desktop-search { background: #ffffff; }
+
+/* scrollbars (the dark ones are white at 10% and vanish on a light page) */
+html[data-learner-theme="light"] .lrs-sidebar-scroll::-webkit-scrollbar-thumb,
+html[data-learner-theme="light"] .lrs-pvw::-webkit-scrollbar-thumb { background: rgba(38,39,35,.16); }
+html[data-learner-theme="light"] .lrs-sidebar-scroll::-webkit-scrollbar-thumb:hover,
+html[data-learner-theme="light"] .lrs-pvw::-webkit-scrollbar-thumb:hover { background: rgba(38,39,35,.30); }
+
+/* resize handle between the list and the detail pane */
+html[data-learner-theme="light"] .lrs-split:hover,
+html[data-learner-theme="light"] .lrs-split.drag,
+html[data-learner-theme="light"] .lrs-split:focus-visible {
+    background: linear-gradient(90deg, transparent 2px, #187a72 2px, #187a72 4px, transparent 4px);
+}
+
+/* primary button in the header (Open file / Open in new tab / Open in YouTube): dark, like the Home button */
+html[data-learner-theme="light"] .lrs-pri { background: #252624; color: #ffffff; }
+html[data-learner-theme="light"] .lrs-pri:hover { background: #3a3b37; }
+html[data-learner-theme="light"] .lrs-pri--warn { background: var(--lrs-danger); }
+html[data-learner-theme="light"] .lrs-pri--warn:hover { background: #a63f38; }
+
+/* file tiles (the extension on a soft square) */
+html[data-learner-theme="light"] .lrs-ft { background: rgba(38,39,35,.06); }
+
+/* preview canvas: dark mode darkens whatever is behind it by 22%, which would be a heavy grey on a light page,
+   so it becomes a faint warm tint instead. PDFs fill it edge to edge, so this only shows around images,
+   video and the "no preview" tile. */
+html[data-learner-theme="light"] .lrs-pvw { background: rgba(38,39,35,.04); }
+
+/* empty-pane icon: resources.js draws it with an inline teal stroke */
+html[data-learner-theme="light"] .lrs-panel-empty svg[stroke="#4fd1c5" i] { stroke: #187a72; }
+
+/* ── Phone-style list: below 900px the desktop layout is hidden and this is what shows.
+      Its colours are hard-coded for a dark page. ── */
+html[data-learner-theme="light"] .lrs-mobile-folder-header { border-bottom-color: #dfded8; }
+html[data-learner-theme="light"] .lrs-mobile-folder-header:active,
+html[data-learner-theme="light"] .lrs-mobile-folder-header:not(.lrs-mobile-folder-header--collapsed) { background: rgba(38,39,35,.04); }
+html[data-learner-theme="light"] .lrs-mobile-folder-name,
+html[data-learner-theme="light"] .lrs-mobile-row-title,
+html[data-learner-theme="light"] .lrs-mobile-video-title { color: #282924; }
+html[data-learner-theme="light"] .lrs-mobile-folder-count { color: #73746d; background: rgba(38,39,35,.06); }
+html[data-learner-theme="light"] .lrs-mobile-folder-chevron,
+html[data-learner-theme="light"] .lrs-mobile-row-chevron { color: #8b8b83; }
+html[data-learner-theme="light"] .lrs-mobile-row::after,
+html[data-learner-theme="light"] .lrs-mobile-video-card::after { background: #ebeae5; }
+html[data-learner-theme="light"] .lrs-mobile-row:active { background: rgba(38,39,35,.04); }
+html[data-learner-theme="light"] .lrs-mobile-row-size,
+html[data-learner-theme="light"] .lrs-mobile-video-meta { color: #73746d; }
+html[data-learner-theme="light"] .lrs-bullet-muted { color: #bdbcb4; }
+html[data-learner-theme="light"] .lrs-mobile-search-wrap svg { color: #282924; }
+html[data-learner-theme="light"] .lrs-mobile-search { background: #ffffff; border: 1px solid #dfded8; color: #282924; }
+html[data-learner-theme="light"] .lrs-mobile-search:focus { border-color: #bdbcb4; }
+html[data-learner-theme="light"] .lrs-mobile-search::placeholder { color: #8b8b83; }
+html[data-learner-theme="light"] .lrs-mobile-empty-title { color: #282924; }
+html[data-learner-theme="light"] .lrs-mobile-empty-body { color: #73746d; }
+
+/* the orange accent (#f28c38) on the folder, file and empty-state icons, and the red YouTube mark on video cards,
+   darkened so they read on a light page (same orange as the Quiz status text) */
+html[data-learner-theme="light"] .lrs-mobile-list [stroke="#f28c38" i] { stroke: #b85f12; }
+html[data-learner-theme="light"] .lrs-mobile-list [fill="#f28c38" i] { fill: #b85f12; }
+html[data-learner-theme="light"] .lrs-mobile-video-meta [fill="#ff4444" i] { fill: #dc2626; }
+
+/* fetch error state */
+html[data-learner-theme="light"] .lrs-error-state { color: #bd4a43; }
+
+}
