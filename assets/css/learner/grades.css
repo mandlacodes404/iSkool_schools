@@ -842,3 +842,267 @@
     .grades-desktop-layout .dist-tip { font-weight: var(--gr-w-strong, 500); }
     .grades-desktop-layout .dist-legend span { font-weight: var(--gr-w-strong, 500); }
 }
+
+/* ═══ Light mode: learner Grades (desktop) ═══════════════════════════════════════════════════════════════
+   The desktop Grades page is driven by the --gr-* variables above, so most of light mode is the variable block
+   below, the same way the Assignments page does it with --las-* and the Quiz page with --lqz-*. The rest fixes
+   the colours that are hard-coded: the search box, scrollbars, resize handle, subject tiles, the "term assessed"
+   bar, the summative tag, the class range overview (track, band, "You" marker, chips), the info modals, the
+   Progress Report that opens in the right panel (card, hero, grade badges, and the status colours grades.js
+   writes inline), the phone-style accordion shown between 769px and 899px, and the fetch error state. Same
+   palette as the Home page, the sidebar, the Assignments page and the Quiz page.
+   Applies only when <html data-learner-theme="light"> on 769px and wider. Dark mode and phones are untouched, and
+   grades.js needs no change. To remove it, delete this block. */
+@media (min-width: 769px) {
+
+/* palette: titles near-black, body text grey, lines the same warm greys as the sidebar and Home */
+html[data-learner-theme="light"] .grades-desktop-layout {
+    --gr-text:   #282924;   /* titles and the selected row */
+    --gr-soft:   #53544e;   /* body text */
+    --gr-muted:  #73746d;
+    --gr-faint:  #7d7e76;
+    --gr-accent: #187a72;   /* focus rings, current-term dot and the search focus border */
+    --gr-line:        #dfded8;
+    --gr-line-strong: #d0cfc8;
+    --gr-hover:  rgba(38,39,35,.055);
+    --gr-active: rgba(38,39,35,.075);
+    /* mark colours (75% and above, 50 to 74%, below 50%), darkened so they read on a light page */
+    --gr-hi:  #15803d;
+    --gr-mid: #b85f12;
+    --gr-lo:  #bd4a43;
+    /* the layout sets no text colour of its own, so anything unstyled would inherit the dark page's white */
+    color: var(--gr-text);
+    color-scheme: light;
+}
+
+/* filter box: white, like the sidebar's search button */
+html[data-learner-theme="light"] .gr-desktop-search { background: #ffffff; }
+
+/* scrollbars (the dark ones are white at 10% and vanish on a light page) */
+html[data-learner-theme="light"] .gr-sidebar-scroll::-webkit-scrollbar-thumb,
+html[data-learner-theme="light"] .gr-body::-webkit-scrollbar-thumb { background: rgba(38,39,35,.16); }
+html[data-learner-theme="light"] .gr-sidebar-scroll::-webkit-scrollbar-thumb:hover,
+html[data-learner-theme="light"] .gr-body::-webkit-scrollbar-thumb:hover { background: rgba(38,39,35,.30); }
+
+/* resize handle between the list and the detail pane */
+html[data-learner-theme="light"] .gr-split:hover,
+html[data-learner-theme="light"] .gr-split.drag,
+html[data-learner-theme="light"] .gr-split:focus-visible {
+    background: linear-gradient(90deg, transparent 2px, #187a72 2px, #187a72 4px, transparent 4px);
+}
+
+/* empty-state icon (teal in the markup) */
+html[data-learner-theme="light"] .gr-panel-empty svg[stroke="#4fd1c5" i] { stroke: #187a72; }
+
+/* subject tile in the list, summative tag and the "term assessed" bar */
+html[data-learner-theme="light"] .gr-ft { background: rgba(38,39,35,.06); }
+html[data-learner-theme="light"] .gr-sb { background: rgba(38,39,35,.06); }
+html[data-learner-theme="light"] .gr-bar1 { background: rgba(38,39,35,.09); }
+html[data-learner-theme="light"] .gr-bar1 i { background: #3a3b37; }
+
+/* the little (i) buttons: the dark-mode hover grey would vanish */
+html[data-learner-theme="light"] .gr-info:hover,
+html[data-learner-theme="light"] .gr-info:focus-visible { color: #282924; border-color: #bdbcb4; }
+
+/* opened assessment: the strip behind the class range overview */
+html[data-learner-theme="light"] .gr-xp td { background: rgba(38,39,35,.025); }
+
+/* class range overview: chips (the green and orange tints are rebuilt from the darker colours), track, band, key */
+html[data-learner-theme="light"] .gr-ov-chip.ok   { background: rgba(21,128,61,.07);  border-color: rgba(21,128,61,.28); }
+html[data-learner-theme="light"] .gr-ov-chip.mid  { background: rgba(38,39,35,.045); }
+html[data-learner-theme="light"] .gr-ov-chip.warn { background: rgba(184,95,18,.08);  border-color: rgba(184,95,18,.30); }
+html[data-learner-theme="light"] .gr-ov-tr   { background: rgba(38,39,35,.09); }
+html[data-learner-theme="light"] .gr-ov-band { background: rgba(38,39,35,.16); }
+html[data-learner-theme="light"] .gr-ov-key .k1::before { background: rgba(38,39,35,.20); }
+
+/* the "You" marker: a dark dot with a white ring and a dark label, like the primary buttons on the other pages */
+html[data-learner-theme="light"] .gr-ov-you {
+    background: #252624;
+    border-color: #ffffff;
+    box-shadow: 0 0 0 1px rgba(38,39,35,.30), 0 2px 5px rgba(38,39,35,.22);
+}
+html[data-learner-theme="light"] .gr-ov-you em { background: #252624; color: #ffffff; }
+html[data-learner-theme="light"] .gr-ov-you em::after { border-top-color: #252624; }
+
+/* "How your term mark works" and the other info modals. They are appended to <body>, outside the layout, so they
+   carry their own tokens (see the end of this file for the dark ones) and get their own light ones here. */
+html[data-learner-theme="light"] .gr-modal-overlay {
+    --gr-text:   #282924;
+    --gr-soft:   #53544e;
+    --gr-muted:  #73746d;
+    --gr-accent: #187a72;
+    --gr-line-strong: #d0cfc8;
+    --gr-hover:  rgba(38,39,35,.055);
+    background: rgba(38,39,35,.38);
+    color-scheme: light;
+}
+html[data-learner-theme="light"] .gr-modal-box { background: #ffffff; box-shadow: 0 20px 60px rgba(38,39,35,.22); }
+
+/* fetch error state */
+html[data-learner-theme="light"] .grades-error-state { color: #bd4a43; }
+
+/* ── Progress Report (desktop: it opens in the right panel; below 900px it is the dark mobile sheet and stays dark) ── */
+@media (min-width: 900px) {
+
+html[data-learner-theme="light"] #grades-dt-panel .pr-card { background: #ffffff; border-color: #dfded8; }
+html[data-learner-theme="light"] #grades-dt-panel .pr-hero-school,
+html[data-learner-theme="light"] #grades-dt-panel .pr-hero-class,
+html[data-learner-theme="light"] #grades-dt-panel .pr-hero-trenditem-t,
+html[data-learner-theme="light"] #grades-dt-panel .pr-subjects-title { color: #73746d; }
+html[data-learner-theme="light"] #grades-dt-panel .pr-hero-avglabel,
+html[data-learner-theme="light"] #grades-dt-panel .pr-hero-trendlabel,
+html[data-learner-theme="light"] #grades-dt-panel .pr-subject-v2-meta,
+html[data-learner-theme="light"] #grades-dt-panel .pr-empty { color: #73746d; }
+html[data-learner-theme="light"] #grades-dt-panel .pr-hero-name,
+html[data-learner-theme="light"] #grades-dt-panel .pr-subject-v2-name { color: #282924; }
+html[data-learner-theme="light"] #grades-dt-panel .pr-hero-idrow,
+html[data-learner-theme="light"] #grades-dt-panel .pr-hero-trendrow,
+html[data-learner-theme="light"] #grades-dt-panel .pr-footer-legend { border-color: #dfded8; }
+html[data-learner-theme="light"] #grades-dt-panel .pr-subject-row-v2 { border-top-color: #ebeae5; }
+
+/* avatar and the current term in the trend row (mint in dark mode) */
+html[data-learner-theme="light"] #grades-dt-panel .pr-hero-avatar { background: rgba(21,128,61,.09); color: #15803d; }
+html[data-learner-theme="light"] #grades-dt-panel .pr-hero-trenditem.pr-hero-trend-current .pr-hero-trenditem-t { color: #15803d; }
+
+/* A / B / C / D badges on the subject rows and in the legend */
+html[data-learner-theme="light"] #grades-dt-panel .pr-grade-a { background: rgba(21,128,61,.10);  color: #15803d; border-color: rgba(21,128,61,.28); }
+html[data-learner-theme="light"] #grades-dt-panel .pr-grade-b { background: rgba(43,95,184,.09);  color: #2b5fb8; border-color: rgba(43,95,184,.28); }
+html[data-learner-theme="light"] #grades-dt-panel .pr-grade-c { background: rgba(184,95,18,.10);  color: #b85f12; border-color: rgba(184,95,18,.30); }
+html[data-learner-theme="light"] #grades-dt-panel .pr-grade-d { background: rgba(189,74,67,.09);  color: #bd4a43; border-color: rgba(189,74,67,.30); }
+
+/* "Learn more" pill */
+html[data-learner-theme="light"] #grades-dt-panel .pr-learn-more-btn { background: #ffffff; border-color: #d0cfc8; color: #53544e; }
+html[data-learner-theme="light"] #grades-dt-panel .pr-learn-more-btn:hover { background: rgba(38,39,35,.055); border-color: #bdbcb4; color: #282924; }
+
+/* the "?" badge on a subject with no marks this term (grades.js writes a white tint inline) */
+html[data-learner-theme="light"] #grades-dt-panel .pr-subject-v2-badge[style*="rgba(255,255,255,0.05)" i] {
+    background: rgba(38,39,35,.05) !important;
+    border-color: #dfded8 !important;
+}
+
+/* status and mark colours grades.js writes inline (the overall number, the status pill, the term trend and each
+   subject's %), darkened so they read on a light page. prSwitchTerm rewrites them from JS and the browser then
+   stores them as rgb(), so both spellings are matched. */
+html[data-learner-theme="light"] #grades-dt-panel .pr-wrap [style*="#22c55e" i],
+html[data-learner-theme="light"] #grades-dt-panel .pr-wrap [style*="rgb(34, 197, 94)" i] { color: #15803d !important; }
+html[data-learner-theme="light"] #grades-dt-panel .pr-wrap [style*="#60a5fa" i],
+html[data-learner-theme="light"] #grades-dt-panel .pr-wrap [style*="rgb(96, 165, 250)" i] { color: #2b5fb8 !important; }
+html[data-learner-theme="light"] #grades-dt-panel .pr-wrap [style*="#f59e0b" i],
+html[data-learner-theme="light"] #grades-dt-panel .pr-wrap [style*="rgb(245, 158, 11)" i] { color: #b85f12 !important; }
+html[data-learner-theme="light"] #grades-dt-panel .pr-wrap [style*="#f85149" i],
+html[data-learner-theme="light"] #grades-dt-panel .pr-wrap [style*="rgb(248, 81, 73)" i] { color: #bd4a43 !important; }
+html[data-learner-theme="light"] #grades-dt-panel .pr-wrap [style*="#555e6a" i],
+html[data-learner-theme="light"] #grades-dt-panel .pr-wrap [style*="rgb(85, 94, 106)" i] { color: #73746d !important; }
+
+/* info modals ("Learn more" and the status explainer); appended to <body>, shared with the mobile sheet */
+html[data-learner-theme="light"] .pr-info-modal-overlay { background: rgba(38,39,35,.38); }
+html[data-learner-theme="light"] .pr-info-modal-box { background: #ffffff; border-color: #dfded8; box-shadow: 0 20px 60px rgba(38,39,35,.22); }
+html[data-learner-theme="light"] .pr-info-modal-close { background: rgba(38,39,35,.06); color: #73746d; }
+html[data-learner-theme="light"] .pr-info-modal-close:hover { background: rgba(38,39,35,.10); color: #282924; }
+html[data-learner-theme="light"] .pr-info-modal-title,
+html[data-learner-theme="light"] .pr-info-modal-body strong { color: #282924; }
+html[data-learner-theme="light"] .pr-info-modal-body,
+html[data-learner-theme="light"] .pr-info-modal-notes li { color: #53544e; }
+html[data-learner-theme="light"] .pr-info-modal-notes { background: rgba(38,39,35,.03); border-color: #dfded8; }
+html[data-learner-theme="light"] .pr-info-modal-notes-title { color: #73746d; }
+html[data-learner-theme="light"] .pr-info-modal-box [style*="#22c55e" i],
+html[data-learner-theme="light"] .pr-info-modal-box [style*="rgb(34, 197, 94)" i] { color: #15803d !important; }
+html[data-learner-theme="light"] .pr-info-modal-box [style*="#60a5fa" i],
+html[data-learner-theme="light"] .pr-info-modal-box [style*="rgb(96, 165, 250)" i] { color: #2b5fb8 !important; }
+html[data-learner-theme="light"] .pr-info-modal-box [style*="#f59e0b" i],
+html[data-learner-theme="light"] .pr-info-modal-box [style*="rgb(245, 158, 11)" i] { color: #b85f12 !important; }
+html[data-learner-theme="light"] .pr-info-modal-box [style*="#f85149" i],
+html[data-learner-theme="light"] .pr-info-modal-box [style*="rgb(248, 81, 73)" i] { color: #bd4a43 !important; }
+html[data-learner-theme="light"] .pr-info-modal-box [style*="#555e6a" i],
+html[data-learner-theme="light"] .pr-info-modal-box [style*="rgb(85, 94, 106)" i] { color: #73746d !important; }
+
+}
+
+/* ── Phone-style accordion (shown between 769px and 899px, inside the light shell) ── */
+html[data-learner-theme="light"] .grades-mobile-layout { color: #282924; color-scheme: light; }
+
+html[data-learner-theme="light"] .grades-mobile-layout .grades-search { background: #ffffff; border: 1px solid #dfded8; color: #282924; }
+html[data-learner-theme="light"] .grades-mobile-layout .grades-search:focus { border-color: #bdbcb4; }
+html[data-learner-theme="light"] .grades-mobile-layout .grades-search::placeholder { color: #8b8b83; }
+html[data-learner-theme="light"] .grades-mobile-layout .grades-report-btn { background: rgba(21,128,61,.07); color: #15803d; border-color: rgba(21,128,61,.28); }
+html[data-learner-theme="light"] .grades-mobile-layout .grades-report-btn:hover { background: rgba(21,128,61,.12); }
+
+html[data-learner-theme="light"] .grades-mobile-layout .subject-card { background: #ffffff; border-color: #dfded8; }
+html[data-learner-theme="light"] .grades-mobile-layout .subject-card:hover { border-color: #d0cfc8; }
+html[data-learner-theme="light"] .grades-mobile-layout .subject-header { border-bottom-color: #ebeae5; }
+html[data-learner-theme="light"] .grades-mobile-layout .subject-header:hover { background: rgba(38,39,35,.03); }
+html[data-learner-theme="light"] .grades-mobile-layout .subject-name { color: #282924; }
+html[data-learner-theme="light"] .grades-mobile-layout .subject-count { color: #73746d; background: rgba(38,39,35,.06); }
+html[data-learner-theme="light"] .grades-mobile-layout .subject-chevron { color: #8b8b83; }
+html[data-learner-theme="light"] .grades-mobile-layout .subject-name svg[stroke="#68d391" i] { stroke: #15803d; }
+
+html[data-learner-theme="light"] .grades-mobile-layout .view-toggle-bar { border-bottom-color: #ebeae5; }
+html[data-learner-theme="light"] .grades-mobile-layout .view-toggle-btn { color: #73746d; }
+html[data-learner-theme="light"] .grades-mobile-layout .view-toggle-btn:hover,
+html[data-learner-theme="light"] .grades-mobile-layout .view-toggle-btn.active-view { background: rgba(21,128,61,.08); color: #15803d; }
+
+html[data-learner-theme="light"] .grades-mobile-layout .quiz-row { background: rgba(38,39,35,.02); border-color: #ebeae5; }
+html[data-learner-theme="light"] .grades-mobile-layout .quiz-row:hover:not(.quiz-unpublished) { border-color: rgba(21,128,61,.30); }
+html[data-learner-theme="light"] .grades-mobile-layout .quiz-row-title,
+html[data-learner-theme="light"] .grades-mobile-layout .quiz-row-title a,
+html[data-learner-theme="light"] .grades-mobile-layout .quiz-row-title a:hover,
+html[data-learner-theme="light"] .grades-mobile-layout .quiz-title-link { color: #282924; }
+html[data-learner-theme="light"] .grades-mobile-layout .quiz-unpublished .quiz-row-title { color: #73746d; }
+html[data-learner-theme="light"] .grades-mobile-layout .quiz-row-icon svg[stroke="#68d391" i] { stroke: #15803d; }
+html[data-learner-theme="light"] .grades-mobile-layout .quiz-row-icon svg[stroke="#f85149" i] { stroke: #bd4a43; }
+html[data-learner-theme="light"] .grades-mobile-layout .quiz-score-pill.high { background: rgba(21,128,61,.10); color: #15803d; }
+html[data-learner-theme="light"] .grades-mobile-layout .quiz-score-pill.mid  { background: rgba(44,122,75,.10); color: #2c7a4b; }
+html[data-learner-theme="light"] .grades-mobile-layout .quiz-score-pill.low  { background: rgba(189,74,67,.09); color: #bd4a43; }
+html[data-learner-theme="light"] .grades-mobile-layout .quiz-score-pill.hidden-score { background: rgba(38,39,35,.06); color: #73746d; }
+html[data-learner-theme="light"] .grades-mobile-layout .quiz-grading-status.pending,
+html[data-learner-theme="light"] .grades-mobile-layout .quiz-grading-status.partial { color: #b85f12; background: rgba(184,95,18,.09); border-color: rgba(184,95,18,.30); }
+html[data-learner-theme="light"] .grades-mobile-layout .quiz-grading-status.done { color: #15803d; background: rgba(21,128,61,.08); border-color: rgba(21,128,61,.28); }
+html[data-learner-theme="light"] .grades-mobile-layout .quiz-expand-btn { color: #8b8b83; }
+html[data-learner-theme="light"] .grades-mobile-layout .quiz-expand-btn:hover { color: #15803d; }
+html[data-learner-theme="light"] .grades-mobile-layout .quiz-row-details { background: rgba(38,39,35,.03); border-top-color: #ebeae5; color: #73746d; }
+html[data-learner-theme="light"] .grades-mobile-layout .quiz-row-details strong { color: #282924; }
+html[data-learner-theme="light"] .grades-mobile-layout .grades-status-text--done { color: #15803d; }
+html[data-learner-theme="light"] .grades-mobile-layout .grades-status-text--pending { color: #b85f12; }
+html[data-learner-theme="light"] .grades-mobile-layout .grades-unpublished-note { color: #73746d; }
+html[data-learner-theme="light"] .grades-mobile-layout .summative-badge { color: #15803d; border-color: rgba(21,128,61,.30); }
+
+html[data-learner-theme="light"] .grades-mobile-layout .term-selector { background: #ffffff; border-color: #d0cfc8; color: #282924; }
+html[data-learner-theme="light"] .grades-mobile-layout .term-selector:focus { border-color: #bdbcb4; }
+html[data-learner-theme="light"] .grades-mobile-layout .term-table-wrap { border-color: #dfded8; }
+html[data-learner-theme="light"] .grades-mobile-layout .term-table th { color: #15803d; background: rgba(38,39,35,.03); border-bottom-color: #dfded8; }
+html[data-learner-theme="light"] .grades-mobile-layout .term-table td { color: #53544e; border-bottom-color: #ebeae5; }
+html[data-learner-theme="light"] .grades-mobile-layout .term-table-total td { color: #15803d; border-top-color: rgba(21,128,61,.30) !important; }
+html[data-learner-theme="light"] .grades-mobile-layout .term-total-result,
+html[data-learner-theme="light"] .grades-mobile-layout .term-table-earned { color: #15803d; }
+html[data-learner-theme="light"] .grades-mobile-layout .term-still-pending,
+html[data-learner-theme="light"] .grades-mobile-layout .no-summative { color: #73746d; }
+
+html[data-learner-theme="light"] .grades-mobile-layout .grades-mobile-empty { color: #73746d; }
+html[data-learner-theme="light"] .grades-mobile-layout .grades-mobile-empty-title { color: #282924; }
+html[data-learner-theme="light"] .grades-mobile-layout .grades-mobile-empty-body { color: #73746d; }
+html[data-learner-theme="light"] .grades-mobile-layout .grades-mobile-empty svg[stroke="#68d391" i] { stroke: #15803d; }
+
+/* performance overview inside an opened row: score ring and the class distribution bar */
+html[data-learner-theme="light"] .grades-mobile-layout .grade-inline-stats { background: rgba(38,39,35,.025); border-color: #dfded8; }
+html[data-learner-theme="light"] .grades-mobile-layout .grade-inline-stats.loading,
+html[data-learner-theme="light"] .grades-mobile-layout .grade-inline-stats.error { color: #73746d; }
+html[data-learner-theme="light"] .grades-mobile-layout .grade-inline-title,
+html[data-learner-theme="light"] .grades-mobile-layout .score-circle-text { color: #282924; }
+html[data-learner-theme="light"] .grades-mobile-layout .score-out-of,
+html[data-learner-theme="light"] .grades-mobile-layout .dist-labels { color: #73746d; }
+html[data-learner-theme="light"] .grades-mobile-layout .sc-track { stroke: rgba(38,39,35,.08); }
+html[data-learner-theme="light"] .grades-mobile-layout .sc-fill { stroke: #15803d; }
+html[data-learner-theme="light"] .grades-mobile-layout .dist-bar-wrap { background: rgba(38,39,35,.08); }
+html[data-learner-theme="light"] .grades-mobile-layout .dist-marker.me { border-color: #15803d; box-shadow: 0 1px 3px rgba(38,39,35,.25); }
+html[data-learner-theme="light"] .grades-mobile-layout .dist-line.low  { background: #bd4a43; }
+html[data-learner-theme="light"] .grades-mobile-layout .dist-line.avg  { background: #d97706; }
+html[data-learner-theme="light"] .grades-mobile-layout .dist-line.high { background: #16a34a; }
+html[data-learner-theme="light"] .grades-mobile-layout .dist-tip { background: #252624; border-color: #252624; color: #ffffff; }
+html[data-learner-theme="light"] .grades-mobile-layout .dist-tip::after { border-top-color: #252624; }
+html[data-learner-theme="light"] .grades-mobile-layout .dist-legend { background: rgba(38,39,35,.03); color: #73746d; }
+html[data-learner-theme="light"] .grades-mobile-layout .dist-legend-dot--me   { color: #15803d; }
+html[data-learner-theme="light"] .grades-mobile-layout .dist-legend-dot--low  { color: #bd4a43; }
+html[data-learner-theme="light"] .grades-mobile-layout .dist-legend-dot--avg  { color: #d97706; }
+html[data-learner-theme="light"] .grades-mobile-layout .dist-legend-dot--high { color: #16a34a; }
+
+}
