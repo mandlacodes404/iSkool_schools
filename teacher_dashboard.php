@@ -108,6 +108,7 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
     <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_settings.css?v=1.0">
     <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_settings.css?v=1.3">
     <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_light_mode.css?v=1.6">
+    <link rel="stylesheet" href="assets/css/splash_light.css?v=<?= (int) @filemtime(__DIR__ . '/assets/css/splash_light.css') ?>">
     <script>
     // Desktop sidebar: restore the saved collapsed state BEFORE first paint (no flash).
     // With no saved choice, screens narrower than 1440px start as a rail.
@@ -122,6 +123,9 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
         try {
             var theme = localStorage.getItem(window.ISKOOL_TEACHER_THEME_KEY);
             document.documentElement.dataset.teacherTheme = theme === 'light' ? 'light' : 'dark';
+            // Remember the theme last shown on this browser. The login page is shown before anyone signs in, so
+            // it reads this value (includes/login_theme_head.php).
+            localStorage.setItem('iskoolDesktopThemeLastUsed', theme === 'light' ? 'light' : 'dark');
         } catch (e) {
             document.documentElement.dataset.teacherTheme = 'dark';
         }
@@ -148,6 +152,10 @@ function getCsrfToken() {
     body { background-color: #0a0a0a !important; }
     @media (max-width: 899px) {
         body { background-color: #20201f !important; }
+    }
+    /* Desktop light mode (769px and up): the splash is light, see assets/css/splash_light.css */
+    @media (min-width: 769px) {
+        html[data-teacher-theme="light"] body { background-color: #faf9f5 !important; }
     }
 </style>
 <div id="dash-splash">
@@ -1599,6 +1607,6 @@ document.addEventListener('DOMContentLoaded', function () {
 <script src="assets/js/teacher/teacher_mobile_menu.js?v=1.0"></script>
 <script>window.ISKOOL_TEACHER = <?= json_encode(['name'=>$teacherFullName,'email'=>$teacherEmail,'initials'=>$teacherInitials], JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?>;</script>
 <script src="assets/js/teacher/teacher_mobile_settings.js?v=1.0"></script>
-<script src="assets/js/teacher/teacher_desktop_settings.js?v=1.2"></script>
+<script src="assets/js/teacher/teacher_desktop_settings.js?v=1.3"></script>
 </body>
 </html>

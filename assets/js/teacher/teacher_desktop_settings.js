@@ -69,6 +69,8 @@
     theme = theme === 'light' ? 'light' : 'dark';
     document.documentElement.dataset.teacherTheme = theme;
     try { localStorage.setItem(themeKey(), theme); } catch (e) {}
+    // The login page (shown before anyone signs in) reads the theme last used on this browser from here.
+    try { localStorage.setItem('iskoolDesktopThemeLastUsed', theme); } catch (e) {}
     if (modal) {
       modal.querySelectorAll('[data-theme-choice]').forEach(function (button) {
         var selected = button.getAttribute('data-theme-choice') === theme;

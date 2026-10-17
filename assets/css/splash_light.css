@@ -1,0 +1,27 @@
+/* assets/css/splash_light.css
+ *
+ * Light mode for the splash screen, on desktop only.
+ *
+ * Shared by three pages so the splash looks the same from the login page to the dashboard:
+ *   - index.php                   #animation-wrapper   (<html data-login-theme="light">)
+ *   - learner_dashboard.php       #dash-splash         (<html data-learner-theme="light">)
+ *   - teacher_dashboard.php       #dash-splash         (<html data-teacher-theme="light">)
+ *
+ * Applies only on screens 769px wide and up. Phones and narrow windows keep the dark splash.
+ * Dark mode is the default and is not touched: every rule below needs the "light" attribute.
+ * The colours are the same paper/ink pair the light dashboards use.
+ */
+@media (min-width: 769px) {
+
+    html[data-login-theme="light"] #animation-wrapper,
+    html[data-learner-theme="light"] #dash-splash,
+    html[data-teacher-theme="light"] #dash-splash {
+        background: #faf9f5;
+    }
+
+    html[data-login-theme="light"] #splash-wordmark,
+    html[data-learner-theme="light"] #dash-splash-wordmark,
+    html[data-teacher-theme="light"] #dash-splash-wordmark {
+        color: #282924;
+    }
+}

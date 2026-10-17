@@ -255,6 +255,7 @@ if (!empty($joinedClassIds)) {
     <link rel="stylesheet" href="assets/css/learner/mobile_settings.css?v=1.0">
     <link rel="stylesheet" href="assets/css/learner/mobile_class.css?v=1.0">
     <link rel="stylesheet" href="assets/css/learner/desktop_settings.css?v=1.3">   <!-- new -->
+    <link rel="stylesheet" href="assets/css/splash_light.css?v=<?= (int) @filemtime(__DIR__ . '/assets/css/splash_light.css') ?>">
     <script>
     // Desktop sidebar: restore the saved collapsed state BEFORE first paint (no flash).
     // With no saved choice, screens narrower than 1100px start as a rail.
@@ -262,6 +263,19 @@ if (!empty($joinedClassIds)) {
         try {
             var s = localStorage.getItem('iskoolMenuCollapsed');
             if (s === '1' || (s === null && window.innerWidth < 1100)) document.documentElement.classList.add('dm-collapsed');
+        } catch (e) {}
+    })();
+    </script>
+    <script>
+    // Desktop light mode: apply the saved choice BEFORE first paint, so the splash handoff below (and the page under
+    // it) never starts dark and then flips. desktop_settings.js keeps it up to date from here on.
+    // Also remember the theme last shown on this browser. The login page is shown before anyone signs in, so it
+    // reads this value (includes/login_theme_head.php). Dark is the default.
+    (function () {
+        try {
+            var theme = localStorage.getItem(window.ISKOOL_LEARNER_THEME_KEY || 'iskoolLearnerDesktopTheme');
+            if (theme === 'light' || theme === 'dark') document.documentElement.dataset.learnerTheme = theme;
+            localStorage.setItem('iskoolDesktopThemeLastUsed', theme === 'light' ? 'light' : 'dark');
         } catch (e) {}
     })();
     </script>
@@ -307,6 +321,10 @@ function getCsrfToken() {
     body { background-color: #0a0a0a !important; }
     @media (max-width: 899px) {
         body { background-color: #20201f !important; }
+    }
+    /* Desktop light mode (769px and up): the splash is light, see assets/css/splash_light.css */
+    @media (min-width: 769px) {
+        html[data-learner-theme="light"] body { background-color: #faf9f5 !important; }
     }
 </style>
 <div id="dash-splash">
@@ -4010,7 +4028,7 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/mobile_menu.js?v=1.4"></script>
 <script src="assets/js/learner/mobile_settings.js?v=1.3"></script>
 <script src="assets/js/learner/mobile_class.js?v=1.0"></script>
-<script src="assets/js/learner/desktop_settings.js?v=1.2"></script>
+<script src="assets/js/learner/desktop_settings.js?v=1.3"></script>
 <script>window.ISKOOL_SETTINGS = { sendResetUrl: 'auth/password/send_reset_link.php' };</script>
 <?php include 'includes/global_viewer.php'; ?>
 </body>
