@@ -72,7 +72,9 @@ h1{font-size:22px;font-weight:800;color:#f85149;margin-bottom:10px}
 p{color:#8b949e;font-size:15px;line-height:1.6;margin-bottom:24px}
 a{background:#4fd1c5;color:#0d1117;padding:12px 28px;border-radius:10px;font-weight:700;text-decoration:none;font-size:14px;display:inline-block}
 @media (max-width:768px){body{background:#20201f}}
-</style><script>
+</style>
+<?php $learnerThemeCss = 'take_quiz_light.css'; require __DIR__ . '/includes/learner_theme_head.php'; ?>
+<script>
 function getCsrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
     return meta ? meta.getAttribute('content') : '';
@@ -174,7 +176,9 @@ p{color:#8b949e;font-size:15px;line-height:1.6;margin-bottom:24px}
 .spinner{width:44px;height:44px;border:3px solid rgba(255,255,255,0.06);border-top:3px solid #4fd1c5;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto}
 @keyframes spin{to{transform:rotate(360deg)}}
 @media (max-width:768px){body{background:#20201f}}
-</style><script>
+</style>
+<?php $learnerThemeCss = 'take_quiz_light.css'; require __DIR__ . '/includes/learner_theme_head.php'; ?>
+<script>
 function getCsrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
     return meta ? meta.getAttribute('content') : '';
@@ -1345,6 +1349,7 @@ function build_word_bank(array $fitb): array {
             .toast { border-radius: 6px; font-size: 13px; font-weight: 600; box-shadow: none; }
         }
     </style>
+<?php $learnerThemeCss = 'take_quiz_light.css'; require __DIR__ . '/includes/learner_theme_head.php'; ?>
 <script>
 function getCsrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
