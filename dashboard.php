@@ -36,6 +36,12 @@ switch ($role) {
         redirect_to('index.php');
 
     case 'parent':
+        // A parent who came in through a learner's invite link: take them back to confirm it.
+        require_once __DIR__ . '/auth/parent_invite_functions.php';
+        $pending_invite = $_COOKIE['pending_parent_invite'] ?? '';
+        if (parent_invite_is_valid_code_format($pending_invite)) {
+            redirect_to('parent_link.php?code=' . rawurlencode($pending_invite));
+        }
         if (is_file(__DIR__ . '/parent_dashboard.php')) {
             load_dashboard('parent_dashboard.php');
         }

@@ -64,28 +64,22 @@ while ($row = $result->fetch_assoc()) {
 }
 $stmt->close();
 
-// Parent link
-$parentLink = null;
-$parentsInClass = [];
-if (!empty($joinedClassIds)) {
-    $classId = $joinedClassIds[0];
-    $stmt = $conn->prepare("SELECT parent_email FROM parent_links WHERE learner_email = ? AND class_id = ?");
-    $stmt->bind_param("si", $learnerEmail, $classId);
-    $stmt->execute();
-    if ($row = $stmt->get_result()->fetch_assoc()) {
-        $parentLink = $row['parent_email'];
-    }
-    $stmt->close();
-
-    $stmt = $conn->prepare("SELECT u.email, u.name FROM parent_classes pc JOIN users u ON pc.parent_email = u.email WHERE pc.class_id = ? AND u.role = 'parent'");
-    $stmt->bind_param("i", $classId);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    while ($row = $result->fetch_assoc()) {
-        $parentsInClass[] = $row;
-    }
-    $stmt->close();
+// Parents linked to this learner (by invite link, see create_parent_invite.php)
+$parentLinks = [];
+$stmt = $conn->prepare("
+    SELECT pl.id, u.name, u.surname
+    FROM parent_links pl
+    JOIN users u ON u.email = pl.parent_email AND u.role = 'parent' AND u.is_deleted = 0
+    WHERE pl.learner_email = ?
+    ORDER BY u.name, u.surname
+");
+$stmt->bind_param("s", $learnerEmail);
+$stmt->execute();
+$result = $stmt->get_result();
+while ($row = $result->fetch_assoc()) {
+    $parentLinks[] = ['id' => (int)$row['id'], 'name' => trim($row['name'] . ' ' . $row['surname'])];
 }
+$stmt->close();
 
 echo json_encode([
     'schoolName' => $schoolName,
@@ -95,7 +89,6 @@ echo json_encode([
     'profilePicture' => $learnerProfilePicture,
     'classes' => $classes,
     'joinedClassIds' => $joinedClassIds,
-    'parentLink' => $parentLink,
-    'parentsInClass' => $parentsInClass
+    'parentLinks' => $parentLinks
 ]);
 ?>
