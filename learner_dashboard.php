@@ -252,9 +252,9 @@ if (!empty($joinedClassIds)) {
      <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=13.7">
     <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=3.1">
     <link rel="stylesheet" href="assets/css/learner/mobile_menu.css?v=1.7">
-    <link rel="stylesheet" href="assets/css/learner/mobile_settings.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/learner/mobile_settings.css?v=1.1">
     <link rel="stylesheet" href="assets/css/learner/mobile_class.css?v=1.0">
-    <link rel="stylesheet" href="assets/css/learner/desktop_settings.css?v=1.3">   <!-- new -->
+    <link rel="stylesheet" href="assets/css/learner/desktop_settings.css?v=1.4">   <!-- new -->
     <link rel="stylesheet" href="assets/css/splash_light.css?v=<?= (int) @filemtime(__DIR__ . '/assets/css/splash_light.css') ?>">
     <script>
     // Desktop sidebar: restore the saved collapsed state BEFORE first paint (no flash).
@@ -4028,7 +4028,7 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/mobile_menu.js?v=1.4"></script>
 <script src="assets/js/learner/mobile_settings.js?v=1.3"></script>
 <script src="assets/js/learner/mobile_class.js?v=1.0"></script>
-<script src="assets/js/learner/desktop_settings.js?v=1.3"></script>
+<script src="assets/js/learner/desktop_settings.js?v=1.4"></script>
 <script>window.ISKOOL_SETTINGS = { sendResetUrl: 'auth/password/send_reset_link.php' };</script>
 <?php include 'includes/global_viewer.php'; ?>
 </body>
