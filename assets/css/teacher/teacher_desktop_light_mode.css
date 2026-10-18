@@ -883,3 +883,15 @@ html[data-teacher-theme="light"] .mini-cal-modal .teacher-modal-submit:hover { b
     letter-spacing: -0.01em;
   }
 }
+
+/* ═══ Fraunces greeting on the desktop Home (teacher): "Good morning, Mrs Dlamini" or "Welcome to iSkool, ...".
+   The line under it and everything else on Home are unchanged, and so are phones and narrow windows
+   (768px and below). Fraunces is already loaded by teacher_dashboard.php. The selector is id-prefixed to
+   outrank `#api-content-area .tdh h1 { font-family: inherit }` in dashboard.css.
+   To revert, delete this block. ═══ */
+@media (min-width: 769px) {
+  #api-content-area .tdh .tdh-head h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    letter-spacing: -0.02em;
+  }
+}

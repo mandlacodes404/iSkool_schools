@@ -2479,3 +2479,27 @@ html[data-learner-theme="light"] .lmc-empty-note,
 html[data-learner-theme="light"] .lmc-empty-wrap { color: #73746d; }
 
 }
+
+/* ═══ Fraunces titles (desktop only): the title at the top of each detail (main) panel on the learner list
+   pages (Quizzes, Assignments, Announcements, Evaluations, Grades, Resources, Syllabus), and the greeting on
+   the desktop Home ("Good morning, Name"). Unchanged: the list panels on the left, the empty-state headings,
+   the text inside the panels, and phones and narrow windows (768px and below).
+   Fraunces is already loaded by learner_dashboard.php. Every selector starts with `html` or
+   `#api-content-area` so it outranks the id-prefixed `font-family: inherit` rules the pages set, including the
+   styles that quiz.js and syllabus.js inject at runtime.
+   To revert, delete this whole block. ═══ */
+@media (min-width: 769px) {
+    html #lqz-main-panel .lqz-dh-title,
+    html #las-main-panel .las-dh-title,
+    html #lan-main-panel .lan-dh-title,
+    html #lev-main-panel .lev-dh-title,
+    html #grades-dt-panel .gr-dh-title,
+    html #lrs-main-panel .lrs-dh-title,
+    html #syl-main-panel .syl-dh-title {
+        font-family: 'Fraunces', Georgia, serif;
+    }
+    #api-content-area .lhd .lhd-head h1 {
+        font-family: 'Fraunces', Georgia, serif;
+        letter-spacing: -0.02em;
+    }
+}
