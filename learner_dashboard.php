@@ -199,39 +199,23 @@ while ($row = $joinedResult->fetch_assoc()) {
 $joinedStmt->close();
 
 //────────────────────────────────────────────────────────────────────────
-//           Parent linking (only if learner is in a class) 
+//           Parent linking: how many parents are linked to this learner.
+//           Parents are added by invite link (api/learner/create_parent_invite.php),
+//           and the My Class panel loads the list from api/learner/get_parent_links.php.
 //────────────────────────────────────────────────────────────────────────
-$parentLink     = null;
-$parentsInClass = [];
-
-if (!empty($joinedClassIds)) {
-    $classId = $joinedClassIds[0]; // learner can only be in one class
-
-    // Check if already linked to a parent
-    $linkStmt = $conn->prepare("SELECT parent_email FROM parent_links WHERE learner_email = ? AND class_id = ?");
-    $linkStmt->bind_param("si", $learnerEmail, $classId);
-    $linkStmt->execute();
-    if ($res = $linkStmt->get_result()->fetch_assoc()) {
-        $parentLink = $res['parent_email'];
-    }
-    $linkStmt->close();
-
-    // Get all parents in this class
-    $parentStmt = $conn->prepare("
-        SELECT u.email, u.name 
-        FROM parent_classes pc 
-        JOIN users u ON pc.parent_email = u.email 
-        WHERE pc.class_id = ? AND u.role = 'parent'
-        ORDER BY u.name
-    ");
-    $parentStmt->bind_param("i", $classId);
-    $parentStmt->execute();
-    $parentsResult = $parentStmt->get_result();
-    while ($row = $parentsResult->fetch_assoc()) {
-        $parentsInClass[] = $row;
-    }
-    $parentStmt->close();
-}
+$parentCount = 0;
+$parentStmt = $conn->prepare("
+    SELECT COUNT(*)
+    FROM parent_links pl
+    JOIN users u ON u.email = pl.parent_email AND u.role = 'parent' AND u.is_deleted = 0
+    WHERE pl.learner_email = ?
+");
+$parentStmt->bind_param("s", $learnerEmail);
+$parentStmt->execute();
+$parentStmt->bind_result($parentCount);
+$parentStmt->fetch();
+$parentStmt->close();
+$parentLink = ((int)$parentCount > 0); // true when at least one parent is linked
 ?>
 <!DOCTYPE html>
 <html>
@@ -253,7 +237,8 @@ if (!empty($joinedClassIds)) {
     <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=3.1">
     <link rel="stylesheet" href="assets/css/learner/mobile_menu.css?v=1.7">
     <link rel="stylesheet" href="assets/css/learner/mobile_settings.css?v=1.1">
-    <link rel="stylesheet" href="assets/css/learner/mobile_class.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/learner/mobile_class.css?v=1.1">
+    <link rel="stylesheet" href="assets/css/learner/parent_invite.css?v=1.0">
     <link rel="stylesheet" href="assets/css/learner/desktop_settings.css?v=1.4">   <!-- new -->
     <link rel="stylesheet" href="assets/css/splash_light.css?v=<?= (int) @filemtime(__DIR__ . '/assets/css/splash_light.css') ?>">
     <script>
@@ -716,11 +701,6 @@ if (!empty($joinedClassIds)) {
             $lmcNames = implode(', ', array_column($myClasses, 'name'));
             ?>
             <!-- ═══ MOBILE (phones only, max-width 768px): Settings-style My Class. Styles in mobile_class.css, sheet in mobile_class.js ═══ -->
-            <?php
-            $lmcParentsJson = json_encode(array_map(function ($p) {
-                return ['name' => (string)$p['name'], 'email' => (string)$p['email']];
-            }, $parentsInClass), JSON_UNESCAPED_UNICODE);
-            ?>
             <div class="lmc-m ms">
                 <div class="ms-gt"><?= $lmcMulti ? 'My classes' : 'My class' ?></div>
                 <div class="ms-g">
@@ -741,17 +721,17 @@ if (!empty($joinedClassIds)) {
                 </div>
 
                 <div class="ms-gt">Parent link</div>
-                <div class="ms-g lmc-parent" data-linked="<?= $parentLink ? '1' : '0' ?>" data-current="<?= htmlspecialchars((string)$parentLink, ENT_QUOTES, 'UTF-8') ?>">
+                <div class="ms-g lmc-parent" data-linked="<?= $parentLink ? '1' : '0' ?>">
                     <div class="ms-r ms-r--static">
                         <svg class="ms-i ms-ok mc-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
                         <svg class="ms-i ms-warn mc-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
-                        <span class="ms-rt"><b>Parent</b><span class="mc-on">A parent has access to your progress</span><span class="mc-off">No parent linked to your account yet</span></span>
+                        <span class="ms-rt"><b>Parent</b><span class="mc-on">Linked parents can see your progress</span><span class="mc-off">No parent linked to your account yet</span></span>
                         <span class="ms-rv ms-ok mc-on">Linked</span>
                         <span class="ms-rv ms-warn mc-off">Not linked</span>
                     </div>
-                    <button type="button" class="ms-r" data-mc="manage" data-class="<?= (int)($joinedClassIds[0] ?? 0) ?>" data-parents="<?= htmlspecialchars($lmcParentsJson, ENT_QUOTES, 'UTF-8') ?>">
+                    <button type="button" class="ms-r" data-mc="manage">
                         <svg class="ms-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                        <span class="ms-rt"><b class="mc-on">Manage parent link</b><b class="mc-off">Link my parent</b><span>Choose who sees your progress</span></span>
+                        <span class="ms-rt"><b class="mc-on">Manage parent link</b><b class="mc-off">Link my parent</b><span>Invite a parent or manage who sees your progress</span></span>
                         <svg class="ms-i ms-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
                     </button>
                 </div>
@@ -788,7 +768,7 @@ if (!empty($joinedClassIds)) {
                     <div class="lmc-panel-title">Parent Link</div>
                     <div class="parent-link-section lmc-parent-block">
                         <div class="lmc-parent-top">
-                            <div class="lmc-class-icon lmc-parent-icon <?= $parentLink ? 'lmc-parent-icon--linked' : '' ?>">
+                            <div class="lmc-class-icon lmc-parent-icon <?= $parentLink ? 'lmc-parent-icon--linked' : '' ?>" id="lmcParentIcon">
                                 <svg viewBox="0 0 24 24" width="20" height="20" stroke="<?= $parentLink ? '#68d391' : '#63b3ed' ?>" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                                     <?php if ($parentLink): ?>
                                         <path d="M20 6L9 17l-5-5"/>
@@ -799,33 +779,29 @@ if (!empty($joinedClassIds)) {
                             </div>
                             <div class="lmc-class-body">
                                 <div class="lmc-class-label">Parent</div>
-                                <div class="lmc-class-name"><?= $parentLink ? 'Linked' : 'Not linked' ?></div>
-                                <div class="lmc-class-sub"><?= $parentLink ? 'A parent has access to your progress' : 'No parent linked to your account yet' ?></div>
+                                <div class="lmc-class-name" id="lmcParentName"><?= $parentLink ? 'Linked' : 'Not linked' ?></div>
+                                <div class="lmc-class-sub" id="lmcParentSub"><?= !$parentLink ? 'No parent linked to your account yet' : ((int)$parentCount === 1 ? 'A parent can see your progress' : (int)$parentCount . ' parents can see your progress') ?></div>
                             </div>
                         </div>
                         <button type="button" class="toggle-parent-link lmc-toggle-btn" onclick="toggleParentDropdown()">
-                            <span class="lmc-m-only"><?= $parentLink ? 'Manage Parent Link' : 'Link My Parent' ?></span><span class="lmc-d-only"><?= $parentLink ? 'Manage' : 'Link my parent' ?></span>
+                            <span class="lmc-m-only" id="lmcParentBtnM"><?= $parentLink ? 'Manage Parent Link' : 'Link My Parent' ?></span><span class="lmc-d-only" id="lmcParentBtnD"><?= $parentLink ? 'Manage' : 'Link my parent' ?></span>
                         </button>
                         <div class="parent-dropdown lmc-parent-dropdown" id="parentDropdown" style="display:none;">
-                            <?php if (!empty($parentsInClass)): ?>
-                                <form id="parentLinkForm" class="lmc-parent-form">
-                                    <label class="lmc-form-label" for="lmcParentSelect">Select parent</label>
-                                    <select name="parent_email" id="lmcParentSelect" required>
-                                        <option value="">-- Select Parent --</option>
-                                        <?php foreach ($parentsInClass as $p): ?>
-                                            <option value="<?= $p['email'] ?>" <?= ($p['email']===$parentLink?'selected':'') ?>>
-                                                <?= htmlspecialchars($p['name']) ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                    <div class="lmc-actions">
-                                        <button type="button" class="lmc-cancel-btn" onclick="toggleParentDropdown()">Cancel</button>
-                                        <button type="submit" class="join-class-btn lmc-save-btn">Save</button>
-                                    </div>
-                                </form>
-                            <?php else: ?>
-                                <p class="lmc-empty-note">No parents in class yet.</p>
-                            <?php endif; ?>
+                            <div class="lmc-parent-list" id="lmcParentLinked"></div>
+                            <p class="lmc-empty-note">Create a link and send it to your parent yourself, in any way you like. It works once and expires after 48 hours.</p>
+                            <div class="lmc-invite-result" id="lmcInviteResult" style="display:none;">
+                                <label class="lmc-form-label" for="lmcInviteLink">Invite link</label>
+                                <input type="text" id="lmcInviteLink" class="lmc-invite-input" readonly>
+                                <div class="lmc-actions">
+                                    <button type="button" class="join-class-btn lmc-save-btn" id="lmcCopyBtn">Copy link</button>
+                                </div>
+                                <p class="lmc-parent-msg" id="lmcInviteNote"></p>
+                            </div>
+                            <p class="lmc-parent-msg" id="lmcParentMsg" role="alert"></p>
+                            <div class="lmc-actions">
+                                <button type="button" class="lmc-cancel-btn" onclick="toggleParentDropdown()">Close</button>
+                                <button type="button" class="join-class-btn lmc-save-btn" id="lmcInviteBtn">Create invite link</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -837,7 +813,7 @@ if (!empty($joinedClassIds)) {
                 <div class="lmc-kv"><span>School</span><b><?= htmlspecialchars($schoolName) ?></b></div>
                 <div class="lmc-kv"><span>Class</span><b><?= htmlspecialchars($lmcNames) ?></b></div>
                 <?php if ($currentYearId > 0): ?><div class="lmc-kv"><span>Year</span><b><?= htmlspecialchars($currentYearName) ?></b></div><?php endif; ?>
-                <div class="lmc-kv"><span>Parent</span><b<?= $parentLink ? ' class="lmc-ok"' : '' ?>><?= $parentLink ? 'Linked' : 'Not linked' ?></b></div>
+                <div class="lmc-kv"><span>Parent</span><b id="lmcRailParent"<?= $parentLink ? ' class="lmc-ok"' : '' ?>><?= $parentLink ? 'Linked' : 'Not linked' ?></b></div>
             </aside>
             </div><!-- /.lmc-body -->
         <?php else: ?>
@@ -2417,38 +2393,7 @@ window.toggleSidebar = function (forceClose = false) {
         if (apiArea) apiArea.style.display = "none";
     };
 
-    window.toggleParentDropdown = () => {
-        const drop = document.getElementById("parentDropdown");
-        drop.style.display = drop.style.display === "block" ? "none" : "block";
-    };
-
-    document.getElementById("parentLinkForm")?.addEventListener("submit", function(e) {
-    e.preventDefault();
-    const email = this.querySelector("select").value;
-    // Get the class ID from a hidden input or the PHP variable
-    const classId = "<?= $joinedClassIds[0] ?? 0 ?>"; 
-
-    if (!email || classId == 0) return alert("Select a parent and ensure you are in a class.");
-    
-    loader.style.display = "flex";
-    
-    fetch("link_parent.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" , 'X-CSRF-Token': getCsrfToken() },
-        // Use encodeURIComponent for both to be safe
-        body: "parent_email=" + encodeURIComponent(email) + "&class_id=" + classId
-    })
-    .then(r => r.json())
-    .then(d => { 
-        if (d.success) {
-            location.reload(); 
-        } else {
-            alert("Error: " + d.error); // This will now tell you exactly what's wrong
-        }
-    })
-    .catch(err => alert("Connection error"))
-    .finally(() => loader.style.display = "none");
-});
+    // Parent link (desktop panel and phone sheet): assets/js/learner/parent_invite.js and mobile_class.js
 
     function createMobileOverlay() {
         const div = document.createElement("div");
@@ -4027,7 +3972,8 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/desktop_menu.js?v=1.4"></script>
 <script src="assets/js/learner/mobile_menu.js?v=1.4"></script>
 <script src="assets/js/learner/mobile_settings.js?v=1.3"></script>
-<script src="assets/js/learner/mobile_class.js?v=1.0"></script>
+<script src="assets/js/learner/parent_invite.js?v=1.0"></script>
+<script src="assets/js/learner/mobile_class.js?v=1.1"></script>
 <script src="assets/js/learner/desktop_settings.js?v=1.4"></script>
 <script>window.ISKOOL_SETTINGS = { sendResetUrl: 'auth/password/send_reset_link.php' };</script>
 <?php include 'includes/global_viewer.php'; ?>

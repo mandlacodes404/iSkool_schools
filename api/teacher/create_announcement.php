@@ -78,11 +78,13 @@ $stmt->close();
 
 // Get recipients
 if ($send_to === 'parents') {
+    // Parents linked (by invite link) to a learner who is in this class this year.
     $recipientStmt = $conn->prepare("
-        SELECT DISTINCT u.email, u.name 
-        FROM users u 
-        JOIN parent_classes pc ON u.email = pc.parent_email
-        WHERE pc.class_id = ? AND pc.academic_year_id = ? AND u.role = 'parent'
+        SELECT DISTINCT u.email, u.name
+        FROM users u
+        JOIN parent_links pl ON pl.parent_email = u.email
+        JOIN class_students cs ON cs.student_email = pl.learner_email
+        WHERE cs.class_id = ? AND cs.academic_year_id = ? AND u.role = 'parent' AND u.is_deleted = 0
     ");
 } else {
     $recipientStmt = $conn->prepare("

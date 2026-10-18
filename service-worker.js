@@ -39,7 +39,7 @@ const NETWORK_ONLY_PATHS = new Set([
     '/api/learner/submit_evaluation.php', '/api/learner/create_discussion.php',
     '/api/learner/submit_reply.php', '/api/learner/submit_discussion_report.php',
     '/api/learner/save_learner_profile.php', '/api/learner/join_class.php',
-    '/upload_profile.php', '/link_parent.php', '/subscribe_push.php', '/logout.php',
+    '/upload_profile.php', '/subscribe_push.php', '/logout.php',
     '/api/set_typing.php', '/api/get_typing.php'
 ]);
 // Reports, logout, profile updates, and class changes deliberately never queue.
