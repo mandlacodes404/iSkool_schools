@@ -109,7 +109,7 @@ iskool_schools/
 ├── learner_dashboard.php         # Learner interface
 ├── teacher_dashboard.php         # Teacher interface
 ├── school_admin_dashboard.php    # School admin dashboard
-├── parent_dashboard.php          # Parent monitoring interface
+├── parent_dashboard.php          # Parent app shell (Home, Report; data from api/parent/)
 │
 ├── /api/                         # 76 REST endpoints (return JSON)
 │   ├── /learner/                 # 20+ learner endpoints
