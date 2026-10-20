@@ -73,7 +73,7 @@ final class SentinelSecurityTest extends TestCase
 
     public function test_parent_app_endpoints_are_parent_only_and_only_read_a_linked_child(): void
     {
-        foreach (['get_home', 'get_report'] as $name) {
+        foreach (['get_home', 'get_report', 'get_syllabus'] as $name) {
             $source = $this->source("api/parent/{$name}.php");
             $this->assertStringContainsString("!== 'parent'", $source, $name);
             $this->assertStringContainsString('parent_find_child($conn, $parent_email, $child_id)', $source, $name);

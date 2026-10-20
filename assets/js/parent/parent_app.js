@@ -22,9 +22,7 @@
     var ROUTES = {
         home: renderHome,
         report: renderReport,
-        syllabus: function () {
-            return renderSoon('Syllabus', 'What your child is learning each term will be listed here. This part of the app is on its way.');
-        },
+        syllabus: renderSyllabus,
         news: function () {
             return renderSoon('News', 'Announcements from the school and teachers will be listed here. For now, the latest ones show on Home.');
         },
@@ -37,8 +35,11 @@
         parent: { name: textOf('.pa-account-name') || 'Parent', email: '' },
         children: [],
         childId: null,
-        reportTerm: null
+        reportTerm: null,
+        syllabusTerm: null
     };
+    // Screens that show one child's data (they need at least one linked child)
+    var NEEDS_CHILD = { home: true, report: true, syllabus: true };
     var cache = {};
     var renderId = 0;
     var drawerOpen = false;
@@ -390,7 +391,7 @@
         markActiveLinks(route);
 
         var node;
-        if (!state.children.length && ROUTES[route] !== undefined && (route === 'home' || route === 'report')) {
+        if (!state.children.length && NEEDS_CHILD[route]) {
             node = renderNoChildren();
             show(node);
         } else {
@@ -626,7 +627,7 @@
         var root = document.createElement('div');
 
         // Title and term buttons
-        var head = el('div', 'pa-report-head');
+        var head = el('div', 'pa-page-head');
         var titleBox = el('div');
         append(titleBox, el('h1', 'pa-h1', 'Progress report'), el('p', 'pa-sub', eyebrow(d.child, d.term)));
         var terms = el('div', 'pa-terms');
@@ -746,6 +747,138 @@
             append(row, info, el('span', 'pa-work-pct', pct(w.pct)));
             panel.appendChild(row);
         });
+    }
+
+    // ── Syllabus ───────────────────────────────────────────────────────────────────────────────────────────
+
+    function renderSyllabus() {
+        var child = currentChild();
+        if (!child) return renderNoChildren();
+        return cached('api/parent/get_syllabus.php', { child: child.id }).then(buildSyllabus);
+    }
+
+    /** The term to show: the one the parent chose, else the current term, else the latest one before it, else the first. */
+    function pickSyllabusTerm(d) {
+        if (state.syllabusTerm && d.terms.indexOf(state.syllabusTerm) !== -1) return state.syllabusTerm;
+        if (d.terms.indexOf(d.current_term) !== -1) return d.current_term;
+        var earlier = d.terms.filter(function (t) { return t <= d.current_term; });
+        return earlier.length ? earlier[earlier.length - 1] : d.terms[0];
+    }
+
+    function buildSyllabus(d) {
+        if (!d.briefs.length) {
+            return stateCard(
+                'No syllabus posted yet',
+                'Teachers post the syllabus for each subject at the start of a term. It will appear here once they do.'
+            );
+        }
+
+        var root = document.createElement('div');
+        var term = pickSyllabusTerm(d);
+
+        // Title and term buttons (only the terms that have a syllabus)
+        var head = el('div', 'pa-page-head');
+        var titleBox = el('div');
+        var sub = [d.child.name, d.child.class_name, 'Term ' + term + (term === d.current_term ? ' (current)' : '')]
+            .filter(Boolean).join(' · ');
+        append(titleBox, el('h1', 'pa-h1', 'Syllabus'), el('p', 'pa-sub', sub));
+        var terms = el('div', 'pa-terms');
+        terms.setAttribute('role', 'group');
+        terms.setAttribute('aria-label', 'Term');
+        d.terms.forEach(function (t) {
+            var b = el('button', 'pa-term', 'Term ' + t);
+            b.type = 'button';
+            b.setAttribute('aria-pressed', t === term ? 'true' : 'false');
+            b.addEventListener('click', function () {
+                if (t === term) return;
+                state.syllabusTerm = t;
+                render();
+            });
+            terms.appendChild(b);
+        });
+        append(head, titleBox, terms);
+        root.appendChild(head);
+
+        // One expandable row for each subject
+        var card = el('div', 'pa-card');
+        d.briefs.filter(function (b) { return b.term === term; }).forEach(function (b, i) {
+            card.appendChild(buildBrief(b, i));
+        });
+        root.appendChild(card);
+        root.appendChild(el('p', 'pa-foot', 'Posted by each subject teacher. This is the same syllabus your child sees.'));
+        return root;
+    }
+
+    function buildBrief(b, index) {
+        var wrap = el('div', 'pa-brief-wrap');
+        var panelId = 'paBrief' + index;
+
+        var btn = el('button', 'pa-brief');
+        btn.type = 'button';
+        btn.setAttribute('aria-expanded', 'false');
+        btn.setAttribute('aria-controls', panelId);
+        var meta = [b.teacher];
+        if (b.topics.length) meta.push(b.topics.length + (b.topics.length === 1 ? ' topic' : ' topics'));
+        var main = el('span', 'pa-brief-main');
+        append(main, el('span', 'pa-brief-name', b.subject), el('span', 'pa-brief-meta', meta.join(' · ')));
+        append(btn, main, append(el('span', 'pa-chev'), chevron()));
+
+        var panel = el('div', 'pa-brief-panel');
+        panel.id = panelId;
+        panel.hidden = true;
+        fillBrief(panel, b);
+
+        btn.addEventListener('click', function () {
+            var open = btn.getAttribute('aria-expanded') === 'true';
+            btn.setAttribute('aria-expanded', open ? 'false' : 'true');
+            panel.hidden = open;
+        });
+
+        append(wrap, btn, panel);
+        return wrap;
+    }
+
+    function fillBrief(panel, b) {
+        if (b.note) {
+            var note = el('div', 'pa-brief-note');
+            note.appendChild(el('small', null, 'Note from ' + b.teacher));
+            note.appendChild(document.createTextNode(b.note));
+            panel.appendChild(note);
+        }
+
+        if (b.topics.length) {
+            panel.appendChild(el('h2', 'pa-label', 'Topics'));
+            var list = el('ol', 'pa-topics');
+            b.topics.forEach(function (topic, i) {
+                var li = el('li');
+                li.appendChild(el('span', null, (i < 9 ? '0' : '') + (i + 1)));
+                li.appendChild(document.createTextNode(topic));
+                list.appendChild(li);
+            });
+            panel.appendChild(list);
+        }
+
+        if (b.assessments.length) {
+            panel.appendChild(el('h2', 'pa-label', 'How it is assessed'));
+            var stack = el('div', 'pa-stack');
+            stack.setAttribute('aria-hidden', 'true');
+            b.assessments.forEach(function (a, i) {
+                var seg = el('span', 'pa-seg pa-c' + (i % 6));
+                seg.style.flex = String(a.weight);
+                stack.appendChild(seg);
+            });
+            panel.appendChild(stack);
+            b.assessments.forEach(function (a, i) {
+                var row = el('div', 'pa-wrow');
+                append(row, el('i', 'pa-c' + (i % 6)), el('span', null, a.type), el('b', null, number(a.weight) + '%'));
+                panel.appendChild(row);
+            });
+        }
+
+        if (!b.note && !b.topics.length && !b.assessments.length) {
+            panel.appendChild(el('p', 'pa-work-note', 'No details have been posted for this subject yet.'));
+        }
+        if (b.updated) panel.appendChild(el('p', 'pa-brief-foot', 'Updated ' + b.updated));
     }
 
     // ── Start ──────────────────────────────────────────────────────────────────────────────────────────────
