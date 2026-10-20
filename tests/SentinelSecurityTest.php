@@ -71,6 +71,57 @@ final class SentinelSecurityTest extends TestCase
         $this->assertLessThan($session, $bounce);
     }
 
+    public function test_parent_app_endpoints_are_parent_only_and_only_read_a_linked_child(): void
+    {
+        foreach (['get_home', 'get_report'] as $name) {
+            $source = $this->source("api/parent/{$name}.php");
+            $this->assertStringContainsString("!== 'parent'", $source, $name);
+            $this->assertStringContainsString('parent_find_child($conn, $parent_email, $child_id)', $source, $name);
+            // The child check comes before any data is read
+            $check = strpos($source, 'parent_find_child(');
+            $read  = strpos($source, 'parent_fetch_');
+            $this->assertNotFalse($check, $name);
+            $this->assertNotFalse($read, $name);
+            $this->assertLessThan($read, $check, $name);
+            $this->assertStringContainsString('http_response_code(404)', $source, $name);
+        }
+
+        $children = $this->source('api/parent/get_children.php');
+        $this->assertStringContainsString("!== 'parent'", $children);
+        $this->assertStringNotContainsString("'email'    => \$row", $children);
+    }
+
+    public function test_parent_app_only_shows_published_marks_and_never_sends_learner_emails(): void
+    {
+        $functions = $this->source('auth/parent_app_functions.php');
+        $this->assertStringContainsString('q.publish_marks = 1', $functions);
+        $this->assertStringContainsString('open_ended_grades', $functions);
+
+        // parent_find_child joins parent_links on the signed-in parent's email
+        $this->assertMatchesRegularExpression('/function parent_find_child.*?pl\.parent_email = \?/s', $functions);
+
+        // The children list that goes to the browser carries ids and names, not learner emails
+        $this->assertDoesNotMatchRegularExpression('/function parent_list_children.*?\'email\'\s*=>/s', $functions);
+    }
+
+    public function test_parent_app_page_is_parent_only_and_does_not_put_data_into_html_unescaped(): void
+    {
+        $page = $this->source('parent_dashboard.php');
+        $this->assertStringContainsString("!== 'parent'", $page);
+        $this->assertStringNotContainsString('$_GET', $page);
+        $this->assertStringNotContainsString('$_POST', $page);
+
+        $js = $this->source('assets/js/parent/parent_app.js');
+        $this->assertStringNotContainsString('innerHTML', $js);
+        $this->assertStringNotContainsString('insertAdjacentHTML', $js);
+        $this->assertStringNotContainsString('document.write', $js);
+    }
+
+    public function test_old_parent_pages_are_gone(): void
+    {
+        $this->assertFileDoesNotExist(__DIR__ . '/../parent_grades.php');
+    }
+
     public function test_superadmin_has_csrf_rate_limit_and_session_regeneration(): void
     {
         $source = $this->source('superadmin/index.php');
