@@ -122,6 +122,38 @@ final class SentinelSecurityTest extends TestCase
         $this->assertFileDoesNotExist(__DIR__ . '/../parent_grades.php');
     }
 
+    public function test_parent_app_says_so_when_the_school_has_no_current_year(): void
+    {
+        // Linked children are still listed, so the page does not claim a parent has none
+        $children = $this->source('api/parent/get_children.php');
+        $this->assertStringNotContainsString('$year_id > 0 ?', $children);
+        $this->assertStringContainsString('parent_list_children($conn, $parent_email, $year_id)', $children);
+
+        // Home and Report give a code the page recognises, instead of a message that looks like a network error
+        foreach (['get_home', 'get_report'] as $name) {
+            $this->assertStringContainsString("'code' => 'no_year'", $this->source("api/parent/{$name}.php"), $name);
+        }
+
+        $js = $this->source('assets/js/parent/parent_app.js');
+        $this->assertStringContainsString("r.json.code === 'no_year'", $js);
+        $this->assertStringContainsString('renderNoYear()', $js);
+    }
+
+    public function test_parent_app_only_says_no_children_after_the_list_has_loaded(): void
+    {
+        $js = $this->source('assets/js/parent/parent_app.js');
+        $this->assertStringContainsString("childrenStatus: 'loading'", $js);
+        // A failed load shows the error card, and "Try again" loads the list again
+        $this->assertStringContainsString("needsChildren && state.childrenStatus === 'failed'", $js);
+        $this->assertStringContainsString("if (state.childrenStatus !== 'ready') start();", $js);
+        // "No children linked yet" comes after the failed and loading cases
+        $failed = strpos($js, "needsChildren && state.childrenStatus === 'failed'");
+        $none   = strpos($js, 'needsChildren && !state.children.length');
+        $this->assertNotFalse($failed);
+        $this->assertNotFalse($none);
+        $this->assertLessThan($none, $failed);
+    }
+
     public function test_superadmin_has_csrf_rate_limit_and_session_regeneration(): void
     {
         $source = $this->source('superadmin/index.php');
