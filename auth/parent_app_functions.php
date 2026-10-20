@@ -285,6 +285,106 @@ function parent_parse_assessments($json): array
     return $out;
 }
 
+/** "Thandi", "Thandi and Sipho", "Thandi, Sipho and Lwazi". Blank names are left out. */
+function parent_join_names(array $names): string
+{
+    $names = array_values(array_filter(array_map(function ($n) {
+        return trim((string) $n);
+    }, $names), function ($n) {
+        return $n !== '';
+    }));
+    $count = count($names);
+    if ($count === 0) {
+        return '';
+    }
+    if ($count === 1) {
+        return $names[0];
+    }
+    return implode(', ', array_slice($names, 0, -1)) . ' and ' . $names[$count - 1];
+}
+
+/** One announcement as the News screen needs it. $for is the child or children it relates to ('' for the school). */
+function parent_feed_item(array $row, string $kind, string $sender, string $for): array
+{
+    $created = (string) ($row['created_at'] ?? '');
+    $ts = strtotime($created);
+    $title = trim((string) ($row['title'] ?? ''));
+
+    // An edit date of 0000-00-00 counts as "never edited"
+    $edited = null;
+    $edited_at = trim((string) ($row['edited_at'] ?? ''));
+    if ($edited_at !== '') {
+        $edited_ts = strtotime($edited_at);
+        if ($edited_ts !== false && $edited_ts > 0) {
+            $edited = parent_date_parts($edited_at)['label'];
+        }
+    }
+
+    return [
+        'id'      => (int) $row['id'],
+        'kind'    => $kind,
+        'tag'     => $kind === 'school' ? 'School' : 'Teacher',
+        'title'   => $title !== '' ? $title : 'Announcement',
+        'message' => trim((string) ($row['message'] ?? '')),
+        'sender'  => $sender,
+        'for'     => $for,
+        'date'    => parent_date_parts($created)['label'],
+        'time'    => ($ts !== false && $ts > 0) ? date('H:i', $ts) : '',
+        'ts'      => ($ts !== false && $ts > 0) ? $ts : 0,
+        'edited'  => $edited,
+    ];
+}
+
+/**
+ * One news feed from school-wide announcements and the announcements teachers sent to parents.
+ * A school-wide announcement appears once. A teacher announcement appears once even when it reaches several of the
+ * parent's children (the same class), with all their names. Newest first, at most $limit items.
+ *
+ * @param array $school_rows  id, title, message, created_at, edited_at
+ * @param array $teacher_rows id, title, message, created_at, edited_at, t_title, t_surname, child_name (one row per child)
+ * @return array{items: array, more: bool} "more" is true when older items were left out
+ */
+function parent_build_feed(array $school_rows, array $teacher_rows, string $school_name, int $limit): array
+{
+    $items = [];
+    $seen_school = [];
+    foreach ($school_rows as $row) {
+        $id = (int) $row['id'];
+        if (isset($seen_school[$id])) {
+            continue;
+        }
+        $seen_school[$id] = true;
+        $items[] = parent_feed_item($row, 'school', $school_name, '');
+    }
+
+    $grouped = [];
+    foreach ($teacher_rows as $row) {
+        $id = (int) $row['id'];
+        if (!isset($grouped[$id])) {
+            $grouped[$id] = ['row' => $row, 'names' => []];
+        }
+        $name = trim((string) ($row['child_name'] ?? ''));
+        if ($name !== '' && !in_array($name, $grouped[$id]['names'], true)) {
+            $grouped[$id]['names'][] = $name;
+        }
+    }
+    foreach ($grouped as $group) {
+        $items[] = parent_feed_item(
+            $group['row'],
+            'teacher',
+            parent_teacher_display($group['row']['t_title'] ?? '', $group['row']['t_surname'] ?? ''),
+            parent_join_names($group['names'])
+        );
+    }
+
+    usort($items, function ($a, $b) {
+        return [$b['ts'], $b['id']] <=> [$a['ts'], $a['id']];
+    });
+
+    $limit = max(0, $limit);
+    return ['items' => array_slice($items, 0, $limit), 'more' => count($items) > $limit];
+}
+
 // ═══════════════════════════════════════════════════════════════════════════════════════════════════════════
 // Part 2: database reads
 // ═══════════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -642,4 +742,49 @@ function parent_fetch_syllabus(mysqli $conn, string $learner_email, int $year_id
     $stmt->close();
 
     return $briefs;
+}
+
+/**
+ * The News feed for a parent, across all their linked children (spec 3.4): school-wide announcements for everyone,
+ * plus the announcements teachers sent to parents for the class each linked child is in this year.
+ * Every row is scoped to the signed-in parent through parent_links. Learner emails are not returned.
+ *
+ * @return array{items: array, more: bool}
+ */
+function parent_fetch_feed(mysqli $conn, string $parent_email, int $year_id, string $school_name, int $limit): array
+{
+    // School-wide: no class, meant for everyone (the same rule as the Home screen)
+    $fetch = $limit + 1;
+    $stmt = $conn->prepare(
+        "SELECT a.id, a.title, a.message, a.created_at, a.edited_at
+         FROM announcements a
+         WHERE a.academic_year_id = ? AND a.class_id IS NULL AND a.target_role = 'all'
+         ORDER BY a.created_at DESC, a.id DESC
+         LIMIT ?"
+    );
+    $stmt->bind_param('ii', $year_id, $fetch);
+    $stmt->execute();
+    $school_rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+
+    // Teacher announcements sent to parents, one row per linked child in that class
+    $row_cap = $fetch * 8;
+    $stmt = $conn->prepare(
+        "SELECT a.id, a.title, a.message, a.created_at, a.edited_at,
+                t.title AS t_title, t.surname AS t_surname, ch.name AS child_name
+         FROM parent_links pl
+         JOIN users ch ON ch.email = pl.learner_email AND ch.role = 'learner' AND COALESCE(ch.is_deleted, 0) = 0
+         JOIN class_students cs ON cs.student_email = ch.email AND cs.academic_year_id = ?
+         JOIN announcements a ON a.class_id = cs.class_id AND a.academic_year_id = ? AND a.send_to = 'parents'
+         LEFT JOIN users t ON t.email = a.created_by AND t.role = 'teacher'
+         WHERE pl.parent_email = ?
+         ORDER BY a.created_at DESC, a.id DESC, ch.name ASC
+         LIMIT ?"
+    );
+    $stmt->bind_param('iisi', $year_id, $year_id, $parent_email, $row_cap);
+    $stmt->execute();
+    $teacher_rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+
+    return parent_build_feed($school_rows, $teacher_rows, $school_name, $limit);
 }

@@ -23,9 +23,7 @@
         home: renderHome,
         report: renderReport,
         syllabus: renderSyllabus,
-        news: function () {
-            return renderSoon('News', 'Announcements from the school and teachers will be listed here. For now, the latest ones show on Home.');
-        },
+        news: renderNews,
         events: function () {
             return renderSoon('Events', 'Tests, due dates and school events will be listed here. For now, what is coming up shows on Home.');
         }
@@ -36,10 +34,14 @@
         children: [],
         childId: null,
         reportTerm: null,
-        syllabusTerm: null
+        syllabusTerm: null,
+        newsFilter: 'all',
+        newsRead: null
     };
     // Screens that show one child's data (they need at least one linked child)
-    var NEEDS_CHILD = { home: true, report: true, syllabus: true };
+    var NEEDS_CHILD = { home: true, report: true, syllabus: true, news: true };
+    // Screens that cover all the children at once, so the child switcher is hidden on them
+    var ALL_CHILDREN = { news: true };
     var cache = {};
     var renderId = 0;
     var drawerOpen = false;
@@ -335,13 +337,14 @@
         state.childId = found ? found.id : (state.children[0] ? state.children[0].id : null);
     }
 
+    function syncSwitcher(route) {
+        switcher.hidden = state.children.length < 2 || !!ALL_CHILDREN[route];
+    }
+
     function renderSwitcher() {
         clear(switcher);
-        if (state.children.length < 2) {
-            switcher.hidden = true;
-            return;
-        }
-        switcher.hidden = false;
+        syncSwitcher(currentRoute());
+        if (state.children.length < 2) return;
         state.children.forEach(function (c) {
             var chip = el('button', 'pa-chip');
             chip.type = 'button';
@@ -389,6 +392,7 @@
         var route = currentRoute();
         var id = ++renderId;
         markActiveLinks(route);
+        syncSwitcher(route);
 
         var node;
         if (!state.children.length && NEEDS_CHILD[route]) {
@@ -588,7 +592,7 @@
         side.appendChild(upcoming);
 
         // Latest news
-        var news = section('Latest news');
+        var news = section('Latest news', 'See all', '#/news');
         var newsCard = el('div', 'pa-card');
         if (!d.news.length) newsCard.appendChild(emptyRow('No announcements yet.'));
         d.news.forEach(function (n) {
@@ -879,6 +883,186 @@
             panel.appendChild(el('p', 'pa-work-note', 'No details have been posted for this subject yet.'));
         }
         if (b.updated) panel.appendChild(el('p', 'pa-brief-foot', 'Updated ' + b.updated));
+    }
+
+    // ── News ───────────────────────────────────────────────────────────────────────────────────────────────
+
+    var NEWS_FILTERS = [['all', 'All'], ['school', 'School'], ['teacher', 'Teacher']];
+    var WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+
+    function renderNews() {
+        return cached('api/parent/get_news.php').then(buildNews);
+    }
+
+    function newsReadKey() {
+        return 'parentApp.read.' + (state.parent.email || '');
+    }
+
+    function saveNewsRead(items) {
+        // Keep only announcements still in the feed, so the saved list cannot grow for ever
+        var ids = items.filter(function (n) { return state.newsRead[n.id]; }).map(function (n) { return n.id; });
+        storeSet(newsReadKey(), JSON.stringify(ids));
+    }
+
+    /**
+     * Which announcements this parent has opened. It is kept in this browser, like the learner's announcements.
+     * On the first visit anything older than a week counts as read, so a new parent is not met by a long unread list.
+     */
+    function loadNewsRead(items) {
+        if (state.newsRead) return state.newsRead;
+        var saved = null;
+        try { saved = JSON.parse(storeGet(newsReadKey())); } catch (e) { saved = null; }
+        state.newsRead = {};
+        if (Array.isArray(saved)) {
+            saved.forEach(function (id) { state.newsRead[id] = true; });
+        } else {
+            var cutoff = Date.now() - WEEK_MS;
+            items.forEach(function (n) {
+                if (n.ts * 1000 < cutoff) state.newsRead[n.id] = true;
+            });
+            saveNewsRead(items);
+        }
+        return state.newsRead;
+    }
+
+    function buildNews(d) {
+        if (!d.items.length) {
+            return stateCard(
+                'No news yet',
+                'Announcements from the school and from your child’s teachers will appear here.'
+            );
+        }
+
+        var read = loadNewsRead(d.items);
+        var root = document.createElement('div');
+        var rows = [];
+
+        // Title, unread count and the All / School / Teacher buttons
+        var head = el('div', 'pa-page-head');
+        var titleBox = el('div');
+        var sub = el('p', 'pa-news-sub');
+        var subText = el('span');
+        var markAll = el('button', 'pa-link-btn', 'Mark all as read');
+        markAll.type = 'button';
+        append(sub, subText, markAll);
+        append(titleBox, el('h1', 'pa-h1', 'News'), sub);
+
+        var filters = el('div', 'pa-terms');
+        filters.setAttribute('role', 'group');
+        filters.setAttribute('aria-label', 'Show');
+        var filterButtons = NEWS_FILTERS.map(function (f) {
+            var b = el('button', 'pa-term', f[1]);
+            b.type = 'button';
+            b.addEventListener('click', function () {
+                if (state.newsFilter === f[0]) return;
+                state.newsFilter = f[0];
+                drawList();
+            });
+            filters.appendChild(b);
+            return b;
+        });
+        append(head, titleBox, filters);
+        root.appendChild(head);
+
+        var card = el('div', 'pa-card');
+        root.appendChild(card);
+        if (d.more) {
+            root.appendChild(el('p', 'pa-foot', 'Showing the latest ' + d.items.length + ' announcements.'));
+        }
+
+        function unreadCount() {
+            return d.items.filter(function (n) { return !read[n.id]; }).length;
+        }
+
+        /** Dots, bold titles, the count and the Mark all button follow what has been read */
+        function syncUnread() {
+            var unread = unreadCount();
+            subText.textContent = unread ? unread + ' unread' : 'You are all caught up';
+            markAll.hidden = unread === 0;
+            rows.forEach(function (r) { r.sync(); });
+        }
+
+        function markRead(n) {
+            if (read[n.id]) return;
+            read[n.id] = true;
+            saveNewsRead(d.items);
+            syncUnread();
+        }
+
+        markAll.addEventListener('click', function () {
+            d.items.forEach(function (n) { read[n.id] = true; });
+            saveNewsRead(d.items);
+            syncUnread();
+        });
+
+        function drawList() {
+            var f = state.newsFilter;
+            filterButtons.forEach(function (b, i) {
+                b.setAttribute('aria-pressed', NEWS_FILTERS[i][0] === f ? 'true' : 'false');
+            });
+            clear(card);
+            rows = [];
+            var shown = d.items.filter(function (n) { return f === 'all' || n.kind === f; });
+            if (!shown.length) {
+                card.appendChild(emptyRow(f === 'school' ? 'No school announcements yet.' : 'No teacher announcements yet.'));
+            }
+            shown.forEach(function (n) {
+                var item = buildNewsItem(n, read, markRead);
+                rows.push(item);
+                card.appendChild(item.node);
+            });
+            syncUnread();
+        }
+
+        drawList();
+        return root;
+    }
+
+    function buildNewsItem(n, read, markRead) {
+        var wrap = el('div', 'pa-item-wrap');
+        var panelId = 'paNews' + n.id;
+
+        var btn = el('button', 'pa-item');
+        btn.type = 'button';
+        btn.setAttribute('aria-expanded', 'false');
+        btn.setAttribute('aria-controls', panelId);
+
+        var dot = el('span', 'pa-dot');
+        var main = el('span', 'pa-item-main');
+        var meta = el('span', 'pa-item-meta');
+        var who = n.kind === 'teacher' && n.for ? n.sender + ' · for ' + n.for : n.sender;
+        append(meta, el('span', 'pa-tag' + (n.kind === 'teacher' ? ' is-teacher' : ''), n.tag), el('span', null, [who, n.date].filter(Boolean).join(' · ')));
+        append(main, el('span', 'pa-item-title', n.title), meta);
+        append(btn, dot, main, append(el('span', 'pa-chev'), chevron()));
+
+        var panel = el('div', 'pa-item-panel');
+        panel.id = panelId;
+        panel.hidden = true;
+        panel.appendChild(el('p', 'pa-item-body', n.message || 'This announcement has no message.'));
+        var foot = ['Posted ' + [n.date, n.time].filter(Boolean).join(' at ')];
+        if (n.edited) foot.push('Edited ' + n.edited);
+        panel.appendChild(el('p', 'pa-brief-foot', foot.join(' · ')));
+
+        btn.addEventListener('click', function () {
+            var open = btn.getAttribute('aria-expanded') === 'true';
+            btn.setAttribute('aria-expanded', open ? 'false' : 'true');
+            panel.hidden = open;
+            if (!open) markRead(n);
+        });
+
+        // Unread: a dot, a bolder title and a hidden word for screen readers
+        var sr = el('span', 'pa-sr', 'Unread. ');
+        function sync() {
+            var unread = !read[n.id];
+            dot.classList.toggle('is-on', unread);
+            btn.classList.toggle('is-unread', unread);
+            if (unread && !sr.parentNode) main.insertBefore(sr, main.firstChild);
+            if (!unread && sr.parentNode) main.removeChild(sr);
+        }
+        sync();
+
+        append(wrap, btn, panel);
+        return { node: wrap, sync: sync };
     }
 
     // ── Start ──────────────────────────────────────────────────────────────────────────────────────────────
