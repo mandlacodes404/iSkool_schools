@@ -24,9 +24,7 @@
         report: renderReport,
         syllabus: renderSyllabus,
         news: renderNews,
-        events: function () {
-            return renderSoon('Events', 'Tests, due dates and school events will be listed here. For now, what is coming up shows on Home.');
-        }
+        events: renderEvents
     };
 
     var state = {
@@ -36,12 +34,13 @@
         reportTerm: null,
         syllabusTerm: null,
         newsFilter: 'all',
-        newsRead: null
+        newsRead: null,
+        eventsFilter: 'all'
     };
     // Screens that show one child's data (they need at least one linked child)
-    var NEEDS_CHILD = { home: true, report: true, syllabus: true, news: true };
+    var NEEDS_CHILD = { home: true, report: true, syllabus: true, news: true, events: true };
     // Screens that cover all the children at once, so the child switcher is hidden on them
-    var ALL_CHILDREN = { news: true };
+    var ALL_CHILDREN = { news: true, events: true };
     var cache = {};
     var renderId = 0;
     var drawerOpen = false;
@@ -476,10 +475,6 @@
         );
     }
 
-    function renderSoon(title, text) {
-        return stateCard(title, text);
-    }
-
     function eyebrow(child, term) {
         return [child.name, child.class_name, term ? 'Term ' + term : null].filter(Boolean).join(' · ');
     }
@@ -576,7 +571,7 @@
         main.appendChild(subjects);
 
         // Coming up
-        var upcoming = section('Coming up');
+        var upcoming = section('Coming up', 'See all', '#/events');
         var upCard = el('div', 'pa-card');
         if (!d.upcoming.length) upCard.appendChild(emptyRow('Nothing is due in the next few weeks.'));
         d.upcoming.forEach(function (u) {
@@ -1063,6 +1058,102 @@
 
         append(wrap, btn, panel);
         return { node: wrap, sync: sync };
+    }
+
+    // ── Events ─────────────────────────────────────────────────────────────────────────────────────────────
+
+    var EVENT_FILTERS = [['all', 'All'], ['work', 'Work'], ['school', 'School']];
+
+    function renderEvents() {
+        return cached('api/parent/get_events.php').then(buildEvents);
+    }
+
+    function buildEvents(d) {
+        if (!d.items.length) {
+            return stateCard(
+                'Nothing coming up',
+                'Tests, quizzes, assignment due dates and school events for your ' + (d.children > 1 ? 'children' : 'child') + ' will appear here.'
+            );
+        }
+
+        var root = document.createElement('div');
+
+        // Title and the All / Work / School buttons
+        var head = el('div', 'pa-page-head');
+        var titleBox = el('div');
+        append(titleBox, el('h1', 'pa-h1', 'Events'), el('p', 'pa-sub', 'Coming up for your ' + (d.children > 1 ? 'children' : 'child')));
+        var filters = el('div', 'pa-terms');
+        filters.setAttribute('role', 'group');
+        filters.setAttribute('aria-label', 'Show');
+        var filterButtons = EVENT_FILTERS.map(function (f) {
+            var b = el('button', 'pa-term', f[1]);
+            b.type = 'button';
+            b.addEventListener('click', function () {
+                if (state.eventsFilter === f[0]) return;
+                state.eventsFilter = f[0];
+                drawList();
+            });
+            filters.appendChild(b);
+            return b;
+        });
+        append(head, titleBox, filters);
+        root.appendChild(head);
+
+        var list = el('div', 'pa-ev-list');
+        root.appendChild(list);
+        if (d.more) {
+            root.appendChild(el('p', 'pa-foot', 'Showing the next ' + d.items.length + ' items.'));
+        }
+
+        function drawList() {
+            var f = state.eventsFilter;
+            filterButtons.forEach(function (b, i) {
+                b.setAttribute('aria-pressed', EVENT_FILTERS[i][0] === f ? 'true' : 'false');
+            });
+            clear(list);
+            var shown = d.items.filter(function (n) { return f === 'all' || n.section === f; });
+            if (!shown.length) {
+                var empty = el('div', 'pa-card');
+                empty.appendChild(emptyRow(f === 'work'
+                    ? 'No tests, quizzes or due dates coming up.'
+                    : 'No school events or holidays coming up.'));
+                list.appendChild(empty);
+                return;
+            }
+            // One heading and card for each run of items with the same heading (Today, Tomorrow, This week...)
+            var group = null;
+            var card = null;
+            shown.forEach(function (n) {
+                if (n.group !== group) {
+                    group = n.group;
+                    var sec = section(group);
+                    card = el('div', 'pa-card');
+                    sec.appendChild(card);
+                    list.appendChild(sec);
+                }
+                card.appendChild(buildEventRow(n));
+            });
+        }
+
+        drawList();
+        return root;
+    }
+
+    function buildEventRow(n) {
+        var row = el('div', 'pa-row pa-up-row pa-ev-row' + (n.done ? ' is-done' : ''));
+        var date = el('div', 'pa-date');
+        append(date, el('span', 'pa-dow', n.dow), el('span', 'pa-day', n.day));
+
+        var text = el('div', 'pa-up-text');
+        var meta = el('span', 'pa-ev-meta');
+        var tagClass = 'pa-tag' + (n.section === 'work' ? ' is-work' : '');
+        var detail = [n.subject, n.time, n.for ? 'for ' + n.for : ''].filter(Boolean).join(' · ');
+        append(meta, el('span', tagClass, n.kind));
+        if (detail) meta.appendChild(el('span', null, detail));
+        append(text, el('span', 'pa-title', n.title), meta);
+
+        append(row, date, text);
+        return row;
     }
 
     // ── Start ──────────────────────────────────────────────────────────────────────────────────────────────

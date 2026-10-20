@@ -285,6 +285,134 @@ final class ParentAppFunctionsTest extends TestCase
         $this->assertSame('<script>x</script>', $item['message']);
     }
 
+    public function test_events_are_grouped_by_how_soon_they_are(): void
+    {
+        $today = '2026-10-20'; // a Tuesday
+        $this->assertSame('Earlier', parent_event_group('2026-10-19', $today));
+        $this->assertSame('Today', parent_event_group('2026-10-20', $today));
+        $this->assertSame('Today', parent_event_group('2026-10-20 23:30:00', $today));
+        $this->assertSame('Tomorrow', parent_event_group('2026-10-21', $today));
+        $this->assertSame('This week', parent_event_group('2026-10-22', $today));
+        $this->assertSame('This week', parent_event_group('2026-10-25', $today));   // the Sunday
+        $this->assertSame('Next week', parent_event_group('2026-10-26', $today));   // the Monday after
+        $this->assertSame('Next week', parent_event_group('2026-11-01', $today));
+        $this->assertSame('November', parent_event_group('2026-11-02', $today));
+        $this->assertSame('December', parent_event_group('2026-12-15', $today));
+        $this->assertSame('January 2027', parent_event_group('2027-01-05', $today));
+        $this->assertSame('', parent_event_group('not a date', $today));
+
+        // On a Sunday the rest of the week is just "Tomorrow" and then next week starts on Tuesday
+        $this->assertSame('Tomorrow', parent_event_group('2026-10-26', '2026-10-25'));
+        $this->assertSame('Next week', parent_event_group('2026-10-27', '2026-10-25'));
+        // On a Monday "this week" runs to Sunday
+        $this->assertSame('This week', parent_event_group('2026-10-25', '2026-10-19'));
+        $this->assertSame('Next week', parent_event_group('2026-10-26', '2026-10-19'));
+    }
+
+    public function test_events_are_work_or_school(): void
+    {
+        foreach (['assignment', 'quiz', 'test', 'exam'] as $c) {
+            $this->assertSame('work', parent_event_section($c), $c);
+        }
+        foreach (['holiday', 'event', 'other', 'something else'] as $c) {
+            $this->assertSame('school', parent_event_section($c), $c);
+        }
+    }
+
+    private function upcoming_row(string $date, string $title, string $category = 'assignment', string $kind = 'Assignment due', ?string $subject = 'Mathematics', bool $done = false): array
+    {
+        return ['date' => $date, 'title' => $title, 'kind' => $kind, 'subject' => $subject, 'category' => $category, 'done' => $done];
+    }
+
+    public function test_event_item_shows_a_time_only_when_one_was_set(): void
+    {
+        $timed = parent_event_item($this->upcoming_row('2026-10-22 12:00:00', 'Worksheet'), ['Thandi'], '2026-10-20');
+        $this->assertSame('12:00', $timed['time']);
+        $this->assertSame('Thu', $timed['dow']);
+        $this->assertSame('22', $timed['day']);
+        $this->assertSame('2026-10-22', $timed['date']);
+        $this->assertSame('This week', $timed['group']);
+        $this->assertSame('work', $timed['section']);
+        $this->assertSame('Mathematics', $timed['subject']);
+        $this->assertSame('Thandi', $timed['for']);
+
+        $midnight = parent_event_item($this->upcoming_row('2026-10-22 00:00:00', 'Worksheet'), [], '2026-10-20');
+        $this->assertSame('', $midnight['time']);
+        $this->assertSame('', $midnight['for']);
+
+        $dateOnly = parent_event_item($this->upcoming_row('2026-10-26', 'Heritage Day', 'holiday', 'Holiday', null), ['Thandi'], '2026-10-20');
+        $this->assertSame('', $dateOnly['time']);
+        $this->assertSame('school', $dateOnly['section']);
+        $this->assertNull($dateOnly['subject']);
+
+        $blank = parent_event_item($this->upcoming_row('2026-10-26', '  ', 'event', 'School event', '  '), [], '2026-10-20');
+        $this->assertSame('Event', $blank['title']);
+        $this->assertNull($blank['subject']);
+    }
+
+    public function test_events_for_several_children_merge_when_they_are_the_same_thing(): void
+    {
+        $camp = $this->upcoming_row('2026-10-30', 'Grade 7 camp', 'event', 'School event', null);
+        $feed = parent_build_events([
+            ['name' => 'Zinhle', 'items' => [$camp, $this->upcoming_row('2026-10-22 12:00:00', 'Worksheet')]],
+            ['name' => 'Zodwa', 'items' => [$camp, $this->upcoming_row('2026-10-22 12:00:00', 'Worksheet')]],
+        ], '2026-10-20', 10);
+        $this->assertCount(2, $feed['items']);
+        $this->assertSame(['Worksheet', 'Grade 7 camp'], array_column($feed['items'], 'title'));
+        $this->assertSame(['Zinhle and Zodwa', 'Zinhle and Zodwa'], array_column($feed['items'], 'for'));
+    }
+
+    public function test_an_assignment_one_child_handed_in_and_the_other_did_not_stays_two_items(): void
+    {
+        $feed = parent_build_events([
+            ['name' => 'Zinhle', 'items' => [$this->upcoming_row('2026-10-22 12:00:00', 'Worksheet', 'assignment', 'Assignment handed in', 'Mathematics', true)]],
+            ['name' => 'Zodwa', 'items' => [$this->upcoming_row('2026-10-22 12:00:00', 'Worksheet')]],
+        ], '2026-10-20', 10);
+        $this->assertCount(2, $feed['items']);
+        $by = [];
+        foreach ($feed['items'] as $i) {
+            $by[$i['for']] = $i;
+        }
+        $this->assertTrue($by['Zinhle']['done']);
+        $this->assertSame('Assignment handed in', $by['Zinhle']['kind']);
+        $this->assertFalse($by['Zodwa']['done']);
+        $this->assertSame('Assignment due', $by['Zodwa']['kind']);
+    }
+
+    public function test_events_are_sorted_by_date_then_all_day_first_then_title(): void
+    {
+        $feed = parent_build_events([['name' => 'Thandi', 'items' => [
+            $this->upcoming_row('2026-10-23 08:00:00', 'Quiz B', 'quiz', 'Quiz'),
+            $this->upcoming_row('2026-10-23', 'Test', 'test', 'Test', null),
+            $this->upcoming_row('2026-10-22 12:00:00', 'zebra task'),
+            $this->upcoming_row('2026-10-22 12:00:00', 'Apple task'),
+            $this->upcoming_row('2026-10-21', 'Sports day', 'event', 'School event', null),
+        ]]], '2026-10-20', 10);
+        $this->assertSame(['Sports day', 'Apple task', 'zebra task', 'Test', 'Quiz B'], array_column($feed['items'], 'title'));
+    }
+
+    public function test_events_are_capped_and_say_when_later_ones_were_left_out(): void
+    {
+        $rows = [];
+        for ($i = 1; $i <= 5; $i++) {
+            $rows[] = $this->upcoming_row('2026-10-2' . $i, 'Item ' . $i, 'event', 'School event', null);
+        }
+        $feed = parent_build_events([['name' => 'Thandi', 'items' => $rows]], '2026-10-20', 3);
+        $this->assertSame(['Item 1', 'Item 2', 'Item 3'], array_column($feed['items'], 'title'));
+        $this->assertTrue($feed['more']);
+        $this->assertFalse(parent_build_events([['name' => 'Thandi', 'items' => $rows]], '2026-10-20', 5)['more']);
+        $this->assertSame(['items' => [], 'more' => false], parent_build_events([], '2026-10-20', 5));
+        $this->assertSame(['items' => [], 'more' => false], parent_build_events([['name' => 'Thandi', 'items' => []]], '2026-10-20', 5));
+    }
+
+    public function test_event_text_is_kept_as_plain_text(): void
+    {
+        $item = parent_event_item($this->upcoming_row('2026-10-22', '<b>Hi</b>', 'event', 'School event', '<i>x</i>'), ['<u>A</u>'], '2026-10-20');
+        $this->assertSame('<b>Hi</b>', $item['title']);
+        $this->assertSame('<i>x</i>', $item['subject']);
+        $this->assertSame('<u>A</u>', $item['for']);
+    }
+
     public function test_summary_without_marks_says_so_and_does_not_guess(): void
     {
         $s = parent_build_summary('Thandi', null, null, []);
