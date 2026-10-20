@@ -107,7 +107,7 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
     <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_menu.css?v=1.1">
     <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_settings.css?v=1.1">
     <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_settings.css?v=1.4">
-    <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_light_mode.css?v=1.7">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_light_mode.css?v=1.8">
     <link rel="stylesheet" href="assets/css/splash_light.css?v=<?= (int) @filemtime(__DIR__ . '/assets/css/splash_light.css') ?>">
     <script>
     // Desktop sidebar: restore the saved collapsed state BEFORE first paint (no flash).
