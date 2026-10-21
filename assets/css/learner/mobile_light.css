@@ -1,0 +1,61 @@
+/* assets/css/learner/mobile_light.css
+   The shell around a light phone page: page background, header, bottom nav and the header's profile dropdown.
+   Phones only (max-width: 768px). Load it LAST, after mobile_menu.css, mobile_settings.css and assignments.css.
+
+   Light is switched on by <html data-learner-mobile-theme="light"> (mobile_theme.js). While pages are being
+   converted one by one, this file only takes effect when a converted page is on screen: the gate looks for the
+   page's own markup, so every other page stays exactly as it is today. To convert the next page, add a marker
+   for it to the :has( ) list (in every rule below) and write its light block in its own css.
+
+   Pages in the gate now: Settings (.ms) and Assignments ([class*="las-mobile"]).
+   The menu (drawer, search, account sheet) is not gated: it is light everywhere, see mobile_menu.css.
+
+   Why so many !important: learner_dashboard.php writes colours straight onto these elements (the header's
+   background when it scrolls or the menu opens, the nav tab icon boxes), and an inline style only loses to
+   an !important rule. */
+
+@media (max-width: 768px) {
+
+/* -- page -- */
+html[data-learner-mobile-theme="light"]:has(.ms, [class*="las-mobile"]) { color-scheme: light; }
+html[data-learner-mobile-theme="light"]:has(.ms, [class*="las-mobile"]) body,
+html[data-learner-mobile-theme="light"]:has(.ms, [class*="las-mobile"]) body .main-content,
+html[data-learner-mobile-theme="light"]:has(.ms, [class*="las-mobile"]) body #api-content-area { background: #faf9f5; }
+
+/* -- header -- */
+html[data-learner-mobile-theme="light"]:has(.ms, [class*="las-mobile"]) .main-header { background: #faf9f5 !important; color: #282924; }
+html[data-learner-mobile-theme="light"]:has(.ms, [class*="las-mobile"]) .main-header.header-scrolled { border-bottom: 1px solid #dfded8 !important; }
+html[data-learner-mobile-theme="light"]:has(.ms, [class*="las-mobile"]) .main-header .school-name,
+html[data-learner-mobile-theme="light"]:has(.ms, [class*="las-mobile"]) .main-header #headerTitle { color: #282924; }
+html[data-learner-mobile-theme="light"]:has(.ms, [class*="las-mobile"]) .main-header #mobileToggle,
+html[data-learner-mobile-theme="light"]:has(.ms, [class*="las-mobile"]) .main-header #headerBackBtn,
+html[data-learner-mobile-theme="light"]:has(.ms, [class*="las-mobile"]) .main-header.mobile-detail-mode #headerBackBtn { color: #282924 !important; }
+html[data-learner-mobile-theme="light"]:has(.ms, [class*="las-mobile"]) .main-header #headerLogo { border-color: #dfded8 !important; }
+html[data-learner-mobile-theme="light"]:has(.ms, [class*="las-mobile"]) .main-header .school-logo-initials { background: #ffffff; color: #53544e; }
+html[data-learner-mobile-theme="light"]:has(.ms, [class*="las-mobile"]) .main-header .top-nav-avatar { background: #e9e8e2; }
+html[data-learner-mobile-theme="light"]:has(.ms, [class*="las-mobile"]) .main-header .top-nav-avatar .initials-sm { color: #555650; }
+
+/* -- the profile dropdown under the header avatar -- */
+html[data-learner-mobile-theme="light"]:has(.ms, [class*="las-mobile"]) .avatar-dropdown { background: #ffffff; border: 1px solid #dfded8; box-shadow: 0 8px 24px rgba(31,32,29,.14); }
+html[data-learner-mobile-theme="light"]:has(.ms, [class*="las-mobile"]) .avatar-dropdown-header { border-bottom-color: #ebeae5; }
+html[data-learner-mobile-theme="light"]:has(.ms, [class*="las-mobile"]) .avatar-dropdown-name { color: #282924; }
+html[data-learner-mobile-theme="light"]:has(.ms, [class*="las-mobile"]) .avatar-dropdown-email { color: #73746d; }
+html[data-learner-mobile-theme="light"]:has(.ms, [class*="las-mobile"]) .avatar-dropdown-item { color: #53544e; }
+html[data-learner-mobile-theme="light"]:has(.ms, [class*="las-mobile"]) .avatar-dropdown-item:hover { background: rgba(38,39,35,.055); color: #282924; }
+html[data-learner-mobile-theme="light"]:has(.ms, [class*="las-mobile"]) .avatar-dropdown-item.danger { color: #bd4a43; }
+html[data-learner-mobile-theme="light"]:has(.ms, [class*="las-mobile"]) .avatar-dropdown-item.danger:hover { background: rgba(189,74,67,.08); }
+
+/* -- bottom nav: plain tabs, no coloured icon boxes; the open tab is dark, the rest grey -- */
+html[data-learner-mobile-theme="light"]:has(.ms, [class*="las-mobile"]) #mobileBottomNav.nav-scrolled {
+  background: rgba(250,249,245,.88) !important; border-top: 1px solid #dfded8 !important; box-shadow: 0 -4px 20px rgba(31,32,29,.08) !important;
+}
+html[data-learner-mobile-theme="light"]:has(.ms, [class*="las-mobile"]) #mobileBottomNav a { color: #73746d; }
+html[data-learner-mobile-theme="light"]:has(.ms, [class*="las-mobile"]) #mobileBottomNav a.active,
+html[data-learner-mobile-theme="light"]:has(.ms, [class*="las-mobile"]) #mobileBottomNav a:hover { color: #282924; }
+html[data-learner-mobile-theme="light"]:has(.ms, [class*="las-mobile"]) #mobileBottomNav .lh-nav-box { background: transparent !important; border-color: transparent !important; }
+html[data-learner-mobile-theme="light"]:has(.ms, [class*="las-mobile"]) #mobileBottomNav a.active .lh-nav-box,
+html[data-learner-mobile-theme="light"]:has(.ms, [class*="las-mobile"]) #mobileBottomNav a:hover .lh-nav-box { background: rgba(38,39,35,.075) !important; }
+html[data-learner-mobile-theme="light"]:has(.ms, [class*="las-mobile"]) #mobileBottomNav .lh-nav-box svg { stroke: currentColor; }
+html[data-learner-mobile-theme="light"]:has(.ms, [class*="las-mobile"]) #mobileBottomNav .dmm-badge { border-color: #faf9f5; }
+
+}
