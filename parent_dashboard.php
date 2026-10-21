@@ -41,7 +41,7 @@ function pa_e($value): string
     return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
 }
 
-// The five tabs. Home and Report are built; the others open a short "coming soon" page for now.
+// The five tabs. Home, Report and Syllabus are built; News and Events open a short "coming soon" page for now.
 $nav = [
     ['home',     'Home',     '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/>'],
     ['report',   'Report',   '<path d="M4 20h16"/><path d="M7 20v-9"/><path d="M12 20V5"/><path d="M17 20v-6"/>'],
@@ -75,7 +75,7 @@ function pa_icon(string $paths, int $size = 20, string $width = '1.8'): string
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Geist:wght@400;500;600&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/parent/parent_app.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/parent/parent_app.css?v=1.1">
 </head>
 <body>
 <div class="pa" id="parentApp">
@@ -166,6 +166,6 @@ function pa_icon(string $paths, int $size = 20, string $width = '1.8'): string
     </aside>
 </div>
 
-<script src="assets/js/parent/parent_app.js?v=1.1"></script>
+<script src="assets/js/parent/parent_app.js?v=1.2"></script>
 </body>
 </html>

@@ -129,6 +129,39 @@ final class ParentAppFunctionsTest extends TestCase
         $this->assertSame([], parent_merge_upcoming($items, 0));
     }
 
+    public function test_topics_become_a_clean_list_of_strings(): void
+    {
+        $this->assertSame(['Algebra', 'Trigonometry'], parent_parse_topics('["Algebra", "  Trigonometry  ", "", "   "]'));
+        // Numbers are kept as text; nulls, booleans and nested values are dropped
+        $this->assertSame(['1', '2.5'], parent_parse_topics('[1, 2.5, null, true, [3], {"a": 1}]'));
+        $this->assertSame([], parent_parse_topics(''));
+        $this->assertSame([], parent_parse_topics(null));
+        $this->assertSame([], parent_parse_topics('not json'));
+        $this->assertSame([], parent_parse_topics('"just a string"'));
+        $this->assertSame([], parent_parse_topics('{"a": "b"}'));
+        // Markup is kept as plain text for the page to show literally
+        $this->assertSame(['<b>Bold</b>'], parent_parse_topics('["<b>Bold</b>"]'));
+    }
+
+    public function test_assessments_keep_only_named_rows_with_a_positive_weight(): void
+    {
+        $json = '[{"type":"Tests","weight":40},{"type":" Exam ","weight":"50"},{"type":"Task","weight":7.5},'
+              . '{"type":"","weight":10},{"type":"Zero","weight":0},{"type":"Negative","weight":-5},{"type":"NoWeight"},'
+              . '{"weight":20},{"type":["x"],"weight":10},"junk",null]';
+        $this->assertSame(
+            [
+                ['type' => 'Tests', 'weight' => 40],
+                ['type' => 'Exam', 'weight' => 50],
+                ['type' => 'Task', 'weight' => 7.5],
+            ],
+            parent_parse_assessments($json)
+        );
+        $this->assertSame([], parent_parse_assessments(''));
+        $this->assertSame([], parent_parse_assessments(null));
+        $this->assertSame([], parent_parse_assessments('nonsense'));
+        $this->assertSame([], parent_parse_assessments('{"type":"Tests","weight":100}'));
+    }
+
     public function test_summary_without_marks_says_so_and_does_not_guess(): void
     {
         $s = parent_build_summary('Thandi', null, null, []);

@@ -1,6 +1,7 @@
 <?php
 /**
- * Helpers for the parent app (Home and Report). Used by api/parent/get_children.php, get_home.php and get_report.php.
+ * Helpers for the parent app (Home, Report and Syllabus). Used by api/parent/get_children.php, get_home.php, get_report.php
+ * and get_syllabus.php.
  *
  * Part 1 is pure functions (no database, no session) so they are easy to test.
  * Part 2 reads the database. Every read there is scoped to ONE learner, and the endpoints only call it after
@@ -233,6 +234,55 @@ function parent_build_summary(string $first_name, ?int $avg, ?int $prev_avg, arr
         'headline' => $headline,
         'note'     => implode(' ', array_slice($sentences, 0, 2)),
     ];
+}
+
+/**
+ * Topics from a subject brief's JSON column as a clean list of non-empty strings. Anything that is not a list
+ * (empty, broken JSON, a number) gives an empty list, so one bad row never breaks the whole page.
+ */
+function parent_parse_topics($json): array
+{
+    $list = json_decode((string) $json, true);
+    if (!is_array($list) || !array_is_list($list)) {
+        return [];
+    }
+    $out = [];
+    foreach ($list as $topic) {
+        if (!is_string($topic) && !is_int($topic) && !is_float($topic)) {
+            continue;
+        }
+        $text = trim((string) $topic);
+        if ($text !== '') {
+            $out[] = $text;
+        }
+    }
+    return $out;
+}
+
+/**
+ * Assessment weighting from a subject brief's JSON column: a list of ['type' => string, 'weight' => number].
+ * Rows with no name or a weight of 0 or less are dropped (the teacher's form does not allow them either).
+ */
+function parent_parse_assessments($json): array
+{
+    $list = json_decode((string) $json, true);
+    if (!is_array($list) || !array_is_list($list)) {
+        return [];
+    }
+    $out = [];
+    foreach ($list as $item) {
+        if (!is_array($item) || !isset($item['type']) || !is_scalar($item['type'])) {
+            continue;
+        }
+        $type = trim((string) $item['type']);
+        $weight = $item['weight'] ?? null;
+        if ($type === '' || !is_numeric($weight) || (float) $weight <= 0) {
+            continue;
+        }
+        $w = (float) $weight;
+        $out[] = ['type' => $type, 'weight' => ($w == floor($w)) ? (int) $w : round($w, 1)];
+    }
+    return $out;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -544,4 +594,52 @@ function parent_fetch_news(mysqli $conn, string $learner_email, int $year_id, st
     $stmt->close();
 
     return $news;
+}
+
+/**
+ * The subject briefs (syllabus) posted for the learner's class this year, term by term, then by subject.
+ * Same source as the learner's Syllabus page (api/learner/get_sbo.php). A brief whose teacher account is gone
+ * still shows, with "Teacher" in place of the name.
+ *
+ * @return array<int, array{id: int, term: int, subject: string, teacher: string, topics: array, assessments: array, note: ?string, updated: string}>
+ */
+function parent_fetch_syllabus(mysqli $conn, string $learner_email, int $year_id): array
+{
+    $stmt = $conn->prepare(
+        "SELECT sb.id, sb.term_number, sb.subject_name, sb.topics, sb.assessments, sb.notes, sb.updated_at,
+                u.title AS t_title, u.surname AS t_surname
+         FROM subject_briefs sb
+         LEFT JOIN users u ON u.email = sb.created_by AND u.role = 'teacher'
+         WHERE sb.academic_year_id = ?
+           AND sb.class_id IN (
+                SELECT cs.class_id FROM class_students cs
+                WHERE cs.student_email = ? AND cs.academic_year_id = ?)
+         ORDER BY sb.term_number ASC, sb.subject_name ASC"
+    );
+    $stmt->bind_param('isi', $year_id, $learner_email, $year_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $briefs = [];
+    while ($row = $result->fetch_assoc()) {
+        $term = (int) $row['term_number'];
+        if ($term < 1 || $term > 4) {
+            continue;
+        }
+        $subject = trim((string) $row['subject_name']);
+        $note = trim((string) ($row['notes'] ?? ''));
+        $briefs[] = [
+            'id'          => (int) $row['id'],
+            'term'        => $term,
+            'subject'     => $subject !== '' ? $subject : 'Subject',
+            'teacher'     => parent_teacher_display($row['t_title'], $row['t_surname']),
+            'topics'      => parent_parse_topics($row['topics']),
+            'assessments' => parent_parse_assessments($row['assessments']),
+            'note'        => $note !== '' ? $note : null,
+            'updated'     => parent_date_parts((string) $row['updated_at'])['label'],
+        ];
+    }
+    $stmt->close();
+
+    return $briefs;
 }
