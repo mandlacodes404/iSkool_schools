@@ -41,7 +41,7 @@ function pa_e($value): string
     return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
 }
 
-// The five tabs: Home, Report, Syllabus, News and Events.
+// The five tabs: Home, Report, Syllabus, News and Events. "Add a child" is not a tab; it sits in the account menus.
 $nav = [
     ['home',     'Home',     '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/>'],
     ['report',   'Report',   '<path d="M4 20h16"/><path d="M7 20v-9"/><path d="M12 20V5"/><path d="M17 20v-6"/>'],
@@ -62,6 +62,7 @@ function pa_icon(string $paths, int $size = 20, string $width = '1.8'): string
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>iSkool Parent</title>
+    <meta name="csrf-token" content="<?= pa_e($_SESSION['csrf_token'] ?? '') ?>">
     <link rel="icon" href="icon.svg?v=1.4" type="image/svg+xml">
     <script>
         // Set the saved theme before anything paints, so there is no flash. Light is the default.
@@ -75,7 +76,7 @@ function pa_icon(string $paths, int $size = 20, string $width = '1.8'): string
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Geist:wght@400;500;600&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/parent/parent_app.css?v=1.3">
+    <link rel="stylesheet" href="assets/css/parent/parent_app.css?v=1.4">
 </head>
 <body>
 <div class="pa" id="parentApp">
@@ -160,12 +161,13 @@ function pa_icon(string $paths, int $size = 20, string $width = '1.8'): string
                     <span class="pa-account-role">Parent</span>
                 </span>
             </div>
+            <a class="pa-menu-item" href="#/add-child" data-route="add-child">Add a child</a>
             <button type="button" class="pa-menu-item" data-pa-theme></button>
             <a class="pa-menu-item pa-danger" href="logout.php">Sign out</a>
         </div>
     </aside>
 </div>
 
-<script src="assets/js/parent/parent_app.js?v=1.4"></script>
+<script src="assets/js/parent/parent_app.js?v=1.5"></script>
 </body>
 </html>

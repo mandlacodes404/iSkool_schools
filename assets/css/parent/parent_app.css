@@ -300,6 +300,30 @@ html[data-theme="dark"] .pa-chip[aria-pressed="true"] .pa-chip-av { background: 
 }
 .pa-loading { padding: 8px 2px; }
 
+/* ── Add a child ────────────────────────────────────────────────────────────────────────────────────────── */
+.pa-add-form { display: flex; flex-direction: column; align-items: flex-start; max-width: 520px; margin-top: 18px; }
+.pa-add-label { font-size: 13px; font-weight: var(--pa-w-mid); color: var(--pa-muted); }
+.pa-input {
+    width: 100%;
+    height: 48px;
+    margin-top: 6px;
+    padding: 0 14px;
+    border: 1px solid var(--pa-line-strong);
+    border-radius: 8px;
+    background: var(--pa-page);
+    color: var(--pa-text);
+    font: inherit;
+    font-size: 16px; /* 16px stops iPhones zooming in when the box is tapped */
+}
+.pa-input::placeholder { color: var(--pa-muted); }
+.pa-input:focus-visible { outline: 2px solid var(--pa-accent); outline-offset: 1px; border-color: var(--pa-accent); }
+.pa-add .pa-form-msg { margin-top: 10px; font-size: 14px; line-height: 1.5; color: var(--pa-soft); }
+.pa-add .pa-form-msg.is-error { color: var(--pa-down); }
+.pa-add .pa-form-note { margin-top: 16px; font-size: 13px; color: var(--pa-muted); }
+.pa-btn:disabled { opacity: .6; cursor: default; }
+.pa-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.pa-btn.is-ghost { background: transparent; color: var(--pa-text); border: 1px solid var(--pa-line-strong); }
+
 /* ── Home ───────────────────────────────────────────────────────────────────────────────────────────────── */
 .pa-hero {
     padding: 28px 30px;

@@ -161,6 +161,27 @@ final class SentinelSecurityTest extends TestCase
         $this->assertStringNotContainsString('document.write', $js);
     }
 
+    public function test_parent_app_add_child_sends_the_csrf_token_and_only_calls_the_redeem_endpoint(): void
+    {
+        $page = $this->source('parent_dashboard.php');
+        $this->assertStringContainsString('name="csrf-token"', $page);
+        $this->assertStringContainsString("\$_SESSION['csrf_token']", $page);
+
+        $js = $this->source('assets/js/parent/parent_app.js');
+        // The token goes in the body and in the header, as csrf_helper.php expects
+        $this->assertStringContainsString("body.append('csrf_token'", $js);
+        $this->assertStringContainsString("'X-CSRF-Token'", $js);
+        // The screen waits for the first load of the child list, so the redraw that follows cannot wipe a pasted link
+        $this->assertStringContainsString("route === 'add-child' && state.childrenStatus === 'loading'", $js);
+        // The one POST in the parent app is the redeem call
+        $this->assertSame(1, substr_count($js, "method: 'POST'"));
+        $this->assertSame(1, substr_count($js, "post('api/parent/redeem_parent_invite.php'"));
+        // The code taken from a pasted link has the shape the server accepts: 32 lowercase hex characters
+        $this->assertStringContainsString('[a-f0-9]{32}', $js);
+        $this->assertStringContainsString('toLowerCase()', $js);
+        $this->assertMatchesRegularExpression('/\[a-f0-9\]\{32\}/', $this->source('auth/parent_invite_functions.php'));
+    }
+
     public function test_old_parent_pages_are_gone(): void
     {
         $this->assertFileDoesNotExist(__DIR__ . '/../parent_grades.php');
