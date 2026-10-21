@@ -166,6 +166,6 @@ function pa_icon(string $paths, int $size = 20, string $width = '1.8'): string
     </aside>
 </div>
 
-<script src="assets/js/parent/parent_app.js?v=1.3"></script>
+<script src="assets/js/parent/parent_app.js?v=1.4"></script>
 </body>
 </html>
