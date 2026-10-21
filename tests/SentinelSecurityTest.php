@@ -8,6 +8,13 @@ final class SentinelSecurityTest extends TestCase
         return file_get_contents(__DIR__ . '/../' . $path);
     }
 
+    /** The text of one top-level function, from "function name(" to its closing brace at the start of a line. */
+    private function function_body(string $source, string $name): string
+    {
+        $this->assertSame(1, preg_match('/function ' . preg_quote($name, '/') . '\(.*?\n}\n/s', $source, $m), $name . ' not found');
+        return $m[0];
+    }
+
     public function test_edit_marks_scopes_quiz_to_authenticated_teacher_and_learner_to_quiz_class(): void
     {
         $source = $this->source('edit_marks.php');
@@ -105,7 +112,27 @@ final class SentinelSecurityTest extends TestCase
         $this->assertMatchesRegularExpression('/function parent_fetch_feed.*?WHERE pl\.parent_email = \?/s', $functions);
         $this->assertMatchesRegularExpression('/function parent_fetch_feed.*?a\.send_to = \'parents\'/s', $functions);
         // The feed rows that go to the browser carry names and text, not email addresses
-        $this->assertDoesNotMatchRegularExpression('/function parent_feed_item.*?\'[a-z_]*email\'\s*=>/s', $functions);
+        $this->assertDoesNotMatchRegularExpression('/[\'"][a-z_]*email[\'"]\s*=>/', $this->function_body($functions, 'parent_feed_item'));
+        $this->assertDoesNotMatchRegularExpression('/[\'"][a-z_]*email[\'"]\s*=>/', $this->function_body($functions, 'parent_build_feed'));
+    }
+
+    public function test_parent_events_is_parent_only_scoped_to_the_parents_links_and_sends_no_emails(): void
+    {
+        $source = $this->source('api/parent/get_events.php');
+        $this->assertStringContainsString("!== 'parent'", $source);
+        $this->assertStringContainsString('http_response_code(403)', $source);
+        // No child id or date is read from the request: the feed is built from the signed-in parent only
+        $this->assertStringNotContainsString('$_GET', $source);
+        $this->assertStringNotContainsString('$_POST', $source);
+        $this->assertStringContainsString('parent_fetch_events($conn, $parent_email', $source);
+
+        $functions = $this->source('auth/parent_app_functions.php');
+        // Learners come only from this parent's links
+        $this->assertMatchesRegularExpression('/function parent_linked_learners.*?WHERE pl\.parent_email = \?/s', $functions);
+        $this->assertMatchesRegularExpression('/function parent_fetch_events.*?parent_linked_learners\(\$conn, \$parent_email\)/s', $functions);
+        // The items that go to the browser carry names and text, not email addresses
+        $this->assertDoesNotMatchRegularExpression('/[\'"][a-z_]*email[\'"]\s*=>/', $this->function_body($functions, 'parent_event_item'));
+        $this->assertDoesNotMatchRegularExpression('/[\'"][a-z_]*email[\'"]\s*=>/', $this->function_body($functions, 'parent_build_events'));
     }
 
     public function test_parent_app_only_shows_published_marks_and_never_sends_learner_emails(): void
@@ -118,7 +145,7 @@ final class SentinelSecurityTest extends TestCase
         $this->assertMatchesRegularExpression('/function parent_find_child.*?pl\.parent_email = \?/s', $functions);
 
         // The children list that goes to the browser carries ids and names, not learner emails
-        $this->assertDoesNotMatchRegularExpression('/function parent_list_children.*?\'email\'\s*=>/s', $functions);
+        $this->assertDoesNotMatchRegularExpression('/[\'"][a-z_]*email[\'"]\s*=>/', $this->function_body($functions, 'parent_list_children'));
     }
 
     public function test_parent_app_page_is_parent_only_and_does_not_put_data_into_html_unescaped(): void
