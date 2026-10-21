@@ -122,6 +122,56 @@ final class SentinelSecurityTest extends TestCase
         $this->assertFileDoesNotExist(__DIR__ . '/../parent_grades.php');
     }
 
+    public function test_parent_app_says_so_when_the_school_has_no_current_year(): void
+    {
+        // Linked children are still listed, so the page does not claim a parent has none
+        $children = $this->source('api/parent/get_children.php');
+        $this->assertStringNotContainsString('$year_id > 0 ?', $children);
+        $this->assertStringContainsString('parent_list_children($conn, $parent_email, $year_id)', $children);
+
+        // Home, Report and Syllabus give a code the page recognises, instead of a message that looks like a network error,
+        // and only after the child has been checked (so nobody can probe other children through it)
+        foreach (['get_home', 'get_report', 'get_syllabus'] as $name) {
+            $source = $this->source("api/parent/{$name}.php");
+            $this->assertStringContainsString("'code' => 'no_year'", $source, $name);
+            $check = strpos($source, 'parent_find_child(');
+            $noYear = strpos($source, "'code' => 'no_year'");
+            $this->assertNotFalse($check, $name);
+            $this->assertLessThan($noYear, $check, $name);
+        }
+
+        $js = $this->source('assets/js/parent/parent_app.js');
+        $this->assertStringContainsString("r.json.code === 'no_year'", $js);
+        // The page draws that message when a screen fails with it (the call, not just the function)
+        $this->assertStringContainsString("err.code === 'noyear' ? renderNoYear()", $js);
+    }
+
+    public function test_parent_app_only_says_no_children_after_the_list_has_loaded(): void
+    {
+        $js = $this->source('assets/js/parent/parent_app.js');
+        $this->assertStringContainsString("childrenStatus: 'loading'", $js);
+        // A failed load shows the error card, and "Try again" loads the list again
+        $this->assertStringContainsString("needsChildren && state.childrenStatus === 'failed'", $js);
+        $this->assertStringContainsString("if (state.childrenStatus !== 'ready') start();", $js);
+        // The status really moves: loading while the list is requested, ready once it arrived, failed when it did not.
+        // Without these the page would sit on "Loading" for ever.
+        $this->assertStringContainsString("state.childrenStatus = 'loading'", $js);
+        $this->assertStringContainsString("state.childrenStatus = 'ready'", $js);
+        $this->assertStringContainsString("state.childrenStatus = 'failed'", $js);
+        // "No children linked yet" comes after the loading and failed cases
+        $loading = strpos($js, "needsChildren && state.childrenStatus === 'loading'");
+        $failed  = strpos($js, "needsChildren && state.childrenStatus === 'failed'");
+        $none    = strpos($js, 'needsChildren && !state.children.length');
+        $this->assertNotFalse($loading);
+        $this->assertNotFalse($failed);
+        $this->assertNotFalse($none);
+        $this->assertLessThan($failed, $loading);
+        $this->assertLessThan($none, $failed);
+        // Every screen that shows a child's data waits for the list, including Syllabus
+        $this->assertStringContainsString('var needsChildren = !!NEEDS_CHILD[route];', $js);
+        $this->assertMatchesRegularExpression('/NEEDS_CHILD = \{[^}]*syllabus: true/', $js);
+    }
+
     public function test_superadmin_has_csrf_rate_limit_and_session_regeneration(): void
     {
         $source = $this->source('superadmin/index.php');
