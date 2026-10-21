@@ -91,6 +91,23 @@ final class SentinelSecurityTest extends TestCase
         $this->assertStringNotContainsString("'email'    => \$row", $children);
     }
 
+    public function test_parent_news_is_parent_only_scoped_to_the_parents_links_and_sends_no_emails(): void
+    {
+        $source = $this->source('api/parent/get_news.php');
+        $this->assertStringContainsString("!== 'parent'", $source);
+        $this->assertStringContainsString('http_response_code(403)', $source);
+        // No child id is read from the request: the feed is built from the signed-in parent only
+        $this->assertStringNotContainsString('$_GET', $source);
+        $this->assertStringNotContainsString('$_POST', $source);
+        $this->assertStringContainsString('parent_fetch_feed($conn, $parent_email', $source);
+
+        $functions = $this->source('auth/parent_app_functions.php');
+        $this->assertMatchesRegularExpression('/function parent_fetch_feed.*?WHERE pl\.parent_email = \?/s', $functions);
+        $this->assertMatchesRegularExpression('/function parent_fetch_feed.*?a\.send_to = \'parents\'/s', $functions);
+        // The feed rows that go to the browser carry names and text, not email addresses
+        $this->assertDoesNotMatchRegularExpression('/function parent_feed_item.*?\'[a-z_]*email\'\s*=>/s', $functions);
+    }
+
     public function test_parent_app_only_shows_published_marks_and_never_sends_learner_emails(): void
     {
         $functions = $this->source('auth/parent_app_functions.php');

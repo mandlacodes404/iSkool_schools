@@ -162,6 +162,129 @@ final class ParentAppFunctionsTest extends TestCase
         $this->assertSame([], parent_parse_assessments('{"type":"Tests","weight":100}'));
     }
 
+    public function test_names_are_joined_the_way_people_say_them(): void
+    {
+        $this->assertSame('', parent_join_names([]));
+        $this->assertSame('', parent_join_names(['', '  ']));
+        $this->assertSame('Thandi', parent_join_names(['Thandi']));
+        $this->assertSame('Thandi and Sipho', parent_join_names([' Thandi ', 'Sipho']));
+        $this->assertSame('Thandi, Sipho and Lwazi', parent_join_names(['Thandi', '', 'Sipho', 'Lwazi']));
+    }
+
+    private function school_row(int $id, string $at, string $title = 'Fees'): array
+    {
+        return ['id' => $id, 'title' => $title, 'message' => 'Body ' . $id, 'created_at' => $at, 'edited_at' => null];
+    }
+
+    private function teacher_row(int $id, string $at, string $child, string $title = 'Trip'): array
+    {
+        return [
+            'id' => $id, 'title' => $title, 'message' => 'Body ' . $id, 'created_at' => $at, 'edited_at' => null,
+            't_title' => 'Mrs', 't_surname' => 'Venter', 'child_name' => $child,
+        ];
+    }
+
+    public function test_feed_mixes_school_and_teacher_items_newest_first(): void
+    {
+        $feed = parent_build_feed(
+            [$this->school_row(1, '2026-10-12 09:00:00'), $this->school_row(4, '2026-10-19 07:30:00')],
+            [$this->teacher_row(2, '2026-10-15 14:05:00', 'Thandi'), $this->teacher_row(3, '2026-10-17 08:00:00', 'Sipho')],
+            'Landulwazi High School',
+            10
+        );
+        $this->assertSame([4, 3, 2, 1], array_column($feed['items'], 'id'));
+        $this->assertSame(['School', 'Teacher', 'Teacher', 'School'], array_column($feed['items'], 'tag'));
+        $this->assertSame(['school', 'teacher', 'teacher', 'school'], array_column($feed['items'], 'kind'));
+        $this->assertFalse($feed['more']);
+
+        $first = $feed['items'][0];
+        $this->assertSame('Landulwazi High School', $first['sender']);
+        $this->assertSame('', $first['for']);
+        $this->assertSame('Mon 19 Oct', $first['date']);
+        $this->assertSame('07:30', $first['time']);
+
+        $teacher = $feed['items'][1];
+        $this->assertSame('Mrs Venter', $teacher['sender']);
+        $this->assertSame('Sipho', $teacher['for']);
+    }
+
+    public function test_a_teacher_announcement_that_reaches_two_children_shows_once_with_both_names(): void
+    {
+        $feed = parent_build_feed(
+            [],
+            [
+                $this->teacher_row(7, '2026-10-15 14:05:00', 'Sipho'),
+                $this->teacher_row(7, '2026-10-15 14:05:00', 'Thandi'),
+                $this->teacher_row(7, '2026-10-15 14:05:00', 'Sipho'),
+            ],
+            'School',
+            10
+        );
+        $this->assertCount(1, $feed['items']);
+        $this->assertSame('Sipho and Thandi', $feed['items'][0]['for']);
+    }
+
+    public function test_a_school_announcement_shows_once_even_if_the_rows_repeat(): void
+    {
+        $feed = parent_build_feed([$this->school_row(1, '2026-10-12 09:00:00'), $this->school_row(1, '2026-10-12 09:00:00')], [], 'School', 10);
+        $this->assertCount(1, $feed['items']);
+    }
+
+    public function test_feed_is_capped_and_says_when_older_items_were_left_out(): void
+    {
+        $rows = [];
+        for ($i = 1; $i <= 5; $i++) {
+            $rows[] = $this->school_row($i, '2026-10-0' . $i . ' 09:00:00');
+        }
+        $feed = parent_build_feed($rows, [], 'School', 3);
+        $this->assertSame([5, 4, 3], array_column($feed['items'], 'id'));
+        $this->assertTrue($feed['more']);
+
+        $exact = parent_build_feed($rows, [], 'School', 5);
+        $this->assertCount(5, $exact['items']);
+        $this->assertFalse($exact['more']);
+
+        $this->assertSame(['items' => [], 'more' => true], parent_build_feed($rows, [], 'School', 0));
+        $this->assertSame(['items' => [], 'more' => false], parent_build_feed([], [], 'School', 5));
+    }
+
+    public function test_feed_items_with_the_same_time_are_ordered_by_id(): void
+    {
+        $feed = parent_build_feed(
+            [$this->school_row(1, '2026-10-12 09:00:00'), $this->school_row(2, '2026-10-12 09:00:00')],
+            [],
+            'School',
+            10
+        );
+        $this->assertSame([2, 1], array_column($feed['items'], 'id'));
+    }
+
+    public function test_feed_item_handles_missing_titles_teachers_and_edit_dates(): void
+    {
+        $blank = parent_feed_item(['id' => 9, 'title' => '  ', 'message' => "  Line one\nLine two  ", 'created_at' => '2026-10-12 09:00:00', 'edited_at' => '0000-00-00 00:00:00'], 'school', 'School', '');
+        $this->assertSame('Announcement', $blank['title']);
+        $this->assertSame("Line one\nLine two", $blank['message']);
+        $this->assertNull($blank['edited']);
+
+        $edited = parent_feed_item(['id' => 9, 'title' => 'T', 'message' => 'M', 'created_at' => '2026-10-12 09:00:00', 'edited_at' => '2026-10-13 10:15:00'], 'school', 'School', '');
+        $this->assertSame('Tue 13 Oct', $edited['edited']);
+
+        $feed = parent_build_feed([], [['id' => 3, 'title' => 'X', 'message' => 'Y', 'created_at' => '2026-10-12 09:00:00', 'edited_at' => null, 't_title' => null, 't_surname' => null, 'child_name' => 'Thandi']], 'School', 5);
+        $this->assertSame('Teacher', $feed['items'][0]['sender']);
+
+        $bad = parent_feed_item(['id' => 1, 'title' => 'T', 'message' => 'M', 'created_at' => 'garbage', 'edited_at' => null], 'school', 'School', '');
+        $this->assertSame(0, $bad['ts']);
+        $this->assertSame('', $bad['date']);
+        $this->assertSame('', $bad['time']);
+    }
+
+    public function test_feed_keeps_markup_as_plain_text(): void
+    {
+        $item = parent_feed_item(['id' => 1, 'title' => '<b>Hi</b>', 'message' => '<script>x</script>', 'created_at' => '2026-10-12 09:00:00', 'edited_at' => null], 'school', 'School', '');
+        $this->assertSame('<b>Hi</b>', $item['title']);
+        $this->assertSame('<script>x</script>', $item['message']);
+    }
+
     public function test_summary_without_marks_says_so_and_does_not_guess(): void
     {
         $s = parent_build_summary('Thandi', null, null, []);
