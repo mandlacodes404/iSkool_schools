@@ -444,7 +444,11 @@
         syncSwitcher(route);
 
         var needsChildren = !!NEEDS_CHILD[route];
-        if (needsChildren && state.childrenStatus === 'loading') {
+        if (route === 'add-child' && state.childrenStatus === 'loading') {
+            // It does not need the list, but start() draws the page again when the list arrives, which would
+            // wipe a link the parent had already pasted, so it waits for the first load too
+            showLoading();
+        } else if (needsChildren && state.childrenStatus === 'loading') {
             showLoading(); // start() draws the page once the children arrive
         } else if (needsChildren && state.childrenStatus === 'failed') {
             show(renderError());

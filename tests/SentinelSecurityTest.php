@@ -171,6 +171,8 @@ final class SentinelSecurityTest extends TestCase
         // The token goes in the body and in the header, as csrf_helper.php expects
         $this->assertStringContainsString("body.append('csrf_token'", $js);
         $this->assertStringContainsString("'X-CSRF-Token'", $js);
+        // The screen waits for the first load of the child list, so the redraw that follows cannot wipe a pasted link
+        $this->assertStringContainsString("route === 'add-child' && state.childrenStatus === 'loading'", $js);
         // The one POST in the parent app is the redeem call
         $this->assertSame(1, substr_count($js, "method: 'POST'"));
         $this->assertSame(1, substr_count($js, "post('api/parent/redeem_parent_invite.php'"));
