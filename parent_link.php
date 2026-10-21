@@ -57,7 +57,8 @@ $viewer_role  = $_SESSION['role'] ?? '';
 if ($code !== '') {
     if (!isset($_SESSION['email'])) {
         // Remember the code through login or registration. A cookie, not the session: registering can take a
-        // while (the parent may need the school's access key) and session data is cleaned up sooner than that.
+        // while and session data is cleaned up sooner than that. auth/register_ajax.php reads this cookie too:
+        // with the code, a new parent account needs no access key and is linked to the learner when it is created.
         setcookie('pending_parent_invite', $code, $cookie_options + ['expires' => time() + PARENT_INVITE_TTL_SECONDS]);
         $view = 'login';
     } elseif ($viewer_role !== 'parent') {
@@ -174,9 +175,10 @@ $e = fn($s) => htmlspecialchars((string) $s, ENT_QUOTES, 'UTF-8');
 
 <?php if ($view === 'login'): ?>
     <h1>You've been invited</h1>
-    <p>A learner at <?= $e($school_name) ?> has invited you to follow their progress on iSkool. Log in with your parent account, or create one, to continue.</p>
-    <a class="btn primary" href="index.php">Log in or create an account</a>
-    <p class="note">After you log in you'll come straight back here to confirm. Creating a parent account needs the parent access key from the school.</p>
+    <p>A learner at <?= $e($school_name) ?> has invited you to follow their progress on iSkool. Create a parent account, or log in if you already have one.</p>
+    <a class="btn primary" href="index.php?form=register">Create a parent account</a>
+    <a class="btn" href="index.php">I already have an account</a>
+    <p class="note">This invite replaces the parent access key, so you do not need one. A new account is linked to the learner straight away. If you log in instead, you'll come straight back here to confirm.</p>
 
 <?php elseif ($view === 'wrong_role'): ?>
     <h1>This invite is for a parent account</h1>
