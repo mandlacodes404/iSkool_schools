@@ -8,6 +8,13 @@ final class SentinelSecurityTest extends TestCase
         return file_get_contents(__DIR__ . '/../' . $path);
     }
 
+    /** The text of one top-level function, from "function name(" to its closing brace at the start of a line. */
+    private function function_body(string $source, string $name): string
+    {
+        $this->assertSame(1, preg_match('/function ' . preg_quote($name, '/') . '\(.*?\n}\n/s', $source, $m), $name . ' not found');
+        return $m[0];
+    }
+
     public function test_edit_marks_scopes_quiz_to_authenticated_teacher_and_learner_to_quiz_class(): void
     {
         $source = $this->source('edit_marks.php');
@@ -105,7 +112,27 @@ final class SentinelSecurityTest extends TestCase
         $this->assertMatchesRegularExpression('/function parent_fetch_feed.*?WHERE pl\.parent_email = \?/s', $functions);
         $this->assertMatchesRegularExpression('/function parent_fetch_feed.*?a\.send_to = \'parents\'/s', $functions);
         // The feed rows that go to the browser carry names and text, not email addresses
-        $this->assertDoesNotMatchRegularExpression('/function parent_feed_item.*?\'[a-z_]*email\'\s*=>/s', $functions);
+        $this->assertDoesNotMatchRegularExpression('/[\'"][a-z_]*email[\'"]\s*=>/', $this->function_body($functions, 'parent_feed_item'));
+        $this->assertDoesNotMatchRegularExpression('/[\'"][a-z_]*email[\'"]\s*=>/', $this->function_body($functions, 'parent_build_feed'));
+    }
+
+    public function test_parent_events_is_parent_only_scoped_to_the_parents_links_and_sends_no_emails(): void
+    {
+        $source = $this->source('api/parent/get_events.php');
+        $this->assertStringContainsString("!== 'parent'", $source);
+        $this->assertStringContainsString('http_response_code(403)', $source);
+        // No child id or date is read from the request: the feed is built from the signed-in parent only
+        $this->assertStringNotContainsString('$_GET', $source);
+        $this->assertStringNotContainsString('$_POST', $source);
+        $this->assertStringContainsString('parent_fetch_events($conn, $parent_email', $source);
+
+        $functions = $this->source('auth/parent_app_functions.php');
+        // Learners come only from this parent's links
+        $this->assertMatchesRegularExpression('/function parent_linked_learners.*?WHERE pl\.parent_email = \?/s', $functions);
+        $this->assertMatchesRegularExpression('/function parent_fetch_events.*?parent_linked_learners\(\$conn, \$parent_email\)/s', $functions);
+        // The items that go to the browser carry names and text, not email addresses
+        $this->assertDoesNotMatchRegularExpression('/[\'"][a-z_]*email[\'"]\s*=>/', $this->function_body($functions, 'parent_event_item'));
+        $this->assertDoesNotMatchRegularExpression('/[\'"][a-z_]*email[\'"]\s*=>/', $this->function_body($functions, 'parent_build_events'));
     }
 
     public function test_parent_app_only_shows_published_marks_and_never_sends_learner_emails(): void
@@ -118,7 +145,7 @@ final class SentinelSecurityTest extends TestCase
         $this->assertMatchesRegularExpression('/function parent_find_child.*?pl\.parent_email = \?/s', $functions);
 
         // The children list that goes to the browser carries ids and names, not learner emails
-        $this->assertDoesNotMatchRegularExpression('/function parent_list_children.*?\'email\'\s*=>/s', $functions);
+        $this->assertDoesNotMatchRegularExpression('/[\'"][a-z_]*email[\'"]\s*=>/', $this->function_body($functions, 'parent_list_children'));
     }
 
     public function test_parent_app_page_is_parent_only_and_does_not_put_data_into_html_unescaped(): void
@@ -186,6 +213,27 @@ final class SentinelSecurityTest extends TestCase
         $link = $this->source('parent_link.php');
         $this->assertStringContainsString('index.php?form=register', $link);
         $this->assertStringNotContainsString('needs the parent access key', $link);
+    }
+
+    public function test_parent_app_add_child_sends_the_csrf_token_and_only_calls_the_redeem_endpoint(): void
+    {
+        $page = $this->source('parent_dashboard.php');
+        $this->assertStringContainsString('name="csrf-token"', $page);
+        $this->assertStringContainsString("\$_SESSION['csrf_token']", $page);
+
+        $js = $this->source('assets/js/parent/parent_app.js');
+        // The token goes in the body and in the header, as csrf_helper.php expects
+        $this->assertStringContainsString("body.append('csrf_token'", $js);
+        $this->assertStringContainsString("'X-CSRF-Token'", $js);
+        // The screen waits for the first load of the child list, so the redraw that follows cannot wipe a pasted link
+        $this->assertStringContainsString("route === 'add-child' && state.childrenStatus === 'loading'", $js);
+        // The one POST in the parent app is the redeem call
+        $this->assertSame(1, substr_count($js, "method: 'POST'"));
+        $this->assertSame(1, substr_count($js, "post('api/parent/redeem_parent_invite.php'"));
+        // The code taken from a pasted link has the shape the server accepts: 32 lowercase hex characters
+        $this->assertStringContainsString('[a-f0-9]{32}', $js);
+        $this->assertStringContainsString('toLowerCase()', $js);
+        $this->assertMatchesRegularExpression('/\[a-f0-9\]\{32\}/', $this->source('auth/parent_invite_functions.php'));
     }
 
     public function test_old_parent_pages_are_gone(): void

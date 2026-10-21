@@ -1,6 +1,8 @@
 /* assets/js/parent/parent_app.js
-   The parent app: Home, Report and the frame around them (child switcher, account menu, phone menu, theme).
-   Talks to api/parent/get_children.php, get_home.php and get_report.php.
+   The parent app: Home, Report, Syllabus, News, Events, the "Add a child" screen and the frame around them
+   (child switcher, account menu, phone menu, theme).
+   Talks to the endpoints in api/parent/ (get_children, get_home, get_report, get_syllabus, get_news, get_events and,
+   for "Add a child", redeem_parent_invite).
    Everything that comes from the server is put on the page as text nodes (textContent), never as markup. */
 (function () {
     'use strict';
@@ -24,9 +26,8 @@
         report: renderReport,
         syllabus: renderSyllabus,
         news: renderNews,
-        events: function () {
-            return renderSoon('Events', 'Tests, due dates and school events will be listed here. For now, what is coming up shows on Home.');
-        }
+        events: renderEvents,
+        'add-child': renderAddChild
     };
 
     var state = {
@@ -39,12 +40,13 @@
         reportTerm: null,
         syllabusTerm: null,
         newsFilter: 'all',
-        newsRead: null
+        newsRead: null,
+        eventsFilter: 'all'
     };
     // Screens that show one child's data (they need at least one linked child)
-    var NEEDS_CHILD = { home: true, report: true, syllabus: true, news: true };
-    // Screens that cover all the children at once, so the child switcher is hidden on them
-    var ALL_CHILDREN = { news: true };
+    var NEEDS_CHILD = { home: true, report: true, syllabus: true, news: true, events: true };
+    // Screens that cover all the children at once (or none in particular), so the child switcher is hidden on them
+    var ALL_CHILDREN = { news: true, events: true, 'add-child': true };
     var cache = {};
     var renderId = 0;
     var drawerOpen = false;
@@ -161,6 +163,42 @@
         return e;
     }
 
+    function csrfToken() {
+        var meta = document.querySelector('meta[name="csrf-token"]');
+        return meta ? (meta.getAttribute('content') || '') : '';
+    }
+
+    /** POST form fields to a parent API endpoint (with the CSRF token). Resolves { status, json } for any JSON answer. */
+    function post(path, fields) {
+        var body = new URLSearchParams();
+        Object.keys(fields).forEach(function (k) { body.append(k, fields[k]); });
+        body.append('csrf_token', csrfToken());
+        return fetch(path, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRF-Token': csrfToken()
+            },
+            body: body.toString()
+        }).then(function (res) {
+            if (res.status === 401 || res.status === 403) {
+                toLogin();
+                throw fail('auth');
+            }
+            return res.json().then(function (json) {
+                return { status: res.status, json: json || {} };
+            }, function () {
+                // Not JSON: the session timed out and the server sent the login page
+                toLogin();
+                throw fail('auth');
+            });
+        }, function () {
+            throw fail('network');
+        });
+    }
+
     function cached(path, params) {
         var key = path + '?' + JSON.stringify(params || {});
         var hit = cache[key];
@@ -204,6 +242,10 @@
             append(head, el('div', 'pa-menu-name', state.parent.name));
             if (state.parent.email) append(head, el('div', 'pa-menu-email', state.parent.email));
 
+            var add = el('a', 'pa-menu-item', 'Add a child');
+            add.href = '#/add-child';
+            add.setAttribute('data-route', 'add-child');
+
             var theme = el('button', 'pa-menu-item');
             theme.type = 'button';
             theme.setAttribute('data-pa-theme', '');
@@ -211,7 +253,7 @@
             var out = el('a', 'pa-menu-item pa-danger', 'Sign out');
             out.href = 'logout.php';
 
-            append(t.menu, head, theme, out);
+            append(t.menu, head, add, theme, out);
         });
         syncThemeButtons();
     }
@@ -244,6 +286,8 @@
                 toggleTheme();
                 closeMenus(null);
             }
+            // Tapping "Add a child" while already on that screen does not change the hash, so close the menu here
+            if (ev.target.closest && ev.target.closest('a[data-route]')) closeMenus(null);
         });
     });
 
@@ -400,7 +444,11 @@
         syncSwitcher(route);
 
         var needsChildren = !!NEEDS_CHILD[route];
-        if (needsChildren && state.childrenStatus === 'loading') {
+        if (route === 'add-child' && state.childrenStatus === 'loading') {
+            // It does not need the list, but start() draws the page again when the list arrives, which would
+            // wipe a link the parent had already pasted, so it waits for the first load too
+            showLoading();
+        } else if (needsChildren && state.childrenStatus === 'loading') {
             showLoading(); // start() draws the page once the children arrive
         } else if (needsChildren && state.childrenStatus === 'failed') {
             show(renderError());
@@ -468,7 +516,9 @@
     function renderNoChildren() {
         return stateCard(
             'No children linked yet',
-            'To see your child here, ask them to create a parent link in their iSkool app (My Class). When you open that link while signed in, your child appears on this page.'
+            'Ask your child to create a parent link in their iSkool app (My Class). Paste that link here and your child appears on this page.',
+            'Add a child',
+            function () { window.location.hash = '#/add-child'; }
         );
     }
 
@@ -492,10 +542,6 @@
             'The school year is not set up yet',
             'Your child’s marks and what is coming up will appear here once the school has set up the year. Please check again soon.'
         );
-    }
-
-    function renderSoon(title, text) {
-        return stateCard(title, text);
     }
 
     function eyebrow(child, term) {
@@ -594,7 +640,7 @@
         main.appendChild(subjects);
 
         // Coming up
-        var upcoming = section('Coming up');
+        var upcoming = section('Coming up', 'See all', '#/events');
         var upCard = el('div', 'pa-card');
         if (!d.upcoming.length) upCard.appendChild(emptyRow('Nothing is due in the next few weeks.'));
         d.upcoming.forEach(function (u) {
@@ -1081,6 +1127,267 @@
 
         append(wrap, btn, panel);
         return { node: wrap, sync: sync };
+    }
+
+    // ── Events ─────────────────────────────────────────────────────────────────────────────────────────────
+
+    var EVENT_FILTERS = [['all', 'All'], ['work', 'Work'], ['school', 'School']];
+
+    function renderEvents() {
+        return cached('api/parent/get_events.php').then(buildEvents);
+    }
+
+    function buildEvents(d) {
+        if (!d.items.length) {
+            return stateCard(
+                'Nothing coming up',
+                'Tests, quizzes, assignment due dates and school events for your ' + (d.children > 1 ? 'children' : 'child') + ' will appear here.'
+            );
+        }
+
+        var root = document.createElement('div');
+
+        // Title and the All / Work / School buttons
+        var head = el('div', 'pa-page-head');
+        var titleBox = el('div');
+        append(titleBox, el('h1', 'pa-h1', 'Events'), el('p', 'pa-sub', 'Coming up for your ' + (d.children > 1 ? 'children' : 'child')));
+        var filters = el('div', 'pa-terms');
+        filters.setAttribute('role', 'group');
+        filters.setAttribute('aria-label', 'Show');
+        var filterButtons = EVENT_FILTERS.map(function (f) {
+            var b = el('button', 'pa-term', f[1]);
+            b.type = 'button';
+            b.addEventListener('click', function () {
+                if (state.eventsFilter === f[0]) return;
+                state.eventsFilter = f[0];
+                drawList();
+            });
+            filters.appendChild(b);
+            return b;
+        });
+        append(head, titleBox, filters);
+        root.appendChild(head);
+
+        var list = el('div', 'pa-ev-list');
+        root.appendChild(list);
+        if (d.more) {
+            root.appendChild(el('p', 'pa-foot', 'Showing the next ' + d.items.length + ' items.'));
+        }
+
+        function drawList() {
+            var f = state.eventsFilter;
+            filterButtons.forEach(function (b, i) {
+                b.setAttribute('aria-pressed', EVENT_FILTERS[i][0] === f ? 'true' : 'false');
+            });
+            clear(list);
+            var shown = d.items.filter(function (n) { return f === 'all' || n.section === f; });
+            if (!shown.length) {
+                var empty = el('div', 'pa-card');
+                empty.appendChild(emptyRow(f === 'work'
+                    ? 'No tests, quizzes or due dates coming up.'
+                    : 'No school events or holidays coming up.'));
+                list.appendChild(empty);
+                return;
+            }
+            // One heading and card for each run of items with the same heading (Today, Tomorrow, This week...)
+            var group = null;
+            var card = null;
+            shown.forEach(function (n) {
+                if (n.group !== group) {
+                    group = n.group;
+                    var sec = section(group);
+                    card = el('div', 'pa-card');
+                    sec.appendChild(card);
+                    list.appendChild(sec);
+                }
+                card.appendChild(buildEventRow(n));
+            });
+        }
+
+        drawList();
+        return root;
+    }
+
+    function buildEventRow(n) {
+        var row = el('div', 'pa-row pa-up-row pa-ev-row' + (n.done ? ' is-done' : ''));
+        var date = el('div', 'pa-date');
+        append(date, el('span', 'pa-dow', n.dow), el('span', 'pa-day', n.day));
+
+        var text = el('div', 'pa-up-text');
+        var meta = el('span', 'pa-ev-meta');
+        var tagClass = 'pa-tag' + (n.section === 'work' ? ' is-work' : '');
+        var detail = [n.subject, n.time, n.for ? 'for ' + n.for : ''].filter(Boolean).join(' · ');
+        append(meta, el('span', tagClass, n.kind));
+        if (detail) meta.appendChild(el('span', null, detail));
+        append(text, el('span', 'pa-title', n.title), meta);
+
+        append(row, date, text);
+        return row;
+    }
+
+    // ── Add a child ────────────────────────────────────────────────────────────────────────────────────────
+    // The parent pastes the invite link (or just the code) their child shared. Linking happens on the server
+    // (api/parent/redeem_parent_invite.php), so it works the same inside the installed app as in a browser.
+
+    var INVITE_CODE = /(?:^|[^a-f0-9])([a-f0-9]{32})(?![a-f0-9])/i;
+    var INVITE_HOST = /https?:\/\/([^\s/?#]+)/i;
+
+    /** The 32-character invite code inside what was pasted: the whole link, a message that holds the link, or the bare code. */
+    function extractInviteCode(text) {
+        var match = INVITE_CODE.exec(String(text || ''));
+        return match ? match[1].toLowerCase() : null;
+    }
+
+    /** True when the pasted text holds a link to a different address than this app (usually another school). */
+    function isOtherAddress(text) {
+        var match = INVITE_HOST.exec(String(text || ''));
+        return !!match && match[1].toLowerCase() !== window.location.host.toLowerCase();
+    }
+
+    /** Resolves { ok: true, name, already } or { ok: false, error }. Rejects only for network and session problems. */
+    function redeemInvite(code) {
+        return post('api/parent/redeem_parent_invite.php', { code: code }).then(function (r) {
+            var json = r.json;
+            if (json.success) {
+                return { ok: true, name: json.learner_name || '', already: !!json.already_linked };
+            }
+            var known = json.error && json.error !== 'Invalid CSRF token';
+            return { ok: false, error: known ? json.error : 'Something went wrong. Please refresh the page and try again.' };
+        });
+    }
+
+    function renderAddChild() {
+        var root = el('div', 'pa-card pa-state pa-add');
+        drawAddForm(root);
+        return root;
+    }
+
+    function drawAddForm(root) {
+        clear(root);
+        var intro = state.children.length
+            ? 'Ask your child to open My Class in their iSkool app and create a parent link. Then paste the link or code here.'
+            : 'Ask your child to open My Class in their iSkool app and create a parent link. Then paste the link or code here and your child appears on this page.';
+        append(root, el('h1', 'pa-h1', 'Add a child'), el('p', null, intro));
+
+        var form = el('form', 'pa-add-form');
+        form.noValidate = true;
+
+        var label = el('label', 'pa-add-label', 'Invite link or code');
+        label.setAttribute('for', 'paInviteInput');
+
+        var input = el('input', 'pa-input');
+        input.type = 'text';
+        input.id = 'paInviteInput';
+        input.name = 'invite';
+        input.autocomplete = 'off';
+        input.spellcheck = false;
+        input.setAttribute('autocapitalize', 'none');
+        input.setAttribute('autocorrect', 'off');
+        input.setAttribute('enterkeyhint', 'go');
+        input.setAttribute('placeholder', 'Paste the link here');
+
+        var msg = el('p', 'pa-form-msg');
+        msg.setAttribute('role', 'status');
+        msg.setAttribute('aria-live', 'polite');
+        msg.hidden = true;
+
+        var button = el('button', 'pa-btn', 'Link my child');
+        button.type = 'submit';
+
+        var note = el('p', 'pa-form-note', 'A link works once and expires after 48 hours. If it does not work, ask your child to make a new one.');
+
+        append(form, label, input, msg, button);
+        append(root, form, note);
+
+        function say(text) {
+            msg.textContent = text;
+            msg.hidden = false;
+            msg.classList.add('is-error');
+        }
+
+        input.addEventListener('input', function () { msg.hidden = true; });
+
+        form.addEventListener('submit', function (ev) {
+            ev.preventDefault();
+            if (button.disabled) return;
+
+            var pasted = input.value;
+            var code = extractInviteCode(pasted);
+            if (!code) {
+                say('That does not look like an invite link or code. Copy the whole link your child shared and paste it here.');
+                input.focus();
+                return;
+            }
+
+            button.disabled = true;
+            button.textContent = 'Linking…';
+            msg.hidden = true;
+
+            redeemInvite(code).then(function (result) {
+                if (!result.ok) {
+                    var text = result.error;
+                    if (isOtherAddress(pasted)) {
+                        text += ' This link is for a different address than this app, so it may belong to another school.';
+                    }
+                    say(text);
+                    button.disabled = false;
+                    button.textContent = 'Link my child';
+                    input.focus();
+                    return;
+                }
+                return finishAddChild(root, result);
+            }).then(null, function (err) {
+                if (err && err.code === 'auth') return;
+                say('We could not reach iSkool. Check your connection and try again.');
+                button.disabled = false;
+                button.textContent = 'Link my child';
+            });
+        });
+    }
+
+    /** The child is linked: refresh the list, make the new child the one on show, and confirm. */
+    function finishAddChild(root, result) {
+        var before = state.children.map(function (c) { return c.id; });
+        cache = {};
+        return loadChildren().then(function () {
+            var added = state.children.filter(function (c) { return before.indexOf(c.id) === -1; })[0];
+            if (added) {
+                state.childId = added.id;
+                storeSet('parentApp.child', String(added.id));
+            }
+            renderSwitcher();
+            drawAddDone(root, result, false);
+        }, function () {
+            // Linked, but the list could not be refreshed: the page is reloaded when the parent goes to Home
+            drawAddDone(root, result, true);
+        });
+    }
+
+    function drawAddDone(root, result, needsReload) {
+        clear(root);
+        var who = result.name || 'Your child';
+        var text = result.already
+            ? who + ' was already on your account, so nothing changed.'
+            : who + ' is now on your account. You can see their results, syllabus, news and events.';
+        append(root, el('h1', 'pa-h1', result.already ? 'Already linked' : 'Child linked'), el('p', null, text));
+
+        var actions = el('div', 'pa-actions');
+        var home = el('button', 'pa-btn', 'Go to Home');
+        home.type = 'button';
+        home.addEventListener('click', function () {
+            if (needsReload) {
+                window.location.hash = '#/home';
+                window.location.reload();
+                return;
+            }
+            window.location.hash = '#/home';
+        });
+        var another = el('button', 'pa-btn is-ghost', 'Add another child');
+        another.type = 'button';
+        another.addEventListener('click', function () { drawAddForm(root); });
+        append(actions, home, another);
+        root.appendChild(actions);
+        try { home.focus({ preventScroll: true }); } catch (e) { home.focus(); }
     }
 
     // ── Start ──────────────────────────────────────────────────────────────────────────────────────────────

@@ -228,18 +228,19 @@ $parentLink = ((int)$parentCount > 0); // true when at least one parent is linke
     <link rel="stylesheet" href="assets/css/learner/quiz.css?v=6.1">
     <link rel="stylesheet" href="assets/css/learner/manual.css?v=8.3">
     <link rel="stylesheet" href="assets/css/learner/announcements.css?v=3.7">
-    <link rel="stylesheet" href="assets/css/learner/assignments.css?v=3.6">
+    <link rel="stylesheet" href="assets/css/learner/assignments.css?v=3.7">
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
     <link rel="stylesheet" href="assets/css/learner/grades.css?v=3.7">
     <link rel="stylesheet" href="assets/css/learner/resources.css?v=2.8">
      <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=4.9">
      <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=13.8">
     <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=3.1">
-    <link rel="stylesheet" href="assets/css/learner/mobile_menu.css?v=1.7">
-    <link rel="stylesheet" href="assets/css/learner/mobile_settings.css?v=1.1">
+    <link rel="stylesheet" href="assets/css/learner/mobile_menu.css?v=1.8">
+    <link rel="stylesheet" href="assets/css/learner/mobile_settings.css?v=1.2">
     <link rel="stylesheet" href="assets/css/learner/mobile_class.css?v=1.1">
     <link rel="stylesheet" href="assets/css/learner/parent_invite.css?v=1.0">
     <link rel="stylesheet" href="assets/css/learner/desktop_settings.css?v=1.4">   <!-- new -->
+    <link rel="stylesheet" href="assets/css/learner/mobile_light.css?v=1.0">
     <link rel="stylesheet" href="assets/css/splash_light.css?v=<?= (int) @filemtime(__DIR__ . '/assets/css/splash_light.css') ?>">
     <script>
     // Desktop sidebar: restore the saved collapsed state BEFORE first paint (no flash).
@@ -3971,10 +3972,11 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/learner_calendar.js?v=2.3"></script>
 <script src="assets/js/learner/desktop_menu.js?v=1.4"></script>
 <script src="assets/js/learner/mobile_menu.js?v=1.4"></script>
-<script src="assets/js/learner/mobile_settings.js?v=1.3"></script>
+<script src="assets/js/learner/mobile_settings.js?v=1.4"></script>
 <script src="assets/js/learner/parent_invite.js?v=1.0"></script>
 <script src="assets/js/learner/mobile_class.js?v=1.1"></script>
 <script src="assets/js/learner/desktop_settings.js?v=1.4"></script>
+<script src="assets/js/learner/mobile_theme.js?v=1.0"></script>
 <script>window.ISKOOL_SETTINGS = { sendResetUrl: 'auth/password/send_reset_link.php' };</script>
 <?php include 'includes/global_viewer.php'; ?>
 </body>

@@ -1,7 +1,7 @@
 /* iSkool learner offline-support service worker. */
-const STATIC_CACHE = 'iskool-static-v2';
-const CONTENT_CACHE = 'iskool-content-v2';
-const NETWORK_CACHE = 'iskool-network-v2';
+const STATIC_CACHE = 'iskool-static-v3';
+const CONTENT_CACHE = 'iskool-content-v3';
+const NETWORK_CACHE = 'iskool-network-v3';
 const QUEUE_DB = 'iskool-offline-writes-v1';
 const QUEUE_STORE = 'requests';
 const SYNC_TAG = 'iskool-retry-writes';

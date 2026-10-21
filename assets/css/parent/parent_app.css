@@ -300,6 +300,30 @@ html[data-theme="dark"] .pa-chip[aria-pressed="true"] .pa-chip-av { background: 
 }
 .pa-loading { padding: 8px 2px; }
 
+/* ── Add a child ────────────────────────────────────────────────────────────────────────────────────────── */
+.pa-add-form { display: flex; flex-direction: column; align-items: flex-start; max-width: 520px; margin-top: 18px; }
+.pa-add-label { font-size: 13px; font-weight: var(--pa-w-mid); color: var(--pa-muted); }
+.pa-input {
+    width: 100%;
+    height: 48px;
+    margin-top: 6px;
+    padding: 0 14px;
+    border: 1px solid var(--pa-line-strong);
+    border-radius: 8px;
+    background: var(--pa-page);
+    color: var(--pa-text);
+    font: inherit;
+    font-size: 16px; /* 16px stops iPhones zooming in when the box is tapped */
+}
+.pa-input::placeholder { color: var(--pa-muted); }
+.pa-input:focus-visible { outline: 2px solid var(--pa-accent); outline-offset: 1px; border-color: var(--pa-accent); }
+.pa-add .pa-form-msg { margin-top: 10px; font-size: 14px; line-height: 1.5; color: var(--pa-soft); }
+.pa-add .pa-form-msg.is-error { color: var(--pa-down); }
+.pa-add .pa-form-note { margin-top: 16px; font-size: 13px; color: var(--pa-muted); }
+.pa-btn:disabled { opacity: .6; cursor: default; }
+.pa-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.pa-btn.is-ghost { background: transparent; color: var(--pa-text); border: 1px solid var(--pa-line-strong); }
+
 /* ── Home ───────────────────────────────────────────────────────────────────────────────────────────────── */
 .pa-hero {
     padding: 28px 30px;
@@ -551,6 +575,15 @@ html[data-theme="dark"] .pa-chip[aria-pressed="true"] .pa-chip-av { background: 
 .pa-item-panel .pa-brief-foot { margin-top: 14px; }
 .pa-sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 
+/* ── Events ─────────────────────────────────────────────────────────────────────────────────────────────── */
+.pa-ev-list .pa-section + .pa-section { margin-top: 24px; }
+.pa-ev-row { min-height: 68px; padding-top: 10px; padding-bottom: 10px; }
+.pa-ev-row .pa-title { line-height: 1.35; overflow-wrap: anywhere; }
+.pa-ev-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; margin-top: 4px; font-size: 12px; color: var(--pa-muted); }
+.pa-tag.is-work { background: var(--pa-chip-teacher-bg); color: var(--pa-chip-teacher-fg); }
+.pa-ev-row.is-done .pa-title { font-weight: 400; color: var(--pa-soft); }
+.pa-ev-row.is-done .pa-tag { background: var(--pa-chip); color: var(--pa-soft); }
+
 /* ── Phones ─────────────────────────────────────────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
     :root {
@@ -703,6 +736,10 @@ html[data-theme="dark"] .pa-chip[aria-pressed="true"] .pa-chip-av { background: 
     .pa-news-sub { font-size: 13px; }
     .pa-item { min-height: 68px; padding: 10px 16px 10px 8px; }
     .pa-item-panel { padding: 2px 16px 18px 34px; }
+
+    /* Events */
+    .pa-ev-list .pa-section + .pa-section { margin-top: 0; }
+    .pa-ev-row { min-height: 64px; padding: 10px 16px; }
 
     /* Bottom tabs */
     .pa-tabs {

@@ -385,6 +385,112 @@ function parent_build_feed(array $school_rows, array $teacher_rows, string $scho
     return ['items' => array_slice($items, 0, $limit), 'more' => count($items) > $limit];
 }
 
+/**
+ * Which heading an event sits under on the Events screen: "Today", "Tomorrow", "This week", "Next week", then the
+ * month ("November", or "January 2027" in another year). Weeks run Monday to Sunday. Dates before today are "Earlier".
+ */
+function parent_event_group(string $date, string $today): string
+{
+    $d = strtotime(substr($date, 0, 10));
+    $t = strtotime(substr($today, 0, 10));
+    if ($d === false || $t === false) {
+        return '';
+    }
+    $diff = (int) round(($d - $t) / 86400);
+    if ($diff < 0) {
+        return 'Earlier';
+    }
+    if ($diff === 0) {
+        return 'Today';
+    }
+    if ($diff === 1) {
+        return 'Tomorrow';
+    }
+    $to_sunday = 7 - (int) date('N', $t);
+    if ($diff <= $to_sunday) {
+        return 'This week';
+    }
+    if ($diff <= $to_sunday + 7) {
+        return 'Next week';
+    }
+    return date('F', $d) . (date('Y', $d) !== date('Y', $t) ? ' ' . date('Y', $d) : '');
+}
+
+/** "work" for assignments, quizzes, tests and exams; "school" for holidays and other school events. */
+function parent_event_section(string $category): string
+{
+    return in_array($category, ['assignment', 'quiz', 'test', 'exam'], true) ? 'work' : 'school';
+}
+
+/** One upcoming item as the Events screen needs it. $names are the children it is for. */
+function parent_event_item(array $raw, array $names, string $today): array
+{
+    $date = (string) $raw['date'];
+    $parts = parent_date_parts($date);
+    $ts = strtotime($date);
+    // Only assignments and quizzes carry a time. Midnight means "no time set".
+    $time = (strlen($date) > 10 && $ts !== false && date('H:i', $ts) !== '00:00') ? date('H:i', $ts) : '';
+    $title = trim((string) ($raw['title'] ?? ''));
+    $subject = trim((string) ($raw['subject'] ?? ''));
+
+    return [
+        'date'     => substr($date, 0, 10),
+        'time'     => $time,
+        'dow'      => $parts['dow'],
+        'day'      => $parts['day'],
+        'group'    => parent_event_group($date, $today),
+        'title'    => $title !== '' ? $title : 'Event',
+        'kind'     => (string) $raw['kind'],
+        'category' => (string) $raw['category'],
+        'section'  => parent_event_section((string) $raw['category']),
+        'subject'  => $subject !== '' ? $subject : null,
+        'done'     => !empty($raw['done']),
+        'for'      => parent_join_names($names),
+    ];
+}
+
+/**
+ * One list of what is coming up across all of a parent's children, earliest first, at most $limit items.
+ * The same thing for several children (a class event, or an assignment none of them has handed in) shows once, with
+ * all their names. An assignment one child has handed in and another has not stays two items.
+ *
+ * @param array $per_child list of ['name' => first name, 'items' => rows from parent_collect_upcoming()]
+ * @return array{items: array, more: bool} "more" is true when later items were left out
+ */
+function parent_build_events(array $per_child, string $today, int $limit): array
+{
+    $merged = [];
+    foreach ($per_child as $child) {
+        $name = trim((string) ($child['name'] ?? ''));
+        foreach ($child['items'] as $raw) {
+            $key = implode('|', [
+                (string) $raw['date'], (string) $raw['title'], (string) $raw['category'], (string) $raw['kind'],
+                (string) ($raw['subject'] ?? ''), !empty($raw['done']) ? '1' : '0',
+            ]);
+            if (!isset($merged[$key])) {
+                $merged[$key] = ['raw' => $raw, 'names' => []];
+            }
+            if ($name !== '' && !in_array($name, $merged[$key]['names'], true)) {
+                $merged[$key]['names'][] = $name;
+            }
+        }
+    }
+
+    // A date without a time (a class event) sorts before the timed items on the same day
+    uasort($merged, function ($a, $b) {
+        return [(string) $a['raw']['date'], strtolower((string) $a['raw']['title'])]
+            <=> [(string) $b['raw']['date'], strtolower((string) $b['raw']['title'])];
+    });
+
+    $items = [];
+    foreach ($merged as $entry) {
+        $items[] = parent_event_item($entry['raw'], $entry['names'], $today);
+    }
+
+    $limit = max(0, $limit);
+    return ['items' => array_slice($items, 0, $limit), 'more' => count($items) > $limit];
+}
+
 // ═══════════════════════════════════════════════════════════════════════════════════════════════════════════
 // Part 2: database reads
 // ═══════════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -564,10 +670,15 @@ function parent_subject_marks(array $by_subject, int $term): array
 }
 
 /**
- * What is coming up for the learner: assignment due dates, quizzes not yet taken, and class events,
- * from $from_date (Y-m-d H:i:s) for the next $days days, earliest first.
+ * Everything due or happening for one learner from $from_date (Y-m-d H:i:s) for the next $days days, as raw rows:
+ * date (Y-m-d, or Y-m-d H:i:s for assignments and quizzes), title, kind (a label such as "Assignment due"), subject,
+ * category ("assignment", "quiz", or the class event's type) and done (an assignment already handed in).
+ * Takes at most $per_source rows from each source: assignments, quizzes and class events.
+ * The Home screen and the Events screen both read this.
+ *
+ * @return array<int, array{date: string, title: string, kind: string, subject: ?string, category: string, done: bool}>
  */
-function parent_fetch_upcoming(mysqli $conn, string $learner_email, int $year_id, string $from_date, int $days, int $limit): array
+function parent_collect_upcoming(mysqli $conn, string $learner_email, int $year_id, string $from_date, int $days, int $per_source): array
 {
     $to_date = date('Y-m-d H:i:s', strtotime($from_date) + $days * 86400);
     $class_ids = "SELECT cs0.class_id FROM class_students cs0 WHERE cs0.student_email = ? AND cs0.academic_year_id = ?";
@@ -584,14 +695,21 @@ function parent_fetch_upcoming(mysqli $conn, string $learner_email, int $year_id
            AND a.academic_year_id = ?
            AND a.due_date >= ? AND a.due_date <= ?
          ORDER BY a.due_date ASC
-         LIMIT 20"
+         LIMIT ?"
     );
-    $stmt->bind_param('ssiiss', $learner_email, $learner_email, $year_id, $year_id, $from_date, $to_date);
+    $stmt->bind_param('ssiissi', $learner_email, $learner_email, $year_id, $year_id, $from_date, $to_date, $per_source);
     $stmt->execute();
     $res = $stmt->get_result();
     while ($row = $res->fetch_assoc()) {
-        $kind = empty($row['submission_id']) ? 'Assignment due' : 'Assignment handed in';
-        $items[] = ['date' => $row['d'], 'title' => $row['title'], 'kind' => $kind, 'subject' => $row['subject']];
+        $done = !empty($row['submission_id']);
+        $items[] = [
+            'date'     => (string) $row['d'],
+            'title'    => (string) $row['title'],
+            'kind'     => $done ? 'Assignment handed in' : 'Assignment due',
+            'subject'  => $row['subject'],
+            'category' => 'assignment',
+            'done'     => $done,
+        ];
     }
     $stmt->close();
 
@@ -608,13 +726,20 @@ function parent_fetch_upcoming(mysqli $conn, string $learner_email, int $year_id
            AND q.status IN ('Open', 'Scheduled')
            AND qa.id IS NULL
          ORDER BY q.start_time ASC
-         LIMIT 20"
+         LIMIT ?"
     );
-    $stmt->bind_param('ssiiss', $learner_email, $learner_email, $year_id, $year_id, $from_date, $to_date);
+    $stmt->bind_param('ssiissi', $learner_email, $learner_email, $year_id, $year_id, $from_date, $to_date, $per_source);
     $stmt->execute();
     $res = $stmt->get_result();
     while ($row = $res->fetch_assoc()) {
-        $items[] = ['date' => $row['d'], 'title' => $row['title'], 'kind' => 'Quiz', 'subject' => $row['subject']];
+        $items[] = [
+            'date'     => (string) $row['d'],
+            'title'    => (string) $row['title'],
+            'kind'     => 'Quiz',
+            'subject'  => $row['subject'],
+            'category' => 'quiz',
+            'done'     => false,
+        ];
     }
     $stmt->close();
 
@@ -628,18 +753,35 @@ function parent_fetch_upcoming(mysqli $conn, string $learner_email, int $year_id
            AND ae.academic_year_id = ?
            AND ae.event_date >= ? AND ae.event_date <= ?
          ORDER BY ae.event_date ASC
-         LIMIT 20"
+         LIMIT ?"
     );
-    $stmt->bind_param('siiss', $learner_email, $year_id, $year_id, $from_day, $to_day);
+    $stmt->bind_param('siissi', $learner_email, $year_id, $year_id, $from_day, $to_day, $per_source);
     $stmt->execute();
     $res = $stmt->get_result();
     while ($row = $res->fetch_assoc()) {
-        $items[] = ['date' => $row['d'], 'title' => $row['title'], 'kind' => parent_event_kind((string) $row['event_type']), 'subject' => null];
+        $type = (string) $row['event_type'];
+        $items[] = [
+            'date'     => (string) $row['d'],
+            'title'    => (string) $row['title'],
+            'kind'     => parent_event_kind($type),
+            'subject'  => null,
+            'category' => $type !== '' ? $type : 'other',
+            'done'     => false,
+        ];
     }
     $stmt->close();
 
+    return $items;
+}
+
+/**
+ * What is coming up for the learner (the Home screen's short list): assignment due dates, quizzes not yet taken, and
+ * class events, from $from_date (Y-m-d H:i:s) for the next $days days, earliest first.
+ */
+function parent_fetch_upcoming(mysqli $conn, string $learner_email, int $year_id, string $from_date, int $days, int $limit): array
+{
     $out = [];
-    foreach (parent_merge_upcoming($items, $limit) as $item) {
+    foreach (parent_merge_upcoming(parent_collect_upcoming($conn, $learner_email, $year_id, $from_date, $days, 20), $limit) as $item) {
         $parts = parent_date_parts((string) $item['date']);
         $kind = $item['kind'];
         if (!empty($item['subject'])) {
@@ -787,4 +929,53 @@ function parent_fetch_feed(mysqli $conn, string $parent_email, int $year_id, str
     $stmt->close();
 
     return parent_build_feed($school_rows, $teacher_rows, $school_name, $limit);
+}
+
+/**
+ * The learners linked to this parent, in the same order as parent_list_children(). Includes each learner's email so
+ * their data can be read. It is for server use only and is never sent to the browser.
+ *
+ * @return array<int, array{email: string, name: string}>
+ */
+function parent_linked_learners(mysqli $conn, string $parent_email): array
+{
+    $stmt = $conn->prepare(
+        "SELECT DISTINCT u.email, u.name, u.surname
+         FROM parent_links pl
+         JOIN users u ON u.email = pl.learner_email AND u.role = 'learner' AND COALESCE(u.is_deleted, 0) = 0
+         WHERE pl.parent_email = ?
+         ORDER BY u.name, u.surname"
+    );
+    $stmt->bind_param('s', $parent_email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $learners = [];
+    while ($row = $result->fetch_assoc()) {
+        $learners[] = ['email' => (string) $row['email'], 'name' => trim((string) $row['name'])];
+    }
+    $stmt->close();
+
+    return $learners;
+}
+
+/**
+ * The Events feed for a parent, across all their linked children (spec 3.5): assignment due dates, quizzes not yet
+ * taken and the class events (tests, exams, holidays, school events) from the start of $today for the next $days days.
+ * Every read is for a learner linked to this parent.
+ *
+ * @return array{items: array, more: bool}
+ */
+function parent_fetch_events(mysqli $conn, string $parent_email, int $year_id, string $today, int $days, int $limit): array
+{
+    $from = substr($today, 0, 10) . ' 00:00:00';
+    $per_child = [];
+    foreach (parent_linked_learners($conn, $parent_email) as $learner) {
+        $per_child[] = [
+            'name'  => $learner['name'],
+            'items' => parent_collect_upcoming($conn, $learner['email'], $year_id, $from, $days, $limit + 1),
+        ];
+    }
+
+    return parent_build_events($per_child, substr($today, 0, 10), $limit);
 }
