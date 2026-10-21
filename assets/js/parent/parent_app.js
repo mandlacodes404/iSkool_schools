@@ -32,6 +32,9 @@
     var state = {
         parent: { name: textOf('.pa-account-name') || 'Parent', email: '' },
         children: [],
+        // 'loading' until get_children.php answers, then 'ready' or 'failed'. An empty list only means "no children
+        // linked" when the status is 'ready'; after a failed load it just means we do not know yet.
+        childrenStatus: 'loading',
         childId: null,
         reportTerm: null,
         syllabusTerm: null,
@@ -143,6 +146,8 @@
             .then(function (r) {
                 if (r.json && r.json.success) return r.json.data;
                 if (r.status === 404) throw fail('notfound');
+                // The school has not marked an academic year as current: not a connection problem
+                if (r.json && r.json.code === 'no_year') throw fail('noyear');
                 throw fail('server', r.json && r.json.error);
             }, function (err) {
                 if (err && err.code) throw err;
@@ -394,10 +399,13 @@
         markActiveLinks(route);
         syncSwitcher(route);
 
-        var node;
-        if (!state.children.length && NEEDS_CHILD[route]) {
-            node = renderNoChildren();
-            show(node);
+        var needsChildren = !!NEEDS_CHILD[route];
+        if (needsChildren && state.childrenStatus === 'loading') {
+            showLoading(); // start() draws the page once the children arrive
+        } else if (needsChildren && state.childrenStatus === 'failed') {
+            show(renderError());
+        } else if (needsChildren && !state.children.length) {
+            show(renderNoChildren());
         } else {
             var build = ROUTES[route];
             var result = build(id);
@@ -418,7 +426,7 @@
                         });
                         return;
                     }
-                    show(renderError());
+                    show(err && err.code === 'noyear' ? renderNoYear() : renderError());
                 });
             } else if (result) {
                 show(result);
@@ -471,8 +479,18 @@
             'Try again',
             function () {
                 cache = {};
-                render();
+                // If the children never loaded, load them again first. Drawing the page now would wrongly say
+                // "No children linked yet".
+                if (state.childrenStatus !== 'ready') start();
+                else render();
             }
+        );
+    }
+
+    function renderNoYear() {
+        return stateCard(
+            'The school year is not set up yet',
+            'Your child’s marks and what is coming up will appear here once the school has set up the year. Please check again soon.'
         );
     }
 
@@ -1071,20 +1089,28 @@
         return api('api/parent/get_children.php').then(function (data) {
             state.parent = { name: data.parent.name, email: data.parent.email };
             state.children = data.children;
+            state.childrenStatus = 'ready';
             chooseChild();
             buildMenus();
         });
     }
 
+    /** First load, and "Try again" after a failed first load. */
+    function start() {
+        state.childrenStatus = 'loading';
+        showLoading();
+
+        loadChildren().then(function () {
+            renderSwitcher();
+            render();
+        }, function (err) {
+            if (err && err.code === 'auth') return;
+            state.childrenStatus = 'failed';
+            render(); // Home and Report show the error card, the "coming soon" pages still open
+        });
+    }
+
     buildMenus();
     markActiveLinks(currentRoute());
-    showLoading();
-
-    loadChildren().then(function () {
-        renderSwitcher();
-        render();
-    }, function (err) {
-        if (err && err.code === 'auth') return;
-        show(renderError());
-    });
+    start();
 }());
