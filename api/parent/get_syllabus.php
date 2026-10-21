@@ -31,7 +31,7 @@ try {
 
     $year_id = parent_current_year_id($conn);
     if ($year_id <= 0) {
-        echo json_encode(['success' => false, 'error' => 'No active academic year']);
+        echo json_encode(['success' => false, 'code' => 'no_year', 'error' => 'No active academic year']);
         exit;
     }
 

@@ -40,7 +40,9 @@ try {
             ],
             'school'   => parent_school_info($conn, dirname(__DIR__, 2)),
             'term'     => parent_current_term($conn),
-            'children' => $year_id > 0 ? parent_list_children($conn, $parent_email, $year_id) : [],
+            // Linked children are listed even when the school has not marked a year as current (their class name is
+            // then null). Home and Report answer with code "no_year" in that case, so the page can say so.
+            'children' => parent_list_children($conn, $parent_email, $year_id),
         ],
     ]);
 } catch (Throwable $e) {
