@@ -1692,7 +1692,7 @@
     padding: 16px;
     border-bottom: 1px solid rgba(255,255,255,0.07);
     font-size: 11px;
-    font-weight: 800;
+    font-weight: 500;
     letter-spacing: 1.5px;
     color: var(--dm-muted, #9b9c92);
     text-transform: uppercase;
@@ -1717,7 +1717,7 @@
 .an-sidebar-class-label {
     padding: 8px 16px 4px;
     font-size: 10px;
-    font-weight: 700;
+    font-weight: 500;
     color: var(--dm-muted, #9b9c92);
     text-transform: uppercase;
     letter-spacing: 0.8px;
@@ -1753,7 +1753,7 @@
 .an-sidebar-item-info { flex: 1; min-width: 0; }
 .an-sidebar-item-title {
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 400;
     color: var(--dm-soft, #c2c3b7);
     white-space: nowrap;
     overflow: hidden;
@@ -1772,15 +1772,39 @@
 .an-main-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; transition: background 0.15s ease; }
 .an-main-panel::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
 
+/* Empty state — same structure and measurements as .as-panel-empty in
+   assignments.css (title, muted body, primary button). */
 .an-panel-empty {
-    flex: 1; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; text-align: center;
-    gap: 6px; padding: 40px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 6px;
+    padding: 40px;
     font-family: var(--dm-font, 'Geist', 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif);
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--dm-text, #f0efec);
+}
+.an-panel-empty-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 400;
+    letter-spacing: -0.015em;
+    color: var(--dm-text, #f0efec);
+}
+.an-panel-empty-body {
+    margin: 0;
+    max-width: 340px;
     color: var(--dm-muted, #9b9c92);
 }
-.an-panel-empty svg { opacity: 0.25; }
-.an-panel-empty p { margin: 0; font-size: 14px; max-width: 340px; line-height: 1.5; }
+.an-panel-empty .an-dp-btn { margin-top: 16px; }
+.an-panel-empty :focus-visible {
+    outline: 2px solid var(--dm-accent, #4fd1c5);
+    outline-offset: 2px;
+}
 
 /* Detail column — same measurements and colours as .as-dp in assignments.css */
 .an-panel-content {
@@ -1995,9 +2019,15 @@
 
 /* ── New button (matches pattern used in assignments/resources) ── */
 .an-new-btn {
+    font-family: inherit;
     text-transform: none;
     letter-spacing: normal;
     font-size: 12px;
+}
+@media (min-width: 900px) {
+    .an-sidebar-header .an-new-btn { font-weight: 500; }
+    /* "Search announcements..." text in the search pill (desktop list pane only) */
+    .an-sidebar input::placeholder { color: #c2c3b7; opacity: 1; }
 }
 
 .an-school-icon {
@@ -2135,6 +2165,32 @@
 .an-panel-edit-btn:hover { background: var(--dm-hover, rgba(255,255,255,0.055)); }
 .an-panel-delete-btn { color: var(--dm-danger, #f4776f); border-color: rgba(244,119,111,0.35); }
 .an-panel-delete-btn:hover { background: rgba(244,119,111,0.08); }
+
+.an-dp-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 32px;
+    padding: 0 14px;
+    border: 1px solid var(--dm-line-strong, rgba(255,255,255,0.14));
+    border-radius: 8px;
+    background: none;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--dm-text, #f0efec);
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 0.15s ease, filter 0.15s ease;
+}
+.an-dp-btn:hover { background: var(--dm-hover, rgba(255,255,255,0.055)); text-decoration: none; }
+.an-dp-btn--primary {
+    background: var(--dm-accent, #4fd1c5);
+    border-color: var(--dm-accent, #4fd1c5);
+    color: #04211f;
+}
+.an-dp-btn--primary:hover { background: var(--dm-accent, #4fd1c5); filter: brightness(1.08); }
 
 /* ── "Edited" tag (sidebar item title) ──
    Orange accent (Claude-logo orange, #d97757) marks anything edit-related,

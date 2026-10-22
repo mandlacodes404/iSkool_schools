@@ -65,6 +65,24 @@ window.fetchTeacherResources = async function() {
     }
 };
 
+/** Escapes text for safe HTML-attribute interpolation (used for data-title,
+ * which the shared search bar reads). Local to this file so Resources doesn't
+ * depend on another page's helper being loaded. */
+function escapeTeacherResourceHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+    }[char]));
+}
+
+/** Small inline stroke icon, same 24x24 / 1.75 stroke family as asDpIcon in
+ * assignments.js. Only what the empty-state button needs. */
+function rsDpIcon(name, size) {
+    const paths = {
+        plus: '<path d="M12 5v14M5 12h14"/>'
+    };
+    return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] || ''}</svg>`;
+}
+
 function renderTeacherResources(data) {
     const apiArea = document.getElementById('api-content-area');
     if (!apiArea) return;
@@ -92,6 +110,7 @@ function renderTeacherResources(data) {
                 const flatIndex = window._allResourcesFlat.findIndex(r => r.id === item.id);
                 itemsHtml += `
                     <div class="rs-sidebar-item" id="rs-sidebar-${flatIndex}"
+                        data-title="${escapeTeacherResourceHtml(item.title)}"
                         onclick="selectDesktopResource(${flatIndex})">
                         <span class="rs-sidebar-dot" aria-hidden="true"></span>
                         <div class="rs-sidebar-item-info">
@@ -109,6 +128,18 @@ function renderTeacherResources(data) {
         });
     }
 
+    // ── Empty-state copy for the desktop main panel ──
+    const resourceCount = window._allResourcesFlat.length;
+    const videoCount    = window._allResourcesFlat.filter(r => r.resource_type === 'video').length;
+    const fileCount     = resourceCount - videoCount;
+    const classCount    = new Set(window._allResourcesFlat.map(r => r.class_name)).size;
+    const emptyTitle = resourceCount ? 'Pick a resource' : 'No resources yet';
+    const emptyBody  = resourceCount
+        ? `${resourceCount} ${resourceCount === 1 ? 'resource' : 'resources'} across ${classCount} ${classCount === 1 ? 'class' : 'classes'}. ` +
+          `${fileCount} ${fileCount === 1 ? 'file' : 'files'}, ${videoCount} ${videoCount === 1 ? 'video' : 'videos'}.`
+        : 'Upload a file or add a YouTube video and it will show up here, grouped by class.';
+    const emptyCta   = resourceCount ? 'Upload a resource' : 'Upload your first resource';
+
     // ── Build full HTML ──
     let html = `
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
@@ -124,17 +155,16 @@ function renderTeacherResources(data) {
                         New
                     </button>
                 </div>
+                ${window.buildTeacherSearchBar('rs', { placeholder: 'Search resources...' })}
                 <div class="rs-sidebar-scroll">${sidebarHtml}</div>
             </div>
             <div class="rs-main-panel tchr-flat-panel" id="rs-main-panel">
                 <div class="rs-panel-empty">
-                    <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fd1c5" stroke-width="1.5" fill="none">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14 2 14 8 20 8"></polyline>
-                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                    </svg>
-                    <p>Select a resource from the left to view it</p>
+                    <h2 class="rs-panel-empty-title">${emptyTitle}</h2>
+                    <p class="rs-panel-empty-body">${emptyBody}</p>
+                    <button type="button" class="rs-dp-btn rs-dp-btn--primary" onclick="openUploadResourceForm()">
+                        ${rsDpIcon('plus', 14)}${emptyCta}
+                    </button>
                 </div>
             </div>
 

@@ -74,6 +74,15 @@ window.fetchTeacherAnnouncements = async function() {
     }
 };
 
+/** Small inline stroke icon, same 24x24 / 1.75 stroke family as asDpIcon in
+ * assignments.js. Only what the empty-state button needs. */
+function anDpIcon(name, size) {
+    const paths = {
+        plus: '<path d="M12 5v14M5 12h14"/>'
+    };
+    return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] || ''}</svg>`;
+}
+
 function renderTeacherAnnouncements(data) {
     const apiArea = document.getElementById('api-content-area');
     if (!apiArea) return;
@@ -128,6 +137,21 @@ function renderTeacherAnnouncements(data) {
         });
     }
 
+    // ── Empty-state copy for the desktop main panel ──
+    const announcementCount = window._allAnnouncementsFlat.length;
+    const schoolCount = window._allAnnouncementsFlat.filter(a => a.is_school).length;
+    const ownCount = announcementCount - schoolCount;
+    const emptyTitle = announcementCount ? 'Pick an announcement' : 'No announcements yet';
+    const emptyBody = announcementCount
+        ? [
+            ownCount
+                ? `${ownCount} ${ownCount === 1 ? 'announcement' : 'announcements'} across your classes.`
+                : "You haven't posted any yet.",
+            schoolCount ? `${schoolCount} from the school.` : ''
+          ].filter(Boolean).join(' ')
+        : 'Post one to a class and it will show up here, grouped by class.';
+    const emptyCta = announcementCount ? 'Create an announcement' : 'Create your first announcement';
+
     // ── Full HTML (unchanged structure, added school-item styles) ──
     let html = `
         <!-- DESKTOP -->
@@ -152,11 +176,11 @@ function renderTeacherAnnouncements(data) {
 
             <div class="an-main-panel tchr-flat-panel" id="an-main-panel">
                 <div class="an-panel-empty">
-                    <svg viewBox="0 0 24 24" width="40" height="40" stroke="#4fd1c5" stroke-width="1.5" fill="none">
-                        <path d="M11 5L6 9H2v6h4l5 4V5z"/>
-                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
-                    </svg>
-                    <p>Select an announcement to read it</p>
+                    <h2 class="an-panel-empty-title">${emptyTitle}</h2>
+                    <p class="an-panel-empty-body">${emptyBody}</p>
+                    <button type="button" class="an-dp-btn an-dp-btn--primary" onclick="openCreateAnnouncementForm()">
+                        ${anDpIcon('plus', 14)}${emptyCta}
+                    </button>
                 </div>
             </div>
 

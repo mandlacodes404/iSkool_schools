@@ -94,6 +94,7 @@ function renderTeacherEvaluations(data) {
                 const key = `${gIdx}-${eIdx}`;
                 itemsHtml += `
                     <div class="ev-sidebar-item" id="ev-sidebar-${key}"
+                        data-title="${escapeTeacherEvalHtml(ev.title)}"
                         onclick="selectDesktopEval(${gIdx}, ${eIdx})">
                         <span class="ev-sidebar-dot" aria-hidden="true"></span>
                         <div class="ev-sidebar-item-info">
@@ -139,6 +140,7 @@ function renderTeacherEvaluations(data) {
                         New
                     </button>
                 </div>
+                ${window.buildTeacherSearchBar('ev', { placeholder: 'Search evaluations...' })}
                 <div class="ev-sidebar-scroll">
                     ${sidebarHtml}
                 </div>

@@ -31,7 +31,7 @@
     padding: 16px;
     border-bottom: 1px solid rgba(255,255,255,0.07);
     font-size: 11px;
-    font-weight: 800;
+    font-weight: 500;
     letter-spacing: 1.5px;
     color: var(--dm-muted, #9b9c92);
     text-transform: uppercase;
@@ -56,7 +56,7 @@
 .rs-sidebar-class-label {
     padding: 8px 16px 4px;
     font-size: 10px;
-    font-weight: 700;
+    font-weight: 500;
     color: var(--dm-muted, #9b9c92);
     text-transform: uppercase;
     letter-spacing: 0.8px;
@@ -92,7 +92,7 @@
 .rs-sidebar-item-info { flex: 1; min-width: 0; }
 .rs-sidebar-item-title {
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 400;
     color: var(--dm-soft, #c2c3b7);
     white-space: nowrap;
     overflow: hidden;
@@ -297,6 +297,8 @@
 .rs-main-panel::-webkit-scrollbar-track { background: transparent; }
 .rs-main-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
 
+/* Empty state — same structure and measurements as .as-panel-empty in
+   assignments.css (title, muted body, primary button). */
 .rs-panel-empty {
     flex: 1;
     display: flex;
@@ -307,10 +309,27 @@
     gap: 6px;
     padding: 40px;
     font-family: var(--dm-font, 'Geist', 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif);
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--dm-text, #f0efec);
+}
+.rs-panel-empty-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 400;
+    letter-spacing: -0.015em;
+    color: var(--dm-text, #f0efec);
+}
+.rs-panel-empty-body {
+    margin: 0;
+    max-width: 340px;
     color: var(--dm-muted, #9b9c92);
 }
-.rs-panel-empty svg { opacity: 0.3; }
-.rs-panel-empty p { font-size: 14px; margin: 0; max-width: 340px; }
+.rs-panel-empty .rs-dp-btn { margin-top: 16px; }
+.rs-panel-empty :focus-visible {
+    outline: 2px solid var(--dm-accent, #4fd1c5);
+    outline-offset: 2px;
+}
 
 /* Detail column — same measurements and colours as .as-dp in assignments.css */
 .rs-panel-content {
@@ -397,11 +416,43 @@
 .rs-panel-delete-btn { color: var(--dm-danger, #f4776f); border-color: rgba(244,119,111,0.35); }
 .rs-panel-delete-btn:hover { background: rgba(244,119,111,0.08); }
 
+.rs-dp-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 32px;
+    padding: 0 14px;
+    border: 1px solid var(--dm-line-strong, rgba(255,255,255,0.14));
+    border-radius: 8px;
+    background: none;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--dm-text, #f0efec);
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 0.15s ease, filter 0.15s ease;
+}
+.rs-dp-btn:hover { background: var(--dm-hover, rgba(255,255,255,0.055)); text-decoration: none; }
+.rs-dp-btn--primary {
+    background: var(--dm-accent, #4fd1c5);
+    border-color: var(--dm-accent, #4fd1c5);
+    color: #04211f;
+}
+.rs-dp-btn--primary:hover { background: var(--dm-accent, #4fd1c5); filter: brightness(1.08); }
+
 /* ── New button (matches assignments.css pattern) ── */
 .rs-new-btn {
+    font-family: inherit;
     text-transform: none;
     letter-spacing: normal;
     font-size: 12px;
+}
+@media (min-width: 900px) {
+    .rs-sidebar-header .rs-new-btn { font-weight: 500; }
+    /* "Search resources..." text in the search pill (desktop list pane only) */
+    .rs-sidebar input::placeholder { color: #c2c3b7; opacity: 1; }
 }
 
 .rs-error-message {
