@@ -1106,3 +1106,114 @@ html[data-learner-theme="light"] .grades-mobile-layout .dist-legend-dot--avg  { 
 html[data-learner-theme="light"] .grades-mobile-layout .dist-legend-dot--high { color: #16a34a; }
 
 }
+
+/* ═══ Light mode: learner Grades (phones) ══════════════════════════════════════════════════════════════════
+   Phones only (max-width: 768px), switched on by <html data-learner-mobile-theme="light"> (mobile_theme.js).
+   The page shell (page background, header, bottom nav, profile dropdown) is in mobile_light.css, which finds this page
+   by its markup: .grades-mobile-layout (the accordion, its empty state and everything opened inside it) and
+   .grades-error-state (the fetch error). This block colours what is inside the page: the search box, the Progress
+   Report button, the subject accordion, the quiz rows and their score pills, the Term Marks table and the
+   performance overview (score ring and class distribution bar). Same palette as the desktop light block above and the
+   phone-style accordion it already has for 769px to 899px; the difference is that on phones the accordion is flat
+   (no card), so the rows sit straight on the cream page and use the darker #dfded8 line.
+   Not in this block: the Progress Report and the quiz Review. On phones they open as full-screen sheets appended to
+   <body> (#prReportModal, styled by the css grades.js injects), not inside the page, so they stay dark for now.
+   Dark mode and desktop are untouched, and grades.js needs no change.
+   To remove it, delete this block, the two grades markers in mobile_light.css and the same two in PAGE in mobile_theme.js. */
+@media (max-width: 768px) {
+
+html[data-learner-mobile-theme="light"] .grades-mobile-layout { color: #282924; color-scheme: light; }
+
+/* search box and the Progress Report button */
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .grades-search { background: #ffffff; border: 1px solid #dfded8; color: #282924; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .grades-search:focus { border-color: #bdbcb4; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .grades-search::placeholder { color: #8b8b83; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .grades-report-btn { background: rgba(21,128,61,.08); color: #15803d; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .grades-report-btn:hover { background: rgba(21,128,61,.13); }
+
+/* subject accordion: flat rows divided by a line; the open one gets a faint tint */
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .subject-card,
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .subject-card:hover { border-bottom-color: #dfded8; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .subject-header:not(.subject-header--collapsed) { background: rgba(38,39,35,.04); }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .subject-name { color: #282924; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .subject-count { color: #73746d; background: rgba(38,39,35,.06); }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .subject-chevron { color: #8b8b83; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .subject-name svg[stroke="#68d391" i] { stroke: #15803d; }
+
+/* Quiz List / Term Marks switch */
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .view-toggle-bar { border-bottom-color: #ebeae5; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .view-toggle-btn { color: #73746d; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .view-toggle-btn:hover,
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .view-toggle-btn.active-view { background: rgba(21,128,61,.08); color: #15803d; }
+
+/* quiz rows (the hover rule is repeated because a tap leaves :hover on, and the dark phone css sets it too) */
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-row,
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-row:hover:not(.quiz-unpublished) { background: rgba(38,39,35,.025); border-color: #dfded8; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-row-title,
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-row-title a,
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-row-title a:hover,
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-title-link { color: #282924; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-unpublished .quiz-row-title { color: #73746d; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-row-icon svg[stroke="#68d391" i] { stroke: #15803d; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-row-icon svg[stroke="#f85149" i] { stroke: #bd4a43; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-score-pill.high { background: rgba(21,128,61,.10); color: #15803d; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-score-pill.mid  { background: rgba(44,122,75,.10); color: #2c7a4b; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-score-pill.low  { background: rgba(189,74,67,.09); color: #bd4a43; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-score-pill.hidden-score { background: rgba(38,39,35,.06); color: #73746d; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-grading-status.pending,
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-grading-status.partial { color: #b85f12; background: rgba(184,95,18,.09); border-color: rgba(184,95,18,.30); }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-grading-status.done { color: #15803d; background: rgba(21,128,61,.08); border-color: rgba(21,128,61,.28); }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-expand-btn { color: #8b8b83; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-expand-btn:hover { color: #15803d; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-row-details { background: rgba(38,39,35,.03); border-top-color: #ebeae5; color: #73746d; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-row-details strong { color: #282924; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .grades-status-text--done { color: #15803d; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .grades-status-text--pending { color: #b85f12; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .grades-unpublished-note { color: #73746d; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .summative-badge { color: #15803d; border-color: rgba(21,128,61,.30); }
+
+/* Term Marks table */
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .term-selector { background: #ffffff; border-color: #d0cfc8; color: #282924; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .term-selector:focus { border-color: #bdbcb4; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .term-table-wrap { border-color: #dfded8; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .term-table th { color: #15803d; background: rgba(38,39,35,.03); border-bottom-color: #dfded8; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .term-table td { color: #53544e; border-bottom-color: #ebeae5; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .term-table-total td { color: #15803d; border-top-color: rgba(21,128,61,.30) !important; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .term-total-result,
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .term-table-earned { color: #15803d; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .term-still-pending,
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .no-summative { color: #73746d; }
+
+/* empty state ("No grades yet") */
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .grades-mobile-empty { color: #73746d; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .grades-mobile-empty-title { color: #282924; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .grades-mobile-empty-body { color: #73746d; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .grades-mobile-empty svg[stroke="#68d391" i] { stroke: #15803d; }
+
+/* performance overview inside an opened row: score ring and the class distribution bar */
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .grade-inline-stats { background: rgba(38,39,35,.025); border-color: #dfded8; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .grade-inline-stats.loading,
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .grade-inline-stats.error { color: #73746d; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .grade-inline-title,
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .score-circle-text { color: #282924; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .score-out-of,
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .dist-labels { color: #73746d; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .sc-track { stroke: rgba(38,39,35,.08); }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .sc-fill { stroke: #15803d; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .dist-bar-wrap { background: rgba(38,39,35,.08); }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .dist-marker.me { border-color: #15803d; box-shadow: 0 1px 3px rgba(38,39,35,.25); }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .dist-line.low  { background: #bd4a43; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .dist-line.avg  { background: #d97706; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .dist-line.high { background: #16a34a; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .dist-tip { background: #252624; border-color: #252624; color: #ffffff; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .dist-tip::after { border-top-color: #252624; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .dist-legend { background: rgba(38,39,35,.03); color: #73746d; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .dist-legend-dot--me   { color: #15803d; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .dist-legend-dot--low  { color: #bd4a43; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .dist-legend-dot--avg  { color: #d97706; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .dist-legend-dot--high { color: #16a34a; }
+
+/* fetch error */
+html[data-learner-mobile-theme="light"] .grades-error-state { color: #bd4a43; }
+
+}

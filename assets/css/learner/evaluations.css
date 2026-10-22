@@ -1080,3 +1080,89 @@ html[data-learner-theme="light"] .lev-completed-state [stroke="#22c55e" i] { str
 html[data-learner-theme="light"] .eval-error-state { color: #bd4a43; }
 
 }
+
+/* ═══ Light mode: learner Evaluations (phones) ═════════════════════════════════════════════════════════════
+   Phones only (max-width: 768px), switched on by <html data-learner-mobile-theme="light"> (mobile_theme.js).
+   The page shell (page background, header, bottom nav, profile dropdown) is in mobile_light.css, which finds this page
+   by its markup: .lev-mobile-list (the list and its empty states), .lev-mobile-detail (an open evaluation, its form
+   and the completed state) and .eval-error-state (the fetch error). This block colours what is inside the page: the
+   search box, the teacher folders, the evaluation rows, the detail header, the description and statement cards,
+   the answer options, the comments box, the Submit button, the completed state and the error. Same palette as the
+   desktop light block above and the other phone pages (Resources, Announcements, Assignments, Quiz).
+   Dark mode and desktop are untouched, and evaluations.js needs no change (the blue and green icon strokes it sets
+   are darkened here, the same way the 769px to 899px block does it).
+   To remove it, delete this block, the three .lev-/.eval- markers in mobile_light.css and the same three in PAGE in mobile_theme.js. */
+@media (max-width: 768px) {
+
+/* search box */
+html[data-learner-mobile-theme="light"] .lev-mobile-search-wrap svg { color: #282924; }
+html[data-learner-mobile-theme="light"] .lev-mobile-search { background: #ffffff; border: 1px solid #dfded8; color: #282924; }
+html[data-learner-mobile-theme="light"] .lev-mobile-search:focus { border-color: #bdbcb4; }
+html[data-learner-mobile-theme="light"] .lev-mobile-search::placeholder { color: #8b8b83; }
+
+/* teacher folders */
+html[data-learner-mobile-theme="light"] .lev-mobile-folder-header { border-bottom-color: #dfded8; }
+html[data-learner-mobile-theme="light"] .lev-mobile-folder-header:active,
+html[data-learner-mobile-theme="light"] .lev-mobile-folder-header:not(.lev-mobile-folder-header--collapsed) { background: rgba(38,39,35,.04); }
+html[data-learner-mobile-theme="light"] .lev-mobile-folder-name { color: #282924; }
+html[data-learner-mobile-theme="light"] .lev-mobile-folder-count { color: #73746d; background: rgba(38,39,35,.06); }
+html[data-learner-mobile-theme="light"] .lev-mobile-folder-chevron,
+html[data-learner-mobile-theme="light"] .lev-mobile-row-chevron { color: #8b8b83; }
+
+/* evaluation rows */
+html[data-learner-mobile-theme="light"] .lev-mobile-row-title { color: #282924; }
+html[data-learner-mobile-theme="light"] .lev-mobile-row-meta { color: #73746d; }
+html[data-learner-mobile-theme="light"] .lev-mobile-row::after { background: #ebeae5; }
+html[data-learner-mobile-theme="light"] .lev-mobile-row:active { background: rgba(38,39,35,.04); }
+
+/* the blue accent (#4fa8fd) set as a stroke on the folder, row, empty-state and badge icons becomes a darker blue */
+html[data-learner-mobile-theme="light"] .lev-mobile-list [stroke="#4fa8fd" i],
+html[data-learner-mobile-theme="light"] .lev-mobile-detail [stroke="#4fa8fd" i] { stroke: #1d6fb8; }
+
+/* empty states ("No evaluations yet", "Not enrolled yet") */
+html[data-learner-mobile-theme="light"] .lev-mobile-empty { color: #8b8b83; }
+html[data-learner-mobile-theme="light"] .lev-mobile-empty-title { color: #282924; }
+html[data-learner-mobile-theme="light"] .lev-mobile-empty-body { color: #73746d; }
+
+/* an open evaluation: badge, author row and title */
+html[data-learner-mobile-theme="light"] .lev-mobile-detail-badge,
+html[data-learner-mobile-theme="light"] .lev-mobile-detail-avatar { color: #1d6fb8; border-color: rgba(29,111,184,.35); background: rgba(29,111,184,.08); }
+html[data-learner-mobile-theme="light"] .lev-mobile-detail-role-badge { color: #1d6fb8; }
+html[data-learner-mobile-theme="light"] .lev-mobile-detail-role-sep { color: #8b8b83; }
+html[data-learner-mobile-theme="light"] .lev-mobile-detail-title { color: #282924; border-bottom-color: #dfded8; }
+html[data-learner-mobile-theme="light"] .lev-mobile-detail-author-name { color: #282924; }
+html[data-learner-mobile-theme="light"] .lev-mobile-detail-author-role,
+html[data-learner-mobile-theme="light"] .lev-mobile-detail-posted { color: #73746d; }
+
+/* description and the statements */
+html[data-learner-mobile-theme="light"] .lev-mobile-detail .eval-description { background: rgba(38,39,35,.03); border-left-color: #1d6fb8; color: #53544e; }
+html[data-learner-mobile-theme="light"] .lev-mobile-detail .question-text { color: #282924; border-left-color: #1d6fb8; }
+
+/* answer options: white rows, a grey ring, and the darker blue when hovered or selected */
+html[data-learner-mobile-theme="light"] .lev-mobile-detail .option-label span { color: #53544e; background: #ffffff; border-color: #dfded8; }
+html[data-learner-mobile-theme="light"] .lev-mobile-detail .option-label span::before { border-color: #bdbcb4; }
+html[data-learner-mobile-theme="light"] .lev-mobile-detail .option-label:hover span { color: #282924; background: rgba(29,111,184,.05); border-color: rgba(29,111,184,.40); }
+html[data-learner-mobile-theme="light"] .lev-mobile-detail .option-label:hover span::before { border-color: #1d6fb8; }
+html[data-learner-mobile-theme="light"] .lev-mobile-detail .option-label input[type="radio"]:checked + span { color: #282924; background: rgba(29,111,184,.08); border-color: #1d6fb8; }
+html[data-learner-mobile-theme="light"] .lev-mobile-detail .option-label input[type="radio"]:checked + span::before {
+    background: #1d6fb8;
+    border-color: #1d6fb8;
+    box-shadow: 0 0 0 3px rgba(29,111,184,.15);
+}
+
+/* comments box and the Submit button (dark with white text, like the primary buttons on the other pages) */
+html[data-learner-mobile-theme="light"] .lev-mobile-detail .lev-comments-field label { color: #282924; }
+html[data-learner-mobile-theme="light"] .lev-mobile-detail .lev-comments-field textarea { color: #282924; background: #ffffff; border-color: #d0cfc8; }
+html[data-learner-mobile-theme="light"] .lev-mobile-detail .lev-comments-field textarea:focus { outline: none; border-color: #187a72; box-shadow: 0 0 0 3px rgba(24,122,114,.14); }
+html[data-learner-mobile-theme="light"] .lev-mobile-detail .eval-submit-btn { background: #252624; color: #ffffff; }
+html[data-learner-mobile-theme="light"] .lev-mobile-detail .eval-submit-btn:hover { background: #3a3b37; }
+
+/* completed state */
+html[data-learner-mobile-theme="light"] .lev-completed-title { color: #15803d; }
+html[data-learner-mobile-theme="light"] .lev-completed-copy { color: #73746d; }
+html[data-learner-mobile-theme="light"] .lev-completed-state [stroke="#22c55e" i] { stroke: #16a34a; }
+
+/* fetch error ("Error loading evaluations.") */
+html[data-learner-mobile-theme="light"] .eval-error-state { color: #bd4a43; }
+
+}
