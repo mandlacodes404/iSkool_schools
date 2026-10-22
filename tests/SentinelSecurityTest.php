@@ -161,6 +161,60 @@ final class SentinelSecurityTest extends TestCase
         $this->assertStringNotContainsString('document.write', $js);
     }
 
+    public function test_parent_registration_with_an_invite_is_for_parents_only_rate_limited_and_all_or_nothing(): void
+    {
+        $register = $this->source('auth/register_ajax.php');
+
+        // Only a parent who left the access key empty, and only a cookie shaped like an invite code, uses an invite
+        $this->assertStringContainsString("\$role === 'parent' && \$access_key === ''", $register);
+        $this->assertStringContainsString("parent_invite_is_valid_code_format(\$cookie_code)", $register);
+        // The access key is only checked when there is no invite, so the usual path is unchanged
+        $this->assertMatchesRegularExpression('/if \(\$use_invite\) \{.*?\} else \{\s*\$keyStmt = \$conn->prepare\("SELECT id FROM access_keys WHERE role = \? AND access_key = \?"\);/s', $register);
+        // Wrong codes are counted by IP and blocked before the invite is looked up, and every bad code gets one message
+        $this->assertMatchesRegularExpression('/auth_rate_limit_is_blocked\(\$conn, \'parent_invite_register\', \'ip\'.*?parent_invite_find_open/s', $register);
+        $this->assertMatchesRegularExpression('/parent_invite_find_open.*?auth_rate_limit_record_attempt\(\$conn, \'parent_invite_register\'/s', $register);
+        // Ten wrong codes in 15 minutes from one address, the same limit as signing in
+        $this->assertStringContainsString("auth_rate_limit_is_blocked(\$conn, 'parent_invite_register', 'ip', \$client_ip, 10, \$window)", $register);
+        $this->assertStringContainsString('$window    = 15 * 60;', $register);
+        // The account, the claim on the invite and the link are one transaction: claim lost means rollback
+        $this->assertMatchesRegularExpression('/begin_transaction\(\).*?INSERT INTO users.*?parent_invite_claim.*?rollback\(\).*?parent_invite_link.*?commit\(\)/s', $register);
+        $this->assertStringContainsString('catch (Throwable $e)', $register);
+        // A spent invite must not send the parent back to a dead link after login
+        $this->assertMatchesRegularExpression("/setcookie\('pending_parent_invite', ''/", $register);
+        // The invite code is never echoed back
+        $this->assertDoesNotMatchRegularExpression('/echo[^;]*\$invite_code/', $register);
+    }
+
+    public function test_parent_invite_database_helpers_use_prepared_statements_and_claim_once(): void
+    {
+        $db = $this->source('auth/parent_invite_db.php');
+
+        $this->assertStringContainsString('WHERE code_hash = ? LIMIT 1', $db);
+        $this->assertStringContainsString('parent_invite_is_valid_code_format($code)', $db);
+        // Only one caller can flip used_at from NULL
+        $this->assertStringContainsString('WHERE id = ? AND used_at IS NULL', $db);
+        // The learner must still be an active learner account
+        $this->assertStringContainsString("role = 'learner' AND is_deleted = 0", $db);
+        // The invite is found by its hash; nothing from the request is put into a query
+        $this->assertStringNotContainsString('$_', $db);
+        $this->assertStringNotContainsString('code_hash = \'', $db);
+    }
+
+    public function test_register_form_only_drops_the_access_key_for_a_parent_with_an_invite(): void
+    {
+        $index = $this->source('index.php');
+        // The page only checks the shape of the cookie; register_ajax.php checks the invite itself
+        $this->assertStringContainsString("parent_invite_is_valid_code_format(\$_COOKIE['pending_parent_invite'] ?? '')", $index);
+        $this->assertStringContainsString("sel.value === 'parent'", $index);
+        // The form can be opened on the register tab by a fixed value, never by echoing the request
+        $this->assertStringContainsString("(\$_GET['form'] ?? '') === 'register'", $index);
+        $this->assertStringNotContainsString('echo $_GET', $index);
+
+        $link = $this->source('parent_link.php');
+        $this->assertStringContainsString('index.php?form=register', $link);
+        $this->assertStringNotContainsString('needs the parent access key', $link);
+    }
+
     public function test_parent_app_add_child_sends_the_csrf_token_and_only_calls_the_redeem_endpoint(): void
     {
         $page = $this->source('parent_dashboard.php');
