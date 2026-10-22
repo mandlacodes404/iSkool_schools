@@ -62,7 +62,7 @@ final class MobileLightModeTest extends TestCase
 
         // The pages the script treats as light must be the pages the css gate lets through.
         $this->assertSame(1, preg_match("/var PAGE = '([^']+)';/", $js, $m));
-        $from_js = array_map('trim', explode(',', str_replace('#api-content-area ', '', $m[1])));
+        $from_js = array_map('trim', explode(',', $m[1]));
         $this->assertSame($this->gate_markers($this->source('assets/css/learner/mobile_light.css')), $from_js);
     }
 
@@ -71,5 +71,44 @@ final class MobileLightModeTest extends TestCase
         $page = $this->source('learner_dashboard.php');
         $this->assertSame(1, substr_count($page, 'assets/js/learner/mobile_theme.js'));
         $this->assertLessThan(strpos($page, '</head>'), strpos($page, 'assets/js/learner/mobile_theme.js'));
+    }
+
+    public function test_every_marker_in_the_gate_is_markup_a_page_really_draws(): void
+    {
+        // A typo in a marker would leave that page dark with no error, so each one must exist in its page's script.
+        $where = [
+            '.ms'                  => 'assets/js/learner/mobile_settings.js',
+            'las-mobile'           => 'assets/js/learner/assignments.js',
+            'las-error-state'      => 'assets/js/learner/assignments.js',
+            'lqz-mobile-list'      => 'assets/js/learner/quiz.js',
+            'inst-container'       => 'assets/js/learner/quiz.js',
+            'lqz-retry-btn'        => 'assets/js/learner/quiz.js',
+            'lrs-mobile-list'      => 'assets/js/learner/resources.js',
+            'lrs-error-state'      => 'assets/js/learner/resources.js',
+        ];
+        $markers = implode(' ', $this->gate_markers($this->source('assets/css/learner/mobile_light.css')));
+        foreach ($where as $needle => $file) {
+            $this->assertStringContainsString(ltrim($needle, '.'), $markers, $needle . ' is not in the gate');
+            $this->assertStringContainsString(ltrim($needle, '.') === 'ms' ? 'class="ms' : ltrim($needle, '.'), $this->source($file), $needle . ' is not drawn by ' . $file);
+        }
+    }
+
+    public function test_quiz_and_resources_phone_light_blocks_only_apply_to_phones_in_light(): void
+    {
+        foreach (['assets/css/learner/quiz.css' => ['.lqz-mobile-row-title', '.inst-container .start-btn', '.lqz-retry-btn'],
+                  'assets/css/learner/resources.css' => ['.lrs-mobile-row-title', '.lrs-mobile-video-title', '.lrs-error-state']] as $file => $selectors) {
+            $css = $this->source($file);
+            // the phone block is the last @media (max-width: 768px) in the file, and every rule inside it is for light
+            $start = strrpos($css, '@media (max-width: 768px) {');
+            $this->assertNotFalse($start, $file . ' has no phone light block');
+            $block = substr($css, $start);
+            // the first word of every line that starts a rule (they all start with "html")
+            preg_match_all('/^(html\S*)/m', $block, $m);
+            $this->assertNotEmpty($m[1]);
+            $this->assertSame(['html[data-learner-mobile-theme="light"]'], array_values(array_unique($m[1])), $file . ': every rule in the phone block must start with the light attribute');
+            foreach ($selectors as $sel) {
+                $this->assertStringContainsString('html[data-learner-mobile-theme="light"] ' . $sel, $block, $file . ' misses ' . $sel);
+            }
+        }
     }
 }

@@ -702,3 +702,46 @@ html[data-learner-theme="light"] .lrs-mobile-video-meta [fill="#ff4444" i] { fil
 html[data-learner-theme="light"] .lrs-error-state { color: #bd4a43; }
 
 }
+
+
+/* ── Phones (768px and narrower): light mode ───────────────────────────────────────────────────────────
+   Applies only when <html data-learner-mobile-theme="light"> (mobile_theme.js, Settings > Appearance) and only while
+   the resources list or its error state is on screen (the gate in mobile_light.css). Dark mode and 769px and wider
+   are untouched. Same rules and palette as the 769-899px block above, which already restyles this phone-style list
+   for the desktop light mode; resources.js needs no change. The page background, header and bottom nav are in
+   mobile_light.css. Not here: the file viewer that opens when a file is tapped, which stays dark for now.
+   To remove it, delete this block. */
+@media (max-width: 768px) {
+
+html[data-learner-mobile-theme="light"] .lrs-mobile-folder-header { border-bottom-color: #dfded8; }
+html[data-learner-mobile-theme="light"] .lrs-mobile-folder-header:active,
+html[data-learner-mobile-theme="light"] .lrs-mobile-folder-header:not(.lrs-mobile-folder-header--collapsed) { background: rgba(38,39,35,.04); }
+html[data-learner-mobile-theme="light"] .lrs-mobile-folder-name,
+html[data-learner-mobile-theme="light"] .lrs-mobile-row-title,
+html[data-learner-mobile-theme="light"] .lrs-mobile-video-title { color: #282924; }
+html[data-learner-mobile-theme="light"] .lrs-mobile-folder-count { color: #73746d; background: rgba(38,39,35,.06); }
+html[data-learner-mobile-theme="light"] .lrs-mobile-folder-chevron,
+html[data-learner-mobile-theme="light"] .lrs-mobile-row-chevron { color: #8b8b83; }
+html[data-learner-mobile-theme="light"] .lrs-mobile-row::after,
+html[data-learner-mobile-theme="light"] .lrs-mobile-video-card::after { background: #ebeae5; }
+html[data-learner-mobile-theme="light"] .lrs-mobile-row:active { background: rgba(38,39,35,.04); }
+html[data-learner-mobile-theme="light"] .lrs-mobile-row-size,
+html[data-learner-mobile-theme="light"] .lrs-mobile-video-meta { color: #73746d; }
+html[data-learner-mobile-theme="light"] .lrs-bullet-muted { color: #bdbcb4; }
+html[data-learner-mobile-theme="light"] .lrs-mobile-search-wrap svg { color: #282924; }
+html[data-learner-mobile-theme="light"] .lrs-mobile-search { background: #ffffff; border: 1px solid #dfded8; color: #282924; }
+html[data-learner-mobile-theme="light"] .lrs-mobile-search:focus { border-color: #bdbcb4; }
+html[data-learner-mobile-theme="light"] .lrs-mobile-search::placeholder { color: #8b8b83; }
+html[data-learner-mobile-theme="light"] .lrs-mobile-empty-title { color: #282924; }
+html[data-learner-mobile-theme="light"] .lrs-mobile-empty-body { color: #73746d; }
+
+/* the orange accent (#f28c38) on the folder, file and empty-state icons, and the red YouTube mark on video cards,
+   darkened so they read on a light page (same orange as the Quiz status text) */
+html[data-learner-mobile-theme="light"] .lrs-mobile-list [stroke="#f28c38" i] { stroke: #b85f12; }
+html[data-learner-mobile-theme="light"] .lrs-mobile-list [fill="#f28c38" i] { fill: #b85f12; }
+html[data-learner-mobile-theme="light"] .lrs-mobile-video-meta [fill="#ff4444" i] { fill: #dc2626; }
+
+/* fetch error state */
+html[data-learner-mobile-theme="light"] .lrs-error-state { color: #bd4a43; }
+
+}
