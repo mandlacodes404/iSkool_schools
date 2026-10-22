@@ -2337,6 +2337,16 @@ window.prCloseInfoModal = function () {
 // it's the one color the overlay can never reach.
 // ─────────────────────────────────────────────────────────────────────────────
 const SHEET_OVERLAY_DIMMED_COLOR = '#0e0e0e'; // #20201f composited under rgba(0,0,0,0.55)
+// Light mode on phones (see the "Light mode: learner Grades sheets and modals (phones)" block in grades.css): the page under the
+// sheet is #faf9f5 and the overlay is rgba(38,39,35,0.38), so the bar is #faf9f5 composited under that.
+const SHEET_OVERLAY_DIMMED_COLOR_LIGHT = '#a9a9a5';
+
+// Same condition as the css: phones, light chosen, and the Grades page is what is under the sheet.
+function sheetsAreLight() {
+    return window.innerWidth <= 768 &&
+        document.documentElement.getAttribute('data-learner-mobile-theme') === 'light' &&
+        !!document.querySelector('#api-content-area .grades-mobile-layout');
+}
 
 function darkenBrowserBarForSheet() {
     if (window.innerWidth > 899) return null;
@@ -2346,8 +2356,10 @@ function darkenBrowserBarForSheet() {
         themeColor: themeColorMeta ? themeColorMeta.getAttribute('content') : null,
         headerBg: mainHeader ? mainHeader.style.background : ''
     };
-    if (themeColorMeta) themeColorMeta.setAttribute('content', SHEET_OVERLAY_DIMMED_COLOR);
-    if (mainHeader) mainHeader.style.background = '#20201f';
+    const light = sheetsAreLight();
+    if (themeColorMeta) themeColorMeta.setAttribute('content', light ? SHEET_OVERLAY_DIMMED_COLOR_LIGHT : SHEET_OVERLAY_DIMMED_COLOR);
+    // light: the header stays cream (mobile_light.css) and the overlay dims it, so it is not forced dark
+    if (mainHeader && !light) mainHeader.style.background = '#20201f';
     return saved;
 }
 

@@ -230,7 +230,7 @@ $parentLink = ((int)$parentCount > 0); // true when at least one parent is linke
     <link rel="stylesheet" href="assets/css/learner/announcements.css?v=3.8">
     <link rel="stylesheet" href="assets/css/learner/assignments.css?v=3.7">
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
-    <link rel="stylesheet" href="assets/css/learner/grades.css?v=3.8">
+    <link rel="stylesheet" href="assets/css/learner/grades.css?v=3.9">
     <link rel="stylesheet" href="assets/css/learner/resources.css?v=2.9">
      <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=5.0">
      <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=13.8">
@@ -240,7 +240,7 @@ $parentLink = ((int)$parentCount > 0); // true when at least one parent is linke
     <link rel="stylesheet" href="assets/css/learner/mobile_class.css?v=1.1">
     <link rel="stylesheet" href="assets/css/learner/parent_invite.css?v=1.0">
     <link rel="stylesheet" href="assets/css/learner/desktop_settings.css?v=1.4">   <!-- new -->
-    <link rel="stylesheet" href="assets/css/learner/mobile_light.css?v=1.4">
+    <link rel="stylesheet" href="assets/css/learner/mobile_light.css?v=1.5">
     <link rel="stylesheet" href="assets/css/splash_light.css?v=<?= (int) @filemtime(__DIR__ . '/assets/css/splash_light.css') ?>">
     <script>
     // Desktop sidebar: restore the saved collapsed state BEFORE first paint (no flash).
@@ -3966,7 +3966,7 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/assignments.js?v=10.3"></script>
 <script src="assets/js/learner/resources.js?v=8.8"></script>
 <script src="assets/js/learner/announcements.js?v=9.4"></script>
-<script src="assets/js/learner/grades.js?v=10.3"></script>
+<script src="assets/js/learner/grades.js?v=10.4"></script>
 <script src="assets/js/learner/evaluations.js?v=7.3"></script>
 <script src="assets/js/learner/discussions.js?v=11.2"></script>
 <script src="assets/js/learner/syllabus.js?v=4.3"></script>

@@ -1116,8 +1116,8 @@ html[data-learner-theme="light"] .grades-mobile-layout .dist-legend-dot--high { 
    performance overview (score ring and class distribution bar). Same palette as the desktop light block above and the
    phone-style accordion it already has for 769px to 899px; the difference is that on phones the accordion is flat
    (no card), so the rows sit straight on the cream page and use the darker #dfded8 line.
-   Not in this block: the Progress Report and the quiz Review. On phones they open as full-screen sheets appended to
-   <body> (#prReportModal, styled by the css grades.js injects), not inside the page, so they stay dark for now.
+   The Progress Report and quiz Review sheets and the info modals are not inside the page (they are appended to <body>
+   and styled by the css grades.js injects), so they have their own block at the end of this file.
    Dark mode and desktop are untouched, and grades.js needs no change.
    To remove it, delete this block, the two grades markers in mobile_light.css and the same two in PAGE in mobile_theme.js. */
 @media (max-width: 768px) {
@@ -1215,5 +1215,130 @@ html[data-learner-mobile-theme="light"] .grades-mobile-layout .dist-legend-dot--
 
 /* fetch error */
 html[data-learner-mobile-theme="light"] .grades-error-state { color: #bd4a43; }
+
+}
+
+
+/* ═══ Light mode: learner Grades sheets and modals (phones) ════════════════════════════════════════════════
+   Phones only (max-width: 768px), switched on by <html data-learner-mobile-theme="light"> (mobile_theme.js).
+   Covers what grades.js appends to <body> on phones: the Progress Report sheet (#prReportModal), the quiz Review sheet
+   (the same overlay, with .review-modal-sheet) and the small centred info dialog opened by "Learn more" and the
+   status pill (#prInfoModal). Their css is injected by grades.js as <style id="pr-styles"> AFTER this file loads, so
+   every rule here carries the extra html[...] and :has( ) selectors to win on specificity, not on order.
+   They only go light while the Grades page is what is under them: the :has( ) looks for .grades-mobile-layout inside
+   #api-content-area, the same marker mobile_light.css uses. If one of them is ever opened from a page that is still
+   dark, it stays dark with that page.
+   The colours are the same as the desktop Progress Report block above and the page block before this one. The overlay
+   is the same warm 38% as the desktop modals instead of 55% black, and grades.js uses the matching status bar colour
+   (sheetsAreLight() / SHEET_OVERLAY_DIMMED_COLOR_LIGHT). Dark mode and desktop are untouched.
+   To remove it, delete this block and the light branch in darkenBrowserBarForSheet() in grades.js. */
+@media (max-width: 768px) {
+
+/* sheet shell: the cream page colour, a lighter dim over the page, a dark grabber */
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-modal-overlay,
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-overlay { color-scheme: light; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-modal-overlay { background: rgba(38,39,35,.38); }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-modal-sheet { background: #faf9f5; color: #282924; box-shadow: 0 -8px 30px rgba(31,32,29,.14); }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-modal-grabber { background: rgba(38,39,35,.22); }
+
+/* ── Progress Report ── */
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-hero-school,
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-hero-class,
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-hero-trenditem-t,
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-hero-avglabel,
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-hero-trendlabel,
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-subjects-title,
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-subject-v2-meta,
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-empty { color: #73746d; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-hero-name,
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-subject-v2-name { color: #282924; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-hero-idrow,
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-hero-trendrow,
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-footer-legend { border-color: #dfded8; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-subject-row-v2 { border-top-color: #ebeae5; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-hero-avatar { background: rgba(21,128,61,.09); color: #15803d; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-hero-trenditem.pr-hero-trend-current .pr-hero-trenditem-t { color: #15803d; }
+
+/* A / B / C / D badges on the subject rows and in the legend */
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-grade-a { background: rgba(21,128,61,.10);  color: #15803d; border-color: rgba(21,128,61,.28); }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-grade-b { background: rgba(43,95,184,.09);  color: #2b5fb8; border-color: rgba(43,95,184,.28); }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-grade-c { background: rgba(184,95,18,.10);  color: #b85f12; border-color: rgba(184,95,18,.30); }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-grade-d { background: rgba(189,74,67,.09);  color: #bd4a43; border-color: rgba(189,74,67,.30); }
+
+/* "Learn more" */
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-learn-more-btn { background: #ffffff; border-color: #d0cfc8; color: #53544e; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-learn-more-btn:hover { background: rgba(38,39,35,.055); border-color: #bdbcb4; color: #282924; }
+
+/* the "?" badge on a subject with no marks this term (grades.js writes a white tint inline) */
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-subject-v2-badge[style*="rgba(255,255,255,0.05)" i] { background: rgba(38,39,35,.05) !important; border-color: #dfded8 !important; }
+
+/* status and mark colours grades.js writes inline (overall number, status pill, term trend, each subject's %), darkened
+   to read on cream. prSwitchTerm rewrites them from JS and the browser then stores them as rgb(), so both are matched. */
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-modal-sheet .pr-wrap [style*="#22c55e" i],
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-modal-sheet .pr-wrap [style*="rgb(34, 197, 94)" i] { color: #15803d !important; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-modal-sheet .pr-wrap [style*="#60a5fa" i],
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-modal-sheet .pr-wrap [style*="rgb(96, 165, 250)" i] { color: #2b5fb8 !important; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-modal-sheet .pr-wrap [style*="#f59e0b" i],
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-modal-sheet .pr-wrap [style*="rgb(245, 158, 11)" i] { color: #b85f12 !important; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-modal-sheet .pr-wrap [style*="#f85149" i],
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-modal-sheet .pr-wrap [style*="rgb(248, 81, 73)" i] { color: #bd4a43 !important; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-modal-sheet .pr-wrap [style*="#555e6a" i],
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-modal-sheet .pr-wrap [style*="rgb(85, 94, 106)" i] { color: #73746d !important; }
+
+/* ── Quiz Review ── */
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-loading[style*="#8b949e" i] { color: #73746d !important; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-scorehead { border-bottom-color: #dfded8; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-pct { background: rgba(24,122,114,.08); border-color: rgba(24,122,114,.30); color: #187a72; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-title { color: #282924; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-meta { color: #73746d; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-not-published { color: #282924; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-not-published i { color: #187a72; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-not-published p,
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-error { color: #73746d; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-qbox { border-bottom-color: #dfded8; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-qmeta { background: rgba(38,39,35,.04); border-color: #dfded8; color: #73746d; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-qtext { color: #282924; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-qimage { border-color: #dfded8; }
+
+/* answer choices: white rows; right is green, wrong is red */
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-choice { background: #ffffff; border-color: #dfded8; color: #53544e; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-choice.qr-correct { border-color: rgba(21,128,61,.40); background: rgba(21,128,61,.07); color: #282924; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-choice.qr-incorrect { border-color: rgba(189,74,67,.42); background: rgba(189,74,67,.07); color: #282924; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-choice i.qr-icon-correct { color: #16a34a; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-choice i.qr-icon-incorrect { color: #bd4a43; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-badge-user { color: #187a72; background: rgba(24,122,114,.08); border-color: rgba(24,122,114,.25); }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-deduction-note { color: #9a4f0e; }
+
+/* fill-in-the-blank, open-ended answers and teacher grading */
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-fitb-row { background: #ffffff; border-color: #dfded8; color: #53544e; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-fitb-row.qr-correct { border-color: rgba(21,128,61,.40); background: rgba(21,128,61,.07); }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-fitb-row.qr-incorrect { border-color: rgba(189,74,67,.42); background: rgba(189,74,67,.07); }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-fitb-answer { color: #282924; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-fitb-correct { color: #73746d; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-open-box { background: #ffffff; border-color: #dfded8; color: #282924; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-open-grade { background: rgba(21,128,61,.07); border-color: rgba(21,128,61,.28); color: #166534; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-open-pending { background: rgba(184,95,18,.08); border-color: rgba(184,95,18,.30); color: #9a4f0e; }
+
+/* ── Info dialog ("About Progress Report" and the status explainer) ── */
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-overlay { background: rgba(38,39,35,.38); }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-box { background: #ffffff; border-color: #dfded8; color: #282924; box-shadow: 0 20px 60px rgba(38,39,35,.22); }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-close { background: rgba(38,39,35,.06); color: #73746d; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-close:hover { background: rgba(38,39,35,.10); color: #282924; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-title,
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-body strong { color: #282924; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-body,
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-notes li { color: #53544e; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-notes { background: rgba(38,39,35,.03); border-color: #dfded8; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-notes-title { color: #73746d; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-box [style*="#22c55e" i],
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-box [style*="rgb(34, 197, 94)" i] { color: #15803d !important; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-box [style*="#60a5fa" i],
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-box [style*="rgb(96, 165, 250)" i] { color: #2b5fb8 !important; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-box [style*="#f59e0b" i],
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-box [style*="rgb(245, 158, 11)" i] { color: #b85f12 !important; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-box [style*="#f85149" i],
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-box [style*="rgb(248, 81, 73)" i] { color: #bd4a43 !important; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-box [style*="#555e6a" i],
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-box [style*="rgb(85, 94, 106)" i] { color: #73746d !important; }
 
 }
