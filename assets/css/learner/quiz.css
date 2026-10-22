@@ -359,3 +359,58 @@ html[data-learner-theme="light"] p:has(+ .lqz-retry-btn) { color: #bd4a43 !impor
 @media (min-width: 900px) {
     html[data-learner-theme="light"] .inst-container { background-color: #ffffff; border-color: #dfded8; }
 }
+/* ── Phones (768px and narrower): light mode ───────────────────────────────────────────────────────────
+   Applies only when <html data-learner-mobile-theme="light"> (mobile_theme.js, Settings > Appearance) and only while
+   the quiz list, the instructions screen or the list's error state is on screen (the gate in mobile_light.css).
+   Dark mode and 769px and wider are untouched. Same rules and palette as the 769-899px block above, which already
+   restyles this phone-style list for the desktop light mode; quiz.js needs no change. The page background, header
+   and bottom nav are in mobile_light.css. Not here: the quiz session and result pages (take_quiz.php,
+   submit_quiz.php), which are separate pages and stay dark on phones for now. To remove it, delete this block. */
+@media (max-width: 768px) {
+
+/* the list: folders, rows, search and the empty states */
+html[data-learner-mobile-theme="light"] .lqz-mobile-folder-header { border-bottom-color: #dfded8; }
+html[data-learner-mobile-theme="light"] .lqz-mobile-folder-header:active,
+html[data-learner-mobile-theme="light"] .lqz-mobile-folder-header:not(.lqz-mobile-folder-header--collapsed) { background: rgba(38,39,35,.04); }
+html[data-learner-mobile-theme="light"] .lqz-mobile-folder-name,
+html[data-learner-mobile-theme="light"] .lqz-mobile-row-title { color: #282924; }
+html[data-learner-mobile-theme="light"] .lqz-mobile-folder-count { color: #73746d; background: rgba(38,39,35,.06); }
+html[data-learner-mobile-theme="light"] .lqz-mobile-folder-chevron,
+html[data-learner-mobile-theme="light"] .lqz-mobile-row-chevron { color: #8b8b83; }
+html[data-learner-mobile-theme="light"] .lqz-mobile-row::after { background: #ebeae5; }
+html[data-learner-mobile-theme="light"] .lqz-mobile-row:active:not([style*="opacity"]) { background: rgba(38,39,35,.04); }
+html[data-learner-mobile-theme="light"] .lqz-mobile-row-meta { color: #73746d; }
+html[data-learner-mobile-theme="light"] .lqz-mobile-search-wrap svg { color: #282924; }
+html[data-learner-mobile-theme="light"] .lqz-mobile-search { background: #ffffff; border: 1px solid #dfded8; color: #282924; }
+html[data-learner-mobile-theme="light"] .lqz-mobile-search:focus { border-color: #bdbcb4; }
+html[data-learner-mobile-theme="light"] .lqz-mobile-search::placeholder { color: #8b8b83; }
+html[data-learner-mobile-theme="light"] .lqz-mobile-empty-title { color: #282924; }
+html[data-learner-mobile-theme="light"] .lqz-mobile-empty-body { color: #73746d; }
+
+/* status colours quiz.js writes inline (Pending, Done, Continue, Start, the countdown and the status chip),
+   darkened so they read on a light page. The chip's tinted fill and border are inline too and stay as they are. */
+html[data-learner-mobile-theme="light"] .lqz-mobile-list [style*="#fdd663" i] { color: #9a6b00 !important; }
+html[data-learner-mobile-theme="light"] .lqz-mobile-list [style*="#22c55e" i] { color: #15803d !important; }
+html[data-learner-mobile-theme="light"] .lqz-mobile-list [style*="#e67e22" i] { color: #b85f12 !important; }
+html[data-learner-mobile-theme="light"] .lqz-mobile-list [style*="#4fd1c5" i] { color: #187a72 !important; }
+html[data-learner-mobile-theme="light"] .lqz-mobile-list [stroke="#fdd663" i] { stroke: #9a6b00; }
+
+/* instructions screen (opened from a row) */
+html[data-learner-mobile-theme="light"] .inst-container h2[style*="#e2e8f0" i],
+html[data-learner-mobile-theme="light"] .inst-container h3[style*="#c9d1d9" i] { color: #282924 !important; }
+html[data-learner-mobile-theme="light"] .inst-container .quiz-info-box { background: rgba(38,39,35,.03); border-color: #dfded8; color: #53544e; }
+html[data-learner-mobile-theme="light"] .inst-container .inst-list li { color: #53544e; }
+html[data-learner-mobile-theme="light"] .inst-container .inst-list li[style*="#e67e22" i] { color: #b85f12 !important; }
+html[data-learner-mobile-theme="light"] .inst-container .inst-list li::before { color: #187a72; }
+html[data-learner-mobile-theme="light"] .inst-container .ai-box { background: rgba(24,122,114,.06); border-color: rgba(24,122,114,.30); }
+html[data-learner-mobile-theme="light"] .inst-container .ai-box h4[style*="#4fd1c5" i] { color: #187a72 !important; }
+html[data-learner-mobile-theme="light"] .inst-container .ai-box h4[style*="#8b949e" i],
+html[data-learner-mobile-theme="light"] .inst-container .ai-box p[style*="#8b949e" i] { color: #73746d !important; }
+html[data-learner-mobile-theme="light"] .inst-container .start-btn { background: #252624; border-color: #252624; color: #ffffff; }
+html[data-learner-mobile-theme="light"] .inst-container .start-btn[style*="#e67e22" i] { background-color: #b85f12 !important; }
+
+/* "Try Again" in the list's error state: its colours are inline */
+html[data-learner-mobile-theme="light"] .lqz-retry-btn { background: #252624 !important; color: #ffffff !important; }
+html[data-learner-mobile-theme="light"] p:has(+ .lqz-retry-btn) { color: #bd4a43 !important; }
+
+}

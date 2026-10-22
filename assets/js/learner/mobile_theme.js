@@ -21,8 +21,9 @@
   var LIGHT_BAR = '#faf9f5';            // browser / PWA status bar colour while light is on
   var DARK_BAR = '#20201f';             // what learner_dashboard.php uses for dark
   var watching = false;
-  // Pages that already have a light design. Keep in step with the :has( ) gate in mobile_light.css.
-  var PAGE = '#api-content-area .ms, #api-content-area [class*="las-mobile"]';
+  // Markup that marks a page that already has a light design, looked for inside #api-content-area.
+  // Keep in step with the :is( ) list in the :has( ) gate in mobile_light.css.
+  var PAGE = '.ms, [class*="las-mobile"], .las-error-state, .lqz-mobile-list, .inst-container, .lqz-retry-btn, .lrs-mobile-list, .lrs-error-state';
 
   function saved() {
     try { return localStorage.getItem(KEY) === 'light' ? 'light' : 'dark'; } catch (e) { return 'dark'; }
@@ -31,7 +32,9 @@
 
   // Is the light design on screen right now? Light is chosen, and either the menu is open or a converted page is showing.
   function lightOnScreen() {
-    return get() === 'light' && !!(document.querySelector('.sidebar.active') || document.querySelector(PAGE));
+    if (get() !== 'light') return false;
+    var area = document.getElementById('api-content-area');
+    return !!(document.querySelector('.sidebar.active') || (area && area.querySelector(PAGE)));
   }
 
   // Keep the status bar in step with what is on screen (only if the page already has a theme-color meta tag).

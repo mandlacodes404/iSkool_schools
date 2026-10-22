@@ -225,13 +225,13 @@ $parentLink = ((int)$parentCount > 0); // true when at least one parent is linke
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dashboard - <?= htmlspecialchars($schoolName) ?></title>
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
-    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=6.1">
+    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=6.2">
     <link rel="stylesheet" href="assets/css/learner/manual.css?v=8.3">
     <link rel="stylesheet" href="assets/css/learner/announcements.css?v=3.7">
     <link rel="stylesheet" href="assets/css/learner/assignments.css?v=3.7">
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
     <link rel="stylesheet" href="assets/css/learner/grades.css?v=3.7">
-    <link rel="stylesheet" href="assets/css/learner/resources.css?v=2.8">
+    <link rel="stylesheet" href="assets/css/learner/resources.css?v=2.9">
      <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=4.9">
      <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=13.8">
     <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=3.1">
@@ -240,7 +240,7 @@ $parentLink = ((int)$parentCount > 0); // true when at least one parent is linke
     <link rel="stylesheet" href="assets/css/learner/mobile_class.css?v=1.1">
     <link rel="stylesheet" href="assets/css/learner/parent_invite.css?v=1.0">
     <link rel="stylesheet" href="assets/css/learner/desktop_settings.css?v=1.4">   <!-- new -->
-    <link rel="stylesheet" href="assets/css/learner/mobile_light.css?v=1.1">
+    <link rel="stylesheet" href="assets/css/learner/mobile_light.css?v=1.2">
     <link rel="stylesheet" href="assets/css/splash_light.css?v=<?= (int) @filemtime(__DIR__ . '/assets/css/splash_light.css') ?>">
     <script>
     // Desktop sidebar: restore the saved collapsed state BEFORE first paint (no flash).
@@ -266,7 +266,7 @@ $parentLink = ((int)$parentCount > 0); // true when at least one parent is linke
     })();
     </script>
     <!-- Phone light / dark: sets <html data-learner-mobile-theme> before first paint (see mobile_theme.js) -->
-    <script src="assets/js/learner/mobile_theme.js?v=1.1"></script>
+    <script src="assets/js/learner/mobile_theme.js?v=1.2"></script>
     <meta name="theme-color" content="#20201f">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="iSkool">
