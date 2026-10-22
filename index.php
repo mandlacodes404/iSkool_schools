@@ -92,6 +92,22 @@ if ($result && $row = $result->fetch_assoc()) {
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/index.css?v=9.4">
     <?php require __DIR__ . '/includes/login_theme_head.php'; ?>
+    <script>
+    // Phone light mode (768px and below): apply the phone theme saved by the learner dashboard BEFORE first paint, so the
+    // splash and the login page never start dark and then flip. Dark is the default. The attribute only has CSS at 768px
+    // and below (index_light.css, splash_light.css); the status bar colour (theme-color above) follows it on phones.
+    (function () {
+        try {
+            var light = localStorage.getItem(window.ISKOOL_LEARNER_MOBILE_THEME_KEY || 'iskoolLearnerMobileTheme') === 'light';
+            if (light) document.documentElement.setAttribute('data-login-mobile-theme', 'light');
+            var meta = document.querySelector('meta[name="theme-color"]');
+            var phone = window.matchMedia('(max-width: 768px)');
+            var bar = function () { if (meta) meta.setAttribute('content', light && phone.matches ? '#faf9f5' : '#20201f'); };
+            bar();
+            if (phone.addEventListener) phone.addEventListener('change', bar);
+        } catch (e) {}
+    })();
+    </script>
 
 <?php if (isset($_SESSION['email']) && isset($_SESSION['role'])): ?>
     <!-- ──────────────────────────────────────────────────────────────────

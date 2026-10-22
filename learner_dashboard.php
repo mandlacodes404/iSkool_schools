@@ -272,6 +272,9 @@ $parentLink = ((int)$parentCount > 0); // true when at least one parent is linke
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="msapplication-navbutton-color" content="#20201f">
+    <!-- Phone light / dark: sets <html data-learner-mobile-theme> and the status bar colour before first paint, so the
+         splash below starts in the right theme (see mobile_theme.js). It used to load at the end of <body>. -->
+    <script src="assets/js/learner/mobile_theme.js?v=1.5"></script>
     <link rel="manifest" href="/manifest.php?v=1.1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Geist:wght@300..600&display=swap" rel="stylesheet">
@@ -312,6 +315,10 @@ function getCsrfToken() {
     /* Desktop light mode (769px and up): the splash is light, see assets/css/splash_light.css */
     @media (min-width: 769px) {
         html[data-learner-theme="light"] body { background-color: #faf9f5 !important; }
+    }
+    /* Phone light mode (768px and below): the splash is light too, see assets/css/splash_light.css */
+    @media (max-width: 768px) {
+        html[data-learner-mobile-theme="light"] body { background-color: #faf9f5 !important; }
     }
 </style>
 <div id="dash-splash">
@@ -3977,8 +3984,6 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/parent_invite.js?v=1.0"></script>
 <script src="assets/js/learner/mobile_class.js?v=1.1"></script>
 <script src="assets/js/learner/desktop_settings.js?v=1.4"></script>
-<!-- Phone light / dark: sets <html data-learner-mobile-theme> before first paint (see mobile_theme.js) -->
-<script src="assets/js/learner/mobile_theme.js?v=1.4"></script>
 <script>window.ISKOOL_SETTINGS = { sendResetUrl: 'auth/password/send_reset_link.php' };</script>
 <?php include 'includes/global_viewer.php'; ?>
 </body>
