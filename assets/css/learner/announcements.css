@@ -805,3 +805,67 @@ html[data-learner-theme="light"] .lan-mobile-detail .an-edited-highlight { color
 html[data-learner-theme="light"] .lan-error-state { color: #bd4a43; }
 
 }
+
+/* ═══ Light mode: learner Announcements (phones) ═══════════════════════════════════════════════════════════
+   Phones only (max-width: 768px), switched on by <html data-learner-mobile-theme="light"> (mobile_theme.js).
+   The page shell (page background, header, bottom nav, profile dropdown) is in mobile_light.css, which finds this page
+   by its markup: .lan-mobile-list (the list and its empty state), .lan-mobile-detail (an open announcement) and
+   .lan-error-state (the fetch error). This block colours what is inside the page: the search box, the sender folders,
+   the announcement rows, the detail view, the "Edited" tag and the error. Same palette as the desktop light block above
+   and the other phone pages (Resources, Assignments, Quiz).
+   Dark mode and desktop are untouched, and announcements.js needs no change (the two oranges it sets as icon strokes
+   are darkened here, the same way the 769px to 899px block does it).
+   To remove it, delete this block, the three .lan- markers in mobile_light.css and the same three in PAGE in mobile_theme.js. */
+@media (max-width: 768px) {
+
+/* search box: white with a hairline border, like the other light phone pages */
+html[data-learner-mobile-theme="light"] .lan-mobile-search-wrap svg { color: #282924; }
+html[data-learner-mobile-theme="light"] .lan-mobile-search { background: #ffffff; border: 1px solid #dfded8; color: #282924; }
+html[data-learner-mobile-theme="light"] .lan-mobile-search:focus { border-color: #bdbcb4; }
+html[data-learner-mobile-theme="light"] .lan-mobile-search::placeholder { color: #8b8b83; }
+
+/* sender folders (School-wide and one per teacher) */
+html[data-learner-mobile-theme="light"] .lan-mobile-folder-header { border-bottom-color: #dfded8; }
+html[data-learner-mobile-theme="light"] .lan-mobile-folder-header:active,
+html[data-learner-mobile-theme="light"] .lan-mobile-folder-header:not(.lan-mobile-folder-header--collapsed) { background: rgba(38,39,35,.04); }
+html[data-learner-mobile-theme="light"] .lan-mobile-folder-name { color: #282924; }
+html[data-learner-mobile-theme="light"] .lan-mobile-folder-count { color: #73746d; background: rgba(38,39,35,.06); }
+html[data-learner-mobile-theme="light"] .lan-mobile-folder-chevron,
+html[data-learner-mobile-theme="light"] .lan-mobile-card-chevron { color: #8b8b83; }
+
+/* announcement rows */
+html[data-learner-mobile-theme="light"] .lan-mobile-card-title { color: #282924; }
+html[data-learner-mobile-theme="light"] .lan-mobile-card-date { color: #73746d; }
+html[data-learner-mobile-theme="light"] .lan-mobile-card::after { background: #ebeae5; }
+html[data-learner-mobile-theme="light"] .lan-mobile-card:active { background: rgba(38,39,35,.04); }
+
+/* folder and megaphone icons: the two oranges announcements.js sets as strokes, darkened so they read on the cream page */
+html[data-learner-mobile-theme="light"] .lan-mobile-list [stroke="#f28c38" i] { stroke: #b85f12; }
+html[data-learner-mobile-theme="light"] .lan-mobile-list [stroke="#d29522" i] { stroke: #9a6b00; }
+
+/* empty state ("No announcements yet") */
+html[data-learner-mobile-theme="light"] .lan-mobile-empty { color: #8b8b83; }
+html[data-learner-mobile-theme="light"] .lan-mobile-empty-title { color: #282924; }
+html[data-learner-mobile-theme="light"] .lan-mobile-empty-body { color: #73746d; }
+
+/* an open announcement */
+html[data-learner-mobile-theme="light"] .lan-mobile-detail-avatar { border-color: rgba(184,95,18,.35); background: rgba(184,95,18,.08); color: #b85f12; }
+html[data-learner-mobile-theme="light"] .lan-mobile-detail-author-name,
+html[data-learner-mobile-theme="light"] .lan-mobile-detail-title { color: #282924; }
+html[data-learner-mobile-theme="light"] .lan-mobile-detail-title { border-bottom-color: #dfded8; }
+html[data-learner-mobile-theme="light"] .lan-mobile-detail-author-role,
+html[data-learner-mobile-theme="light"] .lan-mobile-detail-posted { color: #73746d; }
+html[data-learner-mobile-theme="light"] .lan-mobile-detail-role-badge { color: #b85f12; }
+html[data-learner-mobile-theme="light"] .lan-mobile-detail-role-sep { color: #8b8b83; }
+html[data-learner-mobile-theme="light"] .lan-mobile-detail-message { color: #53544e; }
+
+/* "Edited" tag, "Edited <date>" line and the highlighted words in an edited message.
+   Rebuilt from a darker orange so the 9px tag and the 12px line stay readable on the cream page. */
+html[data-learner-mobile-theme="light"] .lan-edited-tag { color: #b8553a; background: rgba(184,85,58,.08); border-color: rgba(184,85,58,.35); }
+html[data-learner-mobile-theme="light"] .lan-edited-meta { color: #b8553a; }
+html[data-learner-mobile-theme="light"] .lan-mobile-detail .an-edited-highlight { color: #b8553a; }
+
+/* fetch error ("Error loading announcements.") */
+html[data-learner-mobile-theme="light"] .lan-error-state { color: #bd4a43; }
+
+}
