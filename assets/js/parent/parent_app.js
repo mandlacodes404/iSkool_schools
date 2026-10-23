@@ -11,15 +11,22 @@
     var CACHE_MS = 60 * 1000;
     var MINUS = '−';
 
+    var root = document.getElementById('parentApp');
     var view = document.getElementById('paView');
     var switcher = document.getElementById('paSwitcher');
     var drawer = document.getElementById('paDrawer');
     var overlay = document.getElementById('paOverlay');
     var menuBtn = document.getElementById('paMenuBtn');
+    // The account card opens in three places: a popover above the desktop sidebar's account row, a dropdown from the
+    // phone header's avatar, and a bottom sheet from the account row in the phone menu. All three get the same content.
     var menuTriggers = [
         { button: document.getElementById('paAccountBtn'), menu: document.getElementById('paMenuDesktop') },
         { button: document.getElementById('paAvatarBtn'), menu: document.getElementById('paMenuMobile') }
     ];
+    var sheet = document.getElementById('paMenuSheet');
+    var sheetBg = document.getElementById('paSheetBg');
+    var sheetBtn = document.getElementById('paDrawerAccount');
+    var appVersion = root ? (root.getAttribute('data-version') || '') : '';
 
     var ROUTES = {
         home: renderHome,
@@ -31,7 +38,7 @@
     };
 
     var state = {
-        parent: { name: textOf('.pa-account-name') || 'Parent', email: '' },
+        parent: { name: textOf('.pa-account-name') || 'Parent', email: root ? (root.getAttribute('data-email') || '') : '' },
         children: [],
         // 'loading' until get_children.php answers, then 'ready' or 'failed'. An empty list only means "no children
         // linked" when the status is 'ready'; after a failed load it just means we do not know yet.
@@ -232,29 +239,45 @@
         syncThemeButtons();
     }
 
-    // ── Account menus (desktop sidebar, phone avatar) ──────────────────────────────────────────────────────
+    // ── Account card (desktop sidebar, phone header, phone menu) ───────────────────────────────────────────
+    // Same structure as the learner app's account card: name and email, the actions (each with an icon), a divider,
+    // Sign out in red, and the app version at the bottom.
+
+    function menuItem(tag, label, icon, extraClass) {
+        var node = el(tag, 'pa-menu-item' + (extraClass ? ' ' + extraClass : ''), label);
+        node.setAttribute('role', 'menuitem');
+        node.setAttribute('data-ico', icon);
+        return node;
+    }
 
     function buildMenus() {
-        menuTriggers.forEach(function (t) {
-            if (!t.menu) return;
-            clear(t.menu);
+        var menus = document.querySelectorAll('[data-pa-menu]');
+        for (var i = 0; i < menus.length; i++) {
+            var menu = menus[i];
+            clear(menu);
+            menu.setAttribute('role', 'menu');
+            menu.setAttribute('aria-label', 'Account');
+
             var head = el('div', 'pa-menu-head');
             append(head, el('div', 'pa-menu-name', state.parent.name));
             if (state.parent.email) append(head, el('div', 'pa-menu-email', state.parent.email));
 
-            var add = el('a', 'pa-menu-item', 'Add a child');
+            var add = menuItem('a', 'Add a child', 'plus');
             add.href = '#/add-child';
             add.setAttribute('data-route', 'add-child');
 
-            var theme = el('button', 'pa-menu-item');
+            var theme = menuItem('button', '', 'theme');
             theme.type = 'button';
             theme.setAttribute('data-pa-theme', '');
 
-            var out = el('a', 'pa-menu-item pa-danger', 'Sign out');
+            var sep = el('div', 'pa-menu-sep');
+            sep.setAttribute('role', 'separator');
+
+            var out = menuItem('a', 'Sign out', 'logout', 'pa-danger');
             out.href = 'logout.php';
 
-            append(t.menu, head, add, theme, out);
-        });
+            append(menu, head, add, theme, sep, out, appVersion ? el('div', 'pa-menu-ver', appVersion) : null);
+        }
         syncThemeButtons();
     }
 
@@ -266,18 +289,29 @@
         });
     }
 
-    function toggleMenu(trigger) {
+    function toggleMenu(trigger, focusFirst) {
         var willOpen = trigger.menu.hidden;
         closeMenus(willOpen ? trigger : null);
         trigger.menu.hidden = !willOpen;
         trigger.button.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+        if (willOpen && focusFirst) {
+            var first = trigger.menu.querySelector('.pa-menu-item');
+            if (first) first.focus();
+        }
     }
 
     menuTriggers.forEach(function (t) {
         if (!t.button || !t.menu) return;
         t.button.addEventListener('click', function (ev) {
             ev.stopPropagation();
-            toggleMenu(t);
+            // ev.detail is 0 when the click came from the keyboard (Enter or Space): then move into the menu
+            toggleMenu(t, ev.detail === 0);
+        });
+        t.button.addEventListener('keydown', function (ev) {
+            if ((ev.key === 'ArrowUp' || ev.key === 'ArrowDown') && t.menu.hidden) {
+                ev.preventDefault();
+                toggleMenu(t, true);
+            }
         });
         // Clicks inside the menu must not reach the page-level "click outside closes the menu" handler below
         t.menu.addEventListener('click', function (ev) {
@@ -291,17 +325,89 @@
         });
     });
 
-    document.addEventListener('click', function (ev) {
+    document.addEventListener('click', function () { closeMenus(null); });
+
+    // ── Account sheet (phone menu) ─────────────────────────────────────────────────────────────────────────
+
+    function sheetOpen() {
+        return !!sheet && sheet.classList.contains('is-open');
+    }
+
+    function openSheet() {
+        if (!sheet || sheetOpen()) return;
         closeMenus(null);
-        // The theme button in the phone menu sits outside the account menus
-        var themeBtn = ev.target.closest ? ev.target.closest('[data-pa-theme]') : null;
-        if (themeBtn) toggleTheme();
+        sheet.classList.add('is-open');
+        if (sheetBg) sheetBg.classList.add('is-open');
+        if (sheetBtn) sheetBtn.setAttribute('aria-expanded', 'true');
+        // The sheet is modal, so keyboard focus moves into it
+        var first = sheet.querySelector('.pa-menu-item');
+        if (first) first.focus();
+    }
+
+    function closeSheet(returnFocus) {
+        if (!sheetOpen()) return;
+        sheet.classList.remove('is-open');
+        if (sheetBg) sheetBg.classList.remove('is-open');
+        if (sheetBtn) {
+            sheetBtn.setAttribute('aria-expanded', 'false');
+            if (returnFocus) sheetBtn.focus();
+        }
+    }
+
+    if (sheetBtn) sheetBtn.addEventListener('click', function (ev) {
+        ev.stopPropagation();
+        if (sheetOpen()) closeSheet(false); else openSheet();
     });
+    if (sheetBg) sheetBg.addEventListener('click', function (ev) {
+        ev.stopPropagation();
+        closeSheet(false);
+    });
+    if (sheet) sheet.addEventListener('click', function (ev) {
+        ev.stopPropagation();
+        var item = ev.target.closest ? ev.target.closest('.pa-menu-item') : null;
+        if (!item) return;
+        if (item.hasAttribute('data-pa-theme')) {
+            toggleTheme();
+            closeSheet(false);
+            return;
+        }
+        // "Add a child" or "Sign out": the sheet goes away, and so does the phone menu behind it
+        closeSheet(false);
+        closeDrawer(false);
+    });
+
+    // Arrow keys, Home and End move through a card's items (the learner card does the same); Tab leaves a popover
+    for (var mi = 0, cards = document.querySelectorAll('[data-pa-menu]'); mi < cards.length; mi++) {
+        cards[mi].addEventListener('keydown', onCardKeydown);
+    }
+
+    function onCardKeydown(ev) {
+        if (ev.key === 'Tab') {
+            if (ev.currentTarget === sheet) return; // the sheet keeps focus inside itself (see the Tab handler below)
+            // Put focus back on the button that opened the popover and close it; the Tab then moves on from there
+            for (var t = 0; t < menuTriggers.length; t++) {
+                if (menuTriggers[t].menu === ev.currentTarget && menuTriggers[t].button) menuTriggers[t].button.focus();
+            }
+            closeMenus(null);
+            return;
+        }
+        var items = Array.prototype.slice.call(ev.currentTarget.querySelectorAll('.pa-menu-item'));
+        if (!items.length) return;
+        var at = items.indexOf(document.activeElement);
+        var next = -1;
+        if (ev.key === 'ArrowDown') next = (at + 1) % items.length;
+        else if (ev.key === 'ArrowUp') next = (at - 1 + items.length) % items.length;
+        else if (ev.key === 'Home') next = 0;
+        else if (ev.key === 'End') next = items.length - 1;
+        if (next < 0) return;
+        ev.preventDefault();
+        items[next].focus();
+    }
 
     // ── Phone menu (drawer) ────────────────────────────────────────────────────────────────────────────────
 
-    function drawerFocusable() {
-        return Array.prototype.slice.call(drawer.querySelectorAll('a[href], button:not([disabled])'));
+    function focusableIn(node) {
+        return Array.prototype.slice.call(node.querySelectorAll('a[href], button:not([disabled])'));
     }
 
     function openDrawer() {
@@ -317,12 +423,13 @@
         void drawer.offsetWidth; // start the slide from the closed position
         overlay.classList.add('is-open');
         drawer.classList.add('is-open');
-        var items = drawerFocusable();
+        var items = focusableIn(drawer);
         if (items.length) items[0].focus();
     }
 
     function closeDrawer(returnFocus) {
         if (!drawerOpen) return;
+        closeSheet(false);
         drawerOpen = false;
         overlay.classList.remove('is-open');
         drawer.classList.remove('is-open');
@@ -341,6 +448,10 @@
 
     document.addEventListener('keydown', function (ev) {
         if (ev.key === 'Escape') {
+            if (sheetOpen()) {
+                closeSheet(true);
+                return;
+            }
             if (drawerOpen) {
                 closeDrawer();
                 return;
@@ -353,7 +464,7 @@
             return;
         }
         if (ev.key === 'Tab' && drawerOpen) {
-            var items = drawerFocusable();
+            var items = focusableIn(sheetOpen() ? sheet : drawer);
             if (!items.length) return;
             var first = items[0];
             var last = items[items.length - 1];
