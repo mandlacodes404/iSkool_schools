@@ -21,7 +21,7 @@
      Evaluations   .lev-mobile-list (list + empty state), .lev-mobile-detail (an open evaluation and its form), .eval-error-state  (evaluations.css)
      Grades        .grades-mobile-layout (the accordion and its empty state), .grades-error-state  (grades.css)
                    Its Progress Report / quiz Review sheets and info dialog sit on <body>, not in the page, so grades.css styles them
-                   itself with an own :has(.grades-mobile-layout) gate; they need nothing here.
+                   itself with a gate of its own (on .grades-mobile-layout); they need nothing here.
    Still dark on phones: the quiz session and result pages (take_quiz.php, submit_quiz.php) and the file viewer.
    The menu (drawer, search, account sheet) is not gated: it is light everywhere, see mobile_menu.css.
 
