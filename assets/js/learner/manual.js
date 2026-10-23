@@ -90,7 +90,7 @@ function wireManualScrollState() {
 
 function buildMobileHomeLoadingState() {
     return `
-        <div aria-busy="true" aria-label="Loading home" style="padding:20px 16px 120px;">
+        <div class="lh-home-loading" aria-busy="true" aria-label="Loading home" style="padding:20px 16px 120px;">
             <div style="height:88px;border-radius:12px;background:rgba(255,255,255,0.05);margin-bottom:18px;"></div>
             <div style="height:18px;width:92px;border-radius:6px;background:rgba(255,255,255,0.08);margin-bottom:10px;"></div>
             <div style="height:146px;border-radius:12px;background:rgba(255,255,255,0.05);margin-bottom:18px;"></div>
@@ -163,7 +163,7 @@ window.loadManual = async function(containerId = 'api-content-area') {
         const classData  = classRes.ok ? await classRes.json().catch(() => null) : null;
         if (classData) homeData.myClass = classData;
 
-        const manualStyleHref = 'assets/css/learner/manual.css?v=8.2';
+        const manualStyleHref = 'assets/css/learner/manual.css?v=8.4';
         const existingManualStyle = document.getElementById('manual-style');
         if (existingManualStyle) {
             existingManualStyle.href = manualStyleHref;
@@ -185,7 +185,7 @@ window.loadManual = async function(containerId = 'api-content-area') {
     } catch (error) {
         if (!isCurrentNavigation()) return;
         console.error('Home load failed:', error);
-        apiArea.innerHTML = `<p style="color:#ff5555;text-align:center;margin-top:50px;">
+        apiArea.innerHTML = `<p class="lh-home-error" style="color:#ff5555;text-align:center;margin-top:50px;">
             Could not load home screen.</p>`;
     } finally {
         if (loader && isCurrentNavigation()) loader.style.display = 'none';

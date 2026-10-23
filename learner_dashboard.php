@@ -226,7 +226,7 @@ $parentLink = ((int)$parentCount > 0); // true when at least one parent is linke
     <title>Dashboard - <?= htmlspecialchars($schoolName) ?></title>
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
     <link rel="stylesheet" href="assets/css/learner/quiz.css?v=6.2">
-    <link rel="stylesheet" href="assets/css/learner/manual.css?v=8.3">
+    <link rel="stylesheet" href="assets/css/learner/manual.css?v=8.4">
     <link rel="stylesheet" href="assets/css/learner/announcements.css?v=3.8">
     <link rel="stylesheet" href="assets/css/learner/assignments.css?v=3.7">
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
@@ -240,7 +240,7 @@ $parentLink = ((int)$parentCount > 0); // true when at least one parent is linke
     <link rel="stylesheet" href="assets/css/learner/mobile_class.css?v=1.1">
     <link rel="stylesheet" href="assets/css/learner/parent_invite.css?v=1.0">
     <link rel="stylesheet" href="assets/css/learner/desktop_settings.css?v=1.4">   <!-- new -->
-    <link rel="stylesheet" href="assets/css/learner/mobile_light.css?v=1.5">
+    <link rel="stylesheet" href="assets/css/learner/mobile_light.css?v=1.6">
     <link rel="stylesheet" href="assets/css/splash_light.css?v=<?= (int) @filemtime(__DIR__ . '/assets/css/splash_light.css') ?>">
     <script>
     // Desktop sidebar: restore the saved collapsed state BEFORE first paint (no flash).
@@ -274,7 +274,7 @@ $parentLink = ((int)$parentCount > 0); // true when at least one parent is linke
     <meta name="msapplication-navbutton-color" content="#20201f">
     <!-- Phone light / dark: sets <html data-learner-mobile-theme> and the status bar colour before first paint, so the
          splash below starts in the right theme (see mobile_theme.js). It used to load at the end of <body>. -->
-    <script src="assets/js/learner/mobile_theme.js?v=1.5"></script>
+    <script src="assets/js/learner/mobile_theme.js?v=1.6"></script>
     <link rel="manifest" href="/manifest.php?v=1.1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Geist:wght@300..600&display=swap" rel="stylesheet">
@@ -3968,7 +3968,7 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 <script src="assets/js/learner/main.js?v=1.2"></script>
-<script src="assets/js/learner/manual.js?v=11.6"></script>
+<script src="assets/js/learner/manual.js?v=11.7"></script>
 <script src="assets/js/learner/quiz.js?v=12.5"></script>
 <script src="assets/js/learner/assignments.js?v=10.3"></script>
 <script src="assets/js/learner/resources.js?v=8.8"></script>
