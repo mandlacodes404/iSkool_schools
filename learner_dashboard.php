@@ -233,14 +233,16 @@ $parentLink = ((int)$parentCount > 0); // true when at least one parent is linke
     <link rel="stylesheet" href="assets/css/learner/grades.css?v=3.9">
     <link rel="stylesheet" href="assets/css/learner/resources.css?v=2.9">
      <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=5.0">
-     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=13.8">
+     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=13.9">
     <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=3.1">
     <link rel="stylesheet" href="assets/css/learner/mobile_menu.css?v=1.8">
-    <link rel="stylesheet" href="assets/css/learner/mobile_settings.css?v=1.3">
+    <link rel="stylesheet" href="assets/css/learner/mobile_settings.css?v=1.6">
     <link rel="stylesheet" href="assets/css/learner/mobile_class.css?v=1.1">
     <link rel="stylesheet" href="assets/css/learner/parent_invite.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/learner/desktop_settings.css?v=1.5S">   <!-- new -->
+    <link rel="stylesheet" href="assets/css/learner/mobile_light.css?v=1.9">
     <link rel="stylesheet" href="assets/css/learner/desktop_settings.css?v=1.4">   <!-- new -->
-    <link rel="stylesheet" href="assets/css/learner/mobile_light.css?v=1.8">
+    <link rel="stylesheet" href="assets/css/learner/mobile_light.css?v=1.9">
     <link rel="stylesheet" href="assets/css/splash_light.css?v=<?= (int) @filemtime(__DIR__ . '/assets/css/splash_light.css') ?>">
     <script>
     // Desktop sidebar: restore the saved collapsed state BEFORE first paint (no flash).
@@ -1247,7 +1249,7 @@ if (fullPage &&
     if (apiArea) apiArea.style.display = 'block';
 
     sessionStorage.setItem("lastLearnerPage", "learner_settings");
-    window.configureHeader({ title: 'Settings', mode: 'standard' });
+    window.configureHeader({ title: 'Settings', mode: 'standard', color: '#4fd1c5' });
     if (typeof window.setActive === 'function') window.setActive("learner_settings");
 
     // Grab current avatar src or initials
@@ -3483,12 +3485,16 @@ window.configureHeader = function(config) {
             // Header bottom accent + tinted glass background when scrolled
             if (mainHeader)     mainHeader.style.borderBottom = '2px solid ' + color + '55';
             if (mainHeader)     mainHeader.setAttribute('data-page-color', color);
+            // Light mode paints the scrolled header from this (mobile_light.css can't read the inline
+            // background the scroll handler writes, and its cream rule is !important).
+            if (mainHeader)     mainHeader.style.setProperty('--learner-page-color', color);
         } else {
             // Home or no colour — reset to dark surface/default
             window.learnerCurrentPageColor = '#20201f';
             if (themeColorMeta) themeColorMeta.setAttribute('content', '#20201f');
             if (mainHeader)     mainHeader.style.borderBottom = '';
             if (mainHeader)     mainHeader.removeAttribute('data-page-color');
+            if (mainHeader)     mainHeader.style.removeProperty('--learner-page-color');
         }
     }
     // ──────────────────────────────────────────────────────────────────
@@ -3973,16 +3979,16 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/assignments.js?v=10.3"></script>
 <script src="assets/js/learner/resources.js?v=8.8"></script>
 <script src="assets/js/learner/announcements.js?v=9.4"></script>
-<script src="assets/js/learner/grades.js?v=10.4"></script>
-<script src="assets/js/learner/evaluations.js?v=7.3"></script>
+<script src="assets/js/learner/grades.js?v=10.5"></script>
+<script src="assets/js/learner/evaluations.js?v=7.4"></script>
 <script src="assets/js/learner/discussions.js?v=11.2"></script>
-<script src="assets/js/learner/syllabus.js?v=4.4"></script>
-<script src="assets/js/learner/learner_calendar.js?v=2.4"></script>
+<script src="assets/js/learner/syllabus.js?v=4.5"></script>
+<script src="assets/js/learner/learner_calendar.js?v=2.5"></script>
 <script src="assets/js/learner/desktop_menu.js?v=1.4"></script>
 <script src="assets/js/learner/mobile_menu.js?v=1.4"></script>
-<script src="assets/js/learner/mobile_settings.js?v=1.4"></script>
+<script src="assets/js/learner/mobile_settings.js?v=1.7"></script>
 <script src="assets/js/learner/parent_invite.js?v=1.0"></script>
-<script src="assets/js/learner/mobile_class.js?v=1.1"></script>
+<script src="assets/js/learner/mobile_class.js?v=1.2"></script>
 <script src="assets/js/learner/desktop_settings.js?v=1.4"></script>
 <script>window.ISKOOL_SETTINGS = { sendResetUrl: 'auth/password/send_reset_link.php' };</script>
 <?php include 'includes/global_viewer.php'; ?>

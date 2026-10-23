@@ -118,7 +118,7 @@ window.fetchEvaluations = async function() {
     }
 
     if (window.configureHeader) {
-        window.configureHeader({ title: 'Evaluations', mode: 'standard' });
+        window.configureHeader({ title: 'Evaluations', mode: 'standard', color: '#4fa8fd' });
     }
 
     const apiArea = document.getElementById('api-content-area');

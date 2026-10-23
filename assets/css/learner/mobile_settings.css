@@ -192,21 +192,13 @@ html.ms-sheet-open #api-content-area { overflow: hidden !important; }
 @media (max-width: 768px) {
 
 .ms-note { margin: 0 4px 18px; font-size: 14px; line-height: 1.5; color: var(--ms-muted); }
-.ms-opts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-.ms-opt { display: flex; flex-direction: column; gap: 10px; padding: 10px; border-radius: 14px; background: var(--ms-card); border: 1px solid var(--ms-line); color: var(--ms-soft); }
-.ms-opt.on { border-color: var(--ms-text); box-shadow: 0 0 0 1px var(--ms-text); }
-.ms-sw { display: flex; height: 84px; overflow: hidden; border-radius: 9px; border: 1px solid rgba(38,39,35,.14); }
-.ms-sw i { display: block; }
-.ms-sw i:first-child { width: 28%; }
-.ms-sw i:last-child { flex: 1; }
-.ms-sw--light { background: #faf9f5; }
-.ms-sw--light i:first-child { background: #f0efe9; border-right: 1px solid #dfded8; }
-.ms-sw--light i:last-child { background: linear-gradient(145deg, #ffffff 0 54%, #f1f0eb 54%); }
-.ms-sw--dark { background: #151515; border-color: #30302f; }
-.ms-sw--dark i:first-child { background: #111111; border-right: 1px solid #30302f; }
-.ms-sw--dark i:last-child { background: linear-gradient(145deg, #1a1a19 0 54%, #151515 54%); }
-.ms-opt-t b { display: block; font: 500 14px/1.25 var(--ms-font); color: var(--ms-text); }
-.ms-opt-t span { display: block; margin-top: 2px; font-size: 12px; line-height: 1.35; color: var(--ms-muted); }
+.ms-g .ms-r--static:active { background: none; }
+/* theme switch: the same sun / moon pair as the desktop Appearance page (desktop_settings.css), a little bigger for thumbs */
+.ms-toggle { display: inline-flex; gap: 2px; padding: 3px; flex: none; border: 1px solid #2f2f2e; border-radius: 13px; background: #242423; }
+.ms-tb { display: grid; place-items: center; width: 46px; height: 38px; border-radius: 10px; color: var(--ms-muted); transition: background .15s, color .15s, box-shadow .15s; }
+.ms-tb .ms-i { width: 20px; height: 20px; }
+.ms-tb.on { background: #3a3a38; color: var(--ms-text); }
+.ms-tb:focus-visible { outline: 2px solid var(--ms-soft); outline-offset: 2px; }
 
 /* -- Light: colours (the .ms tokens do most of the work) -- */
 html[data-learner-mobile-theme="light"] .ms {
@@ -224,6 +216,8 @@ html[data-learner-mobile-theme="light"] .ms-f select,
 html[data-learner-mobile-theme="light"] .ms-f textarea { color-scheme: light; }
 html[data-learner-mobile-theme="light"] .ms-f select option { background: #ffffff; color: #282924; }
 html[data-learner-mobile-theme="light"] .ms-bar { background: #faf9f5; }
+html[data-learner-mobile-theme="light"] .ms-toggle { background: #f4f3ee; border-color: #e4e3dc; }
+html[data-learner-mobile-theme="light"] .ms-tb.on { background: #ffffff; color: var(--ms-text); box-shadow: 0 1px 2px rgba(31,32,29,.12), 0 0 0 1px rgba(38,39,35,.06); }
 html[data-learner-mobile-theme="light"] .ms-btn { background: #252624; color: #ffffff; }
 html[data-learner-mobile-theme="light"] .ms-btn:disabled { background: rgba(38,39,35,.06); color: #8b8b83; }
 html[data-learner-mobile-theme="light"] .ms-btn .ms-spin { border-color: rgba(255,255,255,.3); border-top-color: #ffffff; }

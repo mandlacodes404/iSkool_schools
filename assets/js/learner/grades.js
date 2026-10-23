@@ -141,7 +141,7 @@ window.fetchGrades = async function () {
     if (typeof window.setActive === 'function') window.setActive('grades');
 
     if (typeof window.configureHeader === 'function') {
-        window.configureHeader({ title: 'Grades', mode: 'standard' });
+        window.configureHeader({ title: 'Grades', mode: 'standard', color: '#68d391' });
     }
 
     const apiArea = document.getElementById('api-content-area');
@@ -2360,6 +2360,8 @@ function darkenBrowserBarForSheet() {
     if (themeColorMeta) themeColorMeta.setAttribute('content', light ? SHEET_OVERLAY_DIMMED_COLOR_LIGHT : SHEET_OVERLAY_DIMMED_COLOR);
     // light: the header stays cream (mobile_light.css) and the overlay dims it, so it is not forced dark
     if (mainHeader && !light) mainHeader.style.background = '#20201f';
+    // light: a scrolled coloured page tints the header (mobile_light.css) -- not under the sheet, where the bar is the dimmed cream
+    if (mainHeader && light) mainHeader.setAttribute('data-sheet-open', '');
     return saved;
 }
 
@@ -2369,6 +2371,7 @@ function restoreBrowserBarAfterSheet(saved) {
     const mainHeader = document.querySelector('.main-header');
     if (themeColorMeta && saved.themeColor !== null) themeColorMeta.setAttribute('content', saved.themeColor);
     if (mainHeader) mainHeader.style.background = saved.headerBg;
+    if (mainHeader) mainHeader.removeAttribute('data-sheet-open');
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

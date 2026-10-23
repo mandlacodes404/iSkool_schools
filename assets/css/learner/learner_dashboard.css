@@ -1697,20 +1697,19 @@ iframe {
     }
 
     /* Join a Class (not yet joined) and Joined Class (already joined) —
-       mobile menu only, translucent shadow-pill treatment. */
+       mobile menu only. Plain rows like the rest of the menu: no translucent
+       pill behind them (the press / active highlight still comes from the
+       menu's own .dm-item rules in mobile_menu.css). */
     #nav-joinclass-sidebar {
         display: flex;
         width: fit-content;
         padding: 10px 20px;
         border-radius: 999px;
-        background: rgba(0, 0, 0, 0.35);
     }
 
     .sidebar .join-status {
         width: fit-content;
-        padding: 10px 20px;
-        border-radius: 999px;
-        background: rgba(0, 0, 0, 0.35);
+        padding: 10px 12px; /* lines up with the other menu rows now there is no pill around it */
     }
 }
 
