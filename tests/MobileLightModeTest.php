@@ -85,6 +85,21 @@ final class MobileLightModeTest extends TestCase
             'lqz-retry-btn'        => 'assets/js/learner/quiz.js',
             'lrs-mobile-list'      => 'assets/js/learner/resources.js',
             'lrs-error-state'      => 'assets/js/learner/resources.js',
+            'lan-mobile-list'      => 'assets/js/learner/announcements.js',
+            'lan-mobile-detail'    => 'assets/js/learner/announcements.js',
+            'lan-error-state'      => 'assets/js/learner/announcements.js',
+            'lev-mobile-list'      => 'assets/js/learner/evaluations.js',
+            'lev-mobile-detail'    => 'assets/js/learner/evaluations.js',
+            'eval-error-state'     => 'assets/js/learner/evaluations.js',
+            'grades-mobile-layout' => 'assets/js/learner/grades.js',
+            'grades-error-state'   => 'assets/js/learner/grades.js',
+            'lh-mobile-wrapper'    => 'assets/js/learner/manual.js',
+            'lh-home-loading'      => 'assets/js/learner/manual.js',
+            'lh-home-error'        => 'assets/js/learner/manual.js',
+            'syl-mobile-layout'    => 'assets/js/learner/syllabus.js',
+            'syl-empty'            => 'assets/js/learner/syllabus.js',
+            'syl-retry-btn'        => 'assets/js/learner/syllabus.js',
+            'lcal-body'            => 'assets/js/learner/learner_calendar.js',
         ];
         $markers = implode(' ', $this->gate_markers($this->source('assets/css/learner/mobile_light.css')));
         foreach ($where as $needle => $file) {
@@ -93,10 +108,11 @@ final class MobileLightModeTest extends TestCase
         }
     }
 
-    public function test_quiz_and_resources_phone_light_blocks_only_apply_to_phones_in_light(): void
+    public function test_quiz_resources_and_home_phone_light_blocks_only_apply_to_phones_in_light(): void
     {
         foreach (['assets/css/learner/quiz.css' => ['.lqz-mobile-row-title', '.inst-container .start-btn', '.lqz-retry-btn'],
-                  'assets/css/learner/resources.css' => ['.lrs-mobile-row-title', '.lrs-mobile-video-title', '.lrs-error-state']] as $file => $selectors) {
+                  'assets/css/learner/resources.css' => ['.lrs-mobile-row-title', '.lrs-mobile-video-title', '.lrs-error-state'],
+                  'assets/css/learner/manual.css' => ['.lh-row-title', '.lh-carousel-card', '.lh-home-error']] as $file => $selectors) {
             $css = $this->source($file);
             // the phone block is the last @media (max-width: 768px) in the file, and every rule inside it is for light
             $start = strrpos($css, '@media (max-width: 768px) {');
@@ -109,6 +125,34 @@ final class MobileLightModeTest extends TestCase
             foreach ($selectors as $sel) {
                 $this->assertStringContainsString('html[data-learner-mobile-theme="light"] ' . $sel, $block, $file . ' misses ' . $sel);
             }
+        }
+    }
+
+    public function test_syllabus_phone_light_rules_only_apply_to_phones_in_light(): void
+    {
+        // The Syllabus draws its own <style>, so its phone light rules live in syllabus.js, not in a stylesheet.
+        $js = $this->source('assets/js/learner/syllabus.js');
+        $this->assertSame(1, preg_match('/Light mode: learner Syllabus \(phones\).*?@media \(max-width: 768px\) \{(.*?)\n\s*<\/style>/s', $js, $m));
+        preg_match_all('/^\s*(html\S*)/m', $m[1], $starts);
+        $this->assertNotEmpty($starts[1]);
+        $this->assertSame(['html[data-learner-mobile-theme="light"]'], array_values(array_unique($starts[1])), 'every rule in the Syllabus phone block must start with the light attribute');
+        foreach (['.syl-card', '.syl-tab-active', '.syl-assess-weight[style*="#34d399" i]'] as $sel) {
+            $this->assertStringContainsString('html[data-learner-mobile-theme="light"] ' . $sel, $m[1], 'the Syllabus phone block misses ' . $sel);
+        }
+    }
+
+    public function test_calendar_phone_light_rules_only_apply_to_phones_in_light(): void
+    {
+        // The Calendar draws its own <style>, so its phone light rules live in learner_calendar.js.
+        $js = $this->source('assets/js/learner/learner_calendar.js');
+        $this->assertSame(1, preg_match('/Light mode: learner Calendar \(phones\).*?@media \(max-width: 768px\) \{(.*?)\n\s*<\/style>/s', $js, $m));
+        preg_match_all('/^\s*(html\S*)/m', $m[1], $starts);
+        $this->assertNotEmpty($starts[1]);
+        $this->assertSame(['html[data-learner-mobile-theme="light"]'], array_values(array_unique($starts[1])), 'every rule in the Calendar phone block must start with the light attribute');
+        // quiz.css colours every h2 in the page area, so the title rule needs the id to beat it
+        $this->assertStringContainsString('html[data-learner-mobile-theme="light"] #api-content-area .lcal-page-title', $m[1]);
+        foreach (['.lcal-main', '.lcal-cell-today .lcal-day-num', '.lcal-pill-more', '.lcal-upcoming-card'] as $sel) {
+            $this->assertStringContainsString('html[data-learner-mobile-theme="light"] ' . $sel, $m[1], 'the Calendar phone block misses ' . $sel);
         }
     }
 }

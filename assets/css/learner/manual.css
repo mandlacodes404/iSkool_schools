@@ -1215,3 +1215,86 @@ html[data-learner-theme="light"] .lhd [style*="#8b949e" i] { --c: #73746d !impor
 html[data-learner-theme="light"] .lhd .lhd-ev-kind[style*="#8b949e" i] { color: #73746d !important; }
 html[data-learner-theme="light"] .lhd [stroke="#8b949e" i] { stroke: #73746d; }
 }
+
+/* ═══ Home (phones): light mode ═══════════════════════════════════════════════════════════════════════
+   The phone Home (.lh-mobile-wrapper, drawn by manual.js) in the same light palette the other light phone pages use.
+   It only applies when Light is chosen in Settings > Appearance on a phone (<html data-learner-mobile-theme="light">,
+   set by mobile_theme.js). Dark mode and the desktop Home are not touched.
+   The page background, header and bottom nav around it are light through the gate in mobile_light.css, which lists
+   .lh-mobile-wrapper, .lh-home-loading (the loading placeholder) and .lh-home-error (the error text) for this page.
+   manual.js writes the tag and section colours straight onto the elements (style="color:#4fd1c5; background:#4fd1c518",
+   stroke="#4fd1c5"), so the rules below match those values by attribute and use !important where an inline style
+   would otherwise win. Every teal, orange, amber, purple and pink is a shade darker than in dark mode so the 10px
+   tags and the 12px meta lines stay at 4.5:1 or better on the cream page and the white cards. */
+@media (max-width: 768px) {
+
+/* school and class name, and the green "live" dot with its pulse */
+html[data-learner-mobile-theme="light"] .lh-class-flat-line { color: #282924; }
+html[data-learner-mobile-theme="light"] .lh-class-dot { background: #1a7f37; animation-name: lh-class-dot-pulse-light; }
+@keyframes lh-class-dot-pulse-light {
+    0%   { box-shadow: 0 0 0 0 rgba(26, 127, 55, 0.45); }
+    70%  { box-shadow: 0 0 0 7px rgba(26, 127, 55, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(26, 127, 55, 0); }
+}
+
+/* section titles, their count badge and the small box behind each section icon (inline background) */
+html[data-learner-mobile-theme="light"] .lh-section-title { color: #6b6c65; }
+html[data-learner-mobile-theme="light"] .lh-badge { color: #6b6c65; background: rgba(38,39,35,.06); border-color: #dfded8; }
+html[data-learner-mobile-theme="light"] .lh-section-title > div[style*="#4fd1c5" i] { background: rgba(24,122,114,.10) !important; }
+html[data-learner-mobile-theme="light"] .lh-section-title > div[style*="#f28c38" i] { background: rgba(184,95,18,.10) !important; }
+html[data-learner-mobile-theme="light"] .lh-section-title > div[style*="#f472b6" i] { background: rgba(190,55,105,.09) !important; }
+
+/* To-Do carousel: white cards with a hairline border, and the page dots */
+html[data-learner-mobile-theme="light"] .lh-carousel-card { background: #ffffff; border-color: #dfded8; }
+html[data-learner-mobile-theme="light"] .lh-carousel-card:active { background: #f4f3ee; }
+html[data-learner-mobile-theme="light"] .lh-carousel-dot { background: rgba(38,39,35,.18); }
+html[data-learner-mobile-theme="light"] .lh-carousel-dot-active { background: #187a72; }
+
+/* Upcoming Events: the week strip (today is the dark pill the rest of learner light mode uses) */
+html[data-learner-mobile-theme="light"] .lh-week-strip { border-bottom-color: #ebeae5; }
+html[data-learner-mobile-theme="light"] .lh-week-strip-month,
+html[data-learner-mobile-theme="light"] .lh-week-day-label { color: #6b6c65; }
+html[data-learner-mobile-theme="light"] .lh-week-day-num { color: #282924; }
+html[data-learner-mobile-theme="light"] .lh-week-today { background: #252624; color: #faf9f5; }
+html[data-learner-mobile-theme="light"] .lh-week-day-dot-active { background: #be3769; }
+
+/* cards (Recent, and the To-Do empty state) and the rows inside every list */
+html[data-learner-mobile-theme="light"] .lh-card,
+html[data-learner-mobile-theme="light"] .lh-card-recent { background: #ffffff; border-color: #dfded8; }
+html[data-learner-mobile-theme="light"] .lh-row,
+html[data-learner-mobile-theme="light"] .lh-events-flat .lh-row { border-bottom-color: #ebeae5; }
+html[data-learner-mobile-theme="light"] .lh-row:active,
+html[data-learner-mobile-theme="light"] .lh-card-recent .lh-row:active,
+html[data-learner-mobile-theme="light"] .lh-events-flat .lh-row:active { background: rgba(38,39,35,.04); }
+html[data-learner-mobile-theme="light"] .lh-row-title { color: #282924; }
+html[data-learner-mobile-theme="light"] .lh-row-meta { color: #6b6c65; }
+html[data-learner-mobile-theme="light"] .lh-dot-sep { color: #8b8b83; }
+/* "Done" on a past event (inline colour) */
+html[data-learner-mobile-theme="light"] .lh-events-flat .lh-row > span[style*="#4a5568" i] { color: #6b6c65 !important; }
+
+/* row, section and empty-state icons: the strokes manual.js sets, darkened for the cream page */
+html[data-learner-mobile-theme="light"] .lh-mobile-wrapper [stroke="#4fd1c5" i] { stroke: #187a72; }
+html[data-learner-mobile-theme="light"] .lh-mobile-wrapper [stroke="#f28c38" i] { stroke: #b85f12; }
+html[data-learner-mobile-theme="light"] .lh-mobile-wrapper [stroke="#f472b6" i] { stroke: #be3769; }
+html[data-learner-mobile-theme="light"] .lh-mobile-wrapper [stroke="#4a5568" i] { stroke: #8b8b83; }
+
+/* type tags (Quiz, Assignment, Evaluation, Announcement, Resource, Test, Exam, Holiday, Event, Other) */
+html[data-learner-mobile-theme="light"] .lh-type-tag[style*="#4fd1c5" i] { color: #187a72 !important; background: rgba(24,122,114,.07) !important; }
+html[data-learner-mobile-theme="light"] .lh-type-tag[style*="#f28c38" i] { color: #a64f0c !important; background: rgba(166,79,12,.07) !important; }
+html[data-learner-mobile-theme="light"] .lh-type-tag[style*="#a78bfa" i] { color: #6b4fc7 !important; background: rgba(107,79,199,.07) !important; }
+html[data-learner-mobile-theme="light"] .lh-type-tag[style*="#fdd663" i] { color: #876000 !important; background: rgba(135,96,0,.08) !important; }
+html[data-learner-mobile-theme="light"] .lh-type-tag[style*="#f472b6" i] { color: #be3769 !important; background: rgba(190,55,105,.07) !important; }
+html[data-learner-mobile-theme="light"] .lh-type-tag[style*="#8b949e" i] { color: #65665f !important; background: rgba(101,102,95,.08) !important; }
+
+/* empty states ("You're all caught up", "Nothing yet", "You have no upcoming events this week") */
+html[data-learner-mobile-theme="light"] .lh-empty-title { color: #282924; }
+html[data-learner-mobile-theme="light"] .lh-empty-desc { color: #6b6c65; }
+
+/* loading placeholder: the grey blocks were white at 5-8%, which would not show on cream */
+html[data-learner-mobile-theme="light"] .lh-home-loading > div { background: rgba(38,39,35,.05) !important; }
+html[data-learner-mobile-theme="light"] .lh-home-loading > div[style*="height:18px"] { background: rgba(38,39,35,.09) !important; }
+
+/* error text ("Could not load home screen.") */
+html[data-learner-mobile-theme="light"] .lh-home-error { color: #bd4a43 !important; }
+
+}

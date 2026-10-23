@@ -86,6 +86,12 @@ window.fetchSyllabus = async function() {
                         html[data-learner-theme="light"] .syl-retry-btn:hover { background: #3a3b37 !important; }
                         html[data-learner-theme="light"] p:has(+ .syl-retry-btn) { color: #bd4a43 !important; }
                     }
+                    /* Light mode on phones (Settings > Appearance, set by mobile_theme.js): the same recipe, behind the phone attribute. */
+                    @media (max-width: 768px) {
+                        html[data-learner-mobile-theme="light"] .syl-retry-btn { background: #252624 !important; color: #ffffff !important; }
+                        html[data-learner-mobile-theme="light"] .syl-retry-btn:hover { background: #3a3b37 !important; }
+                        html[data-learner-mobile-theme="light"] p:has(+ .syl-retry-btn) { color: #bd4a43 !important; }
+                    }
                 </style>
                 <div style="text-align:center;margin-top:60px;padding:20px;">
                     <p style="color:#ff5555;">Unable to load syllabus.</p>
@@ -178,6 +184,11 @@ function renderSyllabusPage(data) {
                 @media (min-width: 769px) {
                     html[data-learner-theme="light"] .syl-empty p[style*="#8b949e" i] { color: #73746d !important; }
                     html[data-learner-theme="light"] .syl-empty svg[stroke="#8b949e" i] { stroke: #8b8b83; }
+                }
+                /* Light mode on phones (Settings > Appearance, set by mobile_theme.js): the same message, behind the phone attribute. */
+                @media (max-width: 768px) {
+                    html[data-learner-mobile-theme="light"] .syl-empty p[style*="#8b949e" i] { color: #6b6c65 !important; }
+                    html[data-learner-mobile-theme="light"] .syl-empty svg[stroke="#8b949e" i] { stroke: #8b8b83; }
                 }
             </style>
             <div class="syl-empty" style="text-align:center;margin-top:80px;padding:20px;">
@@ -815,6 +826,56 @@ function renderSyllabusPage(data) {
             html[data-learner-theme="light"] .syl-assess-weight[style*="#f472b6" i] { color: #be185d !important; }
             html[data-learner-theme="light"] .syl-assess-weight[style*="#fdd663" i] { color: #9a6b00 !important; }
             html[data-learner-theme="light"] .syl-assess-weight[style*="#34d399" i] { color: #15803d !important; }
+
+            }
+
+            /* ═══ Light mode: learner Syllabus (phones) ════════════════════════════════════════════════════════════════
+               On a phone the page is the .syl-mobile-layout above (the split layout is hidden below 900px). It is the same
+               page the block above recolours between 769px and 899px, so this is the same set of rules and palette behind the
+               phone attribute: <html data-learner-mobile-theme="light">, set by Settings > Appearance through mobile_theme.js.
+               The assessment colours are written inline by renderBriefCard, so they are matched by value and swapped for a
+               darker one. The page background, header and bottom nav come from the gate in mobile_light.css, which lists
+               .syl-mobile-layout (the page), .syl-empty (no briefs yet) and .syl-retry-btn (the error state) for this page.
+               Dark mode and the desktop layouts are untouched. To remove it, delete this block. */
+            @media (max-width: 768px) {
+
+                html[data-learner-mobile-theme="light"] .syl-page-title { color: #282924; }
+                html[data-learner-mobile-theme="light"] .syl-page-title svg[stroke="#4fd1c5" i] { stroke: #187a72; }
+
+                /* term tabs: base, hover, then active (same specificity, so order matters) */
+                html[data-learner-mobile-theme="light"] .syl-tab { border-color: #dfded8; color: #6b6c65; }
+                html[data-learner-mobile-theme="light"] .syl-tab:hover { border-color: #187a72; color: #187a72; }
+                html[data-learner-mobile-theme="light"] .syl-tab-active { background: rgba(24,122,114,.10); border-color: #187a72; color: #187a72; }
+                html[data-learner-mobile-theme="light"] .syl-current-badge { background: rgba(24,122,114,.12); color: #187a72; }
+
+                /* brief cards: white with a warm-grey line (the dark phone card is a flat #272726 with no border) */
+                html[data-learner-mobile-theme="light"] .syl-card { background: #ffffff; border: 1px solid #dfded8; }
+                html[data-learner-mobile-theme="light"] .syl-subject { color: #282924; }
+                html[data-learner-mobile-theme="light"] .syl-teacher,
+                html[data-learner-mobile-theme="light"] .syl-updated,
+                html[data-learner-mobile-theme="light"] .syl-section-title { color: #6b6c65; }
+                html[data-learner-mobile-theme="light"] .syl-topics li { color: #53544e; border-bottom-color: #ebeae5; }
+                html[data-learner-mobile-theme="light"] .syl-topics li::before { background: #187a72; }
+                html[data-learner-mobile-theme="light"] .syl-assess-row { border-bottom-color: #ebeae5; }
+                html[data-learner-mobile-theme="light"] .syl-assess-type { color: #53544e; }
+                html[data-learner-mobile-theme="light"] .syl-assess-bar-wrap { background: rgba(38,39,35,.08); }
+                html[data-learner-mobile-theme="light"] .syl-notes { color: #6b6c65; background: rgba(38,39,35,.03); border-left-color: rgba(24,122,114,.35); }
+
+                /* weighting bars (fills, so graphics) in the darker tone of each colour */
+                html[data-learner-mobile-theme="light"] .syl-assess-bar[style*="#4fd1c5" i] { background: #187a72 !important; }
+                html[data-learner-mobile-theme="light"] .syl-assess-bar[style*="#a78bfa" i] { background: #6b4fc7 !important; }
+                html[data-learner-mobile-theme="light"] .syl-assess-bar[style*="#f28c38" i] { background: #d97706 !important; }
+                html[data-learner-mobile-theme="light"] .syl-assess-bar[style*="#f472b6" i] { background: #db2777 !important; }
+                html[data-learner-mobile-theme="light"] .syl-assess-bar[style*="#fdd663" i] { background: #c99a00 !important; }
+                html[data-learner-mobile-theme="light"] .syl-assess-bar[style*="#34d399" i] { background: #16a34a !important; }
+
+                /* weighting percentages (text, so a tone that holds 4.5:1 on the white card) */
+                html[data-learner-mobile-theme="light"] .syl-assess-weight[style*="#4fd1c5" i] { color: #187a72 !important; }
+                html[data-learner-mobile-theme="light"] .syl-assess-weight[style*="#a78bfa" i] { color: #6b4fc7 !important; }
+                html[data-learner-mobile-theme="light"] .syl-assess-weight[style*="#f28c38" i] { color: #a64f0c !important; }
+                html[data-learner-mobile-theme="light"] .syl-assess-weight[style*="#f472b6" i] { color: #be185d !important; }
+                html[data-learner-mobile-theme="light"] .syl-assess-weight[style*="#fdd663" i] { color: #9a6b00 !important; }
+                html[data-learner-mobile-theme="light"] .syl-assess-weight[style*="#34d399" i] { color: #15803d !important; }
 
             }
         </style>
