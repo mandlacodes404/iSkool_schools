@@ -236,7 +236,7 @@ $parentLink = ((int)$parentCount > 0); // true when at least one parent is linke
      <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=13.8">
     <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=3.1">
     <link rel="stylesheet" href="assets/css/learner/mobile_menu.css?v=1.8">
-    <link rel="stylesheet" href="assets/css/learner/mobile_settings.css?v=1.5">
+    <link rel="stylesheet" href="assets/css/learner/mobile_settings.css?v=1.6">
     <link rel="stylesheet" href="assets/css/learner/mobile_class.css?v=1.1">
     <link rel="stylesheet" href="assets/css/learner/parent_invite.css?v=1.0">
     <link rel="stylesheet" href="assets/css/learner/desktop_settings.css?v=1.5S">   <!-- new -->
@@ -3982,7 +3982,7 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/learner_calendar.js?v=2.4"></script>
 <script src="assets/js/learner/desktop_menu.js?v=1.4"></script>
 <script src="assets/js/learner/mobile_menu.js?v=1.4"></script>
-<script src="assets/js/learner/mobile_settings.js?v=1.6"></script>
+<script src="assets/js/learner/mobile_settings.js?v=1.7"></script>
 <script src="assets/js/learner/parent_invite.js?v=1.0"></script>
 <script src="assets/js/learner/mobile_class.js?v=1.2"></script>
 <script src="assets/js/learner/desktop_settings.js?v=1.4"></script>

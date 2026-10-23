@@ -225,12 +225,10 @@
      The choice lives in mobile_theme.js (window.iskoolMobileTheme). If that file isn't loaded the page stays dark. */
   function themeNow() { return window.iskoolMobileTheme ? window.iskoolMobileTheme.get() : 'dark'; }
   function themeLabel() { return themeNow() === 'light' ? 'Light' : 'Dark'; }
-  function themeOption(value, title, text, now) {
+  function themeButton(value, title, now) {
     var on = value === now;
-    return '<button type="button" class="ms-opt' + (on ? ' on' : '') + '" data-theme-choice="' + value + '" aria-pressed="' + on + '">' +
-      '<span class="ms-sw ms-sw--' + value + '" aria-hidden="true"><i></i><i></i></span>' +
-      '<span class="ms-opt-r">' + ico(value === 'light' ? 'sun' : 'moon', 'ms-opt-i') +
-      '<span class="ms-opt-t"><b>' + title + '</b><span>' + text + '</span></span></span></button>';
+    return '<button type="button" class="ms-tb' + (on ? ' on' : '') + '" data-theme-choice="' + value + '" aria-pressed="' + on + '" aria-label="' + title + '" title="' + title + '">' +
+      ico(value === 'light' ? 'sun' : 'moon') + '</button>';
   }
   function showAppearance() {
     var area = stage(); if (!area) return;
@@ -239,9 +237,10 @@
     var now = themeNow();
     area.innerHTML = '<div class="ms"><h1 class="ms-title">Appearance</h1>' +
       '<p class="ms-note">Choose how iSkool looks on your phone.</p>' +
-      '<div class="ms-opts" role="group" aria-label="Theme">' +
-        themeOption('light', 'Light', 'Bright, paper-like workspace', now) + themeOption('dark', 'Dark', 'Current iSkool appearance', now) +
-      '</div><p class="ms-foot">Your choice is saved on this device.</p></div>';
+      '<div class="ms-g"><div class="ms-r ms-r--static"><span class="ms-rt"><b>Phone theme</b><span>Your choice is saved on this device.</span></span>' +
+        '<div class="ms-toggle" role="group" aria-label="Phone theme">' +
+          themeButton('light', 'Light', now) + themeButton('dark', 'Dark', now) +
+        '</div></div></div></div>';
     area.querySelector('.ms').addEventListener('click', function (e) {
       var b = e.target.closest('[data-theme-choice]'); if (!b) return;
       if (window.iskoolMobileTheme) window.iskoolMobileTheme.set(b.getAttribute('data-theme-choice'));
