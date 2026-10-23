@@ -10,6 +10,7 @@
 require_once __DIR__ . '/auth/session_guard.php';
 require_once __DIR__ . '/auth/parent_app_functions.php';
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/includes/app_version.php';
 
 if (!isset($_SESSION['email']) || ($_SESSION['role'] ?? '') !== 'parent') {
     header('Location: index.php');
@@ -55,6 +56,26 @@ function pa_icon(string $paths, int $size = 20, string $width = '1.8'): string
     return '<svg width="' . $size . '" height="' . $size . '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' . $width
         . '" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' . $paths . '</svg>';
 }
+
+/** The school's logo, or its initials when there is no logo (same fallback as the learner menu). */
+function pa_school_mark(array $school): string
+{
+    if (!empty($school['logo'])) {
+        return '<img class="pa-mark" src="' . pa_e($school['logo']) . '" alt="">';
+    }
+    return '<span class="pa-mark pa-mark--initials" aria-hidden="true">' . pa_e($school['initials']) . '</span>';
+}
+
+/** The avatar, the parent's name with the "Parent" role under it, and the up/down chevron (the account row at the bottom of the menu). */
+function pa_account_row(string $initials, string $name): string
+{
+    return '<span class="pa-avatar">' . pa_e($initials) . '</span>'
+        . '<span class="pa-account-text">'
+        . '<span class="pa-account-name">' . pa_e($name) . '</span>'
+        . '<span class="pa-account-role">Parent</span>'
+        . '</span>'
+        . '<span class="pa-account-chev" aria-hidden="true"></span>';
+}
 ?>
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
@@ -76,16 +97,18 @@ function pa_icon(string $paths, int $size = 20, string $width = '1.8'): string
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Geist:wght@400;500;600&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/parent/parent_app.css?v=1.4">
+    <link rel="stylesheet" href="assets/css/parent/parent_app.css?v=1.5">
 </head>
 <body>
-<div class="pa" id="parentApp">
+<div class="pa" id="parentApp" data-email="<?= pa_e($parent_email) ?>" data-version="<?= pa_e(iskool_app_version_label()) ?>">
 
-    <!-- Desktop: sidebar -->
+    <!-- Desktop: sidebar. Same structure as the learner menu: school logo and name, the pages, the account row at the bottom. -->
     <aside class="pa-side" aria-label="Parent menu">
         <div class="pa-brand">
-            <span class="pa-brand-name">iSkool</span>
-            <span class="pa-brand-school"><?= pa_e($school['name']) ?></span>
+            <?= pa_school_mark($school) ?>
+            <div class="pa-brand-text">
+                <span class="pa-brand-name" title="<?= pa_e($school['name']) ?>"><?= pa_e($school['name']) ?></span>
+            </div>
         </div>
         <nav class="pa-nav" aria-label="Parent app">
             <?php foreach ($nav as [$id, $label, $icon]): ?>
@@ -93,12 +116,8 @@ function pa_icon(string $paths, int $size = 20, string $width = '1.8'): string
             <?php endforeach; ?>
         </nav>
         <div class="pa-account" id="paAccountDesktop">
-            <button type="button" class="pa-account-btn" id="paAccountBtn" aria-expanded="false" aria-controls="paMenuDesktop">
-                <span class="pa-avatar"><?= pa_e($parent_initials) ?></span>
-                <span class="pa-account-text">
-                    <span class="pa-account-name"><?= pa_e($parent_name) ?></span>
-                    <span class="pa-account-role">Parent</span>
-                </span>
+            <button type="button" class="pa-account-btn" id="paAccountBtn" aria-haspopup="menu" aria-expanded="false" aria-controls="paMenuDesktop">
+                <?= pa_account_row($parent_initials, $parent_name) ?>
             </button>
             <div class="pa-menu pa-menu-up" id="paMenuDesktop" data-pa-menu hidden></div>
         </div>
@@ -119,7 +138,7 @@ function pa_icon(string $paths, int $size = 20, string $width = '1.8'): string
                 <?php endif; ?>
             </div>
             <div class="pa-top-right" id="paAccountMobile">
-                <button type="button" class="pa-avatar-btn" id="paAvatarBtn" aria-label="Profile menu" aria-expanded="false" aria-controls="paMenuMobile">
+                <button type="button" class="pa-avatar-btn" id="paAvatarBtn" aria-label="Profile menu" aria-haspopup="menu" aria-expanded="false" aria-controls="paMenuMobile">
                     <span class="pa-avatar"><?= pa_e($parent_initials) ?></span>
                 </button>
                 <div class="pa-menu pa-menu-down" id="paMenuMobile" data-pa-menu hidden></div>
@@ -141,33 +160,31 @@ function pa_icon(string $paths, int $size = 20, string $width = '1.8'): string
         </nav>
     </div>
 
-    <!-- Phone: slide-in menu -->
+    <!-- Phone: slide-in menu. School logo and name at the top, the account row at the bottom (it opens the sheet below). -->
     <div class="pa-overlay" id="paOverlay" hidden></div>
     <aside class="pa-drawer" id="paDrawer" aria-label="Menu" aria-hidden="true">
         <div class="pa-drawer-head">
-            <span class="pa-brand-name">iSkool</span>
-            <span class="pa-brand-school"><?= pa_e($school['name']) ?></span>
+            <?= pa_school_mark($school) ?>
+            <div class="pa-brand-text">
+                <span class="pa-brand-name"><?= pa_e($school['name']) ?></span>
+            </div>
         </div>
         <nav class="pa-nav" aria-label="Parent app">
             <?php foreach ($nav as [$id, $label, $icon]): ?>
                 <a class="pa-nav-link" href="#/<?= $id ?>" data-route="<?= $id ?>"><?= pa_icon($icon, 18) ?><span><?= pa_e($label) ?></span></a>
             <?php endforeach; ?>
         </nav>
-        <div class="pa-drawer-foot">
-            <div class="pa-drawer-who">
-                <span class="pa-avatar"><?= pa_e($parent_initials) ?></span>
-                <span class="pa-account-text">
-                    <span class="pa-account-name"><?= pa_e($parent_name) ?></span>
-                    <span class="pa-account-role">Parent</span>
-                </span>
-            </div>
-            <a class="pa-menu-item" href="#/add-child" data-route="add-child">Add a child</a>
-            <button type="button" class="pa-menu-item" data-pa-theme></button>
-            <a class="pa-menu-item pa-danger" href="logout.php">Sign out</a>
-        </div>
+        <button type="button" class="pa-account-btn pa-drawer-account" id="paDrawerAccount" aria-haspopup="menu" aria-expanded="false" aria-controls="paMenuSheet">
+            <?= pa_account_row($parent_initials, $parent_name) ?>
+        </button>
     </aside>
+
+    <!-- Phone: account sheet. It sits outside the drawer on purpose: the drawer slides with a transform, which would
+         turn a fixed-position sheet inside it into one that is positioned against the drawer instead of the screen. -->
+    <div class="pa-sheet-bg" id="paSheetBg"></div>
+    <div class="pa-menu pa-sheet" id="paMenuSheet" data-pa-menu role="menu" aria-label="Account"></div>
 </div>
 
-<script src="assets/js/parent/parent_app.js?v=1.5"></script>
+<script src="assets/js/parent/parent_app.js?v=1.6"></script>
 </body>
 </html>
