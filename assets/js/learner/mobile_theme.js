@@ -25,7 +25,7 @@
   var watching = false;
   // Markup that marks a page that already has a light design, looked for inside #api-content-area.
   // Keep in step with the :is( ) list in the :has( ) gate in mobile_light.css.
-  var PAGE = '.ms, [class*="las-mobile"], .las-error-state, .lqz-mobile-list, .inst-container, .lqz-retry-btn, .lrs-mobile-list, .lrs-error-state, .lan-mobile-list, .lan-mobile-detail, .lan-error-state';
+  var PAGE = '.ms, [class*="las-mobile"], .las-error-state, .lqz-mobile-list, .inst-container, .lqz-retry-btn, .lrs-mobile-list, .lrs-error-state, .lan-mobile-list, .lan-mobile-detail, .lan-error-state, .lev-mobile-list, .lev-mobile-detail, .eval-error-state, .grades-mobile-layout, .grades-error-state, .lh-mobile-wrapper, .lh-home-loading, .lh-home-error, .syl-mobile-layout, .syl-empty, .syl-retry-btn, .lcal-body';
 
   function saved() {
     try { return localStorage.getItem(KEY) === 'light' ? 'light' : 'dark'; } catch (e) { return 'dark'; }
