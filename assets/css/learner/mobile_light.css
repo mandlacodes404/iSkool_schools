@@ -28,6 +28,10 @@
    Still dark on phones: Discussions (left as it is on purpose), the quiz session and result pages (take_quiz.php, submit_quiz.php) and the file viewer.
    The menu (drawer, search, account sheet) is not gated: it is light everywhere, see mobile_menu.css.
 
+   Signature colours: a page that gave configureHeader() a colour (Assignments, Quiz, Resources, Announcements, Evaluations,
+   Grades, Syllabus, Calendar, Settings) gets that colour on the header once it scrolls, and the status bar matches it.
+   Home and Discussions have no colour on purpose.
+
    Why so many !important: learner_dashboard.php writes colours straight onto these elements (the header's
    background when it scrolls or the menu opens, the nav tab icon boxes), and an inline style only loses to
    an !important rule. */
@@ -54,6 +58,14 @@ html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, [
 html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, [class*="las-mobile"], .las-error-state, .lqz-mobile-list, .inst-container, .lqz-retry-btn, .lrs-mobile-list, .lrs-error-state, .lan-mobile-list, .lan-mobile-detail, .lan-error-state, .lev-mobile-list, .lev-mobile-detail, .eval-error-state, .grades-mobile-layout, .grades-error-state, .lh-mobile-wrapper, .lh-home-loading, .lh-home-error, .syl-mobile-layout, .syl-empty, .syl-retry-btn, .lcal-body)) .main-header .school-logo-initials { background: #ffffff; color: #53544e; }
 html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, [class*="las-mobile"], .las-error-state, .lqz-mobile-list, .inst-container, .lqz-retry-btn, .lrs-mobile-list, .lrs-error-state, .lan-mobile-list, .lan-mobile-detail, .lan-error-state, .lev-mobile-list, .lev-mobile-detail, .eval-error-state, .grades-mobile-layout, .grades-error-state, .lh-mobile-wrapper, .lh-home-loading, .lh-home-error, .syl-mobile-layout, .syl-empty, .syl-retry-btn, .lcal-body)) .main-header .top-nav-avatar { background: #e9e8e2; }
 html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, [class*="las-mobile"], .las-error-state, .lqz-mobile-list, .inst-container, .lqz-retry-btn, .lrs-mobile-list, .lrs-error-state, .lan-mobile-list, .lan-mobile-detail, .lan-error-state, .lev-mobile-list, .lev-mobile-detail, .eval-error-state, .grades-mobile-layout, .grades-error-state, .lh-mobile-wrapper, .lh-home-loading, .lh-home-error, .syl-mobile-layout, .syl-empty, .syl-retry-btn, .lcal-body)) .main-header .top-nav-avatar .initials-sm { color: #555650; }
+
+/* -- header on a page with a signature colour (data-page-color, set by configureHeader) -- */
+/* Dark mode turns the header the page's colour once it scrolls, and the browser bar goes the same colour. Light does the
+   same, with the dark text it already has. configureHeader() keeps the colour in --learner-page-color because the scroll
+   handler's inline background loses to the cream rule above. Not while the menu is open (toggleSidebar keeps the header's
+   old background in data-bg-before-menu, and the status bar is cream then) and not under a Progress Report / Review sheet
+   (grades.js puts the status bar on the dimmed cream and sets data-sheet-open on the header, so the header stays cream). */
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, [class*="las-mobile"], .las-error-state, .lqz-mobile-list, .inst-container, .lqz-retry-btn, .lrs-mobile-list, .lrs-error-state, .lan-mobile-list, .lan-mobile-detail, .lan-error-state, .lev-mobile-list, .lev-mobile-detail, .eval-error-state, .grades-mobile-layout, .grades-error-state, .lh-mobile-wrapper, .lh-home-loading, .lh-home-error, .syl-mobile-layout, .syl-empty, .syl-retry-btn, .lcal-body)) .main-header.header-scrolled[data-page-color]:not([data-bg-before-menu]):not([data-sheet-open]) { background: var(--learner-page-color, #faf9f5) !important; border-bottom-color: rgba(38,39,35,.16) !important; }
 
 /* -- the profile dropdown under the header avatar -- */
 html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, [class*="las-mobile"], .las-error-state, .lqz-mobile-list, .inst-container, .lqz-retry-btn, .lrs-mobile-list, .lrs-error-state, .lan-mobile-list, .lan-mobile-detail, .lan-error-state, .lev-mobile-list, .lev-mobile-detail, .eval-error-state, .grades-mobile-layout, .grades-error-state, .lh-mobile-wrapper, .lh-home-loading, .lh-home-error, .syl-mobile-layout, .syl-empty, .syl-retry-btn, .lcal-body)) .avatar-dropdown { background: #ffffff; border: 1px solid #dfded8; box-shadow: 0 8px 24px rgba(31,32,29,.14); }

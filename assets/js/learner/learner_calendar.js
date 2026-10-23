@@ -94,6 +94,7 @@ window.fetchLearnerCalendar = async function () {
         window.configureHeader({
             title: 'Calendar',
             mode: 'detail',
+            color: '#4fd1c5',
             // The mobile calendar is reached from the menu, so Back always
             // returns to the learner Home view rather than browser history.
             backAction: () => window.returnToLearnerHome?.()
