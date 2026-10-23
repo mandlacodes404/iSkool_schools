@@ -99,6 +99,7 @@ final class MobileLightModeTest extends TestCase
             'syl-mobile-layout'    => 'assets/js/learner/syllabus.js',
             'syl-empty'            => 'assets/js/learner/syllabus.js',
             'syl-retry-btn'        => 'assets/js/learner/syllabus.js',
+            'lcal-body'            => 'assets/js/learner/learner_calendar.js',
         ];
         $markers = implode(' ', $this->gate_markers($this->source('assets/css/learner/mobile_light.css')));
         foreach ($where as $needle => $file) {
@@ -137,6 +138,21 @@ final class MobileLightModeTest extends TestCase
         $this->assertSame(['html[data-learner-mobile-theme="light"]'], array_values(array_unique($starts[1])), 'every rule in the Syllabus phone block must start with the light attribute');
         foreach (['.syl-card', '.syl-tab-active', '.syl-assess-weight[style*="#34d399" i]'] as $sel) {
             $this->assertStringContainsString('html[data-learner-mobile-theme="light"] ' . $sel, $m[1], 'the Syllabus phone block misses ' . $sel);
+        }
+    }
+
+    public function test_calendar_phone_light_rules_only_apply_to_phones_in_light(): void
+    {
+        // The Calendar draws its own <style>, so its phone light rules live in learner_calendar.js.
+        $js = $this->source('assets/js/learner/learner_calendar.js');
+        $this->assertSame(1, preg_match('/Light mode: learner Calendar \(phones\).*?@media \(max-width: 768px\) \{(.*?)\n\s*<\/style>/s', $js, $m));
+        preg_match_all('/^\s*(html\S*)/m', $m[1], $starts);
+        $this->assertNotEmpty($starts[1]);
+        $this->assertSame(['html[data-learner-mobile-theme="light"]'], array_values(array_unique($starts[1])), 'every rule in the Calendar phone block must start with the light attribute');
+        // quiz.css colours every h2 in the page area, so the title rule needs the id to beat it
+        $this->assertStringContainsString('html[data-learner-mobile-theme="light"] #api-content-area .lcal-page-title', $m[1]);
+        foreach (['.lcal-main', '.lcal-cell-today .lcal-day-num', '.lcal-pill-more', '.lcal-upcoming-card'] as $sel) {
+            $this->assertStringContainsString('html[data-learner-mobile-theme="light"] ' . $sel, $m[1], 'the Calendar phone block misses ' . $sel);
         }
     }
 }
