@@ -207,6 +207,10 @@ html.ms-sheet-open #api-content-area { overflow: hidden !important; }
 .ms-sw--dark i:last-child { background: linear-gradient(145deg, #1a1a19 0 54%, #151515 54%); }
 .ms-opt-t b { display: block; font: 500 14px/1.25 var(--ms-font); color: var(--ms-text); }
 .ms-opt-t span { display: block; margin-top: 2px; font-size: 12px; line-height: 1.35; color: var(--ms-muted); }
+/* sun / moon icon next to the title, the same two icons as the desktop theme switch; brighter on the chosen one */
+.ms-opt-r { display: flex; align-items: flex-start; gap: 9px; }
+.ms-opt-r .ms-opt-i { width: 18px; height: 18px; color: var(--ms-muted); transition: color .15s; }
+.ms-opt.on .ms-opt-r .ms-opt-i { color: var(--ms-text); }
 
 /* -- Light: colours (the .ms tokens do most of the work) -- */
 html[data-learner-mobile-theme="light"] .ms {
