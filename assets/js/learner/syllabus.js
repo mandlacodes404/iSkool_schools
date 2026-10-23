@@ -22,7 +22,7 @@ window.fetchSyllabus = async function() {
     sessionStorage.setItem('lastLearnerPage', 'syllabus');
     if (typeof window.setActive === 'function') window.setActive('syllabus');
     if (typeof window.configureHeader === 'function') {
-        window.configureHeader({ title: 'Syllabus', mode: 'standard' });
+        window.configureHeader({ title: 'Syllabus', mode: 'standard', color: '#4fd1c5' });
     }
 
     const apiArea        = document.getElementById('api-content-area');
