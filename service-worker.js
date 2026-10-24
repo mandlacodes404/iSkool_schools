@@ -1,13 +1,13 @@
 /* iSkool learner offline-support service worker. */
-const STATIC_CACHE = 'iskool-static-v5';
-const CONTENT_CACHE = 'iskool-content-v5';
-const NETWORK_CACHE = 'iskool-network-v5';
+const STATIC_CACHE = 'iskool-static-v6';
+const CONTENT_CACHE = 'iskool-content-v6';
+const NETWORK_CACHE = 'iskool-network-v6';
 const QUEUE_DB = 'iskool-offline-writes-v1';
 const QUEUE_STORE = 'requests';
 const SYNC_TAG = 'iskool-retry-writes';
 
 const APP_SHELL = [
-    '/', '/icon.svg?v=1.4', '/manifest.php?v=1.1',
+    '/', '/icon.svg?v=1.4', '/manifest.php?v=1.2',
     '/assets/css/learner/quiz.css?v=5.4', '/assets/css/learner/manual.css?v=7.3',
     '/assets/css/learner/announcements.css?v=2.5', '/assets/css/learner/assignments.css?v=2.5',
     '/assets/css/learner/grades.css?v=2.9', '/assets/css/learner/resources.css?v=2.0',
