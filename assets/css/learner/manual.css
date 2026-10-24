@@ -1343,18 +1343,18 @@ html[data-learner-mobile-theme="light"] .lh-mobile-wrapper.lhx {
 #api-content-area .lhx .lhx-hello { font-size: 15px; font-weight: 600; color: var(--x-muted); }
 #api-content-area .lhx .lhx-name { font-size: 34px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; color: var(--x-text); overflow-wrap: anywhere; }
 
-/* the hero: the one thing to do next (lime in both themes) */
+/* the hero: the one thing to do next (same background as the icon tiles in the to-do rows) */
 #api-content-area .lhx .lhx-hero {
     display: flex; flex-direction: column; justify-content: space-between; gap: 18px;
     width: 100%; min-height: 176px; box-sizing: border-box; padding: 18px 18px 18px 20px;
-    border-radius: 28px; background: #d8ff5e; color: #10130a;
+    border-radius: 28px; background: var(--x-tile); color: var(--x-text);
 }
-#api-content-area .lhx .lhx-chip-hero { align-self: flex-start; font-size: 12px; font-weight: 700; padding: 6px 11px; border-radius: 99px; background: rgba(16, 19, 10, 0.1); }
+#api-content-area .lhx .lhx-chip-hero { align-self: flex-start; font-size: 12px; font-weight: 700; padding: 6px 11px; border-radius: 99px; background: var(--x-line); }
 #api-content-area .lhx .lhx-hero-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
 #api-content-area .lhx .lhx-hero-text { display: block; min-width: 0; }
 #api-content-area .lhx .lhx-hero-title { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; max-width: 230px; font-size: 24px; font-weight: 800; line-height: 1.15; letter-spacing: -0.02em; overflow-wrap: anywhere; }
-#api-content-area .lhx .lhx-hero-sub { display: block; margin-top: 6px; font-size: 13px; font-weight: 600; color: #3e4a12; }
-#api-content-area .lhx .lhx-go { display: grid; place-items: center; flex: none; width: 52px; height: 52px; border-radius: 50%; background: #0d0e12; color: #d8ff5e; }
+#api-content-area .lhx .lhx-hero-sub { display: block; margin-top: 6px; font-size: 13px; font-weight: 600; color: var(--x-muted); }
+#api-content-area .lhx .lhx-go { display: grid; place-items: center; flex: none; width: 52px; height: 52px; border-radius: 50%; background: var(--x-text); color: var(--x-card); }
 #api-content-area .lhx .lhx-hero--calm { background: var(--x-card); color: var(--x-text); border: 1px solid var(--x-line); }
 #api-content-area .lhx .lhx-hero--calm .lhx-chip-hero { background: var(--x-tile); }
 #api-content-area .lhx .lhx-hero--calm .lhx-hero-sub { color: var(--x-muted); }

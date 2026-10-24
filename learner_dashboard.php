@@ -228,7 +228,7 @@ $parentLink = ((int)$parentCount > 0); // true when at least one parent is linke
     <link rel="stylesheet" href="assets/css/learner/quiz.css?v=6.2">
     <link rel="stylesheet" href="assets/css/learner/manual.css?v=8.5">
     <link rel="stylesheet" href="assets/css/learner/quiz.css?v=6.3">
-    <link rel="stylesheet" href="assets/css/learner/manual.css?v=8.4">
+    <link rel="stylesheet" href="assets/css/learner/manual.css?v=8.6">
     <link rel="stylesheet" href="assets/css/learner/announcements.css?v=3.8">
     <link rel="stylesheet" href="assets/css/learner/assignments.css?v=3.7">
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
@@ -3965,7 +3965,7 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 <script src="assets/js/learner/main.js?v=1.2"></script>
-<script src="assets/js/learner/manual.js?v=11.8"></script>
+<script src="assets/js/learner/manual.js?v=11.9"></script>
 <script src="assets/js/learner/quiz.js?v=12.5"></script>
 <script src="assets/js/learner/assignments.js?v=10.3"></script>
 <script src="assets/js/learner/resources.js?v=8.8"></script>
