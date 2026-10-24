@@ -225,7 +225,7 @@ $parentLink = ((int)$parentCount > 0); // true when at least one parent is linke
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dashboard - <?= htmlspecialchars($schoolName) ?></title>
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
-    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=6.2">
+    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=6.3">
     <link rel="stylesheet" href="assets/css/learner/manual.css?v=8.4">
     <link rel="stylesheet" href="assets/css/learner/announcements.css?v=3.8">
     <link rel="stylesheet" href="assets/css/learner/assignments.css?v=3.7">
@@ -233,7 +233,7 @@ $parentLink = ((int)$parentCount > 0); // true when at least one parent is linke
     <link rel="stylesheet" href="assets/css/learner/grades.css?v=3.9">
     <link rel="stylesheet" href="assets/css/learner/resources.css?v=2.9">
      <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=5.0">
-     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=14.1">
+     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=14.2">
     <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=3.1">
     <link rel="stylesheet" href="assets/css/learner/mobile_menu.css?v=2.0">
     <link rel="stylesheet" href="assets/css/learner/mobile_settings.css?v=1.7">
@@ -241,9 +241,9 @@ $parentLink = ((int)$parentCount > 0); // true when at least one parent is linke
     <link rel="stylesheet" href="assets/css/learner/mobile_class.css?v=1.1">
     <link rel="stylesheet" href="assets/css/learner/parent_invite.css?v=1.0">
     <link rel="stylesheet" href="assets/css/learner/desktop_settings.css?v=1.5S">   <!-- new -->
-    <link rel="stylesheet" href="assets/css/learner/mobile_light.css?v=2.0">
+    <link rel="stylesheet" href="assets/css/learner/mobile_light.css?v=2.1">
     <link rel="stylesheet" href="assets/css/learner/desktop_settings.css?v=1.4">   <!-- new -->
-    <link rel="stylesheet" href="assets/css/learner/mobile_light.css?v=2.0">
+    <link rel="stylesheet" href="assets/css/learner/mobile_light.css?v=2.1">
     <link rel="stylesheet" href="assets/css/splash_light.css?v=<?= (int) @filemtime(__DIR__ . '/assets/css/splash_light.css') ?>">
     <script>
     // Desktop sidebar: restore the saved collapsed state BEFORE first paint (no flash).
@@ -3823,15 +3823,15 @@ window.learnerPageState = {
         <span>Home</span>
     </a>
     <a href="javascript:void(0)" onclick="return handleLearnerMobileBottomNav(event, fetchQuizzes)" data-page="quiz_list.php" id="nav-quiz">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7"/><path d="M12 17h.01"/></svg>
         <span>Quiz</span>
     </a>
     <a href="javascript:void(0)" onclick="return handleLearnerMobileBottomNav(event, fetchAssignments)" data-page="assignment_list.php" id="nav-assignments">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 12h6"/><path d="M9 16h6"/><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6"/><path d="M9 17h4"/></svg>
         <span>Assignments</span>
     </a>
     <a href="javascript:void(0)" onclick="return handleLearnerMobileBottomNav(event, fetchResources)" data-page="resource_list.php" id="nav-resources">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 5h7a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H2z"/><path d="M22 5h-7a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h8z"/></svg>
         <span>Resources</span>
     </a>
 </nav>

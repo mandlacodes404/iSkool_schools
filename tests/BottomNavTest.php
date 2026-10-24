@@ -4,9 +4,10 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Guards for the phone bottom bars of the learner and teacher apps, which follow the parent app's bar: four tabs,
- * 64px high plus the safe area, thin 22px line icons that take the text colour, 11px labels, a bold active tab.
- * The bars keep their own glass background and stay dynamic (clear near the bottom of the page, glass once the
- * page is scrolled). These checks read the source files; the look was checked in a phone-sized browser.
+ * thin 22px line icons (the parent bar's glyphs) that take the text colour, 11px labels, a bold active tab.
+ * The bars are 88px high plus the safe area (the old bar was 82px, the parent bar is 64px). They keep their own
+ * glass colour and stay dynamic (clear near the bottom of the page, glass once the page is scrolled). These checks
+ * read the source files; the look was checked in a phone-sized browser.
  */
 final class BottomNavTest extends TestCase
 {
@@ -47,6 +48,33 @@ final class BottomNavTest extends TestCase
         $this->assertDoesNotMatchRegularExpression('/stroke="#/', $nav);
     }
 
+    public function test_tabs_use_the_parent_bars_clean_icons(): void
+    {
+        $parent = $this->source('parent_dashboard.php');
+        $learner = $this->nav('learner_dashboard.php');
+        $teacher = $this->nav('teacher_dashboard.php');
+
+        // The glyphs the parent bar uses for Home, Syllabus (an open book) and News (a bell)
+        $home = '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/>';
+        $book = '<path d="M2 5h7a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H2z"/><path d="M22 5h-7a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h8z"/>';
+        $bell = '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>';
+        foreach ([$home, $book, $bell] as $glyph) {
+            $this->assertStringContainsString($glyph, $parent);
+        }
+
+        // Home and Resources on both bars, Announcement (the News bell) on the teacher bar
+        foreach ([$learner, $teacher] as $nav) {
+            $this->assertStringContainsString($home, $nav);
+            $this->assertStringContainsString($book, $nav);
+        }
+        $this->assertStringContainsString($bell, $teacher);
+
+        // Quiz and Assignments have no parent tab; they are drawn in the same style (no filled shapes, no old pencil)
+        $this->assertStringContainsString('<circle cx="12" cy="12" r="9"/>', $learner);
+        $this->assertStringNotContainsString('M16.5 3.5a2.12', $learner);
+        $this->assertStringNotContainsString('M11 5L6 9H2v6h4l5 4V5z', $teacher);
+    }
+
     public function test_learner_tabs_still_open_the_same_pages(): void
     {
         $nav = $this->nav('learner_dashboard.php');
@@ -78,11 +106,12 @@ final class BottomNavTest extends TestCase
     }
 
     #[DataProvider('dashboards')]
-    public function test_bar_is_64px_high_plus_the_safe_area_with_the_parent_bar_tab_layout(string $page, string $css): void
+    public function test_bar_is_88px_high_plus_the_safe_area_with_the_parent_bar_tab_layout(string $page, string $css): void
     {
         $style = $this->source($css);
 
-        $this->assertStringContainsString('height: calc(64px + env(safe-area-inset-bottom, 0px));', $style);
+        $this->assertMatchesRegularExpression('/:root \{ --mbn-h: 88px; \}/', $style);
+        $this->assertStringContainsString('height: calc(var(--mbn-h) + env(safe-area-inset-bottom, 0px));', $style);
         $this->assertStringNotContainsString('calc(82px', $style);
         $this->assertMatchesRegularExpression('/#mobileBottomNav a \{[^}]*flex-direction: column;[^}]*justify-content: center;[^}]*gap: 2px;[^}]*font-size: 11px;[^}]*font-weight: 600;/s', $style);
         $this->assertMatchesRegularExpression('/#mobileBottomNav a\.active \{[^}]*font-weight: 700;/s', $style);
@@ -100,7 +129,7 @@ final class BottomNavTest extends TestCase
         // Clear at rest, glass once the page is scrolled (the nav-scrolled class is toggled by the dashboard scripts)
         $this->assertMatchesRegularExpression('/DYNAMIC BOTTOM NAV/', $style);
         $this->assertMatchesRegularExpression('/#mobileBottomNav \{[^}]*background: transparent !important;/s', $style);
-        $this->assertMatchesRegularExpression('/#mobileBottomNav\.nav-scrolled \{[^}]*backdrop-filter: blur\(20px\) !important;/s', $style);
+        $this->assertMatchesRegularExpression('/#mobileBottomNav\.nav-scrolled \{[^}]*backdrop-filter: blur\(28px\) saturate\(180%\) !important;/s', $style);
     }
 
     public function test_each_app_keeps_its_own_glass_colour(): void
@@ -108,12 +137,15 @@ final class BottomNavTest extends TestCase
         $learner = $this->source('assets/css/learner/learner_dashboard.css');
         $teacher = $this->source('assets/css/teacher/teacher_dashboard.css');
 
-        $this->assertStringContainsString('background: rgba(32, 32, 31, 0.85) !important;', $learner);
-        $this->assertStringContainsString('background: rgba(66,65,65,0.35) !important;', $teacher);
+        // The same colours as before, more see-through, with a stronger blur
+        $this->assertStringContainsString('background: rgba(32, 32, 31, 0.55) !important;', $learner);
+        $this->assertStringContainsString('backdrop-filter: blur(28px) saturate(180%) !important;', $learner);
+        $this->assertStringContainsString('background: rgba(66,65,65,0.32) !important;', $teacher);
+        $this->assertStringContainsString('backdrop-filter: blur(28px) saturate(180%) !important;', $teacher);
 
         // Light phone theme on the learner side: the light glass, and the parent bar's light tab colours
         $light = $this->source('assets/css/learner/mobile_light.css');
-        $this->assertStringContainsString('background: rgba(250,249,245,.88) !important;', $light);
+        $this->assertStringContainsString('background: rgba(250,249,245,.62) !important;', $light);
         $this->assertStringContainsString('#mobileBottomNav a { color: #6a6b64; }', $light);
         $this->assertStringContainsString('#mobileBottomNav a.active { color: #282924; }', $light);
         $this->assertStringNotContainsString('lh-nav-box', $light);
@@ -135,10 +167,11 @@ final class BottomNavTest extends TestCase
         $learner = $this->source('learner_dashboard.php');
         $teacher = $this->source('teacher_dashboard.php');
 
-        $this->assertStringContainsString('learner_dashboard.css?v=14.1', $learner);
+        $this->assertStringContainsString('learner_dashboard.css?v=14.2', $learner);
         $this->assertStringContainsString('learner/mobile_menu.css?v=2.0', $learner);
-        $this->assertStringContainsString('mobile_light.css?v=2.0', $learner);
-        $this->assertStringContainsString('teacher_dashboard.css?v=13.7', $teacher);
-        $this->assertStringContainsString('teacher_mobile_menu.css?v=1.3', $teacher);
+        $this->assertStringContainsString('mobile_light.css?v=2.1', $learner);
+        $this->assertStringContainsString('learner/quiz.css?v=6.3', $learner);
+        $this->assertStringContainsString('teacher_dashboard.css?v=13.8', $teacher);
+        $this->assertStringContainsString('teacher_mobile_menu.css?v=1.4', $teacher);
     }
 }
