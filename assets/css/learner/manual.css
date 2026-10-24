@@ -1310,11 +1310,11 @@ html[data-learner-mobile-theme="light"] .lh-home-error { color: #bd4a43 !importa
 
 .lh-mobile-wrapper.lhx {
     --x-card: #2a2a28;   --x-line: rgba(255, 255, 255, 0.08);
-    --x-text: #f3f2ee;   --x-muted: #a8a79f;   --x-tile: rgba(255, 255, 255, 0.07);   --x-tile-ink: #d8ff5e;
-    --x-go-bg: rgba(216, 255, 94, 0.14);   --x-go-ink: #d8ff5e;
+    --x-text: #f3f2ee;   --x-muted: #a8a79f;   --x-tile: rgba(255, 255, 255, 0.07);   --x-tile-ink: #f3f2ee;
+    --x-go-bg: rgba(255, 255, 255, 0.14);   --x-go-ink: #f3f2ee;
     --x-soon-bg: rgba(255, 155, 133, 0.14);   --x-soon-ink: #ff9b85;
-    --x-today-bg: #d8ff5e;   --x-today-ink: #0d0e12;   --x-today-label: #3e4a12;
-    --x-dot: #ff9b85;   --x-school-dot: #d8ff5e;
+    --x-today-bg: #f3f2ee;   --x-today-ink: #0d0e12;   --x-today-label: #5f6059;
+    --x-dot: #ff9b85;   --x-school-dot: #f3f2ee;
     display: block;
     padding: 4px 2px 24px;
     color: var(--x-text);
@@ -1322,7 +1322,7 @@ html[data-learner-mobile-theme="light"] .lh-home-error { color: #bd4a43 !importa
 html[data-learner-mobile-theme="light"] .lh-mobile-wrapper.lhx {
     --x-card: #ffffff;   --x-line: #dfded8;
     --x-text: #282924;   --x-muted: #6b6c65;   --x-tile: #f1f0ea;   --x-tile-ink: #282924;
-    --x-go-bg: #d8ff5e;   --x-go-ink: #1a2000;
+    --x-go-bg: #252624;   --x-go-ink: #ffffff;
     --x-soon-bg: #ffe8e1;   --x-soon-ink: #a8361f;
     --x-today-bg: #252624;   --x-today-ink: #ffffff;   --x-today-label: #c9cdd6;
     --x-dot: #e4573d;   --x-school-dot: #282924;
