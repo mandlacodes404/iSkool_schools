@@ -113,6 +113,22 @@ final class PwaBasicsTest extends TestCase
         $this->assertStringContainsString("'iskool-skip-waiting'", $this->source('assets/js/shared/pwa_prompts.js'));
     }
 
+    public function test_the_service_worker_precaches_the_manifest_version_the_pages_link(): void
+    {
+        $worker = $this->source('service-worker.js');
+
+        // Bumping the worker's cache names makes installed apps drop their old caches and fetch everything again.
+        foreach (['static', 'content', 'network'] as $kind) {
+            $this->assertStringContainsString("'iskool-$kind-v6'", $worker);
+            $this->assertStringNotContainsString("'iskool-$kind-v5'", $worker);
+        }
+        foreach (['index.php', 'learner_dashboard.php', 'teacher_dashboard.php'] as $file) {
+            $this->assertStringContainsString('rel="manifest" href="/manifest.php?v=1.2"', $this->source($file), $file);
+        }
+        $this->assertStringContainsString("'/manifest.php?v=1.2'", $worker);
+        $this->assertStringNotContainsString('manifest.php?v=1.1', $worker);
+    }
+
     public function test_the_prompts_script_covers_update_and_install(): void
     {
         $js = $this->source('assets/js/shared/pwa_prompts.js');
