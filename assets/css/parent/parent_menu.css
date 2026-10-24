@@ -1,0 +1,733 @@
+/* assets/css/parent/parent_menu.css
+   The parent app's menus: the desktop sidebar, the phone slide-in menu and the account card. Built to follow the learner
+   app's menus (assets/css/learner/desktop_menu.css and mobile_menu.css) with the parent app's own tokens (--pa-*).
+   Load it AFTER parent_app.css, then parent_menu.js (it adds the behaviour: collapse, search, shortcuts, swipe).
+
+   Desktop (769px and up)
+   - Sidebar with the school logo and name, a button that collapses it to a rail (remembered), a search button
+     (Ctrl/Cmd + K), the pages in groups, and the account row at the bottom. In the rail, tooltips name the pages.
+   - Quick search and the keyboard shortcuts sheet.
+   Phones (768px and below)
+   - The menu slides in from the left and the page is pushed aside (header, page and bottom tabs move together). The dim
+     over the page has the learner's rounded outward edge (--pa-curve). A finger can drag it open and closed.
+   - Search opens a full-screen sheet. The account row at the bottom opens the account card as a bottom sheet.
+
+   The bottom tab bar keeps its own rules in parent_app.css. This file only slides it along with the page while the menu is open. */
+
+/* ── Tokens ─────────────────────────────────────────────────────────────────────────────────────────────── */
+:root {
+    --pa-side-pad: 10px;
+    --pa-dw: min(79vw, 340px);     /* phone menu width */
+    --pa-curve: 35px;              /* the rounded edge of the page while the phone menu is open */
+    --pa-dur: .32s;
+    --pa-ease: cubic-bezier(.22, .8, .24, 1);
+
+    /* Icons are mask images, so the colour follows the text colour. Same icons as the learner menu. */
+    --pa-i-updown: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m7 15 5 5 5-5'/%3E%3Cpath d='m7 9 5-5 5 5'/%3E%3C/svg%3E");
+    --pa-i-plus: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M8 12h8'/%3E%3Cpath d='M12 8v8'/%3E%3C/svg%3E");
+    --pa-i-logout: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4'/%3E%3Cpolyline points='16 17 21 12 16 7'/%3E%3Cline x1='21' x2='9' y1='12' y2='12'/%3E%3C/svg%3E");
+    --pa-i-moon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z'/%3E%3C/svg%3E");
+    --pa-i-sun: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='4'/%3E%3Cpath d='M12 2v2'/%3E%3Cpath d='M12 20v2'/%3E%3Cpath d='m4.93 4.93 1.41 1.41'/%3E%3Cpath d='m17.66 17.66 1.41 1.41'/%3E%3Cpath d='M2 12h2'/%3E%3Cpath d='M20 12h2'/%3E%3Cpath d='m6.34 17.66-1.41 1.41'/%3E%3Cpath d='m19.07 4.93-1.41 1.41'/%3E%3C/svg%3E");
+    --pa-i-home: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8'/%3E%3Cpath d='M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z'/%3E%3C/svg%3E");
+    --pa-i-chart: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 3v16a2 2 0 0 0 2 2h16'/%3E%3Cpath d='M18 17V9'/%3E%3Cpath d='M13 17V5'/%3E%3Cpath d='M8 17v-3'/%3E%3C/svg%3E");
+    --pa-i-book: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 7v14'/%3E%3Cpath d='M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z'/%3E%3C/svg%3E");
+    --pa-i-bell: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10.268 21a2 2 0 0 0 3.464 0'/%3E%3Cpath d='M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326'/%3E%3C/svg%3E");
+    --pa-i-calendar: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='18' height='18' x='3' y='4' rx='2'/%3E%3Cpath d='M16 2v4M8 2v4M3 10h18'/%3E%3C/svg%3E");
+    --pa-i-search: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E");
+    --pa-i-panel: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='18' height='18' x='3' y='3' rx='2'/%3E%3Cpath d='M9 3v18'/%3E%3C/svg%3E");
+    --pa-i-keyboard: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 8h.01'/%3E%3Cpath d='M12 12h.01'/%3E%3Cpath d='M14 8h.01'/%3E%3Cpath d='M16 12h.01'/%3E%3Cpath d='M18 8h.01'/%3E%3Cpath d='M6 8h.01'/%3E%3Cpath d='M7 16h10'/%3E%3Cpath d='M8 12h.01'/%3E%3Crect width='20' height='16' x='2' y='4' rx='2'/%3E%3C/svg%3E");
+    --pa-i-x: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 6 6 18'/%3E%3Cpath d='m6 6 12 12'/%3E%3C/svg%3E");
+}
+
+:root,
+html[data-theme="light"] {
+    --pa-faint: #8b8b83;
+    --pa-search-bg: #ffffff;
+    --pa-drawer-bg: #f4f3ee;
+    --pa-curve-line: rgba(38, 39, 35, .14);
+    --pa-scrim: rgba(38, 39, 35, .30);
+    --pa-tip-bg: #252624;
+    --pa-tip-text: #faf9f5;
+}
+html[data-theme="dark"] {
+    --pa-faint: #7a7b73;
+    --pa-search-bg: rgba(255, 255, 255, .025);
+    --pa-drawer-bg: #121211;
+    --pa-curve-line: rgba(255, 255, 255, .14);
+    --pa-scrim: rgba(0, 0, 0, .5);
+    --pa-tip-bg: #323231;
+    --pa-tip-text: #f0efec;
+}
+
+/* Everything that only exists on one kind of screen is off until its media query turns it on */
+.pa-drawer, .pa-overlay, .pa-sheet, .pa-sheet-bg, .pa-s, .pa-palette, .pa-keys, .pa-tip { display: none; }
+
+/* ── Pieces used by every menu ──────────────────────────────────────────────────────────────────────────── */
+
+/* The school's logo, or its initials, like the learner menu */
+.pa-mark { box-sizing: border-box; flex: none; width: 40px; height: 40px; border-radius: 10px; object-fit: cover; }
+.pa-mark--initials {
+    display: grid;
+    place-items: center;
+    background: var(--pa-mark-bg);
+    border: 1px solid var(--pa-line);
+    color: var(--pa-soft);
+    font: 600 15px/1 var(--pa-font);
+    text-transform: uppercase;
+}
+.pa-brand-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.pa-brand-name {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 1.2;
+    letter-spacing: -.005em;
+    color: var(--pa-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Mask icons: the colour follows the text colour */
+.pa-search::before, .pa-toggle::before, .pa-menu-item::before, .pa-pico, .pa-palette-field::before, .pa-s-field::before,
+.pa-s-row::before, .pa-keys-x::before {
+    content: '';
+    flex: none;
+    display: block;
+    background: currentColor;
+    -webkit-mask: var(--pa-ico) center / contain no-repeat;
+    mask: var(--pa-ico) center / contain no-repeat;
+}
+
+.pa-avatar {
+    flex: 0 0 auto;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--pa-avatar-bg);
+    color: var(--pa-avatar-fg);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: uppercase;
+}
+
+/* Page links and the search button (same size and look in the sidebar) */
+.pa-nav { display: flex; flex-direction: column; gap: 2px; }
+.pa-nav-link, .pa-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: none;
+    box-sizing: border-box;
+    width: 100%;
+    height: 36px;
+    padding: 0 10px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--pa-soft);
+    font: 450 14px/1 var(--pa-font);
+    text-align: left;
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    cursor: pointer;
+    transition: background .12s ease, color .12s ease;
+}
+.pa-nav-link svg { flex: none; width: 18px; height: 18px; }
+.pa-nav-link:hover, .pa-search:hover { background: var(--pa-hover); color: var(--pa-text); }
+.pa-nav-link[aria-current="page"] { background: var(--pa-active); color: var(--pa-text); }
+.pa-search { --pa-ico: var(--pa-i-search); border: 1px solid var(--pa-line); background: var(--pa-search-bg); }
+.pa-search::before { width: 18px; height: 18px; }
+.pa-nav-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.pa-kbd {
+    display: block;
+    margin-left: auto;
+    padding: 3px 6px;
+    border: 1px solid var(--pa-line);
+    border-radius: 5px;
+    color: var(--pa-muted);
+    font: 500 11px/1 var(--pa-font);
+}
+.pa-nav-group {
+    flex: none;
+    margin: 16px 0 4px;
+    padding: 0 10px;
+    color: var(--pa-muted);
+    font: 500 12px/1 var(--pa-font);
+    letter-spacing: .01em;
+    white-space: nowrap;
+    user-select: none;
+}
+.pa .pa-nav-link:focus-visible, .pa .pa-search:focus-visible, .pa .pa-toggle:focus-visible { outline-offset: -2px; }
+
+/* Account row: avatar, the parent's name with "Parent" under it, up/down chevron. Same grid as the learner's account row. */
+.pa-account { position: relative; margin-top: auto; }
+.pa-account::before { content: ''; display: block; height: 1px; margin: 0 6px 6px; background: var(--pa-line); }
+.pa-account-btn {
+    width: 100%;
+    padding: 8px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    display: grid;
+    grid-template-columns: 32px minmax(0, 1fr) 16px;
+    column-gap: 10px;
+    align-items: center;
+    text-align: left;
+    cursor: pointer;
+    transition: background .12s ease;
+}
+.pa-account-btn:hover, .pa-account-btn[aria-expanded="true"] { background: var(--pa-hover); }
+.pa .pa-account-btn:focus-visible { outline-offset: -2px; }
+.pa-account-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
+.pa-account-name { font-size: 14px; font-weight: 500; color: var(--pa-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pa-account-role { margin-top: 1px; font-size: 12px; color: var(--pa-muted); }
+.pa-account-chev {
+    width: 16px;
+    height: 16px;
+    background: var(--pa-soft);
+    -webkit-mask: var(--pa-i-updown) center / contain no-repeat;
+    mask: var(--pa-i-updown) center / contain no-repeat;
+}
+
+/* Account card. It opens up from the account row on desktop and down from the header avatar on phones; the phone
+   menu's account row opens it as a bottom sheet instead. Same structure as the learner's card: name and email,
+   actions with icons, a divider, Sign out in red, the app version. */
+.pa-menu {
+    position: absolute;
+    z-index: 60;
+    width: 248px;
+    padding: 6px;
+    background: var(--pa-card);
+    border: 1px solid var(--pa-line-strong);
+    border-radius: 12px;
+    box-shadow: var(--pa-pop-shadow);
+    transform-origin: bottom left;
+    animation: pa-pop .14s cubic-bezier(.2, .8, .2, 1);
+}
+.pa-menu-up { left: 0; right: 0; width: auto; bottom: calc(100% + 6px); }
+.pa-menu-down { top: calc(100% + 8px); right: 0; transform-origin: top right; }
+.pa-menu-head { padding: 8px 10px 10px; }
+.pa-menu-name { font-size: 14px; font-weight: 500; line-height: 1.25; color: var(--pa-text); }
+.pa-menu-email { margin-top: 2px; font-size: 12px; color: var(--pa-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pa-menu-sep { height: 1px; margin: 6px 4px; background: var(--pa-line); }
+.pa-menu-item {
+    width: 100%;
+    height: 36px;
+    padding: 0 10px;
+    border: 0;
+    border-radius: 8px;
+    background: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-align: left;
+    text-decoration: none;
+    font: 450 14px/1 var(--pa-font);
+    color: var(--pa-soft);
+    cursor: pointer;
+}
+.pa-menu-item::before { width: 16px; height: 16px; }
+.pa-menu-item[data-ico="plus"] { --pa-ico: var(--pa-i-plus); }
+.pa-menu-item[data-ico="logout"] { --pa-ico: var(--pa-i-logout); }
+.pa-menu-item[data-ico="keyboard"] { --pa-ico: var(--pa-i-keyboard); }
+.pa-menu-item[data-ico="theme"] { --pa-ico: var(--pa-i-moon); }
+html[data-theme="dark"] .pa-menu-item[data-ico="theme"] { --pa-ico: var(--pa-i-sun); }
+.pa-menu-kbd { margin-left: auto; color: var(--pa-faint); font: 500 11px/1 var(--pa-font); }
+.pa-menu-item:hover, .pa-menu-item:focus-visible { background: var(--pa-hover); color: var(--pa-text); }
+.pa .pa-menu-item:focus-visible { outline-offset: -2px; }
+.pa-menu-item.pa-danger, .pa-menu-item.pa-danger:hover { color: var(--pa-down); }
+.pa-menu-item.pa-danger:hover { background: var(--pa-danger-bg); }
+.pa-menu-ver { padding: 8px 10px 4px; font-size: 12px; color: var(--pa-muted); }
+
+@keyframes pa-pop {
+    from { opacity: 0; transform: translateY(4px) scale(.98); }
+    to { opacity: 1; transform: none; }
+}
+@keyframes pa-fade { from { opacity: 0; } to { opacity: 1; } }
+
+/* ═══ Desktop ═══════════════════════════════════════════════════════════════════════════════════════════ */
+@media (min-width: 769px) {
+
+    html.pa-collapsed { --pa-side-w: 64px; --pa-side-pad: 12px; }
+
+    .pa-side {
+        flex: 0 0 var(--pa-side-w);
+        width: var(--pa-side-w);
+        position: sticky;
+        top: 0;
+        z-index: 30;
+        height: 100vh;
+        background: var(--pa-side);
+        border-right: 1px solid var(--pa-line);
+        padding: 0 var(--pa-side-pad) 10px;
+        display: flex;
+        flex-direction: column;
+    }
+    /* Transitions come on after first paint (parent_menu.js), so a saved rail never animates on load */
+    html.pa-ready .pa-side { transition: flex-basis .22s var(--pa-ease), width .22s var(--pa-ease); }
+
+    /* Brand row: logo, school name, collapse button */
+    .pa-brand {
+        position: relative;
+        flex: none;
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        height: 62px;
+        margin: 0 calc(var(--pa-side-pad) * -1);
+        padding: 0 calc(var(--pa-side-pad) + 2px) 0 calc(var(--pa-side-pad) - 1px);
+    }
+    .pa-toggle {
+        --pa-ico: var(--pa-i-panel);
+        flex: none;
+        display: grid;
+        place-items: center;
+        width: 32px;
+        height: 32px;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        border-radius: 8px;
+        background: none;
+        color: var(--pa-muted);
+        cursor: pointer;
+        transition: background .12s ease, color .12s ease;
+    }
+    .pa-toggle::before { width: 18px; height: 18px; }
+    .pa-toggle:hover { background: var(--pa-hover); color: var(--pa-text); }
+
+    .pa-search { margin: 12px 0 10px; }
+    .pa-nav { flex: 1 1 auto; min-height: 0; margin: 0; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; }
+    .pa-nav::-webkit-scrollbar { display: none; }
+
+    /* Rail */
+    html.pa-collapsed .pa-brand-text, html.pa-collapsed .pa-nav-label, html.pa-collapsed .pa-kbd { display: none; }
+    html.pa-collapsed .pa-brand { justify-content: center; padding: 0; }
+    html.pa-collapsed .pa-toggle {
+        position: absolute;
+        inset: 0;
+        margin: auto;
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        opacity: 0;
+        background: var(--pa-side);
+        color: var(--pa-soft);
+    }
+    html.pa-collapsed .pa-brand:hover .pa-toggle, html.pa-collapsed .pa-toggle:focus-visible { opacity: 1; }
+    html.pa-collapsed .pa-nav-link, html.pa-collapsed .pa-search { justify-content: center; gap: 0; padding: 0; }
+    html.pa-collapsed .pa-nav-group { height: 1px; margin: 8px 4px; padding: 0; background: var(--pa-line); font-size: 0; }
+    html.pa-collapsed .pa-account-btn { grid-template-columns: 32px; justify-content: center; padding: 6px 0; }
+    html.pa-collapsed .pa-account-text, html.pa-collapsed .pa-account-chev { display: none; }
+    /* The card cannot fit inside a 64px rail, so it opens beside it */
+    html.pa-collapsed .pa-menu-up { left: calc(100% + 18px); right: auto; width: 248px; bottom: 0; }
+
+    /* Tooltip (rail and the collapse button) */
+    .pa-tip {
+        position: fixed;
+        z-index: 7000;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 9px;
+        transform: translateY(-50%);
+        background: var(--pa-tip-bg);
+        border-radius: 7px;
+        box-shadow: 0 6px 18px rgba(31, 32, 29, .22);
+        color: var(--pa-tip-text);
+        font: 450 12.5px/1 var(--pa-font);
+        white-space: nowrap;
+        pointer-events: none;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity .1s ease;
+    }
+    .pa-tip.is-on { opacity: 1; visibility: visible; }
+    .pa-tip kbd { color: var(--pa-tip-text); opacity: .65; font: 500 11px/1 var(--pa-font); }
+
+    /* Quick search */
+    .pa-palette {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 6500;
+        padding-top: 14vh;
+        align-items: flex-start;
+        justify-content: center;
+        background: var(--pa-scrim);
+        -webkit-backdrop-filter: blur(3px);
+        backdrop-filter: blur(3px);
+        font-family: var(--pa-font);
+    }
+    .pa-palette.is-open { display: flex; animation: pa-fade .12s ease-out; }
+    .pa-palette-panel {
+        width: min(580px, calc(100vw - 48px));
+        overflow: hidden;
+        background: var(--pa-card);
+        border: 1px solid var(--pa-line-strong);
+        border-radius: 14px;
+        box-shadow: 0 24px 64px rgba(31, 32, 29, .22);
+        animation: pa-pop .14s cubic-bezier(.2, .8, .2, 1);
+    }
+    .pa-palette-field { display: flex; align-items: center; gap: 12px; height: 54px; padding: 0 18px; border-bottom: 1px solid var(--pa-line); }
+    .pa-palette-field::before { --pa-ico: var(--pa-i-search); width: 18px; height: 18px; color: var(--pa-muted); }
+    .pa-palette-field input {
+        flex: 1;
+        min-width: 0;
+        height: 100%;
+        padding: 0;
+        border: 0;
+        outline: 0;
+        box-shadow: none;
+        background: transparent;
+        color: var(--pa-text);
+        font: 450 16px/1 var(--pa-font);
+    }
+    .pa-palette-field input::placeholder { color: var(--pa-faint); }
+    #paPaletteList { list-style: none; margin: 0; padding: 6px; max-height: min(400px, 52vh); overflow-y: auto; scroll-padding: 32px 0 6px; }
+    #paPaletteList li.pa-phead { padding: 12px 12px 5px; color: var(--pa-faint); font: 500 12px/1 var(--pa-font); user-select: none; }
+    #paPaletteList li.pa-phead:first-child { padding-top: 6px; }
+    #paPaletteList li[role="option"] {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        height: 40px;
+        padding: 0 12px;
+        border-radius: 8px;
+        color: var(--pa-soft);
+        font: 450 14px/1 var(--pa-font);
+        cursor: pointer;
+    }
+    #paPaletteList li[role="option"][aria-selected="true"] { background: var(--pa-active); color: var(--pa-text); }
+    #paPaletteList li[aria-selected="true"] .pa-pico { background: var(--pa-accent); }
+    .pa-pico { width: 18px; height: 18px; }
+    .pa-plabel { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .pa-ptag { color: var(--pa-muted); font-size: 12px; }
+    .pa-hit { color: var(--pa-accent); }
+    .pa-pkeys { display: flex; gap: 4px; margin-left: auto; }
+    .pa-pk, .pa-krow kbd {
+        min-width: 20px;
+        padding: 3px 5px;
+        box-sizing: border-box;
+        text-align: center;
+        border: 1px solid var(--pa-line);
+        border-radius: 5px;
+        color: var(--pa-muted);
+        font: 500 11px/1 var(--pa-font);
+    }
+    .pa-palette-empty { margin: 0; padding: 28px 18px 30px; text-align: center; color: var(--pa-muted); font-size: 14px; line-height: 1.5; }
+    .pa-palette-foot { display: flex; gap: 18px; padding: 10px 16px; border-top: 1px solid var(--pa-line); color: var(--pa-faint); font-size: 12px; }
+    .pa-palette-foot kbd { margin-right: 4px; padding: 2px 5px; border: 1px solid var(--pa-line); border-radius: 4px; font: 500 11px/1 var(--pa-font); }
+
+    /* Keyboard shortcuts sheet */
+    .pa-keys {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 6600;
+        align-items: center;
+        justify-content: center;
+        background: var(--pa-scrim);
+        -webkit-backdrop-filter: blur(3px);
+        backdrop-filter: blur(3px);
+        font-family: var(--pa-font);
+    }
+    .pa-keys.is-open { display: flex; animation: pa-fade .12s ease-out; }
+    .pa-keys-panel {
+        width: min(640px, calc(100vw - 48px));
+        max-height: calc(100vh - 96px);
+        overflow-y: auto;
+        outline: 0;
+        background: var(--pa-card);
+        border: 1px solid var(--pa-line-strong);
+        border-radius: 14px;
+        box-shadow: 0 24px 64px rgba(31, 32, 29, .22);
+        animation: pa-pop .14s cubic-bezier(.2, .8, .2, 1);
+    }
+    .pa-keys-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 14px 12px 20px; border-bottom: 1px solid var(--pa-line); }
+    .pa-keys-head h2 { margin: 0; color: var(--pa-text); font: 500 15px/1.2 var(--pa-font); }
+    .pa-keys-x {
+        --pa-ico: var(--pa-i-x);
+        display: grid;
+        place-items: center;
+        width: 30px;
+        height: 30px;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        border-radius: 8px;
+        background: none;
+        color: var(--pa-muted);
+        cursor: pointer;
+        transition: background .12s ease, color .12s ease;
+    }
+    .pa-keys-x::before { width: 16px; height: 16px; }
+    .pa-keys-x:hover, .pa-keys-x:focus-visible { background: var(--pa-hover); color: var(--pa-text); outline: 0; }
+    .pa-keys-x:focus-visible { box-shadow: 0 0 0 2px var(--pa-accent); }
+    .pa-keys-body { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 32px; padding: 14px 20px 20px; }
+    .pa-keys-sec h3 { margin: 6px 0 4px; color: var(--pa-faint); font: 500 12px/1 var(--pa-font); }
+    .pa-krow { display: flex; align-items: center; gap: 12px; height: 34px; color: var(--pa-soft); font: 450 14px/1 var(--pa-font); }
+    .pa-krow span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .pa-krow i { display: flex; gap: 4px; font-style: normal; }
+    .pa-keys-note { grid-column: 1 / -1; margin: 6px 0 0; padding-top: 12px; border-top: 1px solid var(--pa-line); color: var(--pa-faint); font-size: 12px; line-height: 1.5; }
+}
+
+/* ═══ Phones ════════════════════════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+    /* The menu is set in Geist, like the learner's phone menu (the pages use Nunito) */
+    .pa-drawer {
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 80;
+        width: var(--pa-dw);
+        box-sizing: border-box;
+        padding: calc(6px + env(safe-area-inset-top, 0px)) 0 0;
+        background: var(--pa-drawer-bg);
+        color: var(--pa-soft);
+        font-family: 'Geist', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        transform: translate3d(-100%, 0, 0);
+        visibility: hidden;
+        transition: transform var(--pa-dur) var(--pa-ease), visibility 0s linear var(--pa-dur);
+    }
+    .pa-drawer.is-open { transform: none; visibility: visible; transition-delay: 0s; }
+
+    /* The pushed-aside page runs past the right edge of the screen. Clipping it there keeps it out of the page's scrollable
+       width, so the phone's browser does not zoom out to fit it (clip, not hidden: the header is sticky and needs the page to
+       stay the scroller). */
+    .pa { overflow-x: clip; }
+
+    /* The page, the header and the bottom tabs are pushed aside together with the menu. They only move while it is open;
+       at rest nothing about them changes. */
+    .pa-top, .pa-content, .pa-tabs { transition: transform var(--pa-dur) var(--pa-ease); }
+    html.pa-menu-open .pa-top, html.pa-menu-open .pa-content, html.pa-menu-open .pa-tabs { transform: translate3d(var(--pa-dw), 0, 0); }
+    html.pa-menu-open .pa-tabs { pointer-events: none; }
+    html.pa-menu-open, html.pa-drag { overflow: hidden; }
+
+    /* The dim over the page carries the rounded outward edge. The two corner pieces paint the menu colour into the corner
+       gaps, so the page's square corners do not show behind the curve. */
+    .pa-overlay {
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        box-sizing: border-box;
+        z-index: 70;
+        border-style: solid;
+        border-width: 1px 0 1px 1px;
+        border-color: var(--pa-curve-line);
+        border-radius: var(--pa-curve) 0 0 var(--pa-curve);
+        background: rgba(0, 0, 0, .18);
+        transform: translate3d(0, 0, 0);
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: transform var(--pa-dur) var(--pa-ease), opacity var(--pa-dur) var(--pa-ease), visibility 0s linear var(--pa-dur);
+    }
+    html.pa-menu-open .pa-overlay {
+        transform: translate3d(var(--pa-dw), 0, 0);
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        transition-delay: 0s;
+    }
+    .pa-overlay::before, .pa-overlay::after { content: ''; position: absolute; left: -1px; width: var(--pa-curve); height: var(--pa-curve); pointer-events: none; }
+    .pa-overlay::before { top: -1px; background: radial-gradient(circle at 100% 100%, transparent calc(var(--pa-curve) - .4px), var(--pa-drawer-bg) var(--pa-curve)); }
+    .pa-overlay::after { bottom: -1px; background: radial-gradient(circle at 100% 0, transparent calc(var(--pa-curve) - .4px), var(--pa-drawer-bg) var(--pa-curve)); }
+
+    /* While a finger is dragging (parent_menu.js): no transitions, and everything is lifted out exactly as when it is open */
+    html.pa-drag .pa-drawer { visibility: visible; transition: none; will-change: transform; }
+    html.pa-drag .pa-top, html.pa-drag .pa-content, html.pa-drag .pa-tabs { transition: none; will-change: transform; }
+    html.pa-drag .pa-tabs { pointer-events: none; }
+    html.pa-drag .pa-overlay { transition: none; will-change: transform, opacity; pointer-events: none; visibility: visible; }
+
+    /* Top: school logo and name */
+    .pa-drawer-head { flex: none; display: flex; align-items: center; gap: 12px; padding: 10px 18px 14px; }
+    .pa-drawer .pa-mark { width: 46px; height: 46px; border-radius: 12px; }
+    .pa-drawer .pa-mark--initials { font-size: 17px; }
+    .pa-drawer .pa-brand-text { gap: 2px; }
+    .pa-drawer .pa-brand-name { font-size: 17px; line-height: 1.15; }
+
+    /* Search */
+    .pa-drawer .pa-search {
+        width: calc(100% - 28px);
+        height: 44px;
+        margin: 0 14px 14px;
+        padding: 0 12px;
+        gap: 10px;
+        border-radius: 12px;
+        color: var(--pa-muted);
+        font: 450 16px/1 'Geist', system-ui, sans-serif;
+        -webkit-tap-highlight-color: transparent;
+    }
+    .pa-drawer .pa-search::before { width: 20px; height: 20px; }
+    .pa-drawer .pa-search:hover { background: var(--pa-search-bg); color: var(--pa-muted); }
+    .pa-drawer .pa-search:active { background: var(--pa-hover); }
+
+    /* Pages */
+    .pa-drawer .pa-nav { flex: 1 1 auto; min-height: 0; padding: 4px 10px 12px; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; scrollbar-width: none; }
+    .pa-drawer .pa-nav::-webkit-scrollbar { display: none; }
+    .pa-drawer .pa-nav-group { margin: 16px 0 6px; padding: 0 12px; font: 500 12.5px/1 'Geist', system-ui, sans-serif; }
+    .pa-drawer .pa-nav-link { height: 48px; padding: 0 12px; gap: 14px; border-radius: 12px; font: 450 16.5px/1 'Geist', system-ui, sans-serif; -webkit-tap-highlight-color: transparent; }
+    .pa-drawer .pa-nav-link svg { width: 22px; height: 22px; }
+    .pa-drawer .pa-nav-link:hover { background: none; color: var(--pa-soft); }
+    .pa-drawer .pa-nav-link:active { background: var(--pa-hover); }
+    .pa-drawer .pa-nav-link[aria-current="page"] { background: var(--pa-active); color: var(--pa-text); font-weight: 500; }
+    .pa-drawer .pa-nav-link[aria-current="page"] svg { color: var(--pa-accent); }
+
+    /* Bottom: the account row, a tinted rounded row. Tapping it opens the account sheet. */
+    .pa-drawer-account {
+        flex: none;
+        width: auto;
+        height: 56px;
+        margin: 0 10px calc(34px + env(safe-area-inset-bottom, 0px));
+        padding: 0 12px 0 10px;
+        grid-template-columns: 36px minmax(0, 1fr) 20px;
+        column-gap: 12px;
+        border-radius: 14px;
+        background: var(--pa-row);
+        -webkit-tap-highlight-color: transparent;
+    }
+    .pa-drawer-account:hover { background: var(--pa-row); }
+    .pa-drawer-account:active, .pa-drawer-account[aria-expanded="true"] { background: var(--pa-active); }
+    .pa-drawer-account .pa-avatar { width: 36px; height: 36px; font-size: 13px; }
+    .pa-drawer-account .pa-account-name { font-size: 16px; }
+    .pa-drawer-account .pa-account-role { font-size: 13px; }
+    .pa-drawer-account .pa-account-chev { width: 20px; height: 20px; background: var(--pa-muted); }
+
+    /* Account sheet: the same card, as a bottom sheet (it is a sibling of the menu, not inside it: the menu slides with a
+       transform, which would pin a fixed-position sheet to the menu instead of the screen) */
+    .pa-sheet-bg {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 90;
+        background: var(--pa-scrim);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity .22s ease, visibility 0s linear .22s;
+    }
+    .pa-sheet-bg.is-open { opacity: 1; visibility: visible; transition-delay: 0s; }
+    .pa-sheet {
+        display: block;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        top: auto;
+        width: auto;
+        z-index: 95;
+        padding: 10px 12px calc(16px + env(safe-area-inset-bottom, 0px));
+        border: 0;
+        border-radius: 24px 24px 0 0;
+        box-shadow: var(--pa-sheet-shadow);
+        font-family: 'Geist', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        animation: none;
+        transform: translate3d(0, 105%, 0);
+        visibility: hidden;
+        transition: transform .3s var(--pa-ease), visibility 0s linear .3s;
+    }
+    .pa-sheet.is-open { transform: none; visibility: visible; transition-delay: 0s; }
+    .pa-sheet::before { content: ''; display: block; width: 38px; height: 4px; margin: 0 auto 12px; border-radius: 2px; background: var(--pa-line-strong); }
+    .pa-sheet .pa-menu-head { padding: 2px 12px 12px; margin-bottom: 6px; border-bottom: 1px solid var(--pa-line); }
+    .pa-sheet .pa-menu-name { font-size: 16.5px; line-height: 1.3; }
+    .pa-sheet .pa-menu-email { font-size: 13px; line-height: 1.4; }
+    .pa-sheet .pa-menu-item { height: 50px; padding: 0 12px; gap: 14px; border-radius: 12px; font-size: 16.5px; -webkit-tap-highlight-color: transparent; }
+    .pa-sheet .pa-menu-item::before { width: 22px; height: 22px; }
+    .pa-sheet .pa-menu-item:hover { background: none; color: var(--pa-soft); }
+    .pa-sheet .pa-menu-item:active { background: var(--pa-hover); }
+    .pa-sheet .pa-menu-item.pa-danger:hover { background: none; color: var(--pa-down); }
+    .pa-sheet .pa-menu-sep { margin: 6px 12px; }
+    .pa-sheet .pa-menu-ver { padding: 12px 12px 16px; font-size: 15px; line-height: 1.3; }
+    /* The keyboard shortcuts row is for desktop */
+    .pa-menu-item[data-ico="keyboard"] { display: none; }
+
+    /* Search sheet (built by parent_menu.js) */
+    .pa-s {
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        inset: 0;
+        z-index: 120;
+        padding-top: env(safe-area-inset-top, 0px);
+        background: var(--pa-drawer-bg);
+        color: var(--pa-text);
+        font-family: 'Geist', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        opacity: 0;
+        visibility: hidden;
+        transform: translate3d(0, 10px, 0);
+        transition: opacity .2s ease, transform .2s ease, visibility 0s linear .2s;
+    }
+    .pa-s.on { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
+    .pa-s-bar { display: flex; align-items: center; gap: 8px; padding: 10px 12px 8px; }
+    .pa-s-field {
+        flex: 1;
+        min-width: 0;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0 12px;
+        border: 1px solid var(--pa-line);
+        border-radius: 12px;
+        background: var(--pa-search-bg);
+        color: var(--pa-muted);
+    }
+    .pa-s-field::before { --pa-ico: var(--pa-i-search); width: 20px; height: 20px; }
+    .pa-s-field input {
+        flex: 1;
+        min-width: 0;
+        height: 100%;
+        border: 0;
+        outline: 0;
+        background: none;
+        padding: 0;
+        color: var(--pa-text);
+        font: 450 16px/1 'Geist', system-ui, sans-serif; /* 16px stops iOS zooming the page */
+    }
+    .pa-s-cancel { border: 0; background: none; padding: 10px 6px; color: var(--pa-soft); font: 450 16px/1 'Geist', system-ui, sans-serif; cursor: pointer; }
+    .pa-s-list { flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 4px 10px calc(16px + env(safe-area-inset-bottom, 0px)); }
+    .pa-s-head { padding: 14px 12px 6px; color: var(--pa-muted); font: 500 12.5px/1 'Geist', system-ui, sans-serif; }
+    .pa-s-row {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        width: 100%;
+        height: 50px;
+        box-sizing: border-box;
+        padding: 0 12px;
+        border: 0;
+        border-radius: 12px;
+        background: none;
+        color: var(--pa-soft);
+        font: 450 16.5px/1 'Geist', system-ui, sans-serif;
+        text-align: left;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+    }
+    .pa-s-row::before { width: 22px; height: 22px; }
+    .pa-s-row:active { background: var(--pa-hover); }
+    .pa-s-row .t { margin-left: auto; color: var(--pa-muted); font-size: 13px; }
+    .pa-s-row b { color: var(--pa-accent); font-weight: 500; }
+    .pa-s-empty { padding: 28px 16px; color: var(--pa-muted); font: 400 15px/1.5 'Geist', system-ui, sans-serif; text-align: center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :root { --pa-dur: .01s; }
+    .pa-side, .pa-drawer, .pa-overlay, .pa-sheet, .pa-sheet-bg, .pa-s, .pa-top, .pa-content, .pa-tabs, .pa-tip, .pa-nav-link { transition-duration: .01s !important; }
+    .pa-menu, .pa-palette, .pa-palette-panel, .pa-keys, .pa-keys-panel { animation: none !important; }
+}

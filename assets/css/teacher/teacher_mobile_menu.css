@@ -73,7 +73,7 @@ html body .sidebar.dm-menu.active { transform: none; visibility: visible; transi
 /* -- The page, the bottom nav and the dim follow it ------------------------ */
 html body .main-content { transition: transform var(--dmm-dur) var(--dmm-ease); }
 html body .sidebar.active ~ .main-content {
-  position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+  position: fixed; top: 0; left: 0; width: 100%; height: 100vh; height: 100dvh;
   transform: translate3d(var(--dmm-w), 0, 0); filter: none;
 }
 html body #mobileBottomNav {
@@ -87,8 +87,8 @@ html body .sidebar.active ~ #mobileBottomNav {
    The curve is drawn by the corner pieces below now, so the bar keeps its normal look: clear at rest, glass once scrolled. */
 html body .sidebar.active ~ #mobileBottomNav { background: transparent !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
 html body .sidebar.active ~ #mobileBottomNav.nav-scrolled {
-  background: rgba(66,65,65,0.35) !important; border-top: 1px solid rgba(255,255,255,0.1) !important;
-  -webkit-backdrop-filter: blur(20px) !important; backdrop-filter: blur(20px) !important; box-shadow: 0 -4px 20px rgba(0,0,0,0.3) !important;
+  background: rgba(66,65,65,0.32) !important; border-top: 1px solid rgba(255,255,255,0.14) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(180%) !important; backdrop-filter: blur(28px) saturate(180%) !important; box-shadow: 0 -4px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05) !important;
 }
 /* The page keeps its own colour while the menu is open. The old rules tinted the body (and, from the script, the header)
    #1a1919 to match the old menu; the header is a child of the page, so it keeps its colour too. */
@@ -127,7 +127,7 @@ html body #mobileOverlay::after { bottom: -1px;
    exactly as it is when the drawer is open. */
 html.dmm-drag body .sidebar.dm-menu { visibility: visible; transition: none; will-change: transform; }
 html.dmm-drag body .sidebar ~ .main-content {
-  position: fixed; top: 0; left: 0; width: 100%; height: 100vh; transition: none; will-change: transform;
+  position: fixed; top: 0; left: 0; width: 100%; height: 100vh; height: 100dvh; transition: none; will-change: transform;
 }
 html.dmm-drag body #mobileBottomNav { transition: none; will-change: transform; pointer-events: none; }
 html.dmm-drag body #mobileOverlay {
@@ -330,7 +330,7 @@ html body .dm-pop .dm-pop-sep { height: 1px; margin: 6px 12px; background: var(-
 }
 html body .sidebar.dm-menu .dm-item .dmm-badge { margin-left: auto; }
 #mobileBottomNav [data-page] { position: relative; }
-#mobileBottomNav .dmm-badge { position: absolute; top: -4px; left: calc(50% + 7px); min-width: 18px; height: 18px; font-size: 11px; line-height: 18px; padding: 0 5px; border: 2px solid #0d1117; box-sizing: content-box; }
+#mobileBottomNav .dmm-badge { position: absolute; top: 6px; left: calc(50% + 6px); min-width: 18px; height: 18px; font-size: 11px; line-height: 18px; padding: 0 5px; border: 2px solid #0d1117; box-sizing: content-box; }
 
 @media (prefers-reduced-motion: reduce) {
   html { --dmm-dur: .01s; }

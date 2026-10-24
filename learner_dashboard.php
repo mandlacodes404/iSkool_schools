@@ -227,22 +227,25 @@ $parentLink = ((int)$parentCount > 0); // true when at least one parent is linke
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
     <link rel="stylesheet" href="assets/css/learner/quiz.css?v=6.2">
     <link rel="stylesheet" href="assets/css/learner/manual.css?v=8.5">
+    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=6.3">
+    <link rel="stylesheet" href="assets/css/learner/manual.css?v=8.4">
     <link rel="stylesheet" href="assets/css/learner/announcements.css?v=3.8">
     <link rel="stylesheet" href="assets/css/learner/assignments.css?v=3.7">
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
     <link rel="stylesheet" href="assets/css/learner/grades.css?v=3.9">
     <link rel="stylesheet" href="assets/css/learner/resources.css?v=2.9">
      <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=5.0">
-     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=13.8">
+     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=14.2">
     <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=3.1">
-    <link rel="stylesheet" href="assets/css/learner/mobile_menu.css?v=1.8">
-    <link rel="stylesheet" href="assets/css/learner/mobile_settings.css?v=1.6">
+    <link rel="stylesheet" href="assets/css/learner/mobile_menu.css?v=2.0">
+    <link rel="stylesheet" href="assets/css/learner/mobile_settings.css?v=1.7">
+    <link rel="stylesheet" href="assets/css/shared/pwa_prompts.css?v=1.0">
     <link rel="stylesheet" href="assets/css/learner/mobile_class.css?v=1.1">
     <link rel="stylesheet" href="assets/css/learner/parent_invite.css?v=1.0">
     <link rel="stylesheet" href="assets/css/learner/desktop_settings.css?v=1.5S">   <!-- new -->
-    <link rel="stylesheet" href="assets/css/learner/mobile_light.css?v=1.6">
+    <link rel="stylesheet" href="assets/css/learner/mobile_light.css?v=2.1">
     <link rel="stylesheet" href="assets/css/learner/desktop_settings.css?v=1.4">   <!-- new -->
-    <link rel="stylesheet" href="assets/css/learner/mobile_light.css?v=1.8">
+    <link rel="stylesheet" href="assets/css/learner/mobile_light.css?v=2.1">
     <link rel="stylesheet" href="assets/css/splash_light.css?v=<?= (int) @filemtime(__DIR__ . '/assets/css/splash_light.css') ?>">
     <script>
     // Desktop sidebar: restore the saved collapsed state BEFORE first paint (no flash).
@@ -277,7 +280,17 @@ $parentLink = ((int)$parentCount > 0); // true when at least one parent is linke
     <!-- Phone light / dark: sets <html data-learner-mobile-theme> and the status bar colour before first paint, so the
          splash below starts in the right theme (see mobile_theme.js). It used to load at the end of <body>. -->
     <script src="assets/js/learner/mobile_theme.js?v=1.8"></script>
+    <!-- Phone canvas: the colour behind the page, there from the very first frame (when the app opens, and in the
+         instant between two pages) so a white or wrong-coloured edge never shows. Dark phone mode only: in light
+         mode the page colour is decided page by page (mobile_light.css), so <html> is left alone and takes whatever
+         <body> paints, as it always did. Same colour as the phone body in learner_dashboard.css. -->
+    <style>
+        @media (max-width: 768px) {
+            html:not([data-learner-mobile-theme="light"]) { background-color: #20201f; }
+        }
+    </style>
     <link rel="manifest" href="/manifest.php?v=1.1">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=1.1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Geist:wght@300..600&display=swap" rel="stylesheet">
     
@@ -1249,7 +1262,7 @@ if (fullPage &&
     if (apiArea) apiArea.style.display = 'block';
 
     sessionStorage.setItem("lastLearnerPage", "learner_settings");
-    window.configureHeader({ title: 'Settings', mode: 'standard' });
+    window.configureHeader({ title: 'Settings', mode: 'standard', color: '#4fd1c5' });
     if (typeof window.setActive === 'function') window.setActive("learner_settings");
 
     // Grab current avatar src or initials
@@ -3485,12 +3498,16 @@ window.configureHeader = function(config) {
             // Header bottom accent + tinted glass background when scrolled
             if (mainHeader)     mainHeader.style.borderBottom = '2px solid ' + color + '55';
             if (mainHeader)     mainHeader.setAttribute('data-page-color', color);
+            // Light mode paints the scrolled header from this (mobile_light.css can't read the inline
+            // background the scroll handler writes, and its cream rule is !important).
+            if (mainHeader)     mainHeader.style.setProperty('--learner-page-color', color);
         } else {
             // Home or no colour — reset to dark surface/default
             window.learnerCurrentPageColor = '#20201f';
             if (themeColorMeta) themeColorMeta.setAttribute('content', '#20201f');
             if (mainHeader)     mainHeader.style.borderBottom = '';
             if (mainHeader)     mainHeader.removeAttribute('data-page-color');
+            if (mainHeader)     mainHeader.style.removeProperty('--learner-page-color');
         }
     }
     // ──────────────────────────────────────────────────────────────────
@@ -3801,45 +3818,24 @@ window.learnerPageState = {
 <div id="desktopBackdrop" class="desktop-backdrop"></div>
 <div id="mobileOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:1500;"></div>
 
-<nav id="mobileBottomNav">
-
-      <a href="javascript:void(0)" onclick="return handleLearnerMobileBottomNav(event, loadManual)" data-page="partials/manual.html" id="nav-home">
-        <div class="lh-nav-box" style="width:28px;height:28px;border-radius:8px;background:#4fd1c518;border:1px solid #4fd1c530;display:flex;align-items:center;justify-content:center;margin-bottom:3px;transition:background 0.2s;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#4fd1c5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
-            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-            <polyline points="9 22 9 12 15 12 15 22"/>
-          </svg>
-        </div>
-        Home
-      </a>
-
+<!-- Phone bottom bar. Same look as the parent app's bar: 64px high, solid, thin line icons, four tabs. -->
+<nav id="mobileBottomNav" aria-label="Learner app">
+    <a href="javascript:void(0)" onclick="return handleLearnerMobileBottomNav(event, loadManual)" data-page="partials/manual.html" id="nav-home">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>
+        <span>Home</span>
+    </a>
     <a href="javascript:void(0)" onclick="return handleLearnerMobileBottomNav(event, fetchQuizzes)" data-page="quiz_list.php" id="nav-quiz">
-        <div class="lh-nav-box" style="width:28px;height:28px;border-radius:8px;background:#fdd66318;border:1px solid #fdd66330;display:flex;align-items:center;justify-content:center;margin-bottom:3px;transition:background 0.2s;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#fdd663" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
-            <path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
-          </svg>
-        </div>
-        Quiz
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7"/><path d="M12 17h.01"/></svg>
+        <span>Quiz</span>
     </a>
-
     <a href="javascript:void(0)" onclick="return handleLearnerMobileBottomNav(event, fetchAssignments)" data-page="assignment_list.php" id="nav-assignments">
-        <div class="lh-nav-box" style="width:28px;height:28px;border-radius:8px;background:#a78bfa18;border:1px solid #a78bfa30;display:flex;align-items:center;justify-content:center;margin-bottom:3px;transition:background 0.2s;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
-            <path d="M9 12h6"/><path d="M9 16h6"/><rect x="4" y="4" width="16" height="16" rx="2"/>
-          </svg>
-        </div>
-        Assignments
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6"/><path d="M9 17h4"/></svg>
+        <span>Assignments</span>
     </a>
-
     <a href="javascript:void(0)" onclick="return handleLearnerMobileBottomNav(event, fetchResources)" data-page="resource_list.php" id="nav-resources">
-        <div class="lh-nav-box" style="width:28px;height:28px;border-radius:8px;background:#f28c3818;border:1px solid #f28c3830;display:flex;align-items:center;justify-content:center;margin-bottom:3px;transition:background 0.2s;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#f28c38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
-            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-          </svg>
-        </div>
-        Resources
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 5h7a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H2z"/><path d="M22 5h-7a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h8z"/></svg>
+        <span>Resources</span>
     </a>
-
 </nav>
 
 <script>
@@ -3870,11 +3866,10 @@ if ('serviceWorker' in navigator) {
     const learnerHadServiceWorkerController = Boolean(navigator.serviceWorker.controller);
     navigator.serviceWorker.addEventListener('message', event => {
         if (event.data?.type !== 'iskool-update-available') return;
-        if (window.confirm('An iSkool update is available. Refresh now?')) {
-            navigator.serviceWorker.getRegistration('/').then(registration => {
-                registration?.waiting?.postMessage({ type: 'iskool-skip-waiting' });
-            });
-        }
+        // An in-app banner (assets/js/shared/pwa_prompts.js) instead of a browser pop-up. Its Update button waits
+        // while a quiz is open and then asks the waiting worker to take over; the controllerchange handler below
+        // reloads the page. If the banner script has not loaded yet, it picks this flag up when it starts.
+        if (window.iskoolPwa) window.iskoolPwa.offerUpdate(); else window.__iskoolUpdatePending = true;
     });
     navigator.serviceWorker.addEventListener('controllerchange', () => {
         if (!learnerHadServiceWorkerController || learnerUpdateReloading) return;
@@ -3975,17 +3970,18 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/assignments.js?v=10.3"></script>
 <script src="assets/js/learner/resources.js?v=8.8"></script>
 <script src="assets/js/learner/announcements.js?v=9.4"></script>
-<script src="assets/js/learner/grades.js?v=10.4"></script>
-<script src="assets/js/learner/evaluations.js?v=7.3"></script>
+<script src="assets/js/learner/grades.js?v=10.5"></script>
+<script src="assets/js/learner/evaluations.js?v=7.4"></script>
 <script src="assets/js/learner/discussions.js?v=11.2"></script>
-<script src="assets/js/learner/syllabus.js?v=4.4"></script>
-<script src="assets/js/learner/learner_calendar.js?v=2.4"></script>
+<script src="assets/js/learner/syllabus.js?v=4.5"></script>
+<script src="assets/js/learner/learner_calendar.js?v=2.5"></script>
 <script src="assets/js/learner/desktop_menu.js?v=1.4"></script>
 <script src="assets/js/learner/mobile_menu.js?v=1.4"></script>
 <script src="assets/js/learner/mobile_settings.js?v=1.7"></script>
 <script src="assets/js/learner/parent_invite.js?v=1.0"></script>
 <script src="assets/js/learner/mobile_class.js?v=1.2"></script>
 <script src="assets/js/learner/desktop_settings.js?v=1.4"></script>
+<script src="assets/js/shared/pwa_prompts.js?v=1.0"></script>
 <script>window.ISKOOL_SETTINGS = { sendResetUrl: 'auth/password/send_reset_link.php' };</script>
 <?php include 'includes/global_viewer.php'; ?>
 </body>

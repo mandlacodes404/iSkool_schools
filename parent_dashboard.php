@@ -51,6 +51,9 @@ $nav = [
     ['events',   'Events',   '<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>'],
 ];
 
+// Headings above some of the pages, like the learner menu's "Learning" and "Academics": Home on its own, then these two groups.
+$groups = ['report' => 'Progress', 'news' => 'School'];
+
 function pa_icon(string $paths, int $size = 20, string $width = '1.8'): string
 {
     return '<svg width="' . $size . '" height="' . $size . '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' . $width
@@ -64,6 +67,20 @@ function pa_school_mark(array $school): string
         return '<img class="pa-mark" src="' . pa_e($school['logo']) . '" alt="">';
     }
     return '<span class="pa-mark pa-mark--initials" aria-hidden="true">' . pa_e($school['initials']) . '</span>';
+}
+
+/** The page links of the sidebar and the phone menu, with the group headings between them. */
+function pa_nav_links(array $nav, array $groups): string
+{
+    $html = '';
+    foreach ($nav as [$id, $label, $icon]) {
+        if (isset($groups[$id])) {
+            $html .= '<div class="pa-nav-group" aria-hidden="true">' . pa_e($groups[$id]) . '</div>';
+        }
+        $html .= '<a class="pa-nav-link" href="#/' . $id . '" data-route="' . $id . '">' . pa_icon($icon, 18)
+            . '<span class="pa-nav-label">' . pa_e($label) . '</span></a>';
+    }
+    return $html;
 }
 
 /** The avatar, the parent's name with the "Parent" role under it, and the up/down chevron (the account row at the bottom of the menu). */
@@ -86,34 +103,40 @@ function pa_account_row(string $initials, string $name): string
     <meta name="csrf-token" content="<?= pa_e($_SESSION['csrf_token'] ?? '') ?>">
     <link rel="icon" href="icon.svg?v=1.4" type="image/svg+xml">
     <script>
-        // Set the saved theme before anything paints, so there is no flash. Light is the default.
+        // Set the saved theme and the sidebar's collapsed state before anything paints, so there is no flash.
+        // Light is the default. With no saved choice the sidebar is a narrow rail on windows under 1100px.
         (function () {
             try {
                 var t = localStorage.getItem('parentApp.theme');
                 if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+                var c = localStorage.getItem('parentApp.menuCollapsed');
+                if (c === '1' || (c === null && window.innerWidth < 1100)) document.documentElement.classList.add('pa-collapsed');
             } catch (e) {}
         })();
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Geist:wght@400;500;600&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/parent/parent_app.css?v=1.5">
+    <link rel="stylesheet" href="assets/css/parent/parent_app.css?v=1.6">
+    <link rel="stylesheet" href="assets/css/parent/parent_menu.css?v=1.0">
 </head>
 <body>
 <div class="pa" id="parentApp" data-email="<?= pa_e($parent_email) ?>" data-version="<?= pa_e(iskool_app_version_label()) ?>">
 
     <!-- Desktop: sidebar. Same structure as the learner menu: school logo and name, the pages, the account row at the bottom. -->
-    <aside class="pa-side" aria-label="Parent menu">
+    <aside class="pa-side" id="paSide" aria-label="Parent menu">
         <div class="pa-brand">
             <?= pa_school_mark($school) ?>
             <div class="pa-brand-text">
                 <span class="pa-brand-name" title="<?= pa_e($school['name']) ?>"><?= pa_e($school['name']) ?></span>
             </div>
+            <button type="button" class="pa-toggle" id="paToggle" aria-controls="paSide" aria-expanded="true" aria-label="Collapse sidebar"></button>
         </div>
+        <button type="button" class="pa-search" id="paSearchBtn" aria-label="Search pages and actions">
+            <span class="pa-nav-label">Search</span><kbd class="pa-kbd" id="paSearchKbd"></kbd>
+        </button>
         <nav class="pa-nav" aria-label="Parent app">
-            <?php foreach ($nav as [$id, $label, $icon]): ?>
-                <a class="pa-nav-link" href="#/<?= $id ?>" data-route="<?= $id ?>"><?= pa_icon($icon, 18) ?><span><?= pa_e($label) ?></span></a>
-            <?php endforeach; ?>
+            <?= pa_nav_links($nav, $groups) ?>
         </nav>
         <div class="pa-account" id="paAccountDesktop">
             <button type="button" class="pa-account-btn" id="paAccountBtn" aria-haspopup="menu" aria-expanded="false" aria-controls="paMenuDesktop">
@@ -161,7 +184,7 @@ function pa_account_row(string $initials, string $name): string
     </div>
 
     <!-- Phone: slide-in menu. School logo and name at the top, the account row at the bottom (it opens the sheet below). -->
-    <div class="pa-overlay" id="paOverlay" hidden></div>
+    <div class="pa-overlay" id="paOverlay"></div>
     <aside class="pa-drawer" id="paDrawer" aria-label="Menu" aria-hidden="true">
         <div class="pa-drawer-head">
             <?= pa_school_mark($school) ?>
@@ -169,10 +192,11 @@ function pa_account_row(string $initials, string $name): string
                 <span class="pa-brand-name"><?= pa_e($school['name']) ?></span>
             </div>
         </div>
+        <button type="button" class="pa-search" id="paDrawerSearch" aria-label="Search pages and actions">
+            <span class="pa-nav-label">Search</span>
+        </button>
         <nav class="pa-nav" aria-label="Parent app">
-            <?php foreach ($nav as [$id, $label, $icon]): ?>
-                <a class="pa-nav-link" href="#/<?= $id ?>" data-route="<?= $id ?>"><?= pa_icon($icon, 18) ?><span><?= pa_e($label) ?></span></a>
-            <?php endforeach; ?>
+            <?= pa_nav_links($nav, $groups) ?>
         </nav>
         <button type="button" class="pa-account-btn pa-drawer-account" id="paDrawerAccount" aria-haspopup="menu" aria-expanded="false" aria-controls="paMenuSheet">
             <?= pa_account_row($parent_initials, $parent_name) ?>
@@ -185,6 +209,7 @@ function pa_account_row(string $initials, string $name): string
     <div class="pa-menu pa-sheet" id="paMenuSheet" data-pa-menu role="menu" aria-label="Account"></div>
 </div>
 
-<script src="assets/js/parent/parent_app.js?v=1.6"></script>
+<script src="assets/js/parent/parent_menu.js?v=1.0"></script>
+<script src="assets/js/parent/parent_app.js?v=1.7"></script>
 </body>
 </html>

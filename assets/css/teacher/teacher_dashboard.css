@@ -20,6 +20,10 @@
             font-weight: 600;
             display: flex;
             height: 100vh;
+            /* dvh = the height you can actually see. On a phone, 100vh is the height with the browser's address
+               bar tucked away, so while the bar is showing, the bottom of the page sits under it. Browsers that
+               do not know dvh ignore the second line and keep the first. */
+            height: 100dvh;
             background: var(--bg-color);
             color: var(--text-color);
             overflow: hidden;
@@ -66,6 +70,7 @@
             visibility: hidden;
             opacity: 0;
             height: 100vh;
+            height: 100dvh; /* the menu's last items must not sit under the browser's address bar */
             z-index: 5000;
             overflow-y: auto;
             overflow-x: hidden;
@@ -406,7 +411,7 @@
         #mobileOverlay {
             position: fixed;
             top: 0; left: 0;
-            width: 100vw; height: 100vh;
+            width: 100vw; height: 100vh; height: 100dvh;
             background: rgba(0,0,0,0.55);
             backdrop-filter: blur(6px);
             opacity: 0;
@@ -582,39 +587,51 @@
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ── MOBILE BOTTOM NAV ── */
+        /* ── MOBILE BOTTOM NAV ──
+           Same structure as the parent app's bar (parent_app.css .pa-tabs): centred tabs, thin 22px line icons
+           with the parent bar's glyphs, 11px labels, bold bright active tab. It is 88px high plus the phone's
+           safe area (--mbn-h; the old bar was 82px, the parent bar is 64px). The background is the teacher's own
+           glass and stays dynamic (see DYNAMIC BOTTOM NAV below). The teacher app is dark on phones, so no light
+           variant. */
+        :root { --mbn-h: 88px; }
         #mobileBottomNav {
             display: none;
             position: fixed;
-            bottom: 0; left: 0;
+            bottom: 0; left: 0; right: 0;
             width: 100%;
-            height: 82px;
-            background: rgba(66,65,65,0.35);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
-            z-index: 4000;
-            justify-content: space-around;
-            align-items: flex-start;
+            height: calc(var(--mbn-h) + env(safe-area-inset-bottom, 0px));
+            padding: 0 0 env(safe-area-inset-bottom, 0px);
             box-sizing: border-box;
+            background: rgba(66,65,65,0.32);
+            backdrop-filter: blur(28px) saturate(180%);
+            -webkit-backdrop-filter: blur(28px) saturate(180%);
+            border-top: 1px solid rgba(255,255,255,0.14);
+            box-shadow: 0 -4px 24px rgba(0,0,0,0.35);
+            z-index: 4000;
         }
         #mobileBottomNav a {
-            color: var(--text-color);
-            text-decoration: none;
-            font-size: 11px;
-            text-align: center;
-            flex: 1;
+            flex: 1 1 0;
+            min-width: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start;
-            padding-top: 5px;
-            transition: all 0.2s;
+            justify-content: center;
+            gap: 2px;
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 600;
+            color: #9b9c92;
+            -webkit-tap-highlight-color: transparent;
         }
-        #mobileBottomNav a i { font-size: 20px; margin-bottom: 4px; }
-        #mobileBottomNav a.active,
-        #mobileBottomNav a:hover { color: var(--accent-color); transform: translateY(-3px); }
+        #mobileBottomNav a span {
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        #mobileBottomNav a svg { width: 22px; height: 22px; flex-shrink: 0; }
+        #mobileBottomNav a.active { color: #ecece9; font-weight: 700; }
+        #mobileBottomNav a.active svg { stroke-width: 2.2; }
 
         /* ── MOBILE LAYOUT ── */
         @media (max-width: 768px) {
@@ -636,13 +653,9 @@
                second time pushed it entirely off-screen (past the right edge)
                while the menu was open. It now travels with .main-content
                exactly like the learner header does. */
-            .sidebar.active ~ #mobileBottomNav { filter: blur(5px); pointer-events: none; }
-            iframe { height: calc(100vh - 120px) !important; }
+            .sidebar.active ~ #mobileBottomNav { pointer-events: none; }
+            iframe { height: calc(100vh - 126px) !important; height: calc(100dvh - 126px) !important; }
             #mobileBottomNav { display: flex !important; }
-            #mobileBottomNav {
-                padding-bottom: env(safe-area-inset-bottom);
-                height: calc(82px + env(safe-area-inset-bottom));
-            }
             .sidebar a.desktop-only,
             .sidebar a.mobile-bottom-link { display: none; }
             .teacher-desktop-create { display: none !important; }
@@ -868,11 +881,11 @@
             }
 
             #mobileBottomNav.nav-scrolled {
-                background: rgba(66,65,65,0.35) !important;
-                border-top: 1px solid rgba(255,255,255,0.1) !important;
-                backdrop-filter: blur(20px) !important;
-                -webkit-backdrop-filter: blur(20px) !important;
-                box-shadow: 0 -4px 20px rgba(0,0,0,0.3) !important;
+                background: rgba(66,65,65,0.32) !important;
+                border-top: 1px solid rgba(255,255,255,0.14) !important;
+                backdrop-filter: blur(28px) saturate(180%) !important;
+                -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+                box-shadow: 0 -4px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05) !important;
             }
         }
 

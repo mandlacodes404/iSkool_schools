@@ -155,4 +155,53 @@ final class MobileLightModeTest extends TestCase
             $this->assertStringContainsString('html[data-learner-mobile-theme="light"] ' . $sel, $m[1], 'the Calendar phone block misses ' . $sel);
         }
     }
+
+    public function test_scrolled_header_takes_the_page_colour_in_light_like_the_status_bar_does(): void
+    {
+        // In dark the scroll handler paints the header and theme-color the page's colour. The light header rule is
+        // !important cream, so without the rules below the header stayed cream while the status bar went coloured.
+        $css = $this->source('assets/css/learner/mobile_light.css');
+        $this->assertStringContainsString(
+            '.main-header.header-scrolled[data-page-color]:not([data-bg-before-menu]):not([data-sheet-open]) { background: var(--learner-page-color, #faf9f5) !important;',
+            $css,
+            'a scrolled header on a coloured page must use the page colour'
+        );
+        // The open menu (status bar cream) and the Grades sheets (status bar #a9a9a5) keep the cream header: the rule is
+        // switched off by data-bg-before-menu / data-sheet-open, which toggleSidebar() and grades.js set.
+        $grades = $this->source('assets/js/learner/grades.js');
+        $this->assertStringContainsString("mainHeader.setAttribute('data-sheet-open', '')", $grades);
+        $this->assertStringContainsString("mainHeader.removeAttribute('data-sheet-open')", $grades);
+        $this->assertStringContainsString("const SHEET_OVERLAY_DIMMED_COLOR_LIGHT = '#a9a9a5';", $grades);
+
+        // configureHeader() is what hands the colour to the css, and clears it on a page without one.
+        $page = $this->source('learner_dashboard.php');
+        $this->assertStringContainsString("mainHeader.style.setProperty('--learner-page-color', color)", $page);
+        $this->assertStringContainsString("mainHeader.style.removeProperty('--learner-page-color')", $page);
+        // toggleSidebar() marks the header while the menu is open; the css rule above depends on that attribute name.
+        $this->assertStringContainsString('mainHeader.dataset.bgBeforeMenu', $page);
+    }
+
+    public function test_every_phone_page_has_a_signature_colour_except_home_and_discussions(): void
+    {
+        $colour = '/configureHeader\(\{[^}]*\bcolor:\s*[^,}]*[\'"]#[0-9a-fA-F]{6}[\'"]/s';
+        foreach ([
+            'assets/js/learner/assignments.js',
+            'assets/js/learner/quiz.js',
+            'assets/js/learner/resources.js',
+            'assets/js/learner/announcements.js',
+            'assets/js/learner/evaluations.js',
+            'assets/js/learner/grades.js',
+            'assets/js/learner/syllabus.js',
+            'assets/js/learner/learner_calendar.js',
+            'learner_dashboard.php', // Settings (and My Class)
+        ] as $file) {
+            $this->assertMatchesRegularExpression($colour, $this->source($file), $file . ' should give configureHeader a colour');
+        }
+        $this->assertMatchesRegularExpression("/configureHeader\(\{ title: 'Settings', mode: 'standard', color: '#[0-9a-fA-F]{6}' \}\)/", $this->source('learner_dashboard.php'));
+
+        // Home stays colourless on purpose (it is the dark/cream surface the other pages tint away from).
+        $this->assertDoesNotMatchRegularExpression("/configureHeader\(\{ title: 'Home'[^}]*color/", $this->source('assets/js/learner/manual.js'));
+        // Discussions is left exactly as it is: no colour on any of its header calls.
+        $this->assertDoesNotMatchRegularExpression('/configureHeader\(\{[^}]*\bcolor:/s', $this->source('assets/js/learner/discussions.js'));
+    }
 }

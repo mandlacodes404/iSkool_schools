@@ -88,6 +88,15 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
     <meta name="msapplication-navbutton-color" content="#0d1117">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=1.1">
+    <!-- Phone canvas: the colour behind the page, there from the very first frame (when the app opens, and in the
+         instant between two pages) so a white or wrong-coloured edge never shows. The teacher phone view is dark
+         only, and this is the same colour as its body (--bg-color in teacher_dashboard.css). -->
+    <style>
+        @media (max-width: 768px) {
+            html { background-color: #0d1117; }
+        }
+    </style>
     <link rel="stylesheet" href="assets/css/teacher/dashboard.css?v=4.9">
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
     <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=7.2">
@@ -102,10 +111,11 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Geist:wght@400..600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=13.5">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=13.8">
     <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_menu.css?v=2.4">
-    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_menu.css?v=1.1">
-    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_settings.css?v=1.1">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_menu.css?v=1.4">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_settings.css?v=1.2">
+    <link rel="stylesheet" href="assets/css/shared/pwa_prompts.css?v=1.0">
     <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_settings.css?v=1.4">
     <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_light_mode.css?v=1.8">
     <link rel="stylesheet" href="assets/css/splash_light.css?v=<?= (int) @filemtime(__DIR__ . '/assets/css/splash_light.css') ?>">
@@ -689,36 +699,22 @@ if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.wasLockedAtLoad
     </div>
 </div>
 
-<!-- Mobile Bottom Nav — UNCHANGED -->
-<nav id="mobileBottomNav">
-     <a href="javascript:void(0)" data-page="teacher_manual" onclick="loadTeacherManual()">
-        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:4px;">
-            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-            <polyline points="9 22 9 12 15 12 15 22"></polyline>
-        </svg>
+<!-- Phone bottom bar. Same look as the parent app's bar: 64px high, solid, thin line icons, four tabs. -->
+<nav id="mobileBottomNav" aria-label="Teacher app">
+    <a href="javascript:void(0)" data-page="teacher_manual" onclick="loadTeacherManual()">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>
         <span>Home</span>
     </a>
     <a href="javascript:void(0)" data-page="teacher_assignments" onclick="fetchTeacherAssignments()">
-        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:4px;">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
-            <line x1="12" y1="18" x2="12" y2="12"></line>
-            <line x1="9"  y1="15" x2="15" y2="15"></line>
-        </svg>
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6"/><path d="M9 17h4"/></svg>
         <span>Assignments</span>
     </a>
     <a href="javascript:void(0)" data-page="teacher_resources" onclick="fetchTeacherResources()">
-        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:4px;">
-            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-        </svg>
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 5h7a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H2z"/><path d="M22 5h-7a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h8z"/></svg>
         <span>Resources</span>
     </a>
     <a href="javascript:void(0)" data-page="teacher_announcements" onclick="fetchTeacherAnnouncements()">
-        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:4px;">
-            <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
-            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-        </svg>
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
         <span>Announcement</span>
     </a>
 </nav>
@@ -1509,11 +1505,10 @@ if ('serviceWorker' in navigator) {
     const teacherHadServiceWorkerController = Boolean(navigator.serviceWorker.controller);
     navigator.serviceWorker.addEventListener('message', event => {
         if (event.data?.type !== 'iskool-update-available') return;
-        if (window.confirm('An iSkool update is available. Refresh now?')) {
-            navigator.serviceWorker.getRegistration('/').then(registration => {
-                registration?.waiting?.postMessage({ type: 'iskool-skip-waiting' });
-            });
-        }
+        // An in-app banner (assets/js/shared/pwa_prompts.js) instead of a browser pop-up. Its Update button asks the
+        // waiting worker to take over; the controllerchange handler below reloads the page. If the banner script
+        // has not loaded yet, it picks this flag up when it starts.
+        if (window.iskoolPwa) window.iskoolPwa.offerUpdate(); else window.__iskoolUpdatePending = true;
     });
     navigator.serviceWorker.addEventListener('controllerchange', () => {
         if (!teacherHadServiceWorkerController || teacherUpdateReloading) return;
@@ -1608,5 +1603,6 @@ document.addEventListener('DOMContentLoaded', function () {
 <script>window.ISKOOL_TEACHER = <?= json_encode(['name'=>$teacherFullName,'email'=>$teacherEmail,'initials'=>$teacherInitials], JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?>;</script>
 <script src="assets/js/teacher/teacher_mobile_settings.js?v=1.0"></script>
 <script src="assets/js/teacher/teacher_desktop_settings.js?v=1.4"></script>
+<script src="assets/js/shared/pwa_prompts.js?v=1.0"></script>
 </body>
 </html>
