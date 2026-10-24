@@ -102,9 +102,9 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Geist:wght@400..600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=13.5">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=13.6">
     <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_menu.css?v=2.4">
-    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_menu.css?v=1.1">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_menu.css?v=1.2">
     <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_settings.css?v=1.1">
     <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_settings.css?v=1.4">
     <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_light_mode.css?v=1.8">
@@ -689,36 +689,22 @@ if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.wasLockedAtLoad
     </div>
 </div>
 
-<!-- Mobile Bottom Nav — UNCHANGED -->
-<nav id="mobileBottomNav">
-     <a href="javascript:void(0)" data-page="teacher_manual" onclick="loadTeacherManual()">
-        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:4px;">
-            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-            <polyline points="9 22 9 12 15 12 15 22"></polyline>
-        </svg>
+<!-- Phone bottom bar. Same look as the parent app's bar: 64px high, solid, thin line icons, four tabs. -->
+<nav id="mobileBottomNav" aria-label="Teacher app">
+    <a href="javascript:void(0)" data-page="teacher_manual" onclick="loadTeacherManual()">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>
         <span>Home</span>
     </a>
     <a href="javascript:void(0)" data-page="teacher_assignments" onclick="fetchTeacherAssignments()">
-        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:4px;">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
-            <line x1="12" y1="18" x2="12" y2="12"></line>
-            <line x1="9"  y1="15" x2="15" y2="15"></line>
-        </svg>
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
         <span>Assignments</span>
     </a>
     <a href="javascript:void(0)" data-page="teacher_resources" onclick="fetchTeacherResources()">
-        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:4px;">
-            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-        </svg>
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
         <span>Resources</span>
     </a>
     <a href="javascript:void(0)" data-page="teacher_announcements" onclick="fetchTeacherAnnouncements()">
-        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:4px;">
-            <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
-            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-        </svg>
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
         <span>Announcement</span>
     </a>
 </nav>

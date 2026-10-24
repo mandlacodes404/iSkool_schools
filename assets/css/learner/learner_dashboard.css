@@ -1755,91 +1755,68 @@ iframe {
     opacity: 0;
 }
 
-        /* Mobile Bottom Navigation - Now fully consistent with platform style */
+/* Mobile bottom bar. Same structure as the parent app's bar (parent_app.css .pa-tabs): 64px high plus the phone's
+   safe area, thin line icons, 11px labels, bold bright active tab. The background is the learner's own glass
+   and stays dynamic (see DYNAMIC BOTTOM NAV below). Light phone theme: mobile_light.css. */
 #mobileBottomNav {
     display: none;
     position: fixed;
-    bottom: 0;
     left: 0;
+    right: 0;
+    bottom: 0;
     width: 100%;
-    height: 82px;                                 /* your preferred height */
-    background: rgba(27, 27, 27, 0.85);           /* ← #1b1b1b with transparency – exact platform charcoal glass */
-    backdrop-filter: blur(20px);                  /* ← premium blur like other glass elements */
-    -webkit-backdrop-filter: blur(20px);
-    border-top: 1px solid rgba(255, 255, 255, 0.05);  /* ← faint platform border */
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);   /* ← soft dark shadow */
-    justify-content: space-around;
-    align-items: flex-start;                      /* content pushed to top */
-    padding-top: 10px;                             /* breathing room at top */
-    padding-bottom: env(safe-area-inset-bottom);
-    padding-bottom: constant(safe-area-inset-bottom);
-    z-index: 4000;
+    height: calc(64px + env(safe-area-inset-bottom, 0px));
+    padding: 0 0 env(safe-area-inset-bottom, 0px);
     box-sizing: border-box;
-    transition: padding-bottom 0.3s ease, height 0.3s ease;
-   border-top: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(27, 27, 27, 0.85);           /* glass, as before */
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+    z-index: 4000;
 }
 
-
-        #mobileBottomNav a {
-    color: var(--text-color);                     /* ← #e2e8f0 – clear white/off-white */
-    text-decoration: none;
-    font-size: 11px;
-    text-align: center;
-    flex: 1;
+#mobileBottomNav a {
+    flex: 1 1 0;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
-    padding-top: 0;
-    transition: all 0.2s ease;
+    justify-content: center;
+    gap: 2px;
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 600;
+    color: #9b9c92;
+    -webkit-tap-highlight-color: transparent;
+}
+#mobileBottomNav a span {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+#mobileBottomNav a.active {
+    color: #ecece9;
+    font-weight: 700;
+}
+#mobileBottomNav a.active svg { stroke-width: 2.2; }
+
+/* Mobile Layout - show the bottom bar */
+@media (max-width: 768px) {
+    #mobileBottomNav {
+        display: flex;
+    }
+
+    iframe {
+        height: calc(100vh - 64px);
+    }
 }
 
-        #mobileBottomNav a i {
-    font-size: 20px;
-    margin-bottom: 3px;                           /* tighter spacing */
-    color: var(--secondary-text);                 /* muted gray #8b949e by default */
+/* Menu open: the bar slides aside with the page (mobile_menu.css) and can't be tapped. */
+.sidebar.active ~ #mobileBottomNav {
+    pointer-events: none;
 }
-        #mobileBottomNav a.active,
-        #mobileBottomNav a:hover {
-            color: var(--accent-color);
-            transform: translateY(-3px);
-        }
-
-        /* Per-item accent colours on active/hover */
-        #nav-home.active,    #nav-home:hover    { color: #4fd1c5; }
-        #nav-quiz.active,    #nav-quiz:hover    { color: #fdd663; }
-        #nav-assignments.active, #nav-assignments:hover { color: #a78bfa; }
-        #nav-resources.active,   #nav-resources:hover   { color: #f28c38; }
-
-        /* Brighten the icon box when active/hover */
-        #nav-home.active .lh-nav-box,    #nav-home:hover .lh-nav-box    { background: #4fd1c530 !important; }
-        #nav-quiz.active .lh-nav-box,    #nav-quiz:hover .lh-nav-box    { background: #fdd66330 !important; }
-        #nav-assignments.active .lh-nav-box, #nav-assignments:hover .lh-nav-box { background: #a78bfa30 !important; }
-        #nav-resources.active .lh-nav-box,   #nav-resources:hover .lh-nav-box   { background: #f28c3830 !important; }
-
-        /* Mobile Layout - Show bottom nav + safe area support */
-        @media (max-width: 768px) {
-            #mobileBottomNav {
-                display: flex;
-            }
-
-            /* Critical: Lifts the entire bar on iPhone & Android gesture navigation */
-            #mobileBottomNav {
-                padding-bottom: env(safe-area-inset-bottom);
-                padding-bottom: constant(safe-area-inset-bottom); /* older iOS fallback */
-                height: calc(82px + env(safe-area-inset-bottom));
-                height: calc(82px + constant(safe-area-inset-bottom));
-            }
-
-            iframe {
-                height: calc(100vh - 80px);
-            }
-        }
-
-        .sidebar.active ~ #mobileBottomNav {
-            filter: blur(5px);
-            pointer-events: none;
-        }
 
 .learner-name {
     margin-top: 4px;
@@ -1945,13 +1922,19 @@ iframe {
 /* SVG icons – consistent with platform style */
 .sidebar a svg,
 .sidebar button svg,
-#mobileBottomNav a svg,
 .main-header button svg {
     width: 20px;
     height: 20px;
     stroke: currentColor;
     flex-shrink: 0;
     transition: stroke 0.3s ease;
+}
+
+#mobileBottomNav a svg {
+    width: 22px;
+    height: 22px;
+    stroke: currentColor;
+    flex-shrink: 0;
 }
 
 .main-header .avatar-dropdown-item svg {
