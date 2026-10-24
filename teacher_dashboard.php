@@ -116,6 +116,7 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
     <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_menu.css?v=1.4">
     <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_settings.css?v=1.2">
     <link rel="stylesheet" href="assets/css/shared/pwa_prompts.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/shared/pull_to_refresh.css?v=1.0">
     <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_settings.css?v=1.4">
     <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_light_mode.css?v=1.8">
     <link rel="stylesheet" href="assets/css/splash_light.css?v=<?= (int) @filemtime(__DIR__ . '/assets/css/splash_light.css') ?>">
@@ -1604,5 +1605,7 @@ document.addEventListener('DOMContentLoaded', function () {
 <script src="assets/js/teacher/teacher_mobile_settings.js?v=1.0"></script>
 <script src="assets/js/teacher/teacher_desktop_settings.js?v=1.4"></script>
 <script src="assets/js/shared/pwa_prompts.js?v=1.0"></script>
+<script src="assets/js/shared/pull_to_refresh.js?v=1.0"></script>
+<script src="assets/js/teacher/teacher_pull_to_refresh.js?v=1.0"></script>
 </body>
 </html>
