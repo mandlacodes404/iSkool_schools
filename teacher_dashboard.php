@@ -97,7 +97,7 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
             html { background-color: #0d1117; }
         }
     </style>
-    <link rel="stylesheet" href="assets/css/teacher/dashboard.css?v=4.9">
+    <link rel="stylesheet" href="assets/css/teacher/dashboard.css?v=5.0">
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
     <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=7.2">
     <link rel="stylesheet" href="assets/css/teacher/assignments.css?v=3.3">
@@ -1587,7 +1587,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
-<script src="assets/js/teacher/dashboard.js?v=13.6"></script>
+<script src="assets/js/teacher/dashboard.js?v=13.7"></script>
 <script src="assets/js/teacher/class-picker.js?v=1.1"></script>
 <script src="assets/js/teacher/quizzes.js?v=8.4"></script>
 <script src="assets/js/teacher/announcements.js?v=6.1"></script>

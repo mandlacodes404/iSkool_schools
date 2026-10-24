@@ -1128,32 +1128,13 @@ function mobileTrailOnclick(item) {
 }
 
 function renderMobileTrail(trail) {
-    if (!trail || trail.length === 0) {
-        return `
-            <div class="mh-empty-card">
-                <svg viewBox="0 0 24 24" width="28" height="28" stroke="#8b949e" stroke-width="1.5" fill="none"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                <div class="mh-empty-title">Nothing yet</div>
-                <div class="mh-empty-sub">Quizzes, assignments, announcements, and resources you create will show up here.</div>
-            </div>`;
-    }
-
-    return trail.map((item, i) => {
-        const meta  = MOBILE_TRAIL_ICONS[item.type] || MOBILE_TRAIL_ICONS.assignment;
-        const verb  = MOBILE_TRAIL_VERB[item.type] || 'Created';
-        const isLast = i === trail.length - 1;
-        const onclick = mobileTrailOnclick(item);
-        return `
-            <div class="mh-trail-item"${onclick ? ` onclick="${onclick}"` : ''}>
-                <div class="mh-trail-line">
-                    <div class="mh-trail-dot" style="background:${meta.color}22;">${meta.svg}</div>
-                    ${isLast ? '' : '<div class="mh-trail-connector"></div>'}
-                </div>
-                <div class="mh-trail-content">
-                    <div class="mh-trail-text">${verb} <b>${item.title}</b>${item.class_name ? ` &middot; ${item.class_name}` : ''}</div>
-                    <div class="mh-trail-time">${item.time_label}</div>
-                </div>
-            </div>`;
-    }).join('');
+    const X = window.THX, T = window.TDH;
+    const items = (trail || []).filter(it => it && T.icons[it.type]).slice(0, 3);
+    if (!items.length) return '';
+    return X.section('Recent activity') + items.map(it => X.row({
+        go: X.go(it.type), icon: it.type, title: it.title,
+        meta: [X.verbs[it.type], it.class_name, it.time_label].filter(Boolean).join(' · ')
+    })).join('');
 }
 
 const WEEK_EVENT_META = {
@@ -1164,66 +1145,37 @@ const WEEK_EVENT_META = {
 };
 
 function renderMobileWeekStrip(weekEvents, weekStart) {
-    const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-    const start = new Date(weekStart + 'T00:00:00');
-    // weekStart from the backend is a Monday; shift so the strip still
-    // renders Sun-first to match the existing learner week-strip look.
-    const monday = new Date(start);
-    const sunday = new Date(monday);
-    sunday.setDate(monday.getDate() - 1);
+    const T = window.TDH, e = T.esc.bind(T), pad = n => String(n).padStart(2, '0');
+    const key = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    const month = d => d.toLocaleString('default', { month: 'short' });
+    const events = weekEvents || [];
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    // weekStart from the backend is a Monday; fall back to this week's Monday.
+    let monday = new Date(String(weekStart || '').slice(0, 10) + 'T00:00:00');
+    if (isNaN(monday)) { monday = new Date(today); monday.setDate(today.getDate() - ((today.getDay() + 6) % 7)); }
+    const names = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const dots = new Set(events.map(ev => String(ev.date).slice(0, 10)));
 
-    const today = new Date();
-    today.setHours(0,0,0,0);
-
-    const eventsByDate = {};
-    (weekEvents || []).forEach(e => {
-        if (!eventsByDate[e.date]) eventsByDate[e.date] = [];
-        eventsByDate[e.date].push(e);
-    });
-
-    let dayCells = '';
+    let cells = '';
     for (let i = 0; i < 7; i++) {
-        const d = new Date(sunday);
-        d.setDate(sunday.getDate() + i);
-        const dateStr = d.toISOString().slice(0,10);
+        const d = new Date(monday); d.setDate(monday.getDate() + i);
         const isToday = d.getTime() === today.getTime();
-        const hasEvents = !!eventsByDate[dateStr];
-        dayCells += `
-            <div class="mh-week-day">
-                <span class="mh-week-day-label">${days[i].toUpperCase()}</span>
-                <span class="mh-week-day-num${isToday ? ' mh-week-day-today' : ''}">${d.getDate()}</span>
-                ${hasEvents ? '<span class="mh-week-day-dot"></span>' : ''}
-            </div>`;
+        cells += `<span class="thx-day${isToday ? ' thx-day--today' : ''}"><span class="thx-day-label">${names[i]}</span><span class="thx-day-num">${d.getDate()}</span><span class="thx-day-dot${dots.has(key(d)) ? ' thx-day-dot--on' : ''}"></span></span>`;
     }
+    const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
+    const range = `${monday.getDate()} ${month(monday)} – ${sunday.getDate()} ${month(sunday)}`;
 
-    const monthLabel = sunday.toLocaleString('default', { month: 'short', year: 'numeric' }).toUpperCase();
+    const list = events.slice(0, 2).map(ev => {
+        const d = new Date(String(ev.date).slice(0, 10) + 'T00:00:00');
+        const when = isNaN(d) ? '' : `${T.days[d.getDay()]} ${d.getDate()} ${month(d)}`;
+        return `<span class="thx-ev"><span class="thx-ev-date">${e(when)}</span><span class="thx-ev-title">${e(ev.title)}</span><span class="thx-ev-kind">${e(ev.label)}</span></span>`;
+    }).join('') || '<span class="thx-ev-empty">Nothing on the calendar this week</span>';
 
-    let rowsHtml = '';
-    if (!weekEvents || weekEvents.length === 0) {
-        rowsHtml = `<div class="mh-week-empty">Nothing on the calendar this week.</div>`;
-    } else {
-        rowsHtml = weekEvents.map(e => {
-            const meta = WEEK_EVENT_META[e.type] || WEEK_EVENT_META.reminder;
-            const d = new Date(e.date + 'T00:00:00');
-            const dayLabel = d.toLocaleString('default', { weekday: 'short', day: 'numeric', month: 'short' });
-            return `
-                <div class="mh-week-row">
-                    <span class="mh-week-row-dot" style="background:${meta.color};"></span>
-                    <div class="mh-week-row-content">
-                        <div class="mh-week-row-title">${e.title}</div>
-                        <div class="mh-week-row-sub">
-                            <span class="mh-week-row-pill" style="background:${meta.color}22;color:${meta.color};">${e.label}</span>
-                            ${e.class_name ? ` &middot; ${e.class_name}` : ''} &middot; ${dayLabel}
-                        </div>
-                    </div>
-                </div>`;
-        }).join('');
-    }
-
-    return `
-        <div class="mh-week-month-label">${monthLabel}</div>
-        <div class="mh-week-strip">${dayCells}</div>
-        <div class="mh-week-rows">${rowsHtml}</div>`;
+    return `${window.THX.section('This week', range)}
+        <button type="button" class="thx-week-card" aria-label="Open calendar, ${e(range)}" onclick="window.fetchTeacherCalendar ? fetchTeacherCalendar() : null">
+            <span class="thx-week">${cells}</span>
+            <span class="thx-ev-list">${list}</span>
+        </button>`;
 }
 
 function renderMobileClassList() {
@@ -1235,7 +1187,7 @@ function renderMobileClassList() {
     let reserve = 0;
     try { reserve = parseInt(sessionStorage.getItem('teacherHomeClassListH') || '0', 10) || 0; } catch (e) {}
     const style = reserve > 0 ? ` style="min-height:${reserve}px"` : '';
-    return `<div id="mh-class-list" class="mh-class-list"${style}><div class="mh-class-loading">Loading classes...</div></div>`;
+    return `<div id="mh-class-list" class="thx-list"${style}><div class="thx-note">Loading classes...</div></div>`;
 }
 
 // Wraps the loader below: once the list has its real content, drop the
@@ -1258,29 +1210,28 @@ window._loadMobileHomeClassesInner = async function() {
 
         if (classes.length === 0) {
             container.innerHTML = `
-                <div class="mh-class-loading">
+                <div class="thx-note">
                     No classes yet — post something to a class, or add one below.
                 </div>`;
             return;
         }
 
+        const T = window.TDH;
         container.innerHTML = classes.map(c => {
-            const initials = c.name.replace(/[^A-Za-z0-9]/g, '').slice(0, 3).toUpperCase();
+            const initials = String(c.name || '').replace(/[^A-Za-z0-9]/g, '').slice(0, 3).toUpperCase();
             const subjectLine = c.needs_subject
-                ? `<span class="mh-class-add-subject" onclick="event.stopPropagation(); window.openAddSubjectFlow(${c.id}, '${c.name.replace(/'/g, "\\'")}')">+ Add subject</span>`
-                : `${c.subject_name}`;
+                ? `<span class="thx-add-subject" data-name="${T.esc(c.name)}" onclick="event.stopPropagation(); window.openAddSubjectFlow(${Number(c.id) || 0}, this.dataset.name)">+ Add subject</span>`
+                : T.esc(c.subject_name);
+            const n = Number(c.learner_count) || 0;
             return `
-                <div class="mh-class-row" onclick="window.openTeacherClassFromHome(${c.id})">
-                    <div class="mh-class-avatar">${initials}</div>
-                    <div class="mh-class-info">
-                        <div class="mh-class-name">${c.name}</div>
-                        <div class="mh-class-sub">${subjectLine} &middot; ${c.learner_count} learner${c.learner_count !== 1 ? 's' : ''}</div>
-                    </div>
-                    <svg class="mh-chevron" viewBox="0 0 24 24" width="16" height="16" stroke="#6e7681" stroke-width="2" fill="none"><path d="M9 18l6-6-6-6"/></svg>
-                </div>`;
+                <button type="button" class="thx-row" onclick="window.openTeacherClassFromHome(${Number(c.id) || 0})">
+                    <span class="thx-tile">${T.esc(initials)}</span>
+                    <span class="thx-rt"><span class="thx-rt-title">${T.esc(c.name)}</span><span class="thx-rt-meta">${subjectLine} &middot; ${n} learner${n !== 1 ? 's' : ''}</span></span>
+                    <span class="thx-chev">${T.svg('chevron', 18)}</span>
+                </button>`;
         }).join('');
     } catch (e) {
-        container.innerHTML = `<div class="mh-class-loading">Failed to load classes.</div>`;
+        container.innerHTML = `<div class="thx-note">Failed to load classes.</div>`;
     }
 };
 
@@ -1420,44 +1371,116 @@ const TEACHER_SUBJECT_MODAL_HTML = `
     </div>
 </div>`;
 
+// ─────────────────────────────────────────────
+// MOBILE HOME ("Focus" layout)
+// Greeting, one featured card (the latest quiz), what needs attention, a
+// Mon–Sun week strip, your classes and what you posted. Phones only: desktop
+// keeps buildTeacherDesktopHome(). Mirrors the learner phone Home
+// (buildMobileHomeV2 in manual.js). Data: get_dashboard_snapshot.php.
+// ─────────────────────────────────────────────
+window.THX = {
+    arrow: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+    info: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>',
+    verbs: { quiz: 'Created quiz', assignment: 'Created assignment', announcement: 'Posted announcement', resource: 'Uploaded resource' },
+
+    // Phones open the section page (openTeacherSnapshotDetail is desktop only).
+    go(type) { return `openTeacherHomeSection('${type}')`; },
+    section(title, meta) {
+        const e = window.TDH.esc.bind(window.TDH);
+        return `<div class="thx-st"><span class="thx-st-title">${e(title)}</span>${meta !== undefined && meta !== '' ? `<span class="thx-st-meta">${e(meta)}</span>` : ''}</div>`;
+    },
+    hero(o) {
+        const e = window.TDH.esc.bind(window.TDH);
+        return `<button type="button" class="thx-hero${o.calm ? ' thx-hero--calm' : ''}" onclick="${o.go}">
+            <span class="thx-chip-hero">${e(o.chip)}</span>
+            <span class="thx-hero-row">
+                <span class="thx-hero-text"><span class="thx-hero-title">${e(o.title)}</span>${o.sub ? `<span class="thx-hero-sub">${e(o.sub)}</span>` : ''}</span>
+                <span class="thx-go" aria-hidden="true">${this.arrow}</span>
+            </span>
+        </button>`;
+    },
+    row(o) {
+        const T = window.TDH, e = T.esc.bind(T);
+        return `<button type="button" class="thx-row" onclick="${o.go}">
+            <span class="thx-tile">${T.svg(o.icon, 20)}</span>
+            <span class="thx-rt"><span class="thx-rt-title">${e(o.title)}</span><span class="thx-rt-meta">${e(o.meta)}</span></span>
+            ${o.chip ? `<span class="thx-chip${o.soon ? ' thx-chip--soon' : ''}">${e(o.chip)}</span>` : ''}
+            ${o.chevron ? `<span class="thx-chev">${T.svg('chevron', 18)}</span>` : ''}
+        </button>`;
+    }
+};
+
 function renderMobileHomePanel(snapshot) {
-    const trailHtml = renderMobileTrail(snapshot.trail);
-    const weekHtml  = renderMobileWeekStrip(snapshot.week_events, snapshot.week_start);
-    const classesHtml = renderMobileClassList();
-    const schoolHtml = snapshot.school_name
-        ? `<div class="mh-school-flat"><span class="mh-school-dot"></span>${snapshot.school_name}</div>`
-        : '';
+    const X = window.THX, T = window.TDH, e = T.esc.bind(T);
+    const data = snapshot || {};
+    const quiz = data.quiz, assignment = data.assignment, announcement = data.announcement;
+    const trail = data.trail || [];
+    const events = data.week_events || data.upcoming || [];
+    const welcome = !quiz && !assignment && !announcement && !trail.length && !events.length;
+    const name = String(data.teacher_name || '').trim();
+    const h = new Date().getHours();
+    const hello = welcome ? 'Welcome to iSkool' : `Good ${h < 12 ? 'morning' : h < 18 ? 'afternoon' : 'evening'}`;
+
+    // ── Featured card: latest quiz, or the getting-started card ──
+    const hero = quiz
+        ? X.hero({ go: X.go('quiz'), chip: quiz.status ? `Quiz · ${quiz.status}` : 'Latest quiz', title: quiz.title,
+                   sub: [quiz.class_name, quiz.start_time && quiz.start_time !== 'Not set' ? `Start date ${quiz.start_time}` : 'No start date set'].filter(Boolean).join(' · ') })
+        : X.hero({ calm: true, go: X.go('quiz'), chip: welcome ? 'Getting started' : 'Quizzes', title: 'Create your first quiz',
+                   sub: 'Pick a class, add your questions and open it to your learners.' });
+
+    // ── At a glance (or "Start here" when there is nothing yet) ──
+    let middle = '';
+    if (welcome) {
+        middle = X.section('Start here') + [
+            ['assignment', 'Post an assignment', 'Give a class work with a due date.'],
+            ['announcement', 'Send an announcement', 'Share news with a class.'],
+            ['resource', 'Upload a resource', 'Share notes and files with learners.']
+        ].map(s => X.row({ go: X.go(s[0]), icon: s[0], title: s[1], meta: s[2], chevron: true })).join('');
+    } else {
+        const glance = [];
+        if (assignment) {
+            const n = Number(assignment.days_left);
+            glance.push(X.row({ go: X.go('assignment'), icon: 'assignment', title: assignment.title,
+                meta: `Assignment · ${assignment.class_name} · Due ${assignment.due_date}`,
+                chip: isNaN(n) ? '' : n <= 0 ? 'Due today' : n === 1 ? 'Tomorrow' : `In ${n} days`, soon: !isNaN(n) && n <= 1 }));
+        }
+        if (announcement) {
+            glance.push(X.row({ go: X.go('announcement'), icon: 'announcement', title: announcement.title,
+                meta: `Announcement · ${announcement.class_name} · ${announcement.created_at}` }));
+        }
+        if (glance.length) middle = X.section('At a glance', glance.length) + glance.join('');
+    }
 
     return `
-        <div class="mh-home">
-            ${schoolHtml}
-            <div class="mh-section-label mh-section-label--first">Recent activity</div>
-            <div class="mh-trail">${trailHtml}</div>
+        <div class="thx">
+            ${data.school_name ? `<div class="thx-top"><span class="thx-top-dot"></span><span class="thx-top-text">${e(data.school_name)}</span></div>` : ''}
+            <div class="thx-greet">${name
+                ? `<div class="thx-hello">${hello}</div><div class="thx-name">${e(name)}</div>`
+                : `<div class="thx-name">${hello}</div>`}</div>
+            ${hero}
+            ${middle}
+            ${renderMobileWeekStrip(events, data.week_start)}
 
-            <div class="mh-section-label">Upcoming</div>
-            <div class="mh-upcoming">${weekHtml}</div>
-
-            <div class="mh-classes-header">
-                <div class="mh-section-label mh-section-label--inline">
-                    Your classes
-                    <span class="mh-info-icon" onclick="window.toggleMobileHomeInfo()" title="How this list works">
-                        <svg viewBox="0 0 24 24" width="13" height="13" stroke="#6e7681" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-                    </span>
-                </div>
-                <span class="mh-add-class-btn" onclick="window.openAddClassFlow()">+ Add class</span>
+            <div class="thx-st">
+                <span class="thx-st-title thx-st-left">Your classes
+                    <button type="button" class="thx-info-btn" onclick="window.toggleMobileHomeInfo()" aria-label="How this list works">${X.info}</button>
+                </span>
+                <button type="button" class="thx-add" onclick="window.openAddClassFlow()">+ Add class</button>
             </div>
-            <div id="mh-classes-info" class="mh-classes-info mh-classes-info--hidden">
+            <div id="thx-classes-info" class="thx-info thx-info--hidden">
                 Classes you've posted to appear here automatically. Add others you teach with
                 <b>+ Add class</b>, and name your subject for each so learners see it instead of your name.
             </div>
-            ${classesHtml}
-            ${TEACHER_SUBJECT_MODAL_HTML}
-        </div>`;
+            ${renderMobileClassList()}
+
+            ${renderMobileTrail(trail)}
+        </div>
+        ${TEACHER_SUBJECT_MODAL_HTML}`;
 }
 
 window.toggleMobileHomeInfo = function() {
-    const el = document.getElementById('mh-classes-info');
-    if (el) el.classList.toggle('mh-classes-info--hidden');
+    const el = document.getElementById('thx-classes-info');
+    if (el) el.classList.toggle('thx-info--hidden');
 };
 
     // ─────────────────────────────────────────────

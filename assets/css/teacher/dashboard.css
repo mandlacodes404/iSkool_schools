@@ -860,6 +860,113 @@
     cursor: pointer;
 }
 
+/* ═══════════════════════════════════════════════════════════════════════
+   MOBILE HOME — "Focus" layout (.thx-*)
+   Built by renderMobileHomePanel() in dashboard.js. Phones only. Same look as
+   the learner phone Home (.lhx-* in manual.css): Nunito, the same weights
+   (800 name and featured title, 700 headings and chips, 600 rows and meta,
+   400 small print), neutral tiles and cards. The only colour is the coral
+   "due soon" chip and the week dots. The .mh-* rules above are no longer used
+   by this page.
+   Every rule starts with "#api-content-area .thx" so it out-ranks id-based
+   rules elsewhere. The wrapper sits inside #api-content-area's 20px padding.
+   ═══════════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+.thx {
+    --x-card: #2a2a28;   --x-line: rgba(255, 255, 255, 0.08);
+    --x-text: #f3f2ee;   --x-muted: #a8a79f;   --x-tile: rgba(255, 255, 255, 0.07);
+    --x-soon-bg: rgba(255, 155, 133, 0.14);   --x-soon-ink: #ff9b85;
+    --x-today-bg: #f3f2ee;   --x-today-ink: #0d0e12;   --x-today-label: #5f6059;   --x-dot: #ff9b85;
+    display: block;
+    /* clears the fixed bottom nav (82px) and the device safe area */
+    padding: 4px 0 calc(24px + 90px + env(safe-area-inset-bottom));
+    font-family: 'Nunito', sans-serif;
+    font-weight: 400;
+    color: var(--x-text);
+}
+#api-content-area .thx button {
+    font-family: inherit; margin: 0; padding: 0; border: 0; background: none; color: inherit; text-align: left;
+    cursor: pointer; -webkit-tap-highlight-color: transparent; transition: transform .12s ease;
+}
+#api-content-area .thx button:active { transform: scale(0.985); }
+#api-content-area .thx button:focus-visible { outline: 2px solid var(--x-text); outline-offset: 2px; }
+
+/* school, then the greeting */
+#api-content-area .thx .thx-top { display: flex; align-items: center; gap: 8px; min-height: 32px; margin-bottom: 8px; }
+#api-content-area .thx .thx-top-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--x-text); flex: none; }
+#api-content-area .thx .thx-top-text { font-size: 13px; font-weight: 600; color: var(--x-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#api-content-area .thx .thx-greet { margin-bottom: 18px; }
+#api-content-area .thx .thx-hello { font-size: 15px; font-weight: 600; color: var(--x-muted); }
+#api-content-area .thx .thx-name { font-size: 34px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; color: var(--x-text); overflow-wrap: anywhere; }
+
+/* the featured card: same background as the icon tiles */
+#api-content-area .thx .thx-hero {
+    display: flex; flex-direction: column; justify-content: space-between; gap: 18px;
+    width: 100%; min-height: 176px; box-sizing: border-box; padding: 18px 18px 18px 20px;
+    border-radius: 28px; background: var(--x-tile); color: var(--x-text);
+}
+#api-content-area .thx .thx-chip-hero { align-self: flex-start; font-size: 12px; font-weight: 700; padding: 6px 11px; border-radius: 99px; background: var(--x-line); }
+#api-content-area .thx .thx-hero-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+#api-content-area .thx .thx-hero-text { display: block; min-width: 0; }
+#api-content-area .thx .thx-hero-title { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; max-width: 230px; font-size: 24px; font-weight: 800; line-height: 1.15; letter-spacing: -0.02em; overflow-wrap: anywhere; }
+#api-content-area .thx .thx-hero-sub { display: block; margin-top: 6px; font-size: 13px; font-weight: 600; color: var(--x-muted); }
+#api-content-area .thx .thx-go { display: grid; place-items: center; flex: none; width: 52px; height: 52px; border-radius: 50%; background: var(--x-text); color: var(--x-card); }
+#api-content-area .thx .thx-hero--calm { background: var(--x-card); border: 1px solid var(--x-line); }
+#api-content-area .thx .thx-hero--calm .thx-chip-hero { background: var(--x-tile); }
+#api-content-area .thx .thx-hero--calm .thx-go { background: var(--x-tile); color: var(--x-text); }
+
+/* section headings */
+#api-content-area .thx .thx-st { display: flex; justify-content: space-between; align-items: center; margin: 24px 0 10px; }
+#api-content-area .thx .thx-st-title { font-size: 15px; font-weight: 700; color: var(--x-text); }
+#api-content-area .thx .thx-st-meta { font-size: 13px; font-weight: 600; color: var(--x-muted); }
+#api-content-area .thx .thx-st-left { display: flex; align-items: center; gap: 6px; }
+#api-content-area .thx .thx-info-btn { display: inline-flex; align-items: center; padding: 6px; margin: -6px 0 -6px -2px; color: var(--x-muted); }
+#api-content-area .thx .thx-add { font-size: 13px; font-weight: 700; color: var(--x-text); padding: 6px 0 6px 12px; }
+#api-content-area .thx .thx-info { margin: 0 0 10px; padding: 12px 14px; border-radius: 18px; background: var(--x-card); border: 1px solid var(--x-line); font-size: 13px; line-height: 1.5; color: var(--x-muted); }
+#api-content-area .thx .thx-info b { font-weight: 700; color: var(--x-text); }
+#api-content-area .thx .thx-info--hidden { display: none; }
+#api-content-area .thx .thx-note { padding: 20px 0; text-align: center; font-size: 13px; color: var(--x-muted); }
+
+/* rows (at a glance, classes, recent activity) */
+#api-content-area .thx .thx-row {
+    display: flex; align-items: center; gap: 14px; width: 100%; min-height: 60px; box-sizing: border-box;
+    padding: 8px 14px; margin-bottom: 8px; border-radius: 18px; background: var(--x-card); border: 1px solid var(--x-line); color: var(--x-text);
+}
+#api-content-area .thx .thx-tile { display: grid; place-items: center; flex: none; width: 36px; height: 36px; border-radius: 12px; background: var(--x-tile); color: var(--x-text); font-size: 13px; font-weight: 700; }
+#api-content-area .thx .thx-rt { display: block; flex: 1; min-width: 0; }
+#api-content-area .thx .thx-rt-title { display: block; font-size: 14px; font-weight: 600; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#api-content-area .thx .thx-rt-meta { display: block; margin-top: 2px; font-size: 12px; color: var(--x-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#api-content-area .thx .thx-add-subject { font-weight: 700; color: var(--x-text); }
+#api-content-area .thx .thx-chip { flex: none; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 99px; white-space: nowrap; background: var(--x-tile); color: var(--x-muted); }
+#api-content-area .thx .thx-chip--soon { background: var(--x-soon-bg); color: var(--x-soon-ink); }
+#api-content-area .thx .thx-chev { display: grid; flex: none; color: var(--x-muted); }
+
+/* week strip (Monday first) and the next events */
+#api-content-area .thx .thx-week-card { display: block; width: 100%; box-sizing: border-box; padding: 8px; border-radius: 22px; background: var(--x-card); border: 1px solid var(--x-line); color: var(--x-text); }
+#api-content-area .thx .thx-week { display: flex; justify-content: space-between; }
+#api-content-area .thx .thx-day { display: flex; flex-direction: column; align-items: center; flex: 1; max-width: 46px; padding: 8px 0 6px; border-radius: 16px; }
+#api-content-area .thx .thx-day-label { font-size: 11px; font-weight: 600; color: var(--x-muted); }
+#api-content-area .thx .thx-day-num { margin: 4px 0; font-size: 16px; font-weight: 700; color: var(--x-text); }
+#api-content-area .thx .thx-day-dot { width: 5px; height: 5px; border-radius: 50%; background: transparent; }
+#api-content-area .thx .thx-day-dot--on { background: var(--x-dot); }
+#api-content-area .thx .thx-day--today { background: var(--x-today-bg); }
+#api-content-area .thx .thx-day--today .thx-day-label { color: var(--x-today-label); }
+#api-content-area .thx .thx-day--today .thx-day-num { color: var(--x-today-ink); }
+#api-content-area .thx .thx-ev-list { display: block; margin-top: 6px; padding: 4px 8px 2px; border-top: 1px solid var(--x-line); }
+#api-content-area .thx .thx-ev { display: flex; align-items: baseline; gap: 10px; padding: 7px 0; font-size: 13px; }
+#api-content-area .thx .thx-ev-date { flex: none; width: 78px; font-weight: 600; color: var(--x-muted); white-space: nowrap; }
+#api-content-area .thx .thx-ev-title { flex: 1; min-width: 0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#api-content-area .thx .thx-ev-kind { flex: none; font-size: 12px; color: var(--x-muted); }
+#api-content-area .thx .thx-ev-empty { display: block; padding: 7px 0; font-size: 13px; color: var(--x-muted); }
+
+@media (prefers-reduced-motion: reduce) {
+    #api-content-area .thx button { transition: none; }
+    #api-content-area .thx button:active { transform: none; }
+}
+
+}
+
 /* ─────────────────────────────────────────────
    DESKTOP HOME — "Focus" layout (.tdh-*)
    Built by buildTeacherDesktopHome() in dashboard.js. Desktop only; mobile
