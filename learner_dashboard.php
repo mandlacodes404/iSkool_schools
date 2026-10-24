@@ -233,10 +233,11 @@ $parentLink = ((int)$parentCount > 0); // true when at least one parent is linke
     <link rel="stylesheet" href="assets/css/learner/grades.css?v=3.9">
     <link rel="stylesheet" href="assets/css/learner/resources.css?v=2.9">
      <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=5.0">
-     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=14.0">
+     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=14.1">
     <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=3.1">
-    <link rel="stylesheet" href="assets/css/learner/mobile_menu.css?v=1.9">
-    <link rel="stylesheet" href="assets/css/learner/mobile_settings.css?v=1.6">
+    <link rel="stylesheet" href="assets/css/learner/mobile_menu.css?v=2.0">
+    <link rel="stylesheet" href="assets/css/learner/mobile_settings.css?v=1.7">
+    <link rel="stylesheet" href="assets/css/shared/pwa_prompts.css?v=1.0">
     <link rel="stylesheet" href="assets/css/learner/mobile_class.css?v=1.1">
     <link rel="stylesheet" href="assets/css/learner/parent_invite.css?v=1.0">
     <link rel="stylesheet" href="assets/css/learner/desktop_settings.css?v=1.5S">   <!-- new -->
@@ -277,7 +278,17 @@ $parentLink = ((int)$parentCount > 0); // true when at least one parent is linke
     <!-- Phone light / dark: sets <html data-learner-mobile-theme> and the status bar colour before first paint, so the
          splash below starts in the right theme (see mobile_theme.js). It used to load at the end of <body>. -->
     <script src="assets/js/learner/mobile_theme.js?v=1.8"></script>
+    <!-- Phone canvas: the colour behind the page, there from the very first frame (when the app opens, and in the
+         instant between two pages) so a white or wrong-coloured edge never shows. Dark phone mode only: in light
+         mode the page colour is decided page by page (mobile_light.css), so <html> is left alone and takes whatever
+         <body> paints, as it always did. Same colour as the phone body in learner_dashboard.css. -->
+    <style>
+        @media (max-width: 768px) {
+            html:not([data-learner-mobile-theme="light"]) { background-color: #20201f; }
+        }
+    </style>
     <link rel="manifest" href="/manifest.php?v=1.1">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=1.1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Geist:wght@300..600&display=swap" rel="stylesheet">
     
@@ -3853,11 +3864,10 @@ if ('serviceWorker' in navigator) {
     const learnerHadServiceWorkerController = Boolean(navigator.serviceWorker.controller);
     navigator.serviceWorker.addEventListener('message', event => {
         if (event.data?.type !== 'iskool-update-available') return;
-        if (window.confirm('An iSkool update is available. Refresh now?')) {
-            navigator.serviceWorker.getRegistration('/').then(registration => {
-                registration?.waiting?.postMessage({ type: 'iskool-skip-waiting' });
-            });
-        }
+        // An in-app banner (assets/js/shared/pwa_prompts.js) instead of a browser pop-up. Its Update button waits
+        // while a quiz is open and then asks the waiting worker to take over; the controllerchange handler below
+        // reloads the page. If the banner script has not loaded yet, it picks this flag up when it starts.
+        if (window.iskoolPwa) window.iskoolPwa.offerUpdate(); else window.__iskoolUpdatePending = true;
     });
     navigator.serviceWorker.addEventListener('controllerchange', () => {
         if (!learnerHadServiceWorkerController || learnerUpdateReloading) return;
@@ -3969,6 +3979,7 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/parent_invite.js?v=1.0"></script>
 <script src="assets/js/learner/mobile_class.js?v=1.2"></script>
 <script src="assets/js/learner/desktop_settings.js?v=1.4"></script>
+<script src="assets/js/shared/pwa_prompts.js?v=1.0"></script>
 <script>window.ISKOOL_SETTINGS = { sendResetUrl: 'auth/password/send_reset_link.php' };</script>
 <?php include 'includes/global_viewer.php'; ?>
 </body>

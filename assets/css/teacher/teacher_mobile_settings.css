@@ -105,7 +105,7 @@ body:has(#api-content-area .ms-detail) #mobileBottomNav { display: none !importa
 
 /* -- Save bar -- */
 /* On a short page the save bar sits at the bottom edge instead of floating under the last row */
-.ms-detail { display: flex; flex-direction: column; min-height: calc(100vh - var(--teacher-top-nav-height, 112px) - env(safe-area-inset-top, 0px)); }
+.ms-detail { display: flex; flex-direction: column; min-height: calc(100vh - var(--teacher-top-nav-height, 112px) - env(safe-area-inset-top, 0px)); min-height: calc(100dvh - var(--teacher-top-nav-height, 112px) - env(safe-area-inset-top, 0px)); }
 .ms-detail > #msPwBody { flex: 1; display: flex; flex-direction: column; }
 .ms-spacer { flex: 1 0 22px; }
 .ms-bar { position: sticky; bottom: 0; z-index: 5; margin: 0 -14px; padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px)); background: #0d1117; border-top: 1px solid var(--ms-line); }

@@ -16,6 +16,8 @@ echo json_encode([
     "short_name"       => "iSkool",
     "id"               => "/",
     "description"      => "Learning Management system",
+    "lang"             => "en-ZA",
+    "categories"       => ["education"],
     "start_url"        => "/",
     "scope"            => "/",
     "display"          => "standalone",
