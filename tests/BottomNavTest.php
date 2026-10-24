@@ -106,14 +106,14 @@ final class BottomNavTest extends TestCase
     }
 
     #[DataProvider('dashboards')]
-    public function test_bar_is_88px_high_plus_the_safe_area_with_the_parent_bar_tab_layout(string $page, string $css): void
+    public function test_icons_and_labels_sit_at_the_top_of_a_54px_bar_plus_the_safe_area(string $page, string $css): void
     {
         $style = $this->source($css);
 
-        $this->assertMatchesRegularExpression('/:root \{ --mbn-h: 88px; \}/', $style);
+        $this->assertMatchesRegularExpression('/:root \{ --mbn-h: 54px; \}/', $style);
         $this->assertStringContainsString('height: calc(var(--mbn-h) + env(safe-area-inset-bottom, 0px));', $style);
         $this->assertStringNotContainsString('calc(82px', $style);
-        $this->assertMatchesRegularExpression('/#mobileBottomNav a \{[^}]*flex-direction: column;[^}]*justify-content: center;[^}]*gap: 2px;[^}]*font-size: 11px;[^}]*font-weight: 600;/s', $style);
+        $this->assertMatchesRegularExpression('/#mobileBottomNav a \{[^}]*flex-direction: column;[^}]*justify-content: flex-start;[^}]*padding-top: 8px;[^}]*gap: 2px;[^}]*font-size: 11px;[^}]*font-weight: 600;/s', $style);
         $this->assertMatchesRegularExpression('/#mobileBottomNav a\.active \{[^}]*font-weight: 700;/s', $style);
         $this->assertMatchesRegularExpression('/#mobileBottomNav a svg[^}]*width: 22px;[^}]*height: 22px;/s', $style);
 
@@ -167,11 +167,11 @@ final class BottomNavTest extends TestCase
         $learner = $this->source('learner_dashboard.php');
         $teacher = $this->source('teacher_dashboard.php');
 
-        $this->assertStringContainsString('learner_dashboard.css?v=14.2', $learner);
+        $this->assertStringContainsString('learner_dashboard.css?v=14.4', $learner);
         $this->assertStringContainsString('learner/mobile_menu.css?v=2.0', $learner);
         $this->assertStringContainsString('mobile_light.css?v=2.1', $learner);
         $this->assertStringContainsString('learner/quiz.css?v=6.3', $learner);
-        $this->assertStringContainsString('teacher_dashboard.css?v=13.8', $teacher);
+        $this->assertStringContainsString('teacher_dashboard.css?v=13.9', $teacher);
         $this->assertStringContainsString('teacher_mobile_menu.css?v=1.4', $teacher);
     }
 }

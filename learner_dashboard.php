@@ -235,7 +235,7 @@ $parentLink = ((int)$parentCount > 0); // true when at least one parent is linke
     <link rel="stylesheet" href="assets/css/learner/grades.css?v=3.9">
     <link rel="stylesheet" href="assets/css/learner/resources.css?v=2.9">
      <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=5.0">
-     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=14.3">
+     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=14.4">
     <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=3.1">
     <link rel="stylesheet" href="assets/css/learner/mobile_menu.css?v=2.0">
     <link rel="stylesheet" href="assets/css/learner/mobile_settings.css?v=1.7">

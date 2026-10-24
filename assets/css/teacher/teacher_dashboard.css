@@ -603,12 +603,15 @@
         @keyframes spin { to { transform: rotate(360deg); } }
 
         /* ── MOBILE BOTTOM NAV ──
-           Same structure as the parent app's bar (parent_app.css .pa-tabs): centred tabs, thin 22px line icons
-           with the parent bar's glyphs, 11px labels, bold bright active tab. It is 85px high plus the phone's
-           safe area (--mbn-h; the old bar was 82px, the parent bar is 64px). The background is the teacher's own
-           glass and stays dynamic (see DYNAMIC BOTTOM NAV below). The teacher app is dark on phones, so no light
+           Same look as the parent app's bar (parent_app.css .pa-tabs): thin 22px line icons with the parent bar's
+           glyphs, 11px labels, bold bright active tab. Like WhatsApp and GitHub on a phone, each icon and its
+           label sit at the TOP of the bar and the home-indicator space (the safe area) is left clear underneath
+           them. The bar is --mbn-h of tab area (54px: 8px above the icon, about 9px below the label, which is
+           what those apps use) plus the safe area. The tabs are pinned to the top (justify-content: flex-start),
+           so a taller --mbn-h only adds empty space under the labels. The background is the teacher's own glass
+           and stays dynamic (see DYNAMIC BOTTOM NAV below). The teacher app is dark on phones, so no light
            variant. */
-        :root { --mbn-h: 85px; }
+        :root { --mbn-h: 54px; }
         #mobileBottomNav {
             display: none;
             position: fixed;
@@ -631,7 +634,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: flex-start;   /* icon + label hug the top of the bar (like WhatsApp / GitHub) */
-            padding-top: 10px;
+            padding-top: 8px;
             gap: 2px;
             text-decoration: none;
             font-size: 11px;
