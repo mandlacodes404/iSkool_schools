@@ -90,12 +90,13 @@ function wireManualScrollState() {
 
 function buildMobileHomeLoadingState() {
     return `
-        <div class="lh-home-loading" aria-busy="true" aria-label="Loading home" style="padding:20px 16px 120px;">
-            <div style="height:88px;border-radius:12px;background:rgba(255,255,255,0.05);margin-bottom:18px;"></div>
+        <div class="lh-home-loading" aria-busy="true" aria-label="Loading home" style="padding:10px 2px 120px;">
+            <div style="height:18px;width:96px;border-radius:6px;background:rgba(255,255,255,0.08);margin:10px 0 8px;"></div>
+            <div style="height:38px;width:160px;border-radius:8px;background:rgba(255,255,255,0.05);margin-bottom:18px;"></div>
+            <div style="height:176px;border-radius:28px;background:rgba(255,255,255,0.05);margin-bottom:24px;"></div>
             <div style="height:18px;width:92px;border-radius:6px;background:rgba(255,255,255,0.08);margin-bottom:10px;"></div>
-            <div style="height:146px;border-radius:12px;background:rgba(255,255,255,0.05);margin-bottom:18px;"></div>
-            <div style="height:18px;width:72px;border-radius:6px;background:rgba(255,255,255,0.08);margin-bottom:10px;"></div>
-            <div style="height:146px;border-radius:12px;background:rgba(255,255,255,0.05);"></div>
+            <div style="height:60px;border-radius:18px;background:rgba(255,255,255,0.05);margin-bottom:8px;"></div>
+            <div style="height:60px;border-radius:18px;background:rgba(255,255,255,0.05);"></div>
         </div>`;
 }
 
@@ -163,7 +164,7 @@ window.loadManual = async function(containerId = 'api-content-area') {
         const classData  = classRes.ok ? await classRes.json().catch(() => null) : null;
         if (classData) homeData.myClass = classData;
 
-        const manualStyleHref = 'assets/css/learner/manual.css?v=8.4';
+        const manualStyleHref = 'assets/css/learner/manual.css?v=8.5';
         const existingManualStyle = document.getElementById('manual-style');
         if (existingManualStyle) {
             existingManualStyle.href = manualStyleHref;
@@ -257,84 +258,7 @@ function buildHomeLayout(data, manualHtml) {
 
     const isMobile = window.innerWidth <= 768;
 
-    if (isMobile) {
-        // ── MOBILE: GitHub-style stacked layout ──
-        return `
-        <style>
-            @media (max-width: 768px) {
-                .lh-mobile-wrapper,
-                .lh-mobile-wrapper * {
-                    font-weight: 300 !important;
-                }
-            }
-        </style>
-        <div class="lh-mobile-wrapper">
-
-            <!-- MY CLASS CARD -->
-            ${buildMobileClassCard(data.myClass)}
-
-            <!-- TO-DO SECTION -->
-            <div class="lh-section">
-                <div class="lh-section-header">
-                    <div class="lh-section-title">
-                        <div style="width:22px;height:22px;border-radius:6px;background:#4fd1c518;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">
-                            <svg viewBox="0 0 24 24" width="13" height="13" stroke="#4fd1c5" stroke-width="2.5" fill="none">
-                                <path d="M9 11l3 3L22 4"/>
-                                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-                            </svg>
-                        </div>
-                        To-Do
-                    </div>
-                    ${todoSlice.length > 0 ? `<span class="lh-badge">${todoSlice.length}</span>` : ''}
-                </div>
-                ${buildMobileTodo(todoSlice)}
-            </div>
-
-            <!-- RECENTS SECTION -->
-            <div class="lh-section">
-                <div class="lh-section-header">
-                    <div class="lh-section-title">
-                        <div style="width:22px;height:22px;border-radius:6px;background:#f28c3818;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">
-                            <svg viewBox="0 0 24 24" width="13" height="13" stroke="#f28c38" stroke-width="2.5" fill="none">
-                                <circle cx="12" cy="12" r="10"/>
-                                <polyline points="12 6 12 12 16 14"/>
-                            </svg>
-                        </div>
-                        Recent
-                    </div>
-                    ${recentSlice.length > 0 ? `<span class="lh-badge">${recentSlice.length}</span>` : ''}
-                </div>
-                <div class="lh-card lh-card-recent">
-                    ${buildMobileRecent(recentSlice)}
-                </div>
-            </div>
-
-            <!-- UPCOMING EVENTS SECTION -->
-            <div class="lh-section lh-events-section">
-                <div class="lh-section-header" onclick="window.fetchLearnerCalendar ? fetchLearnerCalendar() : null" style="cursor:pointer;">
-                    <div class="lh-section-title">
-                        <div style="width:22px;height:22px;border-radius:6px;background:#f472b618;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">
-                            <svg viewBox="0 0 24 24" width="13" height="13" stroke="#f472b6" stroke-width="2.5" fill="none">
-                                <rect x="3" y="4" width="18" height="18" rx="2"/>
-                                <line x1="16" y1="2" x2="16" y2="6"/>
-                                <line x1="8" y1="2" x2="8" y2="6"/>
-                                <line x1="3" y1="10" x2="21" y2="10"/>
-                            </svg>
-                        </div>
-                        Upcoming Events
-                    </div>
-                    ${eventsSlice.length > 0 ? `<span class="lh-badge">${eventsSlice.length}</span>` : ''}
-                </div>
-                <div class="lh-events-flat">
-                    ${buildMobileEventsWeekStrip(eventsSlice)}
-                    <div onclick="window.fetchLearnerCalendar ? fetchLearnerCalendar() : null" style="cursor:pointer;">
-                        ${buildMobileEvents(eventsSlice)}
-                    </div>
-                </div>
-            </div>
-
-        </div>`;
-    }
+    if (isMobile) return buildMobileHomeV2(data);
 
     return buildDesktopHome(data, manualHtml);
 }
@@ -779,6 +703,211 @@ function buildMobileClassCard(myClass) {
         <div class="lh-class-flat">
             ${myClass.school_name ? `<div class="lh-class-flat-line lh-class-flat-school"><span class="lh-class-dot"></span>${myClass.school_name}</div>` : ''}
             ${myClass.name ? `<div class="lh-class-flat-line">${myClass.name}</div>` : ''}
+        </div>`;
+}
+
+// ─────────────────────────────────────────────
+// MOBILE HOME ("Focus" layout)
+// Greeting, one "next up" hero card, the rest of the to-do list, a Mon–Sun
+// week strip, and what teachers posted. The hero only ever shows something the
+// learner has to act on; announcements and resources take it only when nothing
+// is left to do. Phones only: desktop keeps buildDesktopHome.
+// ─────────────────────────────────────────────
+window.LHM = {
+    labels: { quiz: 'Quiz', assignment: 'Assignment', evaluation: 'Evaluation', announcement: 'Announcement', resource: 'Resource' },
+    arrow: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+
+    time(iso) { const d = window.LHD.date(iso); return d ? d.getTime() : NaN; },
+
+    // Which to-do goes in the hero. Lower rank = more urgent:
+    // 1 quiz in progress, 2 assignment due within 48h, 3 summative quiz, 4 other assignment, 5 practice quiz, 6 evaluation.
+    rank(it) {
+        if (it.in_progress) return 1;
+        if (it.type === 'assignment') {
+            const t = this.time(it.due_date);
+            return !isNaN(t) && t - Date.now() <= 48 * 36e5 ? 2 : 4;
+        }
+        if (it.type === 'quiz') return Number(it.is_summative) === 1 ? 3 : 5;
+        return 6;
+    },
+    // Tie-break inside a rank: assignments by soonest due date, quizzes by newest start, then newest id.
+    key(it) {
+        if (it.type === 'assignment') { const t = this.time(it.due_date); return isNaN(t) ? Infinity : t; }
+        if (it.type === 'quiz') { const t = this.time(it.start_time); return isNaN(t) ? 0 : -t; }
+        return 0;
+    },
+    sortTodo(list) {
+        return list.slice().sort((a, b) => this.rank(a) - this.rank(b) || this.key(a) - this.key(b) || (Number(b.id) || 0) - (Number(a.id) || 0));
+    },
+
+    open(it) {
+        const type  = this.labels[it.type] ? it.type : 'quiz';
+        const scope = String(it.scope || '').replace(/[^a-z_]/gi, '');
+        return `openLearnerHomeItem('${type}', ${Number(it.id) || 0}, '${scope}')`;
+    },
+    initials(name) {
+        const w = String(name || '').trim().split(/\s+/).filter(Boolean);
+        return ((w[0] || '').charAt(0) + (w[1] || '').charAt(0)).toUpperCase();
+    },
+    dayLabel(ymd) {
+        const d = new Date(String(ymd).slice(0, 10) + 'T00:00:00');
+        return isNaN(d) ? '' : `${window.LHD.days[d.getDay()]} ${d.getDate()} ${window.LHD.months[d.getMonth()]}`;
+    },
+
+    heroChip(it) {
+        if (it.in_progress) return 'Quiz · In progress';
+        if (it.type === 'assignment') {
+            const n = window.LHD.daysUntil(it.due_date);
+            return 'Assignment' + (n === null ? '' : ' · ' + (n <= 0 ? 'Due today' : n === 1 ? 'Due tomorrow' : `Due in ${n} days`));
+        }
+        if (it.type === 'quiz') return 'Quiz · Open';
+        return 'Evaluation · Pending';
+    },
+    heroSub(it) {
+        const D = window.LHD, parts = [it.type === 'evaluation' ? it.meta : it.teacher];
+        if (it.in_progress) parts.push('Pick up where you left off');
+        else if (it.type === 'assignment' && it.due_date) parts.push('Due ' + D.short(it.due_date));
+        else if (it.type === 'quiz' && it.start_time) parts.push('Started ' + D.short(it.start_time));
+        return parts.filter(Boolean).join(' · ');
+    },
+
+    hero(it) {
+        const e = window.LHD.esc, sub = this.heroSub(it);
+        return `<button type="button" class="lhx-hero" onclick="${this.open(it)}">
+            <span class="lhx-chip-hero">${e(this.heroChip(it))}</span>
+            <span class="lhx-hero-row">
+                <span class="lhx-hero-text"><span class="lhx-hero-title">${e(it.title)}</span>${sub ? `<span class="lhx-hero-sub">${e(sub)}</span>` : ''}</span>
+                <span class="lhx-go" aria-hidden="true">${this.arrow}</span>
+            </span>
+        </button>`;
+    },
+    // Calm card for when nothing needs doing (or the class is new / empty). Opens `it` when given.
+    calm(chip, title, sub, it) {
+        const e = window.LHD.esc;
+        const inner = `<span class="lhx-chip-hero">${e(chip)}</span>
+            <span class="lhx-hero-row">
+                <span class="lhx-hero-text"><span class="lhx-hero-title">${e(title)}</span>${sub ? `<span class="lhx-hero-sub">${e(sub)}</span>` : ''}</span>
+                ${it ? `<span class="lhx-go" aria-hidden="true">${this.arrow}</span>` : ''}
+            </span>`;
+        return it
+            ? `<button type="button" class="lhx-hero lhx-hero--calm" onclick="${this.open(it)}">${inner}</button>`
+            : `<div class="lhx-hero lhx-hero--calm lhx-hero--static">${inner}</div>`;
+    },
+
+    todoRow(it) {
+        const D = window.LHD, n = it.type === 'assignment' ? D.daysUntil(it.due_date) : null;
+        let chip = 'Pending', cls = '', meta;
+        if (it.in_progress)              { chip = 'Continue'; cls = ' lhx-chip--go'; meta = 'Quiz · In progress'; }
+        else if (it.type === 'quiz')     { chip = 'Open';     cls = ' lhx-chip--go'; meta = 'Quiz · ' + (it.start_time ? 'Started ' + D.short(it.start_time) : (it.teacher || 'Open')); }
+        else if (it.type === 'assignment') {
+            chip = n === null ? 'Due' : n <= 0 ? 'Due today' : n === 1 ? 'Tomorrow' : `In ${n} days`;
+            if (n !== null && n <= 1) cls = ' lhx-chip--soon';
+            meta = 'Assignment · ' + (it.teacher || (it.due_date ? 'Due ' + D.short(it.due_date) : ''));
+        } else                           { meta = 'Evaluation · ' + (it.meta || 'Pending'); }
+        return `<button type="button" class="lhx-row" onclick="${this.open(it)}">
+            <span class="lhx-tile">${D.svg(it.type, 20)}</span>
+            <span class="lhx-rt"><span class="lhx-rt-title">${D.esc(it.title)}</span><span class="lhx-rt-meta">${D.esc(meta)}</span></span>
+            <span class="lhx-chip${cls}">${D.esc(chip)}</span>
+        </button>`;
+    },
+    alsoTodo(rest) {
+        if (!rest.length) return '';
+        const more = rest.length - 3;
+        return `<div class="lhx-st"><span class="lhx-st-title">Also to do</span><span class="lhx-st-meta">${rest.length}</span></div>
+            ${rest.slice(0, 3).map(it => this.todoRow(it)).join('')}
+            ${more > 0 ? `<div class="lhx-more">+${more} more</div>` : ''}`;
+    },
+
+    // Days that get a dot: assignments due, upcoming quizzes and school events.
+    dateKeys(data) {
+        const s = new Set(), add = v => { if (v) s.add(String(v).slice(0, 10)); };
+        (data.todo || []).forEach(t => { if (t.type === 'assignment') add(t.due_date); });
+        (data.upcoming || []).forEach(u => add(u.date));
+        (data.events || []).forEach(ev => add(ev.event_date));
+        return s;
+    },
+    week(data) {
+        const D = window.LHD, pad = n => String(n).padStart(2, '0'), dots = this.dateKeys(data);
+        const today = new Date(); today.setHours(0, 0, 0, 0);
+        const monday = new Date(today); monday.setDate(today.getDate() - ((today.getDay() + 6) % 7));
+        const names = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        let cells = '';
+        for (let i = 0; i < 7; i++) {
+            const d = new Date(monday); d.setDate(monday.getDate() + i);
+            const key = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+            const isToday = d.getTime() === today.getTime();
+            cells += `<span class="lhx-day${isToday ? ' lhx-day--today' : ''}"><span class="lhx-day-label">${names[i]}</span><span class="lhx-day-num">${d.getDate()}</span><span class="lhx-day-dot${dots.has(key) ? ' lhx-day-dot--on' : ''}"></span></span>`;
+        }
+        const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
+        const range = `${monday.getDate()} ${D.months[monday.getMonth()]} – ${sunday.getDate()} ${D.months[sunday.getMonth()]}`;
+        const next = (data.upcoming || []).filter(u => u.kind !== 'assignment').slice(0, 2);
+        const list = next.length
+            ? next.map(u => `<span class="lhx-ev"><span class="lhx-ev-date">${D.esc(this.dayLabel(u.date))}</span><span class="lhx-ev-title">${D.esc(u.title)}</span><span class="lhx-ev-kind">${D.esc(u.label)}</span></span>`).join('')
+            : '<span class="lhx-ev-empty">No tests or events coming up</span>';
+        return `<div class="lhx-st"><span class="lhx-st-title">This week</span><span class="lhx-st-meta">${range}</span></div>
+            <button type="button" class="lhx-week-card" aria-label="Open calendar, ${range}" onclick="window.fetchLearnerCalendar ? fetchLearnerCalendar() : null">
+                <span class="lhx-week">${cells}</span>
+                <span class="lhx-ev-list">${list}</span>
+            </button>`;
+    },
+
+    feed(items) {
+        if (!items.length) return '';
+        const D = window.LHD;
+        const rows = items.slice(0, 3).map(it => {
+            const tile = it.meta
+                ? `<span class="lhx-tile lhx-tile--round">${D.esc(this.initials(it.meta))}</span>`
+                : `<span class="lhx-tile">${D.svg(it.type, 20)}</span>`;
+            const meta = [this.labels[it.type], it.meta, it.time_ago].filter(Boolean).join(' · ');
+            return `<button type="button" class="lhx-row" onclick="${this.open(it)}">${tile}
+                <span class="lhx-rt"><span class="lhx-rt-title">${D.esc(it.title)}</span><span class="lhx-rt-meta">${D.esc(meta)}</span></span>
+            </button>`;
+        }).join('');
+        return `<div class="lhx-st"><span class="lhx-st-title">From your teachers</span></div>${rows}`;
+    }
+};
+
+function buildMobileHomeV2(data) {
+    const M = window.LHM, e = window.LHD.esc;
+    const first = String((data.learner && data.learner.first_name) || '').trim();
+    const h = new Date().getHours();
+    const part = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
+
+    // Quizzes the learner has started come from `resume`; everything else from `todo`.
+    const todo   = M.sortTodo([...(data.resume || []).map(r => ({ ...r, type: 'quiz', in_progress: true })), ...(data.todo || [])]);
+    const recent = data.recent || [];
+
+    let hero, rest = [], feed = recent, showWeek = true;
+    if (data.no_class) {
+        hero = M.calm('Not in a class yet', 'No class yet', 'Ask your school to add you to a class.');
+        feed = []; showWeek = false;
+    } else if (data.has_content === false) {
+        hero = M.calm('Getting started', 'Nothing posted yet', 'Quizzes, assignments and announcements from your teachers will show up here.');
+        feed = [];
+    } else if (todo.length) {
+        hero = M.hero(todo[0]);
+        rest = todo.slice(1);
+    } else if (recent.length) {
+        const r = recent[0];
+        hero = M.calm('All caught up', r.title, [M.labels[r.type], r.time_ago].filter(Boolean).join(' · '), r);
+        feed = recent.slice(1);
+    } else {
+        hero = M.calm('All caught up', 'Nothing needs your attention', 'Quizzes and assignments that need you will show up here.');
+    }
+
+    const cls = data.myClass || {};
+    const classLine = [cls.school_name, cls.name].filter(Boolean).join(' · ');
+
+    return `
+        <div class="lh-mobile-wrapper lhx">
+            ${classLine ? `<div class="lhx-top"><span class="lhx-top-dot"></span><span class="lhx-top-text">${e(classLine)}</span></div>` : ''}
+            <div class="lhx-greet">${first
+                ? `<div class="lhx-hello">${part}</div><div class="lhx-name">${e(first)}</div>`
+                : `<div class="lhx-name">${part}</div>`}</div>
+            ${hero}
+            ${M.alsoTodo(rest)}
+            ${showWeek ? M.week(data) : ''}
+            ${M.feed(feed)}
         </div>`;
 }
 

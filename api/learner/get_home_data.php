@@ -15,6 +15,13 @@ $sevenDaysAgo = date('Y-m-d H:i:s', strtotime('-7 days'));
 // First name for the home greeting. Reads whatever the login stored in the session;
 // change these keys (or query users) if your session uses something else.
 $firstName = trim(explode(' ', trim((string)($_SESSION['first_name'] ?? $_SESSION['name'] ?? '')))[0]);
+// The database is the source of truth for the first name (users.name); the session value above is only a fallback.
+$nameStmt = $conn->prepare("SELECT name FROM users WHERE email = ? LIMIT 1");
+$nameStmt->bind_param("s", $email);
+$nameStmt->execute();
+$dbName = trim((string)($nameStmt->get_result()->fetch_assoc()['name'] ?? ''));
+$nameStmt->close();
+if ($dbName !== '') { $firstName = trim(explode(' ', $dbName)[0]); }
 $learner   = ['first_name' => $firstName];
 
 // ── Academic Year ──
@@ -125,9 +132,11 @@ if ($announcementRow) {
 // FIX: include both 'Open' and 'Scheduled' statuses
 // ────────────────────────────────────────────
 $stmt = $conn->prepare("
-    SELECT q.id, q.title, q.start_time
+    SELECT q.id, q.title, q.start_time, q.is_summative,
+           CONCAT(COALESCE(u.title,''), ' ', COALESCE(u.surname,'')) AS teacher
     FROM quizzes q
     LEFT JOIN quiz_attempts qa ON qa.quiz_id = q.id AND qa.user_email = ?
+    LEFT JOIN users u ON q.created_by = u.email
     WHERE q.class_id = ?
       AND q.academic_year_id = ?
       AND q.status IN ('Open', 'Scheduled')
@@ -144,7 +153,49 @@ while ($row = $res->fetch_assoc()) {
         'id'    => $row['id'],
         'title' => $row['title'],
         'label' => 'Quiz available',
-        'meta'  => 'Started ' . date('M j', strtotime($row['start_time']))
+        'meta'  => 'Started ' . date('M j', strtotime($row['start_time'])),
+        'start_time'   => $row['start_time'],
+        'is_summative' => (int)$row['is_summative'],
+        'teacher'      => trim((string)$row['teacher'])
+    ];
+}
+$stmt->close();
+
+// ────────────────────────────────────────────
+// RESUME: quizzes this learner has started but not finished (still within the quiz duration).
+// Kept out of $todo on purpose so the desktop Home is unchanged; the mobile Home reads `resume`.
+// ────────────────────────────────────────────
+$resume = [];
+$stmt = $conn->prepare("
+    SELECT q.id, q.title, q.start_time, q.is_summative,
+           CONCAT(COALESCE(u.title,''), ' ', COALESCE(u.surname,'')) AS teacher
+    FROM quiz_attempts qa
+    JOIN quizzes q ON q.id = qa.quiz_id
+    LEFT JOIN users u ON q.created_by = u.email
+    WHERE qa.user_email = ?
+      AND qa.status = 'in_progress'
+      AND q.class_id = ?
+      AND q.academic_year_id = ?
+      AND q.status = 'Open'
+      AND DATE_ADD(COALESCE(qa.start_time, qa.last_attempt), INTERVAL q.duration MINUTE) > ?
+    ORDER BY qa.attempt_id DESC
+");
+$stmt->bind_param("siis", $email, $classId, $yearId, $now);
+$stmt->execute();
+$res = $stmt->get_result();
+$resumeSeen = [];
+while ($row = $res->fetch_assoc()) {
+    if (isset($resumeSeen[$row['id']])) continue;
+    $resumeSeen[$row['id']] = true;
+    $resume[] = [
+        'type'         => 'quiz',
+        'id'           => $row['id'],
+        'title'        => $row['title'],
+        'label'        => 'Continue quiz',
+        'meta'         => 'In progress',
+        'start_time'   => $row['start_time'],
+        'is_summative' => (int)$row['is_summative'],
+        'teacher'      => trim((string)$row['teacher'])
     ];
 }
 $stmt->close();
@@ -153,9 +204,11 @@ $stmt->close();
 // TO-DO 2: Assignments not yet submitted & not past due
 // ────────────────────────────────────────────
 $stmt = $conn->prepare("
-    SELECT a.id, a.title, a.due_date
+    SELECT a.id, a.title, a.due_date,
+           CONCAT(COALESCE(u.title,''), ' ', COALESCE(u.surname,'')) AS teacher
     FROM assignments a
     LEFT JOIN submissions s ON s.assignment_id = a.id AND s.student_email = ?
+    LEFT JOIN users u ON a.created_by = u.email
     WHERE a.class_id = ?
       AND a.academic_year_id = ?
       AND a.due_date >= ?
@@ -172,7 +225,8 @@ while ($row = $res->fetch_assoc()) {
         'title' => $row['title'],
         'label' => 'Assignment due',
         'meta'  => 'Due ' . date('M j', strtotime($row['due_date'])),
-        'due_date' => $row['due_date']
+        'due_date' => $row['due_date'],
+        'teacher'  => trim((string)$row['teacher'])
     ];
 }
 $stmt->close();
@@ -433,4 +487,4 @@ $stmt->execute();
 $hasContent = ((int)($stmt->get_result()->fetch_assoc()['n'] ?? 0)) > 0;
 $stmt->close();
 
-echo json_encode(['todo' => $todo, 'recent' => $recent, 'events' => $events, 'upcoming' => $upcoming, 'learner' => $learner, 'has_content' => $hasContent, 'snapshot' => $snapshot]);
+echo json_encode(['todo' => $todo, 'resume' => $resume, 'recent' => $recent, 'events' => $events, 'upcoming' => $upcoming, 'learner' => $learner, 'has_content' => $hasContent, 'snapshot' => $snapshot]);

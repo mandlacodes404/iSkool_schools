@@ -1298,3 +1298,110 @@ html[data-learner-mobile-theme="light"] .lh-home-loading > div[style*="height:18
 html[data-learner-mobile-theme="light"] .lh-home-error { color: #bd4a43 !important; }
 
 }
+
+/* ═══ Home (phones): "Focus" layout ═══════════════════════════════════════════════════════════════════
+   Drawn by buildMobileHomeV2() in manual.js. Dark is the default; light follows Settings > Appearance
+   (<html data-learner-mobile-theme="light">, set by mobile_theme.js). The root keeps the .lh-mobile-wrapper class so the
+   light-mode gate in mobile_light.css and the status-bar check in mobile_theme.js still see this page.
+   The page, header and bottom nav colours are not set here.
+   Side inset: #api-content-area adds 18px (quiz.css), so the wrapper adds 2px for a 20px edge.
+   Every rule starts with "#api-content-area .lhx" so it out-ranks the id-based rules in quiz.css (see the #api-content-area h2 rule). */
+@media (max-width: 768px) {
+
+.lh-mobile-wrapper.lhx {
+    --x-card: #2a2a28;   --x-line: rgba(255, 255, 255, 0.08);
+    --x-text: #f3f2ee;   --x-muted: #a8a79f;   --x-tile: rgba(255, 255, 255, 0.07);   --x-tile-ink: #d8ff5e;
+    --x-go-bg: rgba(216, 255, 94, 0.14);   --x-go-ink: #d8ff5e;
+    --x-soon-bg: rgba(255, 155, 133, 0.14);   --x-soon-ink: #ff9b85;
+    --x-today-bg: #d8ff5e;   --x-today-ink: #0d0e12;   --x-today-label: #3e4a12;
+    --x-dot: #ff9b85;   --x-school-dot: #d8ff5e;
+    display: block;
+    padding: 4px 2px 24px;
+    color: var(--x-text);
+}
+html[data-learner-mobile-theme="light"] .lh-mobile-wrapper.lhx {
+    --x-card: #ffffff;   --x-line: #dfded8;
+    --x-text: #282924;   --x-muted: #6b6c65;   --x-tile: #f1f0ea;   --x-tile-ink: #282924;
+    --x-go-bg: #d8ff5e;   --x-go-ink: #1a2000;
+    --x-soon-bg: #ffe8e1;   --x-soon-ink: #a8361f;
+    --x-today-bg: #252624;   --x-today-ink: #ffffff;   --x-today-label: #c9cdd6;
+    --x-dot: #e4573d;   --x-school-dot: #282924;
+}
+
+#api-content-area .lhx button {
+    font-family: inherit; margin: 0; border: 0; background: none; color: inherit; text-align: left;
+    cursor: pointer; -webkit-tap-highlight-color: transparent; transition: transform .12s ease;
+}
+#api-content-area .lhx button:active { transform: scale(0.985); }
+#api-content-area .lhx button:focus-visible { outline: 2px solid var(--x-text); outline-offset: 2px; }
+
+/* school and class, then the greeting */
+#api-content-area .lhx .lhx-top { display: flex; align-items: center; gap: 8px; min-height: 32px; margin-bottom: 8px; }
+#api-content-area .lhx .lhx-top-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--x-school-dot); flex: none; }
+#api-content-area .lhx .lhx-top-text { font-size: 13px; font-weight: 600; color: var(--x-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#api-content-area .lhx .lhx-greet { margin-bottom: 18px; }
+#api-content-area .lhx .lhx-hello { font-size: 15px; font-weight: 600; color: var(--x-muted); }
+#api-content-area .lhx .lhx-name { font-size: 34px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; color: var(--x-text); overflow-wrap: anywhere; }
+
+/* the hero: the one thing to do next (lime in both themes) */
+#api-content-area .lhx .lhx-hero {
+    display: flex; flex-direction: column; justify-content: space-between; gap: 18px;
+    width: 100%; min-height: 176px; box-sizing: border-box; padding: 18px 18px 18px 20px;
+    border-radius: 28px; background: #d8ff5e; color: #10130a;
+}
+#api-content-area .lhx .lhx-chip-hero { align-self: flex-start; font-size: 12px; font-weight: 700; padding: 6px 11px; border-radius: 99px; background: rgba(16, 19, 10, 0.1); }
+#api-content-area .lhx .lhx-hero-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+#api-content-area .lhx .lhx-hero-text { display: block; min-width: 0; }
+#api-content-area .lhx .lhx-hero-title { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; max-width: 230px; font-size: 24px; font-weight: 800; line-height: 1.15; letter-spacing: -0.02em; overflow-wrap: anywhere; }
+#api-content-area .lhx .lhx-hero-sub { display: block; margin-top: 6px; font-size: 13px; font-weight: 600; color: #3e4a12; }
+#api-content-area .lhx .lhx-go { display: grid; place-items: center; flex: none; width: 52px; height: 52px; border-radius: 50%; background: #0d0e12; color: #d8ff5e; }
+#api-content-area .lhx .lhx-hero--calm { background: var(--x-card); color: var(--x-text); border: 1px solid var(--x-line); }
+#api-content-area .lhx .lhx-hero--calm .lhx-chip-hero { background: var(--x-tile); }
+#api-content-area .lhx .lhx-hero--calm .lhx-hero-sub { color: var(--x-muted); }
+#api-content-area .lhx .lhx-hero--calm .lhx-go { background: var(--x-tile); color: var(--x-text); }
+#api-content-area .lhx .lhx-hero--static { cursor: default; }
+
+/* section headings */
+#api-content-area .lhx .lhx-st { display: flex; justify-content: space-between; align-items: baseline; margin: 24px 0 10px; }
+#api-content-area .lhx .lhx-st-title { font-size: 15px; font-weight: 700; color: var(--x-text); }
+#api-content-area .lhx .lhx-st-meta { font-size: 13px; font-weight: 600; color: var(--x-muted); }
+
+/* rows (to-do and teacher posts) */
+#api-content-area .lhx .lhx-row {
+    display: flex; align-items: center; gap: 14px; width: 100%; min-height: 60px; box-sizing: border-box;
+    padding: 8px 14px; margin-bottom: 8px; border-radius: 18px; background: var(--x-card); border: 1px solid var(--x-line); color: var(--x-text);
+}
+#api-content-area .lhx .lhx-tile { display: grid; place-items: center; flex: none; width: 36px; height: 36px; border-radius: 12px; background: var(--x-tile); color: var(--x-tile-ink); font-size: 13px; font-weight: 700; }
+#api-content-area .lhx .lhx-tile--round { border-radius: 50%; color: var(--x-text); }
+#api-content-area .lhx .lhx-rt { display: block; flex: 1; min-width: 0; }
+#api-content-area .lhx .lhx-rt-title { display: block; font-size: 14px; font-weight: 600; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#api-content-area .lhx .lhx-rt-meta { display: block; margin-top: 2px; font-size: 12px; color: var(--x-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#api-content-area .lhx .lhx-chip { flex: none; font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 99px; white-space: nowrap; background: var(--x-tile); color: var(--x-muted); }
+#api-content-area .lhx .lhx-chip--go { background: var(--x-go-bg); color: var(--x-go-ink); }
+#api-content-area .lhx .lhx-chip--soon { background: var(--x-soon-bg); color: var(--x-soon-ink); }
+#api-content-area .lhx .lhx-more { margin: -2px 4px 0; font-size: 12px; font-weight: 600; color: var(--x-muted); }
+
+/* week strip (Monday first) and the next tests or events */
+#api-content-area .lhx .lhx-week-card { display: block; width: 100%; box-sizing: border-box; padding: 8px; border-radius: 22px; background: var(--x-card); border: 1px solid var(--x-line); color: var(--x-text); }
+#api-content-area .lhx .lhx-week { display: flex; justify-content: space-between; }
+#api-content-area .lhx .lhx-day { display: flex; flex-direction: column; align-items: center; flex: 1; max-width: 46px; padding: 8px 0 6px; border-radius: 16px; }
+#api-content-area .lhx .lhx-day-label { font-size: 11px; font-weight: 600; color: var(--x-muted); }
+#api-content-area .lhx .lhx-day-num { margin: 4px 0; font-size: 16px; font-weight: 700; color: var(--x-text); }
+#api-content-area .lhx .lhx-day-dot { width: 5px; height: 5px; border-radius: 50%; background: transparent; }
+#api-content-area .lhx .lhx-day-dot--on { background: var(--x-dot); }
+#api-content-area .lhx .lhx-day--today { background: var(--x-today-bg); }
+#api-content-area .lhx .lhx-day--today .lhx-day-label { color: var(--x-today-label); }
+#api-content-area .lhx .lhx-day--today .lhx-day-num { color: var(--x-today-ink); }
+#api-content-area .lhx .lhx-ev-list { display: block; margin-top: 6px; padding: 4px 8px 2px; border-top: 1px solid var(--x-line); }
+#api-content-area .lhx .lhx-ev { display: flex; align-items: baseline; gap: 10px; padding: 7px 0; font-size: 13px; }
+#api-content-area .lhx .lhx-ev-date { flex: none; width: 78px; font-weight: 600; color: var(--x-muted); white-space: nowrap; }
+#api-content-area .lhx .lhx-ev-title { flex: 1; min-width: 0; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#api-content-area .lhx .lhx-ev-kind { flex: none; font-size: 12px; color: var(--x-muted); }
+#api-content-area .lhx .lhx-ev-empty { display: block; padding: 7px 0; font-size: 13px; color: var(--x-muted); }
+
+@media (prefers-reduced-motion: reduce) {
+    #api-content-area .lhx button { transition: none; }
+    #api-content-area .lhx button:active { transform: none; }
+}
+
+}
