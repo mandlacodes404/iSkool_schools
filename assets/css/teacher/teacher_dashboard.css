@@ -44,10 +44,12 @@
            differences:
              - mobile widths only, so desktop (e.g. two-finger swipe-back on
                a trackpad) behaves exactly as before;
-             - overscroll-behavior-y is left alone. The learner sets it to
-               `contain` because it has its own custom pull-to-refresh; this
-               page has none, so the browser's native pull-to-refresh keeps
-               working. */
+             - overscroll-behavior-y is not set here. The teacher dashboard
+               has its own pull-to-refresh now (assets/js/shared/
+               pull_to_refresh.js); pull_to_refresh.css sets `contain` on
+               the page it refreshes, so the browser's native
+               pull-to-refresh, which reloads the whole app, does not also
+               fire. */
         @media (max-width: 768px) {
             html,
             body,
