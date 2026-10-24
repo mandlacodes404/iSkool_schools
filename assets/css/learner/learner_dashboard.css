@@ -1766,10 +1766,10 @@ iframe {
 }
 
 /* Mobile bottom bar. Same structure as the parent app's bar (parent_app.css .pa-tabs): centred tabs, thin 22px line
-   icons with the parent bar's glyphs, 11px labels, bold bright active tab. It is 88px high plus the phone's safe
+   icons with the parent bar's glyphs, 11px labels, bold bright active tab. It is 85px high plus the phone's safe
    area (--mbn-h; the old bar was 82px, the parent bar is 64px). The background is the learner's own glass and
    stays dynamic (see DYNAMIC BOTTOM NAV below). Light phone theme: mobile_light.css. */
-:root { --mbn-h: 88px; }
+:root { --mbn-h: 85px; }
 
 #mobileBottomNav {
     display: none;
@@ -1795,7 +1795,8 @@ iframe {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;   /* icon + label hug the top of the bar (like WhatsApp / GitHub) */
+    padding-top: 10px;
     gap: 2px;
     text-decoration: none;
     font-size: 11px;

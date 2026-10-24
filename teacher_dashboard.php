@@ -97,7 +97,7 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
             html { background-color: #0d1117; }
         }
     </style>
-    <link rel="stylesheet" href="assets/css/teacher/dashboard.css?v=5.2">
+    <link rel="stylesheet" href="assets/css/teacher/dashboard.css?v=5.3">
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
     <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=7.2">
     <link rel="stylesheet" href="assets/css/teacher/assignments.css?v=3.3">
