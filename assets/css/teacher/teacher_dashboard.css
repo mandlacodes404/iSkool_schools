@@ -582,39 +582,48 @@
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ── MOBILE BOTTOM NAV ── */
+        /* ── MOBILE BOTTOM NAV ──
+           Same structure as the parent app's bar (parent_app.css .pa-tabs): 64px high plus the phone's safe area,
+           thin line icons, 11px labels, bold bright active tab. The background is the teacher's own glass and
+           stays dynamic (see DYNAMIC BOTTOM NAV below). The teacher app is dark on phones, so no light variant. */
         #mobileBottomNav {
             display: none;
             position: fixed;
-            bottom: 0; left: 0;
+            bottom: 0; left: 0; right: 0;
             width: 100%;
-            height: 82px;
+            height: calc(64px + env(safe-area-inset-bottom, 0px));
+            padding: 0 0 env(safe-area-inset-bottom, 0px);
+            box-sizing: border-box;
             background: rgba(66,65,65,0.35);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border-top: 1px solid rgba(255,255,255,0.1);
             box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
             z-index: 4000;
-            justify-content: space-around;
-            align-items: flex-start;
-            box-sizing: border-box;
         }
         #mobileBottomNav a {
-            color: var(--text-color);
-            text-decoration: none;
-            font-size: 11px;
-            text-align: center;
-            flex: 1;
+            flex: 1 1 0;
+            min-width: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start;
-            padding-top: 5px;
-            transition: all 0.2s;
+            justify-content: center;
+            gap: 2px;
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 600;
+            color: #9b9c92;
+            -webkit-tap-highlight-color: transparent;
         }
-        #mobileBottomNav a i { font-size: 20px; margin-bottom: 4px; }
-        #mobileBottomNav a.active,
-        #mobileBottomNav a:hover { color: var(--accent-color); transform: translateY(-3px); }
+        #mobileBottomNav a span {
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        #mobileBottomNav a svg { width: 22px; height: 22px; flex-shrink: 0; }
+        #mobileBottomNav a.active { color: #ecece9; font-weight: 700; }
+        #mobileBottomNav a.active svg { stroke-width: 2.2; }
 
         /* ── MOBILE LAYOUT ── */
         @media (max-width: 768px) {
@@ -636,13 +645,9 @@
                second time pushed it entirely off-screen (past the right edge)
                while the menu was open. It now travels with .main-content
                exactly like the learner header does. */
-            .sidebar.active ~ #mobileBottomNav { filter: blur(5px); pointer-events: none; }
-            iframe { height: calc(100vh - 120px) !important; }
+            .sidebar.active ~ #mobileBottomNav { pointer-events: none; }
+            iframe { height: calc(100vh - 102px) !important; }
             #mobileBottomNav { display: flex !important; }
-            #mobileBottomNav {
-                padding-bottom: env(safe-area-inset-bottom);
-                height: calc(82px + env(safe-area-inset-bottom));
-            }
             .sidebar a.desktop-only,
             .sidebar a.mobile-bottom-link { display: none; }
             .teacher-desktop-create { display: none !important; }

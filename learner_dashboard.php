@@ -233,16 +233,16 @@ $parentLink = ((int)$parentCount > 0); // true when at least one parent is linke
     <link rel="stylesheet" href="assets/css/learner/grades.css?v=3.9">
     <link rel="stylesheet" href="assets/css/learner/resources.css?v=2.9">
      <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=5.0">
-     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=13.9">
+     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=14.0">
     <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=3.1">
-    <link rel="stylesheet" href="assets/css/learner/mobile_menu.css?v=1.8">
+    <link rel="stylesheet" href="assets/css/learner/mobile_menu.css?v=1.9">
     <link rel="stylesheet" href="assets/css/learner/mobile_settings.css?v=1.6">
     <link rel="stylesheet" href="assets/css/learner/mobile_class.css?v=1.1">
     <link rel="stylesheet" href="assets/css/learner/parent_invite.css?v=1.0">
     <link rel="stylesheet" href="assets/css/learner/desktop_settings.css?v=1.5S">   <!-- new -->
-    <link rel="stylesheet" href="assets/css/learner/mobile_light.css?v=1.9">
+    <link rel="stylesheet" href="assets/css/learner/mobile_light.css?v=2.0">
     <link rel="stylesheet" href="assets/css/learner/desktop_settings.css?v=1.4">   <!-- new -->
-    <link rel="stylesheet" href="assets/css/learner/mobile_light.css?v=1.9">
+    <link rel="stylesheet" href="assets/css/learner/mobile_light.css?v=2.0">
     <link rel="stylesheet" href="assets/css/splash_light.css?v=<?= (int) @filemtime(__DIR__ . '/assets/css/splash_light.css') ?>">
     <script>
     // Desktop sidebar: restore the saved collapsed state BEFORE first paint (no flash).
@@ -3805,45 +3805,24 @@ window.learnerPageState = {
 <div id="desktopBackdrop" class="desktop-backdrop"></div>
 <div id="mobileOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:1500;"></div>
 
-<nav id="mobileBottomNav">
-
-      <a href="javascript:void(0)" onclick="return handleLearnerMobileBottomNav(event, loadManual)" data-page="partials/manual.html" id="nav-home">
-        <div class="lh-nav-box" style="width:28px;height:28px;border-radius:8px;background:#4fd1c518;border:1px solid #4fd1c530;display:flex;align-items:center;justify-content:center;margin-bottom:3px;transition:background 0.2s;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#4fd1c5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
-            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-            <polyline points="9 22 9 12 15 12 15 22"/>
-          </svg>
-        </div>
-        Home
-      </a>
-
+<!-- Phone bottom bar. Same look as the parent app's bar: 64px high, solid, thin line icons, four tabs. -->
+<nav id="mobileBottomNav" aria-label="Learner app">
+    <a href="javascript:void(0)" onclick="return handleLearnerMobileBottomNav(event, loadManual)" data-page="partials/manual.html" id="nav-home">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>
+        <span>Home</span>
+    </a>
     <a href="javascript:void(0)" onclick="return handleLearnerMobileBottomNav(event, fetchQuizzes)" data-page="quiz_list.php" id="nav-quiz">
-        <div class="lh-nav-box" style="width:28px;height:28px;border-radius:8px;background:#fdd66318;border:1px solid #fdd66330;display:flex;align-items:center;justify-content:center;margin-bottom:3px;transition:background 0.2s;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#fdd663" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
-            <path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
-          </svg>
-        </div>
-        Quiz
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        <span>Quiz</span>
     </a>
-
     <a href="javascript:void(0)" onclick="return handleLearnerMobileBottomNav(event, fetchAssignments)" data-page="assignment_list.php" id="nav-assignments">
-        <div class="lh-nav-box" style="width:28px;height:28px;border-radius:8px;background:#a78bfa18;border:1px solid #a78bfa30;display:flex;align-items:center;justify-content:center;margin-bottom:3px;transition:background 0.2s;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
-            <path d="M9 12h6"/><path d="M9 16h6"/><rect x="4" y="4" width="16" height="16" rx="2"/>
-          </svg>
-        </div>
-        Assignments
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 12h6"/><path d="M9 16h6"/><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+        <span>Assignments</span>
     </a>
-
     <a href="javascript:void(0)" onclick="return handleLearnerMobileBottomNav(event, fetchResources)" data-page="resource_list.php" id="nav-resources">
-        <div class="lh-nav-box" style="width:28px;height:28px;border-radius:8px;background:#f28c3818;border:1px solid #f28c3830;display:flex;align-items:center;justify-content:center;margin-bottom:3px;transition:background 0.2s;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#f28c38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
-            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-          </svg>
-        </div>
-        Resources
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <span>Resources</span>
     </a>
-
 </nav>
 
 <script>

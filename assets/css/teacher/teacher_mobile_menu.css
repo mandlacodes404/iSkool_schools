@@ -330,7 +330,7 @@ html body .dm-pop .dm-pop-sep { height: 1px; margin: 6px 12px; background: var(-
 }
 html body .sidebar.dm-menu .dm-item .dmm-badge { margin-left: auto; }
 #mobileBottomNav [data-page] { position: relative; }
-#mobileBottomNav .dmm-badge { position: absolute; top: -4px; left: calc(50% + 7px); min-width: 18px; height: 18px; font-size: 11px; line-height: 18px; padding: 0 5px; border: 2px solid #0d1117; box-sizing: content-box; }
+#mobileBottomNav .dmm-badge { position: absolute; top: 6px; left: calc(50% + 6px); min-width: 18px; height: 18px; font-size: 11px; line-height: 18px; padding: 0 5px; border: 2px solid #0d1117; box-sizing: content-box; }
 
 @media (prefers-reduced-motion: reduce) {
   html { --dmm-dur: .01s; }
