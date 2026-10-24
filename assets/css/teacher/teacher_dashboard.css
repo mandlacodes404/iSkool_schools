@@ -201,15 +201,28 @@
         }
         #desktopMenuToggle:hover { background: #30363d; }
 
-        /* Mobile hamburger */
+        /* Mobile hamburger — same button as the learner's #mobileToggle: a thin
+           (1.5px) 20px icon, 8px side padding. The 10px top/bottom padding keeps
+           the button 40px tall so the header height doesn't change, and the
+           -4px margin puts the icon at the same left edge as on the learner. */
         #mobileToggle {
             display: none;
             background: none;
             border: none;
-            color: #e2e8f0;
+            color: #e0e6f0;
             font-size: 26px;
             cursor: pointer;
-            padding: 4px;
+            padding: 10px 8px;
+            margin-left: -4px;
+            transition: color 0.3s ease;
+        }
+        #mobileToggle svg {
+            display: block;
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+            flex-shrink: 0;
+            transition: stroke 0.3s ease;
         }
 
         .top-nav-brand {
@@ -1246,4 +1259,3 @@
     .tchr-create-form,
     .tchr-create-form.as-form-wrap--desktop { padding: 32px 28px 56px; }
 }
-

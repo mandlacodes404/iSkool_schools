@@ -97,7 +97,7 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
             html { background-color: #0d1117; }
         }
     </style>
-    <link rel="stylesheet" href="assets/css/teacher/dashboard.css?v=5.1">
+    <link rel="stylesheet" href="assets/css/teacher/dashboard.css?v=5.2">
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
     <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=7.2">
     <link rel="stylesheet" href="assets/css/teacher/assignments.css?v=3.3">
@@ -483,9 +483,9 @@ if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.wasLockedAtLoad
 
             <div class="top-nav-left">
                 <!-- Mobile hamburger -->
-                <button id="mobileToggle" onclick="toggleSidebar()">
-                    <svg viewBox="0 0 24 24" width="26" height="26" stroke="currentColor"
-                         stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <button id="mobileToggle" onclick="toggleSidebar()" aria-label="Toggle Mobile Menu">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="3" y1="12" x2="21" y2="12"></line>
                         <line x1="3" y1="6"  x2="21" y2="6"></line>
                         <line x1="3" y1="18" x2="21" y2="18"></line>
