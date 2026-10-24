@@ -289,7 +289,7 @@ $parentLink = ((int)$parentCount > 0); // true when at least one parent is linke
             html:not([data-learner-mobile-theme="light"]) { background-color: #20201f; }
         }
     </style>
-    <link rel="manifest" href="/manifest.php?v=1.1">
+    <link rel="manifest" href="/manifest.php?v=1.2">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=1.1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Geist:wght@300..600&display=swap" rel="stylesheet">

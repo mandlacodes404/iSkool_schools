@@ -77,7 +77,7 @@ if ($result && $row = $result->fetch_assoc()) {
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Login - <?= htmlspecialchars($schoolName) ?></title>
 
-<link rel="manifest" href="/manifest.php?v=1.1">
+<link rel="manifest" href="/manifest.php?v=1.2">
 
 <meta name="theme-color" content="#20201f">
 
