@@ -29,7 +29,7 @@
         overflow-y: auto !important;
         overflow-x: hidden !important;
         padding: 18px !important;
-        padding-bottom: calc(80px + env(safe-area-inset-bottom) + 0px) !important; /* Clears the bottom nav bar (82px) + safe area + small buffer */
+        padding-bottom: calc(96px + env(safe-area-inset-bottom) + 0px) !important; /* Clears the bottom nav bar (88px) + safe area + small buffer */
         font-family: 'Nunito', sans-serif !important;
         background-color: #20201f !important;
     }

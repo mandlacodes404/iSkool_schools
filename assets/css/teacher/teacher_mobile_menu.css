@@ -87,8 +87,8 @@ html body .sidebar.active ~ #mobileBottomNav {
    The curve is drawn by the corner pieces below now, so the bar keeps its normal look: clear at rest, glass once scrolled. */
 html body .sidebar.active ~ #mobileBottomNav { background: transparent !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
 html body .sidebar.active ~ #mobileBottomNav.nav-scrolled {
-  background: rgba(66,65,65,0.35) !important; border-top: 1px solid rgba(255,255,255,0.1) !important;
-  -webkit-backdrop-filter: blur(20px) !important; backdrop-filter: blur(20px) !important; box-shadow: 0 -4px 20px rgba(0,0,0,0.3) !important;
+  background: rgba(66,65,65,0.32) !important; border-top: 1px solid rgba(255,255,255,0.14) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(180%) !important; backdrop-filter: blur(28px) saturate(180%) !important; box-shadow: 0 -4px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05) !important;
 }
 /* The page keeps its own colour while the menu is open. The old rules tinted the body (and, from the script, the header)
    #1a1919 to match the old menu; the header is a child of the page, so it keeps its colour too. */
