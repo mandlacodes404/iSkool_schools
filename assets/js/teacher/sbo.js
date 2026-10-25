@@ -288,7 +288,7 @@ function buildMobileSBOFolders(briefs) {
                     onclick="openMobileTeacherSBO(${flatIndex})"
                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMobileTeacherSBO(${flatIndex});}">
                     <div class="sbo-mobile-row-icon">
-                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="#a67c52" stroke-width="1.2" fill="none">
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="#73746d" stroke-width="1.2" fill="none">
                             <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
                             <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
                             <line x1="12" y1="6"  x2="16" y2="6"/>
@@ -312,7 +312,7 @@ function buildMobileSBOFolders(briefs) {
         });
 
         const folderIcon = `
-            <svg viewBox="0 0 24 24" width="20" height="20" stroke="#a67c52" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="sbo-mobile-folder-icon">
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="#73746d" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="sbo-mobile-folder-icon">
                 <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
             </svg>`;
 

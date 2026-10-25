@@ -833,7 +833,7 @@ select.sbo-dp-in,
 .sbo-mobile-folder-label > .tchr-sidebar-class-chevron {
     margin-left: auto;
     flex-shrink: 0;
-    color: #555e6a;
+    color: #73746d;
 }
 /* The wrapper span becomes the real flex row for icon + name + count. */
 .sbo-mobile-folder-label > span {
@@ -892,7 +892,7 @@ select.sbo-dp-in,
     text-overflow: ellipsis;
 }
 .sbo-mobile-row-meta { font-size: 12px; color: #8b949e; margin-top: 2px; }
-.sbo-mobile-row-chevron { flex-shrink: 0; color: #555e6a; }
+.sbo-mobile-row-chevron { flex-shrink: 0; color: #73746d; }
 
 .sbo-mobile-detail {
     padding: 16px;

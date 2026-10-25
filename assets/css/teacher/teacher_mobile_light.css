@@ -329,8 +329,7 @@ html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .
 html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .thx, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state, .an-mobile-list, .an-mobile-detail, .an-error-message, .rs-mobile-list, .rs-error-message, .ev-mobile-list, .ev-mobile-detail, .ev-error-message, .sbo-mobile-list, .sbo-mobile-detail, .sbo-error-message, .full-cal-page-wrapper)) .rs-mobile-list .teacher-empty-state { color: #73746d; }
 
 /* -- Evaluations: list -- */
-/* the blue accent (folder and row icons) is a deeper blue on paper, the same one the Quizzes chips use */
-html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .thx, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state, .an-mobile-list, .an-mobile-detail, .an-error-message, .rs-mobile-list, .rs-error-message, .ev-mobile-list, .ev-mobile-detail, .ev-error-message, .sbo-mobile-list, .sbo-mobile-detail, .sbo-error-message, .full-cal-page-wrapper)) .ev-mobile-list [stroke="#1e90ff" i] { stroke: #1d6fb8; }
+/* the folder and row icons are grey in both themes (evaluations.js) */
 html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .thx, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state, .an-mobile-list, .an-mobile-detail, .an-error-message, .rs-mobile-list, .rs-error-message, .ev-mobile-list, .ev-mobile-detail, .ev-error-message, .sbo-mobile-list, .sbo-mobile-detail, .sbo-error-message, .full-cal-page-wrapper)) .ev-mobile-list .teacher-empty-state { color: #73746d; }
 
 /* -- Evaluations: an open evaluation -- */
@@ -346,8 +345,7 @@ html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .
 html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .thx, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state, .an-mobile-list, .an-mobile-detail, .an-error-message, .rs-mobile-list, .rs-error-message, .ev-mobile-list, .ev-mobile-detail, .ev-error-message, .sbo-mobile-list, .sbo-mobile-detail, .sbo-error-message, .full-cal-page-wrapper)) .ev-mobile-detail .eval-no-comments { color: #73746d; }
 
 /* -- Syllabus: list -- */
-/* the brown folder and book icons are a deeper brown on paper */
-html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .thx, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state, .an-mobile-list, .an-mobile-detail, .an-error-message, .rs-mobile-list, .rs-error-message, .ev-mobile-list, .ev-mobile-detail, .ev-error-message, .sbo-mobile-list, .sbo-mobile-detail, .sbo-error-message, .full-cal-page-wrapper)) .sbo-mobile-list [stroke="#a67c52" i] { stroke: #8a5e30; }
+/* the folder and book icons are grey in both themes (sbo.js) */
 html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .thx, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state, .an-mobile-list, .an-mobile-detail, .an-error-message, .rs-mobile-list, .rs-error-message, .ev-mobile-list, .ev-mobile-detail, .ev-error-message, .sbo-mobile-list, .sbo-mobile-detail, .sbo-error-message, .full-cal-page-wrapper)) .sbo-mobile-list .teacher-empty-state { color: #73746d; }
 
 /* -- Syllabus: an open brief -- */
