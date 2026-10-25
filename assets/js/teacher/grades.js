@@ -843,7 +843,7 @@ window.openMobileTeacherGradeQuiz = async function(quizId) {
     window.persistTeacherSectionState();
 
     apiArea.innerHTML = `
-        <div class="gr-panel-empty">
+        <div class="gr-panel-empty gr-mobile-detail">
             <svg viewBox="0 0 24 24" width="30" height="30" stroke="#4fd1c5" stroke-width="2" fill="none"
                 class="gr-panel-loading-spinner">
                 <circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="12"></circle>
@@ -878,7 +878,7 @@ window.openMobileTeacherGradeQuiz = async function(quizId) {
             renderMobileGradeDetail('standard', data, apiArea);
         }
     } catch (e) {
-        apiArea.innerHTML = `<div class="gr-panel-empty"><p class="gr-panel-error-text">Error loading grades.</p></div>`;
+        apiArea.innerHTML = `<div class="gr-panel-empty gr-mobile-detail"><p class="gr-panel-error-text">Error loading grades.</p></div>`;
     }
 };
 
@@ -903,7 +903,7 @@ function renderMobileGradeDetail(type, data, apiArea) {
 // calls openEditMarksFromElement at all).
 function renderMobileStandardGrades(data, apiArea) {
     let html = `
-        <div class="gr-panel-content">
+        <div class="gr-panel-content gr-mobile-detail">
             <div class="gr-panel-header">
                 <div class="gr-panel-title">${escapeHtml(data.quiz_title)}</div>
                 <div class="gr-panel-meta">${data.learners.length} learner${data.learners.length !== 1 ? 's' : ''}</div>
@@ -954,7 +954,7 @@ function renderMobileOpenEndedGrades(data, apiArea) {
     const fullyGraded = data.quiz_fully_graded === true || data.quiz_fully_graded === 1;
 
     let html = `
-        <div class="gr-panel-content">
+        <div class="gr-panel-content gr-mobile-detail">
             <div class="gr-panel-header">
                 <div>
                     <div class="gr-panel-title">${escapeHtml(data.quiz_title || 'Assessment Results')}</div>
