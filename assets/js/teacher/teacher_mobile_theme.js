@@ -27,7 +27,7 @@
   var watching = false;
   // Markup that marks a page that already has a light design, looked for inside #api-content-area.
   // Keep in step with the :is( ) list in the :has( ) gate in teacher_mobile_light.css.
-  var PAGE = '.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state';
+  var PAGE = '.ms, .thx, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state, .an-mobile-list, .an-mobile-detail, .an-error-message, .rs-mobile-list, .rs-error-message';
 
   function saved() {
     try { return localStorage.getItem(KEY) === 'light' ? 'light' : 'dark'; } catch (e) { return 'dark'; }

@@ -114,7 +114,7 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Geist:wght@400..600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=13.9">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=14.0">
     <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_menu.css?v=2.4">
     <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_menu.css?v=1.5">
     <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_settings.css?v=1.3">
@@ -123,7 +123,7 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
     <link rel="stylesheet" href="assets/css/shared/net_status.css?v=1.0">
     <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_settings.css?v=1.4">
     <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_light_mode.css?v=1.8">
-    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_light.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_light.css?v=1.1">
     <link rel="stylesheet" href="assets/css/splash_light.css?v=<?= (int) @filemtime(__DIR__ . '/assets/css/splash_light.css') ?>">
     <script>
     // Desktop sidebar: restore the saved collapsed state BEFORE first paint (no flash).
@@ -150,7 +150,7 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
     </script>
     <!-- Phone light / dark: sets <html data-teacher-mobile-theme> and the status bar colour before first paint
          (see teacher_mobile_theme.js). Needs the theme-color <meta> tag above. -->
-    <script src="assets/js/teacher/teacher_mobile_theme.js?v=1.0"></script>
+    <script src="assets/js/teacher/teacher_mobile_theme.js?v=1.1"></script>
 <script>
 function getCsrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
@@ -1597,7 +1597,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
-<script src="assets/js/teacher/dashboard.js?v=13.7"></script>
+<script src="assets/js/teacher/dashboard.js?v=13.8"></script>
 <script src="assets/js/teacher/class-picker.js?v=1.1"></script>
 <script src="assets/js/teacher/quizzes.js?v=8.5"></script>
 <script src="assets/js/teacher/announcements.js?v=6.1"></script>

@@ -397,11 +397,10 @@ window.configureTeacherHeader = function(config) {
     if (isMobile && topNavWrapper) {
         if (color) {
             window.teacherCurrentPageColor = color;
-            topNavWrapper.style.borderBottom = '2px solid ' + color + '55';
+            // (No border under the header on phones: see the end of the phone header block in teacher_dashboard.css.)
             topNavWrapper.setAttribute('data-page-color', color);
         } else {
             window.teacherCurrentPageColor = '#0d1117';
-            topNavWrapper.style.borderBottom = '';
             topNavWrapper.removeAttribute('data-page-color');
         }
         // Tell the mobile scroll layer which view is about to show, so the

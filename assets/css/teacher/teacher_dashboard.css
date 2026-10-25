@@ -874,6 +874,19 @@
             .top-nav-wrapper.header-scrolled:not([data-page-color]) {
                 border-bottom: 1px solid rgba(255,255,255,0.07) !important;
             }
+
+            /* No line under the header on phones: not at rest, not scrolled,
+               on no page, in dark or light. This comes last and is
+               !important so it also wins over the 2px page-colour border
+               that configureTeacherHeader writes inline, and over the
+               scrolled rule above. A scrolled page still takes its
+               signature colour as the header background, so the header
+               and the page stay clearly separate without a line. */
+            .top-nav-wrapper,
+            .top-nav-wrapper.header-scrolled,
+            .top-nav-wrapper.header-scrolled:not([data-page-color]) {
+                border-bottom: none !important;
+            }
         }
 
         /* ── DYNAMIC BOTTOM NAV — mobile only ───────────────────────────
