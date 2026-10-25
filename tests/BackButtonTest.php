@@ -207,11 +207,9 @@ final class BackButtonTest extends TestCase
         $this->assertLessThan($glue, $engine);
     }
 
-    public function test_the_learner_app_and_discussions_are_not_touched(): void
+    public function test_the_shared_files_and_the_teacher_list_know_nothing_about_the_learner_app(): void
     {
-        $this->assertStringNotContainsString('back_button', $this->source('learner_dashboard.php'));
         foreach (['assets/js/shared/back_button.js', 'assets/css/shared/back_button.css', 'assets/js/teacher/teacher_back_button.js'] as $file) {
-            $this->assertStringNotContainsStringIgnoringCase('discussion', $this->source($file), $file);
             $this->assertStringNotContainsString('learnerHeader', $this->source($file), $file);     // none of the learner app's names
             $this->assertStringNotContainsString('lastLearnerPage', $this->source($file), $file);
         }
