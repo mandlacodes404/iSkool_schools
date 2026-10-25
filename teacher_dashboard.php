@@ -124,7 +124,7 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
     <link rel="stylesheet" href="assets/css/shared/back_button.css?v=1.0">
     <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_settings.css?v=1.4">
     <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_light_mode.css?v=1.8">
-    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_light.css?v=1.3">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_light.css?v=1.4">
     <link rel="stylesheet" href="assets/css/splash_light.css?v=<?= (int) @filemtime(__DIR__ . '/assets/css/splash_light.css') ?>">
     <script>
     // Desktop sidebar: restore the saved collapsed state BEFORE first paint (no flash).
@@ -1605,7 +1605,7 @@ document.addEventListener('DOMContentLoaded', function () {
 <script src="assets/js/teacher/evaluations.js?v=5.2"></script>
 <script src="assets/js/teacher/resources.js?v=4.9"></script>
 <script src="assets/js/teacher/grades.js?v=5.3"></script>
-<script src="assets/js/teacher/assignments.js?v=5.4"></script>
+<script src="assets/js/teacher/assignments.js?v=5.5"></script>
 <script src="assets/js/teacher/sbo.js?v=5.0"></script>
 <script src="assets/js/teacher/analytics.js?v=4.3"></script>
 <script src="assets/js/teacher/teacher_calendar.js?v=2.0"></script>

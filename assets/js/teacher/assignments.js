@@ -265,9 +265,9 @@ function renderTeacherAssignments(data) {
                             <div class="as-mobile-row-progress">
                                 <div class="as-mobile-row-progress-bar">
                                     <div class="as-mobile-row-progress-fill"
-                                        style="--as-progress-width:${subPercent}%;--as-progress-color:rgba(167,139,250,0.35);"></div>
+                                        style="--as-progress-width:${subPercent}%;--as-progress-color:#73746d;"></div>
                                 </div>
-                                <span class="as-mobile-row-progress-label" style="--as-progress-color:#a78bfa;">${subCount}/${totalCount}</span>
+                                <span class="as-mobile-row-progress-label" style="--as-progress-color:#73746d;">${subCount}/${totalCount}</span>
                             </div>
                         </div>
                         <div class="as-mobile-row-chevron">
