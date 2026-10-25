@@ -79,7 +79,7 @@ window.fetchTeacherQuizzes = async function() {
         renderTeacherQuizzes(data);
     } catch (e) {
         if (apiArea) apiArea.innerHTML = `
-            <p style="color:#ff5555;text-align:center;margin-top:50px;">
+            <p class="qz-error-state" style="color:#ff5555;text-align:center;margin-top:50px;">
                 Error loading quizzes.
             </p>`;
     }

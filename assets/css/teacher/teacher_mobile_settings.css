@@ -35,6 +35,16 @@
 #api-content-area:has(.ms-detail) { padding-bottom: 0 !important; }
 body:has(#api-content-area .ms-detail) #mobileBottomNav { display: none !important; }
 
+/* -- Appearance page: the light / dark switch (the same sun / moon pair as the desktop Appearance page, a little bigger for thumbs).
+      Light-mode colours for these are in teacher_mobile_light.css -- */
+.ms-note { margin: 0 4px 18px; font-size: 14px; line-height: 1.5; color: var(--ms-muted); }
+.ms-g .ms-r--static:active { background: none; }
+.ms-toggle { display: inline-flex; gap: 2px; padding: 3px; flex: none; border: 1px solid rgba(255,255,255,.1); border-radius: 13px; background: #161b22; }
+.ms-tb { display: grid; place-items: center; width: 46px; height: 38px; border-radius: 10px; color: var(--ms-muted); transition: background .15s, color .15s, box-shadow .15s; }
+.ms-tb .ms-i { width: 20px; height: 20px; }
+.ms-tb.on { background: #2b323b; color: var(--ms-text); }
+.ms-tb:focus-visible { outline: 2px solid var(--ms-soft); outline-offset: 2px; }
+
 /* -- Back row (detail pages): pinned under the fixed top nav -- */
 .ms-nav { position: sticky; top: 0; z-index: 6; margin: 0 -14px; padding: 4px 8px 2px; background: #0d1117; }
 .ms-back { display: inline-flex; align-items: center; gap: 2px; min-height: 44px; padding: 0 10px 0 4px; border-radius: 12px; color: var(--ms-accent); font: 450 16px/1 var(--ms-font); }

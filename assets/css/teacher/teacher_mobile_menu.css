@@ -337,4 +337,41 @@ html body .sidebar.dm-menu .dm-item .dmm-badge { margin-left: auto; }
   html body .dm-pop, .dmm-s, .dmm-sheet-bg { transition-duration: .01s; }
 }
 
+
+/* -- Light mode ----------------------------------------------------------------------------------------
+   Applies when <html data-teacher-mobile-theme="light"> (teacher_mobile_theme.js, Settings > Appearance). Dark is untouched.
+   The drawer, the search sheet and the account sheet all follow the --dm-* tokens, so most of it is just these tokens.
+   The rest are the few places that had a dark colour written in. Same colours as the desktop light mode: drawer
+   #f4f3ee, cards and fields white, lines #dfded8, text #282924, accent #187a72.
+   The menu is light on every page, converted or not. Not here: the page, the header and the bottom bar, which are
+   light page by page (teacher_mobile_light.css). */
+html[data-teacher-mobile-theme="light"] {
+  --dm-bg: #f4f3ee; --dm-raise: #ffffff;
+  --dm-hover: rgba(38,39,35,.055); --dm-active: rgba(38,39,35,.075); --dm-line: #dfded8;
+  --dm-text: #282924; --dm-soft: #53544e; --dm-muted: #73746d; --dm-faint: #8b8b83; --dm-accent: #187a72;
+}
+
+/* the curved edge of the dim; the corner gaps already follow --dm-bg */
+html[data-teacher-mobile-theme="light"] body #mobileOverlay,
+html[data-teacher-mobile-theme="light"] body .sidebar.active ~ #mobileOverlay { border-color: rgba(38,39,35,.14); }
+
+/* drawer */
+html[data-teacher-mobile-theme="light"] body .sidebar.dm-menu .dm-mark--initials { background: #ffffff; color: #53544e; }
+html[data-teacher-mobile-theme="light"] body .sidebar.dm-menu .dm-search { background: #ffffff; }
+html[data-teacher-mobile-theme="light"] body .sidebar.dm-menu .dm-search:active { background: rgba(38,39,35,.06); }
+html[data-teacher-mobile-theme="light"] body .sidebar.dm-menu .dm-account-root { background: rgba(38,39,35,.045); }
+html[data-teacher-mobile-theme="light"] body .sidebar.dm-menu .dm-account-root:active { background: rgba(38,39,35,.075); }
+html[data-teacher-mobile-theme="light"] body .sidebar.dm-menu .dm-account-root .initials-avatar { background: #e9e8e2; color: #555650; }
+
+/* account sheet and search sheet */
+html[data-teacher-mobile-theme="light"] .dmm-sheet-bg { background: rgba(38,39,35,.3); }
+html[data-teacher-mobile-theme="light"] body .dm-pop { box-shadow: 0 -10px 40px rgba(31,32,29,.18); }
+html[data-teacher-mobile-theme="light"] body .dm-pop::before { background: #d0cfc8; }
+html[data-teacher-mobile-theme="light"] body .dm-pop .dm-pop-item.is-danger { color: #bd4a43; }
+html[data-teacher-mobile-theme="light"] .dmm-s-field { background: #ffffff; }
+html[data-teacher-mobile-theme="light"] .dmm-s-field input { color-scheme: light; }
+
+/* badge: white text on the darker accent */
+html[data-teacher-mobile-theme="light"] .dmm-badge { color: #ffffff; }
+
 }

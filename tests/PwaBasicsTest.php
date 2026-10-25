@@ -85,9 +85,9 @@ final class PwaBasicsTest extends TestCase
         $this->assertStringContainsString('html:not([data-learner-mobile-theme="light"]) { background-color: #20201f; }', $learner);
         $this->assertStringContainsString("body {\n        overflow-x: hidden;\n        background-color: #20201f;", $this->source('assets/css/learner/learner_dashboard.css'));
 
-        // Teacher: the phone view is dark only, and its body colour is --bg-color.
+        // Teacher: same rule. Dark phone mode only, and its body colour is --bg-color. In light mode <html> stays unpainted and takes what <body> paints.
         $teacher = $this->source('teacher_dashboard.php');
-        $this->assertStringContainsString('html { background-color: #0d1117; }', $teacher);
+        $this->assertStringContainsString('html:not([data-teacher-mobile-theme="light"]) { background-color: #0d1117; }', $teacher);
         $this->assertMatchesRegularExpression('/--bg-color:\s*#0d1117;/', $this->source('assets/css/teacher/teacher_dashboard.css'));
     }
 
