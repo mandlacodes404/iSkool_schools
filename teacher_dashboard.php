@@ -124,7 +124,7 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
     <link rel="stylesheet" href="assets/css/shared/back_button.css?v=1.0">
     <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_settings.css?v=1.4">
     <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_light_mode.css?v=1.8">
-    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_light.css?v=1.1">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_light.css?v=1.2">
     <link rel="stylesheet" href="assets/css/splash_light.css?v=<?= (int) @filemtime(__DIR__ . '/assets/css/splash_light.css') ?>">
     <script>
     // Desktop sidebar: restore the saved collapsed state BEFORE first paint (no flash).
@@ -151,7 +151,7 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
     </script>
     <!-- Phone light / dark: sets <html data-teacher-mobile-theme> and the status bar colour before first paint
          (see teacher_mobile_theme.js). Needs the theme-color <meta> tag above. -->
-    <script src="assets/js/teacher/teacher_mobile_theme.js?v=1.1"></script>
+    <script src="assets/js/teacher/teacher_mobile_theme.js?v=1.2"></script>
 <script>
 function getCsrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');

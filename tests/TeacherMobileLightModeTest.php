@@ -76,6 +76,13 @@ final class TeacherMobileLightModeTest extends TestCase
             'an-error-message'  => 'assets/js/teacher/announcements.js',
             'rs-mobile-list'    => 'assets/js/teacher/resources.js',
             'rs-error-message'  => 'assets/js/teacher/resources.js',
+            'ev-mobile-list'    => 'assets/js/teacher/evaluations.js',
+            'ev-mobile-detail'  => 'assets/js/teacher/evaluations.js',
+            'ev-error-message'  => 'assets/js/teacher/evaluations.js',
+            'sbo-mobile-list'   => 'assets/js/teacher/sbo.js',
+            'sbo-mobile-detail' => 'assets/js/teacher/sbo.js',
+            'sbo-error-message' => 'assets/js/teacher/sbo.js',
+            'full-cal-page-wrapper' => 'assets/js/teacher/teacher_calendar.js',
         ];
         $markers = implode(' ', $this->gate_markers($this->source('assets/css/teacher/teacher_mobile_light.css')));
         foreach ($where as $needle => $file) {
@@ -196,16 +203,17 @@ final class TeacherMobileLightModeTest extends TestCase
         }
     }
 
-    public function test_new_pages_keep_their_dialogs_and_forms_dark_except_the_add_class_dialog(): void
+    public function test_dialogs_and_forms_stay_dark_except_the_two_that_open_from_home_and_calendar(): void
     {
         $light = $this->source('assets/css/teacher/teacher_mobile_light.css');
         // only the dialog that opens from Home is restyled, and only by its own id: the .teacher-modal-* and
         // .mini-cal-modal classes are shared with pages that have not been converted
         $this->assertStringContainsString('#teacherSubjectModal', $light);
+        $this->assertStringContainsString('#fullCalModal', $light);
         $this->assertSame(0, preg_match('/\) \.teacher-modal-(?:box|overlay|input|submit|cancel)/', $light));
         $this->assertSame(0, preg_match('/\) \.mini-cal-modal/', $light));
         // not styled here on purpose
-        foreach (['#rsVideoOverlay', '.an-delete-modal', '.rs-delete-modal', '#uploadResourceModal', '.an-form-'] as $left_dark) {
+        foreach (['#rsVideoOverlay', '.an-delete-modal', '.rs-delete-modal', '#uploadResourceModal', '.an-form-', '#releaseEvalModal', '.ev-delete-modal', '#deleteSBOModal', '.sbo-delete-modal', '.sbo-drawer'] as $left_dark) {
             $this->assertStringNotContainsString($left_dark, $light, $left_dark . ' is meant to stay dark for now');
         }
     }
