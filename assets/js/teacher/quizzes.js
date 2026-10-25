@@ -800,7 +800,7 @@ function renderTeacherQuizzes(data) {
             .qz-mobile-folder-label > .tchr-sidebar-class-chevron {
                 margin-left: auto;
                 flex-shrink: 0;
-                color: #555e6a;
+                color: #73746d;
             }
             /* The wrapper span becomes the real flex row for icon +
                name + count. */
@@ -869,7 +869,7 @@ function renderTeacherQuizzes(data) {
                 font-weight: 700;
                 white-space: nowrap;
             }
-            .qz-mobile-row-chevron { flex-shrink: 0; color: #555e6a; }
+            .qz-mobile-row-chevron { flex-shrink: 0; color: #73746d; }
         </style>
 
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
@@ -950,7 +950,7 @@ function renderTeacherQuizzes(data) {
                         onclick="openMobileTeacherQuiz(${flatIndex})"
                         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMobileTeacherQuiz(${flatIndex});}">
                         <div class="qz-mobile-row-icon">
-                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="#fdd663" stroke-width="2" fill="none">
+                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="#73746d" stroke-width="2" fill="none">
                                 <line x1="18" y1="20" x2="18" y2="10"></line>
                                 <line x1="12" y1="20" x2="12" y2="4"></line>
                                 <line x1="6" y1="20" x2="6" y2="14"></line>
@@ -975,7 +975,7 @@ function renderTeacherQuizzes(data) {
             });
 
             const folderIcon = `
-                <svg viewBox="0 0 24 24" width="20" height="20" stroke="#fdd663" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="qz-mobile-folder-icon">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="#73746d" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="qz-mobile-folder-icon">
                     <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
                 </svg>`;
 

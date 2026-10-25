@@ -205,7 +205,7 @@ function renderTeacherGrades(data) {
                             onclick="openMobileTeacherGradeQuiz(${quiz.id})"
                             onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMobileTeacherGradeQuiz(${quiz.id});}">
                             <div class="gr-mobile-row-icon">
-                                <svg viewBox="0 0 24 24" width="20" height="20" stroke="#22c55e" stroke-width="1.2" fill="none">
+                                <svg viewBox="0 0 24 24" width="20" height="20" stroke="#73746d" stroke-width="1.2" fill="none">
                                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                                     <polyline points="14 2 14 8 20 8"></polyline>
                                     <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -225,7 +225,7 @@ function renderTeacherGrades(data) {
                 });
 
                 const folderIcon = `
-                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="#22c55e" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="gr-mobile-folder-icon">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="#73746d" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="gr-mobile-folder-icon">
                         <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
                     </svg>`;
 

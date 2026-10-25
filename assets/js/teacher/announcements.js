@@ -236,10 +236,9 @@ function renderTeacherAnnouncements(data) {
                 const flatIndex = window._allAnnouncementsFlat.findIndex(a => a.id === ann.id);
                 const preview = ann.message.length > 90 ? ann.message.substring(0, 90) + '...' : ann.message;
                 const editedTag = ann.is_edited ? `<span class="an-edited-tag an-edited-tag--mobile">Edited</span>` : '';
-                // Row icon uses a second, deeper pink shade so it reads
-                // as distinct from the dusty-rose signature colour used
-                // on the "From School" label and the "Edited" tag below.
-                const iconStroke = '#c2618a';
+                // Same neutral grey as the folder icon and the chevron
+                // (and as the other teacher list pages).
+                const iconStroke = '#73746d';
 
                 itemsHtml += `
                     <div class="an-mobile-row" role="button" tabindex="0"
@@ -268,14 +267,13 @@ function renderTeacherAnnouncements(data) {
             // Matches assignments' .as-mobile-folder-count badge for visual
             // consistency between the two mobile list pages.
             const countBadge = `<span class="an-mobile-folder-count">${group.items.length}</span>`;
-            // Class groups get the same folder glyph as Assignments, tinted
-            // with this page's row-icon pink (#c2618a) so it reads as this
-            // page's own signature colour rather than reusing purple.
+            // Class groups get the same folder glyph as Assignments, in the
+            // same neutral grey (#73746d) as the row icons and the chevron.
             // "From School" keeps its distinct house icon instead of a
             // folder, since it isn't a class folder — it's a school
             // broadcast group.
             const folderIcon = `
-                <svg viewBox="0 0 24 24" width="20" height="20" stroke="#c2618a" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="an-mobile-folder-icon">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="#73746d" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="an-mobile-folder-icon">
                     <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
                 </svg>`;
             const labelInnerHtml = isSchool

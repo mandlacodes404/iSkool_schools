@@ -550,7 +550,7 @@ textarea.ev-dp-in { resize: vertical; line-height: 1.5; }
 .ev-mobile-folder-label > .tchr-sidebar-class-chevron {
     margin-left: auto;
     flex-shrink: 0;
-    color: #555e6a;
+    color: #73746d;
 }
 /* The wrapper span becomes the real flex row for icon + name + count. */
 .ev-mobile-folder-label > span {
@@ -609,7 +609,7 @@ textarea.ev-dp-in { resize: vertical; line-height: 1.5; }
     text-overflow: ellipsis;
 }
 .ev-mobile-row-meta { font-size: 12px; color: #8b949e; margin-top: 2px; }
-.ev-mobile-row-chevron { flex-shrink: 0; color: #555e6a; }
+.ev-mobile-row-chevron { flex-shrink: 0; color: #73746d; }
 
 .ev-modal-hidden {
     display: none;

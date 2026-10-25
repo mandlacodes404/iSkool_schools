@@ -612,7 +612,7 @@
     order: 2;
     margin-left: auto;
     flex-shrink: 0;
-    color: #555e6a;
+    color: #73746d;
 }
 /* The wrapper span becomes the real flex row for icon + name + count. */
 .as-mobile-folder-label > span {
@@ -704,7 +704,7 @@
 }
 .as-mobile-row-chevron {
     flex-shrink: 0;
-    color: #555e6a;
+    color: #73746d;
 }
 
 .as-mobile-empty {

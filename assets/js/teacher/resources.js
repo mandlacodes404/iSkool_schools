@@ -200,7 +200,7 @@ function renderTeacherResources(data) {
 
             group.items.forEach(item => {
                 const isVideo = item.resource_type === 'video';
-                const icon = getTeacherFileIcon(item.ext, isVideo, '#f28c38', 1.2);
+                const icon = getTeacherFileIcon(item.ext, isVideo, '#73746d', 1.2);
                 // Open/view is desktop-only (see rs-mobile-info-pill above the
                 // list) — the row itself is no longer clickable on mobile.
                 // Delete keeps working via its own button below, unaffected.
@@ -223,7 +223,7 @@ function renderTeacherResources(data) {
             });
 
             const folderIcon = `
-                <svg viewBox="0 0 24 24" width="20" height="20" stroke="#f28c38" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="rs-mobile-folder-icon">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="#73746d" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="rs-mobile-folder-icon">
                     <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
                 </svg>`;
 

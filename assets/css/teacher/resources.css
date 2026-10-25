@@ -200,7 +200,7 @@
 .rs-mobile-folder-label > .tchr-sidebar-class-chevron {
     margin-left: auto;
     flex-shrink: 0;
-    color: #555e6a;
+    color: #73746d;
 }
 /* The wrapper span becomes the real flex row for icon + name + count. */
 .rs-mobile-folder-label > span {
@@ -266,19 +266,20 @@
 }
 /* Replaces the chevron slot used by assignments/announcements rows —
    resources rows open the file/video directly and have no detail page
-   to navigate into, so this slot deletes instead. */
+   to navigate into, so this slot deletes instead. Same grey as the
+   chevron it replaces; the red only shows as a tint while it is pressed. */
 .rs-mobile-row-delete {
     flex-shrink: 0;
     background: none;
     border: none;
-    color: #f85149;
+    color: #73746d;
     cursor: pointer;
     padding: 6px;
     margin: -6px;
     border-radius: 8px;
     display: flex;
     align-items: center;
-    opacity: 0.7;
+    opacity: 1;
     transition: opacity 0.15s ease, background 0.15s ease;
 }
 .rs-mobile-row-delete:hover,

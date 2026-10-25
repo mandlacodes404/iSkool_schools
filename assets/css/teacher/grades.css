@@ -180,7 +180,7 @@
 .gr-mobile-folder-label > .tchr-sidebar-class-chevron {
     margin-left: auto;
     flex-shrink: 0;
-    color: #555e6a;
+    color: #73746d;
 }
 /* The wrapper span becomes the real flex row for icon + name + count. */
 .gr-mobile-folder-label > span {
@@ -239,7 +239,7 @@
     text-overflow: ellipsis;
 }
 .gr-mobile-row-meta { font-size: 12px; color: #8b949e; margin-top: 2px; }
-.gr-mobile-row-chevron { flex-shrink: 0; color: #555e6a; }
+.gr-mobile-row-chevron { flex-shrink: 0; color: #73746d; }
 
 /* Right panel */
 .gr-main-panel {
