@@ -64,16 +64,22 @@ final class TeacherMobileLightModeTest extends TestCase
         // A typo in a marker would leave that page dark with no error, so each one must exist in its page's script.
         $where = [
             'class="ms'         => 'assets/js/teacher/teacher_mobile_settings.js',
+            'class="thx'        => 'assets/js/teacher/dashboard.js',
             'as-mobile-list'    => 'assets/js/teacher/assignments.js',
             'as-mobile-detail'  => 'assets/js/teacher/assignments.js',
             'as-error-message'  => 'assets/js/teacher/assignments.js',
             'qz-mobile-list'    => 'assets/js/teacher/quizzes.js',
             'qz-mobile-detail'  => 'assets/js/teacher/quizzes.js',
             'qz-error-state'    => 'assets/js/teacher/quizzes.js',
+            'an-mobile-list'    => 'assets/js/teacher/announcements.js',
+            'an-mobile-detail'  => 'assets/js/teacher/announcements.js',
+            'an-error-message'  => 'assets/js/teacher/announcements.js',
+            'rs-mobile-list'    => 'assets/js/teacher/resources.js',
+            'rs-error-message'  => 'assets/js/teacher/resources.js',
         ];
         $markers = implode(' ', $this->gate_markers($this->source('assets/css/teacher/teacher_mobile_light.css')));
         foreach ($where as $needle => $file) {
-            $name = $needle === 'class="ms' ? '.ms' : '.' . $needle;
+            $name = in_array($needle, ['class="ms', 'class="thx'], true) ? '.' . substr($needle, 7) : '.' . $needle;
             $this->assertContains($name, $this->gate_markers($this->source('assets/css/teacher/teacher_mobile_light.css')), $name . ' is not in the gate');
             $this->assertStringContainsString($needle, $this->source($file), $needle . ' is not drawn by ' . $file);
         }
@@ -161,5 +167,46 @@ final class TeacherMobileLightModeTest extends TestCase
         $desktop = $this->source('assets/css/teacher/teacher_desktop_light_mode.css');
         $this->assertStringContainsString('@media (min-width: 769px)', $desktop);
         $this->assertStringNotContainsString('data-teacher-mobile-theme', $desktop);
+    }
+
+    public function test_there_is_no_line_under_the_phone_header(): void
+    {
+        $css = $this->source('assets/css/teacher/teacher_dashboard.css');
+        // the last rule of the phone header block removes every border-bottom the header can get: at rest, scrolled,
+        // with and without a page colour
+        $this->assertMatchesRegularExpression('/\.top-nav-wrapper,\s*\.top-nav-wrapper\.header-scrolled,\s*\.top-nav-wrapper\.header-scrolled:not\(\[data-page-color\]\)\s*\{\s*border-bottom:\s*none !important;/', $css);
+        // configureTeacherHeader used to write a 2px page-colour border inline; nothing should write one again
+        $js = $this->source('assets/js/teacher/dashboard.js');
+        $this->assertStringNotContainsString('style.borderBottom', $js);
+        // and the light stylesheet must not bring a border back
+        $light = $this->source('assets/css/teacher/teacher_mobile_light.css');
+        $this->assertDoesNotMatchRegularExpression('/\.top-nav-wrapper[^{]*\{[^}]*border-bottom/', $light);
+    }
+
+    public function test_home_light_mode_only_re_points_its_colour_variables(): void
+    {
+        // Home paints from --x-* variables (dashboard.css), so light mode sets new values on .thx instead of
+        // repeating every rule. Every variable the page uses must be given a light value.
+        $dark = $this->source('assets/css/teacher/dashboard.css');
+        preg_match_all('/var\(--(x-[a-z-]+)\)/', $dark, $used);
+        $light = $this->source('assets/css/teacher/teacher_mobile_light.css');
+        $this->assertSame(1, preg_match('/ \.thx \{(.*?)\}/s', $light, $m));
+        foreach (array_unique($used[1]) as $var) {
+            $this->assertStringContainsString('--' . $var . ':', $m[1], 'Home uses --' . $var . ' but light mode does not set it');
+        }
+    }
+
+    public function test_new_pages_keep_their_dialogs_and_forms_dark_except_the_add_class_dialog(): void
+    {
+        $light = $this->source('assets/css/teacher/teacher_mobile_light.css');
+        // only the dialog that opens from Home is restyled, and only by its own id: the .teacher-modal-* and
+        // .mini-cal-modal classes are shared with pages that have not been converted
+        $this->assertStringContainsString('#teacherSubjectModal', $light);
+        $this->assertSame(0, preg_match('/\) \.teacher-modal-(?:box|overlay|input|submit|cancel)/', $light));
+        $this->assertSame(0, preg_match('/\) \.mini-cal-modal/', $light));
+        // not styled here on purpose
+        foreach (['#rsVideoOverlay', '.an-delete-modal', '.rs-delete-modal', '#uploadResourceModal', '.an-form-'] as $left_dark) {
+            $this->assertStringNotContainsString($left_dark, $light, $left_dark . ' is meant to stay dark for now');
+        }
     }
 }
