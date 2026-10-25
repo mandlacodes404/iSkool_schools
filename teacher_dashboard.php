@@ -117,6 +117,7 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
     <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_settings.css?v=1.2">
     <link rel="stylesheet" href="assets/css/shared/pwa_prompts.css?v=1.0">
     <link rel="stylesheet" href="assets/css/shared/pull_to_refresh.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/shared/net_status.css?v=1.0">
     <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_settings.css?v=1.4">
     <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_light_mode.css?v=1.8">
     <link rel="stylesheet" href="assets/css/splash_light.css?v=<?= (int) @filemtime(__DIR__ . '/assets/css/splash_light.css') ?>">
@@ -1594,7 +1595,7 @@ document.addEventListener('DOMContentLoaded', function () {
 <script src="assets/js/teacher/announcements.js?v=6.1"></script>
 <script src="assets/js/teacher/evaluations.js?v=5.2"></script>
 <script src="assets/js/teacher/resources.js?v=4.8"></script>
-<script src="assets/js/teacher/grades.js?v=5.1"></script>
+<script src="assets/js/teacher/grades.js?v=5.2"></script>
 <script src="assets/js/teacher/assignments.js?v=5.3"></script>
 <script src="assets/js/teacher/sbo.js?v=5.0"></script>
 <script src="assets/js/teacher/analytics.js?v=4.3"></script>
@@ -1607,5 +1608,7 @@ document.addEventListener('DOMContentLoaded', function () {
 <script src="assets/js/shared/pwa_prompts.js?v=1.0"></script>
 <script src="assets/js/shared/pull_to_refresh.js?v=1.0"></script>
 <script src="assets/js/teacher/teacher_pull_to_refresh.js?v=1.0"></script>
+<script src="assets/js/shared/net_status.js?v=1.0"></script>
+<script src="assets/js/teacher/teacher_net_status.js?v=1.0"></script>
 </body>
 </html>
