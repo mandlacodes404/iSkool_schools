@@ -316,6 +316,14 @@
         render(true);
     });
 
+    // Home draws a different layout on phones, so draw it again when the window crosses the phone breakpoint
+    if (window.matchMedia) {
+        var phoneQuery = window.matchMedia('(max-width: 768px)');
+        var onBreakpoint = function () { if (currentRoute() === 'home') render(); };
+        if (phoneQuery.addEventListener) phoneQuery.addEventListener('change', onBreakpoint);
+        else if (phoneQuery.addListener) phoneQuery.addListener(onBreakpoint);
+    }
+
     // ── Shared view pieces ─────────────────────────────────────────────────────────────────────────────────
 
     function stateCard(title, text, buttonLabel, onClick) {
@@ -406,7 +414,7 @@
     function renderHome() {
         var child = currentChild();
         if (!child) return renderNoChildren();
-        return cached('api/parent/get_home.php', { child: child.id }).then(buildHome);
+        return cached('api/parent/get_home.php', { child: child.id }).then(isPhone() ? buildHomePhone : buildHome);
     }
 
     function buildHome(d) {
@@ -488,6 +496,132 @@
 
         append(cols, main, side);
         root.appendChild(cols);
+        return root;
+    }
+
+    // ── Home on phones ─────────────────────────────────────────────────────────────────────────────────────
+    // The same look as the learner app's phone Home: one summary card, the subjects as tiles, what is coming up and
+    // the latest news. Phones only (max-width: 768px); buildHome above still draws the desktop page. Like the rest
+    // of this file, text from the server goes in as text nodes, never as markup.
+
+    var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    function isPhone() {
+        return !!(window.matchMedia && window.matchMedia('(max-width: 768px)').matches);
+    }
+
+    /** Month name for a "YYYY-MM-DD" date, or '' when it cannot be read. */
+    function monthOf(ymd) {
+        var m = /^\d{4}-(\d{2})-\d{2}/.exec(ymd || '');
+        return m ? (MONTHS[parseInt(m[1], 10) - 1] || '') : '';
+    }
+
+    /** { text: 'Tomorrow', soon: true } for a date that has not passed yet, else null. "Soon" is within two days. */
+    function whenInfo(ymd) {
+        var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(ymd || '');
+        if (!m) return null;
+        var now = new Date();
+        var days = Math.round((new Date(+m[1], +m[2] - 1, +m[3]) - new Date(now.getFullYear(), now.getMonth(), now.getDate())) / 864e5);
+        if (isNaN(days) || days < 0) return null;
+        return { text: days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : 'In ' + days + ' days', soon: days <= 2 };
+    }
+
+    /** "MD" from "Mrs Dlamini", "MR" from "Maple Ridge High". */
+    function initialsOf(text) {
+        var w = String(text || '').trim().split(/\s+/).filter(Boolean);
+        return ((w[0] || '').charAt(0) + (w[1] || '').charAt(0)).toUpperCase();
+    }
+
+    function phoneHero(d) {
+        var hero = el('div', 'pax-hero');
+        var chip = el('span', 'pax-chip', [d.child.class_name, d.term ? 'Term ' + d.term : null].filter(Boolean).join(' · '));
+        var text = el('div', 'pax-hero-text');
+        append(text, el('h1', 'pax-hl', d.headline));
+        if (d.note) text.appendChild(el('p', 'pax-note', d.note));
+        append(hero, chip, text);
+
+        if (d.average !== null) {
+            var avg = el('div', 'pax-avg');
+            var main = el('span', 'pax-avg-main');
+            append(main, el('span', 'pax-avg-num', pct(d.average)), el('span', 'pax-avg-label', 'Term ' + d.term + ' average'));
+            avg.appendChild(main);
+            var line = changeLine(d.change, d.prev_term);
+            if (line) avg.appendChild(el('span', 'pax-avg-change ' + line.cls, line.text));
+            hero.appendChild(avg);
+        }
+        return hero;
+    }
+
+    function phoneSubjects(d) {
+        var wrap = section('Subjects', d.subjects.length ? 'Full report' : null, '#/report');
+        if (!d.subjects.length) {
+            wrap.appendChild(emptyRow('Marks appear here once teachers have marked and published them.'));
+            return wrap;
+        }
+        var grid = el('div', 'pax-grid');
+        d.subjects.forEach(function (s) {
+            var tile = el('a', 'pax-tile');
+            tile.href = '#/report';
+            var delta = deltaInfo(s.delta);
+            var mark = el('span', 'pax-tile-mark');
+            append(mark, el('b', null, pct(s.mark)), el('span', delta.cls, delta.text));
+            var bar = el('span', 'pax-bar');
+            var fill = el('span');
+            fill.style.width = (s.mark === null ? 0 : Math.max(0, Math.min(100, s.mark))) + '%';
+            bar.appendChild(fill);
+            append(tile, el('span', 'pax-tile-name', s.name), mark, bar);
+            grid.appendChild(tile);
+        });
+        wrap.appendChild(grid);
+        return wrap;
+    }
+
+    function phoneUpcoming(d) {
+        var wrap = section('Coming up', 'See all', '#/events');
+        if (!d.upcoming.length) {
+            wrap.appendChild(emptyRow('Nothing is due in the next few weeks.'));
+            return wrap;
+        }
+        d.upcoming.forEach(function (u) {
+            var row = el('a', 'pax-row');
+            row.href = '#/events';
+            var date = el('span', 'pax-date');
+            append(date, el('b', null, u.day), el('span', null, monthOf(u.date) || u.dow));
+            var info = el('span', 'pax-rt');
+            append(info, el('span', 'pax-rt-title', u.title), el('span', 'pax-rt-meta', u.kind));
+            append(row, date, info);
+            var when = whenInfo(u.date);
+            if (when) row.appendChild(el('span', 'pax-when' + (when.soon ? ' is-soon' : ''), when.text));
+            wrap.appendChild(row);
+        });
+        return wrap;
+    }
+
+    function phoneNews(d) {
+        var wrap = section('Latest news', 'See all', '#/news');
+        if (!d.news.length) {
+            wrap.appendChild(emptyRow('No announcements yet.'));
+            return wrap;
+        }
+        d.news.forEach(function (n) {
+            var teacher = n.tag === 'Teacher';
+            var row = el('a', 'pax-row pax-news');
+            row.href = '#/news';
+            // meta reads "Thu 29 Oct · Mrs Dlamini": what follows the first " · " is who sent it
+            var who = String(n.meta || '').split(' · ').slice(1).join(' · ');
+            var meta = el('span', 'pax-rt-meta');
+            append(meta, el('span', 'pa-tag' + (teacher ? ' is-teacher' : ''), n.tag), el('span', null, n.meta));
+            var info = el('span', 'pax-rt');
+            append(info, el('span', 'pax-rt-title', n.title), meta);
+            append(row, who ? el('span', 'pax-ini' + (teacher ? ' is-round' : ''), initialsOf(who)) : null, info);
+            wrap.appendChild(row);
+        });
+        return wrap;
+    }
+
+    function buildHomePhone(d) {
+        var root = el('div', 'pax');
+        append(root, phoneHero(d), phoneSubjects(d), phoneUpcoming(d), phoneNews(d));
         return root;
     }
 

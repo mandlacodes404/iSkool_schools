@@ -682,3 +682,66 @@ html[data-theme="dark"] .pa-chip[aria-pressed="true"] .pa-chip-av { background: 
 @media (prefers-reduced-motion: reduce) {
     .pa-rsubj .c-chev { transition: none; }
 }
+
+/* ── Home on phones: the "Focus" layout ──────────────────────────────────────────────────────────────────────
+   Drawn by buildHomePhone() in parent_app.js, which only runs on phones. Colours come from the --pa-* tokens, so the
+   light and dark themes both work; the summary card stays lime in both. The 16px side padding lines up with the
+   child switcher above it. */
+@media (max-width: 768px) {
+
+    .pax { padding: 0 16px; --x-soon-bg: #ffe8e1; --x-soon-ink: #a8361f; }
+    html[data-theme="dark"] .pax { --x-soon-bg: rgba(255, 155, 133, .14); --x-soon-ink: #ff9b85; }
+
+    /* the summary card */
+    .pax-hero { display: flex; flex-direction: column; justify-content: space-between; gap: 16px; min-height: 176px; padding: 18px 18px 18px 20px; border-radius: 28px; background: #d8ff5e; color: #10130a; }
+    .pax-chip { align-self: flex-start; padding: 6px 11px; border-radius: 99px; background: rgba(16, 19, 10, .1); font-size: 12px; font-weight: 700; }
+    .pax-hl { margin: 0; font-size: 22px; font-weight: 800; line-height: 1.2; letter-spacing: -.02em; color: inherit; }
+    .pax-note { margin: 6px 0 0; font-size: 13px; font-weight: 600; line-height: 1.4; color: #3e4a12; }
+    .pax-avg { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+    .pax-avg-main { display: flex; flex-direction: column; }
+    .pax-avg-num { font-size: 40px; font-weight: 800; line-height: 1; letter-spacing: -.03em; }
+    .pax-avg-label { margin-top: 4px; font-size: 12px; font-weight: 600; color: #3e4a12; }
+    .pax .pax-avg-change { font-size: 13px; font-weight: 800; text-align: right; }
+    .pax .pax-avg-change.is-up { color: #0f5f2c; }
+    .pax .pax-avg-change.is-down { color: #8a2a22; }
+    .pax .pax-avg-change.is-flat { color: #3e4a12; }
+
+    /* section headings (the markup comes from section(), restyled here) */
+    .pax .pa-section { margin-top: 24px; }
+    .pax .pa-section-head { align-items: baseline; padding: 0; margin: 0 0 10px; }
+    .pax .pa-h2 { font-size: 15px; font-weight: 700; color: var(--pa-text); }
+    .pax .pa-sub { margin: -10px 0; padding: 10px 0 10px 12px; font-size: 13px; font-weight: 600; color: var(--pa-muted); text-decoration: none; }
+    .pax .pa-empty-row { padding: 14px 16px; border: 1px solid var(--pa-line); border-radius: 18px; background: var(--pa-card); font-size: 14px; color: var(--pa-muted); }
+
+    /* subjects: two tiles per row */
+    .pax-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .pax-tile { display: block; padding: 12px 14px 14px; border-radius: 18px; border: 1px solid var(--pa-line); background: var(--pa-card); color: inherit; text-decoration: none; }
+    .pax-tile-name { display: block; font-size: 13px; font-weight: 600; color: var(--pa-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pax-tile-mark { display: flex; align-items: baseline; gap: 8px; margin-top: 4px; }
+    .pax-tile-mark b { font-size: 22px; font-weight: 800; line-height: 1.2; }
+    .pax-tile-mark span { font-size: 13px; font-weight: 700; }
+    .pax-bar { display: block; height: 4px; margin-top: 10px; border-radius: 2px; background: var(--pa-bar-bg); }
+    .pax-bar span { display: block; height: 100%; border-radius: 2px; background: var(--pa-bar); }
+
+    /* coming up and news: one card per row */
+    .pax-row { display: flex; align-items: center; gap: 14px; min-height: 60px; margin-bottom: 8px; padding: 8px 14px; border-radius: 18px; border: 1px solid var(--pa-line); background: var(--pa-card); color: inherit; text-decoration: none; }
+    .pax-news { min-height: 76px; }
+    .pax-date { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: none; width: 44px; height: 44px; border-radius: 12px; background: var(--pa-chip); line-height: 1.1; }
+    .pax-date b { font-size: 17px; font-weight: 800; }
+    .pax-date span { font-size: 11px; font-weight: 600; color: var(--pa-muted); }
+    .pax-ini { display: grid; place-items: center; flex: none; width: 36px; height: 36px; border-radius: 12px; background: var(--pa-chip); font-size: 13px; font-weight: 700; color: var(--pa-soft); }
+    .pax-ini.is-round { border-radius: 50%; }
+    .pax-rt { display: block; flex: 1; min-width: 0; }
+    .pax-rt-title { display: block; font-size: 14px; font-weight: 600; line-height: 1.3; }
+    .pax-news .pax-rt-title { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .pax-rt-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; margin-top: 3px; font-size: 12px; color: var(--pa-muted); }
+    .pax-when { flex: none; padding: 5px 10px; border-radius: 99px; background: var(--pa-chip); font-size: 12px; font-weight: 700; color: var(--pa-muted); white-space: nowrap; }
+    .pax-when.is-soon { background: var(--x-soon-bg); color: var(--x-soon-ink); }
+
+    .pax-tile, .pax-row { transition: transform .12s ease; -webkit-tap-highlight-color: transparent; }
+    .pax-tile:active, .pax-row:active { transform: scale(.985); }
+    @media (prefers-reduced-motion: reduce) {
+        .pax-tile, .pax-row { transition: none; }
+        .pax-tile:active, .pax-row:active { transform: none; }
+    }
+}
