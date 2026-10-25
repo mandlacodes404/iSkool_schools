@@ -391,7 +391,7 @@
 }
 .lan-mobile-folder-chevron {
     flex-shrink: 0;
-    color: #555e6a;
+    color: #73746d;
     transition: transform 0.3s ease;
 }
 .lan-mobile-folder-chevron.open { transform: rotate(90deg); }
@@ -466,7 +466,7 @@
 }
 .lan-mobile-card-chevron {
     flex-shrink: 0;
-    color: #555e6a;
+    color: #73746d;
 }
 .lan-mobile-card-date {
     font-size: 12px;
@@ -831,7 +831,7 @@ html[data-learner-mobile-theme="light"] .lan-mobile-folder-header:not(.lan-mobil
 html[data-learner-mobile-theme="light"] .lan-mobile-folder-name { color: #282924; }
 html[data-learner-mobile-theme="light"] .lan-mobile-folder-count { color: #73746d; background: rgba(38,39,35,.06); }
 html[data-learner-mobile-theme="light"] .lan-mobile-folder-chevron,
-html[data-learner-mobile-theme="light"] .lan-mobile-card-chevron { color: #8b8b83; }
+html[data-learner-mobile-theme="light"] .lan-mobile-card-chevron { color: #73746d; }
 
 /* announcement rows */
 html[data-learner-mobile-theme="light"] .lan-mobile-card-title { color: #282924; }
@@ -841,7 +841,6 @@ html[data-learner-mobile-theme="light"] .lan-mobile-card:active { background: rg
 
 /* folder and megaphone icons: the two oranges announcements.js sets as strokes, darkened so they read on the cream page */
 html[data-learner-mobile-theme="light"] .lan-mobile-list [stroke="#f28c38" i] { stroke: #b85f12; }
-html[data-learner-mobile-theme="light"] .lan-mobile-list [stroke="#d29522" i] { stroke: #9a6b00; }
 
 /* empty state ("No announcements yet") */
 html[data-learner-mobile-theme="light"] .lan-mobile-empty { color: #8b8b83; }

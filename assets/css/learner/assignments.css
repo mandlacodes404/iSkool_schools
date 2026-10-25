@@ -430,7 +430,7 @@
 }
 .las-mobile-folder-chevron {
     flex-shrink: 0;
-    color: #555e6a;
+    color: #73746d;
     transition: transform 0.3s ease;
 }
 .las-mobile-folder-chevron.open { transform: rotate(90deg); }
@@ -506,7 +506,7 @@
 }
 .las-mobile-row-chevron {
     flex-shrink: 0;
-    color: #555e6a;
+    color: #73746d;
 }
 
 /* ── MOBILE SEARCH BAR ── */
@@ -1056,7 +1056,7 @@ html[data-learner-mobile-theme="light"] .las-mobile-folder-name,
 html[data-learner-mobile-theme="light"] .las-mobile-row-title { color: #282924; }
 html[data-learner-mobile-theme="light"] .las-mobile-folder-count { color: #73746d; background: rgba(38,39,35,.06); }
 html[data-learner-mobile-theme="light"] .las-mobile-folder-chevron,
-html[data-learner-mobile-theme="light"] .las-mobile-row-chevron { color: #8b8b83; }
+html[data-learner-mobile-theme="light"] .las-mobile-row-chevron { color: #73746d; }
 html[data-learner-mobile-theme="light"] .las-mobile-row::after { background: #ebeae5; }
 html[data-learner-mobile-theme="light"] .las-mobile-row:active { background: rgba(38,39,35,.04); }
 /* row due date: the base rule first, then the done / pending variants (same specificity, so order matters) */

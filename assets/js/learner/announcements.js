@@ -341,7 +341,7 @@ function renderAnnouncements(data) {
         html += `
             <div class="lan-mobile-folder-header lan-mobile-folder-header--collapsed" onclick="toggleLanMobileFolder('${swGid}', this)">
                 <div class="lan-mobile-folder-icon">
-                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="#d29522" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="#73746d" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
                     </svg>
                 </div>
@@ -361,7 +361,7 @@ function renderAnnouncements(data) {
                     onclick="openMobileLearnerAnnouncement(${mobileFlatIdx})"
                     onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openMobileLearnerAnnouncement(${mobileFlatIdx}); }">
                     <div class="lan-mobile-card-icon">
-                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="#f28c38" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
+                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="#73746d" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
                             <path d="M11 6a13 13 0 0 0 8.4-2.8A1 1 0 0 1 21 4v12a1 1 0 0 1-1.6.8A13 13 0 0 0 11 14H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/>
                             <path d="M6 14a12 12 0 0 0 2.4 7.2 2 2 0 0 0 3.2-2.4A8 8 0 0 1 10 14"/>
                             <path d="M8 6v8"/>
@@ -393,7 +393,7 @@ function renderAnnouncements(data) {
             html += `
                 <div class="lan-mobile-folder-header lan-mobile-folder-header--collapsed" onclick="toggleLanMobileFolder('${tGid}', this)">
                     <div class="lan-mobile-folder-icon">
-                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="#f28c38" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="#73746d" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
                         </svg>
                     </div>
@@ -413,7 +413,7 @@ function renderAnnouncements(data) {
                         onclick="openMobileLearnerAnnouncement(${mobileFlatIdx})"
                         onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openMobileLearnerAnnouncement(${mobileFlatIdx}); }">
                         <div class="lan-mobile-card-icon">
-                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="#f28c38" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
+                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="#73746d" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
                                 <path d="M11 6a13 13 0 0 0 8.4-2.8A1 1 0 0 1 21 4v12a1 1 0 0 1-1.6.8A13 13 0 0 0 11 14H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/>
                                 <path d="M6 14a12 12 0 0 0 2.4 7.2 2 2 0 0 0 3.2-2.4A8 8 0 0 1 10 14"/>
                                 <path d="M8 6v8"/>

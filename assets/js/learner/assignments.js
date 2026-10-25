@@ -439,7 +439,7 @@ function renderAssignmentCards(groupedData) {
         html += `
             <div class="las-mobile-folder-header las-mobile-folder-header--collapsed" onclick="toggleLasMobileFolder('${gid}', this)">
                 <div class="las-mobile-folder-icon">
-                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="#a78bfa" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="#73746d" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
                     </svg>
                 </div>
@@ -463,7 +463,7 @@ function renderAssignmentCards(groupedData) {
                     onclick="openMobileLearnerAssignment(${mobileFlatIdx})"
                     onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openMobileLearnerAssignment(${mobileFlatIdx}); }">
                     <div class="las-mobile-row-icon">
-                        <svg viewBox="0 0 24 24" width="24" height="24" stroke="#a78bfa" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round" class="las-icon-crisp">
+                        <svg viewBox="0 0 24 24" width="24" height="24" stroke="#73746d" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round" class="las-icon-crisp">
                             <rect x="4" y="3" width="11" height="18" rx="1.5"></rect>
                             <rect x="7" y="6.3" width="5" height="3" rx="0.6"></rect>
                             <line x1="7" y1="13" x2="11" y2="13"></line>

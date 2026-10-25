@@ -240,7 +240,7 @@ function renderGrades(data) {
             <div class="subject-card" id="scard-${gi}">
                 <div class="subject-header subject-header--collapsed" onclick="toggleSubjectCard(${gi})">
                     <div class="subject-name">
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#68d391" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#73746d" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
                         </svg>
                         ${escHtml(group.group)}
@@ -896,12 +896,12 @@ function buildQuizList(quizzes, gi) {
                </span>` : '';
 
         const iconHtml = published
-            ? `<svg viewBox="0 0 24 24" width="16" height="16" stroke="#68d391" stroke-width="1.3" fill="none">
+            ? `<svg viewBox="0 0 24 24" width="16" height="16" stroke="#73746d" stroke-width="1.3" fill="none">
                     <line x1="18" y1="20" x2="18" y2="10"/>
                     <line x1="12" y1="20" x2="12" y2="4"/>
                     <line x1="6"  y1="20" x2="6"  y2="14"/>
                </svg>`
-            : `<svg viewBox="0 0 24 24" width="16" height="16" stroke="#f85149" stroke-width="1.3" fill="none">
+            : `<svg viewBox="0 0 24 24" width="16" height="16" stroke="#73746d" stroke-width="1.3" fill="none">
                     <rect x="3" y="11" width="18" height="11" rx="2"/>
                     <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                </svg>`;

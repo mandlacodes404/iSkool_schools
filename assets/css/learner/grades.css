@@ -451,7 +451,7 @@
 .subject-header:hover { background: rgba(255,255,255,0.02); }
 .subject-name { flex: 1; font-size: 16px; font-weight: 800; color: #e2e8f0; display: flex; align-items: center; gap: 8px; }
 .subject-count { font-size: 12px; color: #8b949e; font-weight: 600; background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 20px; }
-.subject-chevron { transition: transform 0.3s ease; color: #555e6a; flex-shrink: 0; }
+.subject-chevron { transition: transform 0.3s ease; color: #73746d; flex-shrink: 0; }
 .subject-chevron.open { transform: rotate(90deg); }
 .view-toggle-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px 6px; border-bottom: 1px solid rgba(255,255,255,0.04); }
 .view-toggle-btn { display: inline-flex; align-items: center; gap: 6px; background: none; border: none; color: #8b949e; font-size: 12px; font-weight: 700; font-family: 'Nunito', sans-serif; text-transform: uppercase; letter-spacing: 0.8px; cursor: pointer; padding: 6px 10px; border-radius: 8px; transition: all 0.2s; }
@@ -485,8 +485,10 @@
 .quiz-grading-status.pending { color:#f5c38b; background:rgba(242,140,56,0.12); border:1px solid rgba(242,140,56,0.28); }
 .quiz-grading-status.done { color:#22c55e; background:rgba(34,197,94,0.12); border:1px solid rgba(34,197,94,0.28); }
 .quiz-grading-status.partial { color:#f5c38b; background:rgba(242,140,56,0.12); border:1px solid rgba(242,140,56,0.28); }
-.quiz-expand-btn { background: none; border: none; color: #555e6a; cursor: pointer; padding: 4px; display: flex; align-items: center; transition: color 0.2s; flex-shrink: 0; }
+.quiz-expand-btn { background: none; border: none; color: #73746d; cursor: pointer; padding: 4px; display: flex; align-items: center; transition: color 0.2s; flex-shrink: 0; }
 .quiz-expand-btn:hover { color: #68d391; }
+/* on the phone list it stays the list grey: a tap leaves :hover on, which would leave it green */
+.grades-mobile-layout .quiz-expand-btn:hover { color: #73746d; }
 .quiz-expand-btn svg { transition: transform 0.3s ease; }
 .quiz-expand-btn.open svg { transform: rotate(180deg); }
 .quiz-row-details { display: none; padding: 12px 16px 14px; border-top: 1px solid rgba(255,255,255,0.04); background: rgba(0,0,0,0.2); font-size: 13px; color: #8b949e; line-height: 1.7; }
@@ -1137,8 +1139,7 @@ html[data-learner-mobile-theme="light"] .grades-mobile-layout .subject-card:hove
 html[data-learner-mobile-theme="light"] .grades-mobile-layout .subject-header:not(.subject-header--collapsed) { background: rgba(38,39,35,.04); }
 html[data-learner-mobile-theme="light"] .grades-mobile-layout .subject-name { color: #282924; }
 html[data-learner-mobile-theme="light"] .grades-mobile-layout .subject-count { color: #73746d; background: rgba(38,39,35,.06); }
-html[data-learner-mobile-theme="light"] .grades-mobile-layout .subject-chevron { color: #8b8b83; }
-html[data-learner-mobile-theme="light"] .grades-mobile-layout .subject-name svg[stroke="#68d391" i] { stroke: #15803d; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .subject-chevron { color: #73746d; }
 
 /* Quiz List / Term Marks switch */
 html[data-learner-mobile-theme="light"] .grades-mobile-layout .view-toggle-bar { border-bottom-color: #ebeae5; }
@@ -1154,8 +1155,6 @@ html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-row-title a,
 html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-row-title a:hover,
 html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-title-link { color: #282924; }
 html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-unpublished .quiz-row-title { color: #73746d; }
-html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-row-icon svg[stroke="#68d391" i] { stroke: #15803d; }
-html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-row-icon svg[stroke="#f85149" i] { stroke: #bd4a43; }
 html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-score-pill.high { background: rgba(21,128,61,.10); color: #15803d; }
 html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-score-pill.mid  { background: rgba(44,122,75,.10); color: #2c7a4b; }
 html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-score-pill.low  { background: rgba(189,74,67,.09); color: #bd4a43; }
@@ -1163,8 +1162,8 @@ html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-score-pill.h
 html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-grading-status.pending,
 html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-grading-status.partial { color: #b85f12; background: rgba(184,95,18,.09); border-color: rgba(184,95,18,.30); }
 html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-grading-status.done { color: #15803d; background: rgba(21,128,61,.08); border-color: rgba(21,128,61,.28); }
-html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-expand-btn { color: #8b8b83; }
-html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-expand-btn:hover { color: #15803d; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-expand-btn { color: #73746d; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-expand-btn:hover { color: #73746d; }
 html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-row-details { background: rgba(38,39,35,.03); border-top-color: #ebeae5; color: #73746d; }
 html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-row-details strong { color: #282924; }
 html[data-learner-mobile-theme="light"] .grades-mobile-layout .grades-status-text--done { color: #15803d; }

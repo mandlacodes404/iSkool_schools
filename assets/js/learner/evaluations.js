@@ -360,7 +360,7 @@ function renderEvaluationsUI(data) {
         html += `
             <div class="lev-mobile-folder-header lev-mobile-folder-header--collapsed" onclick="toggleLevMobileFolder('${gid}', this)">
                 <div class="lev-mobile-folder-icon">
-                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="#4fa8fd" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="#73746d" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
                     </svg>
                 </div>
@@ -382,7 +382,7 @@ function renderEvaluationsUI(data) {
                     onclick="openMobileLearnerEvaluation(${mobileFlatIdx})"
                     onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openMobileLearnerEvaluation(${mobileFlatIdx}); }">
                     <div class="lev-mobile-row-icon">
-                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="#4fa8fd" stroke-width="1.3" fill="none">
+                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="#73746d" stroke-width="1.3" fill="none">
                             <path d="M9 11l3 3L22 4"></path>
                             <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
                         </svg>

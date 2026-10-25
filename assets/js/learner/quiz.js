@@ -873,7 +873,7 @@ function renderQuizCards(groupedData) {
             }
             .lqz-mobile-folder-chevron {
                 flex-shrink: 0;
-                color: #555e6a;
+                color: #73746d;
                 transition: transform 0.3s ease;
             }
             .lqz-mobile-folder-chevron.open { transform: rotate(90deg); }
@@ -958,7 +958,7 @@ function renderQuizCards(groupedData) {
             }
             .lqz-mobile-row-chevron {
                 flex-shrink: 0;
-                color: #555e6a;
+                color: #73746d;
             }
             .lqz-mobile-row-meta {
                 font-size: 12px;
@@ -1106,7 +1106,7 @@ function renderQuizCards(groupedData) {
         html += `
             <div class="lqz-mobile-folder-header lqz-mobile-folder-header--collapsed" onclick="toggleLqzMobileFolder('${gid}', this)">
                 <div class="lqz-mobile-folder-icon">
-                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="#fdd663" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="#73746d" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
                     </svg>
                 </div>
@@ -1181,7 +1181,7 @@ function renderQuizCards(groupedData) {
             html += `
                 <div class="lqz-mobile-row" ${rowAttrs} data-quiz-id="${quiz.id}" data-title="${escapeHtml(quiz.title).toLowerCase()}">
                     <div class="lqz-mobile-row-icon">
-                        ${learnerQuizPencilSvgThin(20, 20, '#fdd663')}
+                        ${learnerQuizPencilSvgThin(20, 20, '#73746d')}
                     </div>
                     <div class="lqz-mobile-row-body">
                         <div class="lqz-mobile-row-title">
