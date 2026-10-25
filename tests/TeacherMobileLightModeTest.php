@@ -83,6 +83,9 @@ final class TeacherMobileLightModeTest extends TestCase
             'sbo-mobile-detail' => 'assets/js/teacher/sbo.js',
             'sbo-error-message' => 'assets/js/teacher/sbo.js',
             'full-cal-page-wrapper' => 'assets/js/teacher/teacher_calendar.js',
+            'gr-mobile-list'    => 'assets/js/teacher/grades.js',
+            'gr-mobile-detail'  => 'assets/js/teacher/grades.js',
+            'gr-error-message'  => 'assets/js/teacher/grades.js',
         ];
         $markers = implode(' ', $this->gate_markers($this->source('assets/css/teacher/teacher_mobile_light.css')));
         foreach ($where as $needle => $file) {
@@ -212,9 +215,27 @@ final class TeacherMobileLightModeTest extends TestCase
         $this->assertStringContainsString('#fullCalModal', $light);
         $this->assertSame(0, preg_match('/\) \.teacher-modal-(?:box|overlay|input|submit|cancel)/', $light));
         $this->assertSame(0, preg_match('/\) \.mini-cal-modal/', $light));
-        // not styled here on purpose
-        foreach (['#rsVideoOverlay', '.an-delete-modal', '.rs-delete-modal', '#uploadResourceModal', '.an-form-', '#releaseEvalModal', '.ev-delete-modal', '#deleteSBOModal', '.sbo-delete-modal', '.sbo-drawer'] as $left_dark) {
+        // not styled here on purpose (the Grades marks forms are the desktop panel, .gr-dp-, and the edit-marks box)
+        foreach (['.gr-dp', '.teacher-edit-marks', '#rsVideoOverlay', '.an-delete-modal', '.rs-delete-modal', '#uploadResourceModal', '.an-form-', '#releaseEvalModal', '.ev-delete-modal', '#deleteSBOModal', '.sbo-delete-modal', '.sbo-drawer'] as $left_dark) {
             $this->assertStringNotContainsString($left_dark, $light, $left_dark . ' is meant to stay dark for now');
         }
+    }
+
+    public function test_every_grades_screen_on_a_phone_keeps_the_light_page_lit(): void
+    {
+        // Opening an assessment swaps the whole page for a loading screen, then for the marks (or an error). If any of
+        // the three had no marker the page would flash dark between the list and the marks.
+        $js = $this->source('assets/js/teacher/grades.js');
+        $this->assertSame(2, substr_count($js, '<div class="gr-panel-empty gr-mobile-detail">'), 'the loading and the error screen must carry the marker');
+        $this->assertSame(2, substr_count($js, '<div class="gr-panel-content gr-mobile-detail">'), 'both phone detail views must carry the marker');
+        $this->assertStringContainsString('class="gr-mobile-list"', $js);
+        $this->assertStringContainsString('class="gr-error-message"', $js);
+
+        // the desktop panel and the legacy table are not phone screens and must not carry it
+        $this->assertStringNotContainsString('gr-dp gr-mobile-detail', $js);
+        $this->assertSame(0, preg_match('/gr-main-panel[^>]*gr-mobile-detail/', $js));
+
+        // Analytics is left dark: its script draws none of the Grades markers
+        $this->assertStringNotContainsString('gr-mobile-', $this->source('assets/js/teacher/analytics.js'));
     }
 }
