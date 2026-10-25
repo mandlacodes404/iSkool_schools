@@ -853,7 +853,7 @@ function renderQuizCards(groupedData) {
             .lqz-mobile-folder-name {
                 flex: 1;
                 font-size: 16px;
-                font-weight: 800;
+                font-weight: 600;
                 color: #e2e8f0;
                 display: flex;
                 align-items: center;
@@ -918,8 +918,8 @@ function renderQuizCards(groupedData) {
             }
             .lqz-mobile-row-body { flex: 1; min-width: 0; }
             .lqz-mobile-row-title {
-                font-size: 16px;
-                font-weight: 700;
+                font-size: 15px;
+                font-weight: 600;
                 color: #e2e8f0;
                 margin: 0;
                 white-space: nowrap;
