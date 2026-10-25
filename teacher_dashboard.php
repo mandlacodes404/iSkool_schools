@@ -34,6 +34,8 @@ $stmtTeacher->close();
 $teacherFullName = trim($teacherName . ' ' . $teacherSurname);
 $teacherEmail    = $_SESSION['email'];
 $teacherThemeStorageKey = 'iskoolTeacherDesktopTheme:' . hash('sha256', ($_SESSION['current_school_db'] ?? '') . '|' . $teacherEmail);
+// Phones have their own light / dark choice (Settings > Appearance), saved apart from the desktop one.
+$teacherMobileThemeStorageKey = 'iskoolTeacherMobileTheme:' . hash('sha256', ($_SESSION['current_school_db'] ?? '') . '|' . $teacherEmail);
 
 $tFirstInitial   = !empty($teacherName)    ? strtoupper(substr(trim($teacherName), 0, 1))    : '';
 $tLastInitial    = !empty($teacherSurname) ? strtoupper(substr(trim($teacherSurname), 0, 1)) : '';
@@ -90,11 +92,12 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=1.1">
     <!-- Phone canvas: the colour behind the page, there from the very first frame (when the app opens, and in the
-         instant between two pages) so a white or wrong-coloured edge never shows. The teacher phone view is dark
-         only, and this is the same colour as its body (--bg-color in teacher_dashboard.css). -->
+         instant between two pages) so a white or wrong-coloured edge never shows. Dark phone mode only, the same
+         colour as the body (--bg-color in teacher_dashboard.css): in light mode the page colour is decided page by
+         page (teacher_mobile_light.css), so <html> is left alone and takes whatever <body> paints. -->
     <style>
         @media (max-width: 768px) {
-            html { background-color: #0d1117; }
+            html:not([data-teacher-mobile-theme="light"]) { background-color: #0d1117; }
         }
     </style>
     <link rel="stylesheet" href="assets/css/teacher/dashboard.css?v=5.3">
@@ -113,13 +116,14 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=13.9">
     <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_menu.css?v=2.4">
-    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_menu.css?v=1.4">
-    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_settings.css?v=1.2">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_menu.css?v=1.5">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_settings.css?v=1.3">
     <link rel="stylesheet" href="assets/css/shared/pwa_prompts.css?v=1.0">
     <link rel="stylesheet" href="assets/css/shared/pull_to_refresh.css?v=1.0">
     <link rel="stylesheet" href="assets/css/shared/net_status.css?v=1.0">
     <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_settings.css?v=1.4">
     <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_light_mode.css?v=1.8">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_light.css?v=1.0">
     <link rel="stylesheet" href="assets/css/splash_light.css?v=<?= (int) @filemtime(__DIR__ . '/assets/css/splash_light.css') ?>">
     <script>
     // Desktop sidebar: restore the saved collapsed state BEFORE first paint (no flash).
@@ -129,9 +133,10 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
             var s = localStorage.getItem('iskoolTeacherMenuCollapsed');
             if (s === '1' || (s === null && window.innerWidth < 1440)) document.documentElement.classList.add('dm-collapsed');
         } catch (e) {}
-        // Light mode is intentionally desktop-only. Applying the saved value before
-        // <body> is painted prevents a visible dark-to-light flash on Home.
+        // Desktop light mode (769px and up): applying the saved value before <body> is painted prevents a
+        // visible dark-to-light flash on Home. Phones have their own switch, see teacher_mobile_theme.js below.
         window.ISKOOL_TEACHER_THEME_KEY = <?php echo json_encode($teacherThemeStorageKey); ?>;
+        window.ISKOOL_TEACHER_MOBILE_THEME_KEY = <?php echo json_encode($teacherMobileThemeStorageKey); ?>;
         try {
             var theme = localStorage.getItem(window.ISKOOL_TEACHER_THEME_KEY);
             document.documentElement.dataset.teacherTheme = theme === 'light' ? 'light' : 'dark';
@@ -143,6 +148,9 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
         }
     })();
     </script>
+    <!-- Phone light / dark: sets <html data-teacher-mobile-theme> and the status bar colour before first paint
+         (see teacher_mobile_theme.js). Needs the theme-color <meta> tag above. -->
+    <script src="assets/js/teacher/teacher_mobile_theme.js?v=1.0"></script>
 <script>
 function getCsrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
@@ -1591,7 +1599,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 <script src="assets/js/teacher/dashboard.js?v=13.7"></script>
 <script src="assets/js/teacher/class-picker.js?v=1.1"></script>
-<script src="assets/js/teacher/quizzes.js?v=8.4"></script>
+<script src="assets/js/teacher/quizzes.js?v=8.5"></script>
 <script src="assets/js/teacher/announcements.js?v=6.1"></script>
 <script src="assets/js/teacher/evaluations.js?v=5.2"></script>
 <script src="assets/js/teacher/resources.js?v=4.8"></script>
@@ -1603,7 +1611,7 @@ document.addEventListener('DOMContentLoaded', function () {
 <script src="assets/js/teacher/teacher_desktop_menu.js?v=1.0"></script>
 <script src="assets/js/teacher/teacher_mobile_menu.js?v=1.0"></script>
 <script>window.ISKOOL_TEACHER = <?= json_encode(['name'=>$teacherFullName,'email'=>$teacherEmail,'initials'=>$teacherInitials], JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?>;</script>
-<script src="assets/js/teacher/teacher_mobile_settings.js?v=1.0"></script>
+<script src="assets/js/teacher/teacher_mobile_settings.js?v=1.1"></script>
 <script src="assets/js/teacher/teacher_desktop_settings.js?v=1.4"></script>
 <script src="assets/js/shared/pwa_prompts.js?v=1.0"></script>
 <script src="assets/js/shared/pull_to_refresh.js?v=1.0"></script>

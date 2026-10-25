@@ -1,0 +1,206 @@
+/* assets/css/teacher/teacher_mobile_light.css
+   Light mode for the teacher app on phones (max-width: 768px). Load it LAST, after teacher_dashboard.css, the page
+   stylesheets and teacher_mobile_menu.css / teacher_mobile_settings.css. Dark is untouched, and so is everything
+   at 769px and wider (the desktop light mode is teacher_desktop_light_mode.css).
+
+   Light is switched on by <html data-teacher-mobile-theme="light"> (teacher_mobile_theme.js, Settings > Appearance).
+   While the pages are being converted one at a time, a rule in this file only takes effect when a converted page is
+   on screen: the gate looks for the page's own markup, so every other page stays exactly as it is today. To convert
+   the next page, add a marker for it to the :is( ) list (in every rule below, and PAGE in teacher_mobile_theme.js)
+   and write its light rules here.
+
+   The gate only looks INSIDE #api-content-area, where every page is drawn. (:where() keeps #api-content-area from
+   adding to the specificity.) Keep every rule in this file behind it.
+
+   Pages in the gate now, and the markup that marks each one:
+     Settings     .ms                                         (Settings home, Appearance, Change Password)
+     Assignments  .as-mobile-list (list + empty state), .as-mobile-detail (an open assignment), .as-error-message
+     Quizzes      .qz-mobile-list (list + empty state), .qz-mobile-detail (an open quiz), .qz-error-state
+   Still dark on phones: every other page (Home, Resources, Announcements, Grades, Syllabus, Evaluations, Analytics,
+   Calendar), the create and edit forms for assignments and quizzes, and the dialogs that open from these pages
+   (delete confirmations, the Integrity Report).
+   The menu (drawer, search, account sheet) is not gated: it is light everywhere, see teacher_mobile_menu.css.
+   The splash screen and the "app updated" banner stay dark for now.
+
+   Colours are the same as the teacher desktop light mode and the learner phone light mode: page #faf9f5, cards white,
+   lines #dfded8, text #282924, accent #187a72, dark buttons #252624, danger #bd4a43.
+
+   A page that gave configureTeacherHeader() a colour (Assignments purple, Quizzes yellow) still gets that colour on the
+   header once it scrolls, and the status bar matches it, exactly as in dark: dashboard.js writes it straight onto the
+   header. The header text stays dark, which reads on both colours.
+
+   Why a few !important: teacher_dashboard.css writes some colours with !important (the header's scrolled border, the
+   bottom bar's glass), and dashboard.js writes the header's background inline. */
+
+@media (max-width: 768px) {
+
+/* -- page -- */
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) { color-scheme: light; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) body,
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) body .main-content { background: #faf9f5; }
+/* the pages paint nothing of their own, but keep this !important in case a page stylesheet ever does, as the learner's quiz.css does */
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) body #api-content-area { background: #faf9f5 !important; }
+/* the loader that fades over the page while it loads: a pale veil instead of a dark one */
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) #loaderOverlay { background: rgba(250,249,245,.6); }
+
+/* -- header -- */
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .top-nav-wrapper { color: #282924; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .top-nav-wrapper.header-scrolled:not([data-page-color]) { border-bottom-color: #dfded8 !important; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .top-nav-wrapper #mobileToggle,
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .top-nav-wrapper #teacherHeaderBackBtn,
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .top-nav-wrapper .top-nav-school-name { color: #282924; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .top-nav-brand img { border-color: #dfded8; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .top-nav-wrapper .school-logo-initials { background: #ffffff; border-color: #dfded8; color: #53544e; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .top-nav-wrapper .top-nav-avatar { background: #e9e8e2; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .top-nav-wrapper .top-nav-avatar .initials-sm { color: #555650; }
+
+/* -- the profile dropdown under the header avatar -- */
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .avatar-dropdown { background: #ffffff; border: 1px solid #dfded8; box-shadow: 0 8px 24px rgba(31,32,29,.14); }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .avatar-dropdown-header { border-bottom-color: #ebeae5; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .avatar-dropdown-name { color: #282924; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .avatar-dropdown-email { color: #73746d; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .avatar-dropdown-item { color: #53544e; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .avatar-dropdown-item:hover { background: rgba(38,39,35,.055); color: #282924; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .avatar-dropdown-item.danger { color: #bd4a43; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .avatar-dropdown-item.danger:hover { background: rgba(189,74,67,.08); }
+
+/* -- bottom bar: light glass once scrolled (at rest it is clear, see teacher_dashboard.css) -- */
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) body #mobileBottomNav.nav-scrolled,
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) body .sidebar.active ~ #mobileBottomNav.nav-scrolled {
+  background: rgba(250,249,245,.62) !important; border-top: 1px solid rgba(223,222,216,.9) !important; box-shadow: 0 -4px 24px rgba(31,32,29,.10), inset 0 1px 0 rgba(255,255,255,.55) !important;
+}
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) #mobileBottomNav a { color: #6a6b64; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) #mobileBottomNav a.active { color: #282924; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) #mobileBottomNav .dmm-badge { border-color: #faf9f5; }
+
+/* -- Settings (and Appearance, Change Password) -- */
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .ms {
+  --ms-card: #ffffff; --ms-card-2: rgba(38,39,35,.055); --ms-line: #dfded8;
+  --ms-text: #282924; --ms-soft: #53544e; --ms-muted: #73746d; --ms-faint: #8b8b83;
+  --ms-accent: #187a72; --ms-danger: #bd4a43; --ms-warn: #b85f12;
+}
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .ms-profile,
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .ms-g { border: 1px solid #dfded8; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .ms-av-face { background: #e9e8e2; color: #555650; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .ms-cam { background: #e9e8e2; border-color: #faf9f5; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .ms-nav { background: #faf9f5; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .ms-back:active { background: rgba(24,122,114,.1); }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .ms-f:focus-within { background: rgba(38,39,35,.03); }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .ms-f input,
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .ms-f select,
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .ms-f textarea { color-scheme: light; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .ms-f select option { background: #ffffff; color: #282924; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .ms-bar { background: #faf9f5; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .ms-toggle { background: #f4f3ee; border-color: #e4e3dc; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .ms-tb.on { background: #ffffff; color: var(--ms-text); box-shadow: 0 1px 2px rgba(31,32,29,.12), 0 0 0 1px rgba(38,39,35,.06); }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .ms-btn { background: #252624; color: #ffffff; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .ms-btn:disabled { background: rgba(38,39,35,.06); color: #8b8b83; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .ms-btn .ms-spin { border-color: rgba(255,255,255,.3); border-top-color: #ffffff; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .ms-link:active { background: rgba(24,122,114,.1); }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .ms-banner.is-bad { background: rgba(189,74,67,.09); }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .ms-banner.is-ok { background: rgba(24,122,114,.09); }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .ms-checks li.ok .ms-dot { color: #ffffff; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .ms-done-i { background: rgba(24,122,114,.1); }
+/* the sheets (change photo, sign out, notification help) and the toast are added to <body>, outside .ms */
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .ms-sheet-wrap { --ms-text: #282924; --ms-soft: #53544e; --ms-muted: #73746d; --ms-line: #dfded8; --ms-danger: #bd4a43; --ms-accent: #187a72; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .ms-sheet-bg { background: rgba(38,39,35,.3); }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .ms-sheet { background: #ffffff; box-shadow: 0 -10px 40px rgba(31,32,29,.18); }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .ms-sheet::before { background: #d0cfc8; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .ms-sh-b:active { background: rgba(38,39,35,.06); }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .ms-sh-b.is-primary { background: rgba(24,122,114,.1); }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .ms-sh-b.is-solid { background: rgba(189,74,67,.1); }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .ms-toast { background: #252624; color: #ffffff; box-shadow: 0 6px 24px rgba(31,32,29,.22); }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .ms-toast.is-bad { background: #fbeceb; color: #a8332c; }
+
+/* -- the class folders and rows, shared by the Assignments and Quizzes lists -- */
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-mobile-folder-label,
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .qz-mobile-folder-label { color: #53544e; border-bottom-color: #dfded8; }
+/* a tap leaves :hover stuck on a phone, and the shared dark rule would turn the label pale on cream */
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-mobile-folder-label:hover,
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .qz-mobile-folder-label:hover { color: #53544e; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-mobile-folder-label:active,
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .qz-mobile-folder-label:active { background: rgba(38,39,35,.04); }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-mobile-folder-name,
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-mobile-row-title,
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .qz-mobile-folder-name,
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .qz-mobile-row-title { color: #282924; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-mobile-folder-count,
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .qz-mobile-folder-count { color: #73746d; background: rgba(38,39,35,.06); }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-mobile-folder-label > .tchr-sidebar-class-chevron,
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .qz-mobile-folder-label > .tchr-sidebar-class-chevron,
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-mobile-row-chevron,
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .qz-mobile-row-chevron { color: #8b8b83; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-mobile-row,
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .qz-mobile-row { border-bottom-color: #ebeae5; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-mobile-row:active,
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .qz-mobile-row:active { background: rgba(38,39,35,.04); }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-mobile-row-meta,
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .qz-mobile-row-meta { color: #73746d; }
+/* search box */
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-mobile-list .tchr-mobile-search-wrap svg,
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .qz-mobile-list .tchr-mobile-search-wrap svg { color: #282924; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-mobile-list .tchr-mobile-search,
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .qz-mobile-list .tchr-mobile-search { background: #ffffff; border: 1px solid #dfded8; color: #282924; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-mobile-list .tchr-mobile-search:focus,
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .qz-mobile-list .tchr-mobile-search:focus { background: #ffffff; border-color: #bdbcb4; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-mobile-list .tchr-mobile-search::placeholder,
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .qz-mobile-list .tchr-mobile-search::placeholder { color: #8b8b83; }
+
+/* -- Assignments: list -- */
+/* the purple accents are neutral on paper (the bar's fill, the folder and file icons, the count) */
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-mobile-list [stroke="#a78bfa" i] { stroke: #73746d; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-mobile-row-progress-bar { background: rgba(38,39,35,.08); }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-mobile-row-progress-fill { background: rgba(38,39,35,.28); }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-mobile-row-progress-label { color: #53544e; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-mobile-empty { color: #73746d; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-mobile-empty-title { color: #282924; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-mobile-empty-body { color: #73746d; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-mobile-empty [stroke="#4fd1c5" i] { stroke: #187a72; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-error-message,
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .qz-error-state { color: #bd4a43 !important; }
+
+/* -- Assignments: an open assignment, and its submissions table -- */
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-mobile-detail-title { color: #282924; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-mobile-detail-meta { color: #73746d; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-mobile-detail-progress-row { background: #ffffff; border-color: #dfded8; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-mobile-detail-progress-bar { background: rgba(38,39,35,.08); }
+/* the label shares the fill's colour (teal, amber or green), which is too pale to read as text on paper */
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-mobile-detail-progress-label { color: #53544e; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-mobile-detail-link { color: #53544e; border-color: #dfded8; background: #ffffff; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-mobile-detail-delete-btn { color: #bd4a43; border-color: rgba(189,74,67,.28); background: rgba(189,74,67,.08); }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-mobile-detail-desc { color: #53544e; background: #ffffff; border-color: #dfded8; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-mobile-detail .teacher-grades-table-wrapper { background: #ffffff; border-color: #dfded8; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-mobile-detail .teacher-grades-table th { background: #f4f3ee; color: #53544e; border-bottom-color: #dfded8; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-mobile-detail .teacher-grades-table td { color: #53544e; border-bottom-color: #ebeae5; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-mobile-detail .teacher-grades-table tr:hover td { background: #f6f5f0; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-mobile-detail .as-sub-timestamp,
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-mobile-detail .as-sub-type-cell { color: #73746d; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-mobile-detail .teacher-sub-badge.submitted { color: #15803d; background: rgba(21,128,61,.1); }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-mobile-detail .teacher-sub-badge.not-submitted { color: #bd4a43; background: rgba(189,74,67,.1); }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-mobile-detail .teacher-sub-file-link { color: #187a72; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .as-mobile-detail .teacher-sub-text { color: #53544e; background: #f4f3ee; }
+
+/* -- Quizzes: list -- */
+/* status chips and the folder icon carry their colour inline; darker shades of the same hues read on paper */
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .qz-mobile-list [style*="#f28c38" i],
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .qz-mobile-detail [style*="#f28c38" i] { color: #b85f12 !important; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .qz-mobile-list [style*="#1e90ff" i],
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .qz-mobile-detail [style*="#1e90ff" i] { color: #1d6fb8 !important; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .qz-mobile-list [style*="#6b7280" i],
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .qz-mobile-detail [style*="#6b7280" i] { color: #53544e !important; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .qz-mobile-list [stroke="#fdd663" i] { stroke: #9a6b00; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .qz-mobile-list .teacher-empty-state { color: #73746d; }
+
+/* -- Quizzes: an open quiz -- */
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .qz-mobile-detail-header { border-bottom-color: #dfded8; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .qz-mobile-detail-title { color: #282924; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .qz-mobile-detail-meta { color: #73746d; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .qz-mobile-detail .teacher-quiz-detail-label { color: #73746d; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .qz-mobile-detail .teacher-quiz-publish-status.published { color: #15803d; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .qz-mobile-detail .teacher-quiz-publish-status.hidden { color: #bd4a43; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .qz-mobile-detail .teacher-quiz-action-btn.publish { background: #252624; color: #ffffff; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .qz-mobile-detail .teacher-quiz-action-btn.reopen { background: #15803d; color: #ffffff; }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .qz-mobile-detail .teacher-quiz-action-btn.delete { color: #bd4a43; background: rgba(189,74,67,.08); border-color: rgba(189,74,67,.28); }
+html[data-teacher-mobile-theme="light"]:has(:where(#api-content-area) :is(.ms, .as-mobile-list, .as-mobile-detail, .as-error-message, .qz-mobile-list, .qz-mobile-detail, .qz-error-state)) .qz-mobile-detail .teacher-quiz-action-btn.integrity { color: #9a6b00; background: rgba(154,107,0,.08); border-color: rgba(154,107,0,.3); }
+
+}
