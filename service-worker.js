@@ -43,10 +43,16 @@ const NETWORK_ONLY_PATHS = new Set([
     '/api/set_typing.php', '/api/get_typing.php'
 ]);
 // Reports, logout, profile updates, and class changes deliberately never queue.
+// The teacher's only queueable save is the quiz marks (a teacher in a classroom with no signal). Everything else a
+// teacher does, such as grading an open-ended answer, creating a quiz, or posting an announcement, needs a connection.
+const TEACHER_API_PREFIX = '/api/teacher/';
+const TEACHER_MARKS_PATH = '/api/teacher/save_marks.php';
+const LEARNER_IDENTITY_URL = '/api/learner/get_session_identity.php';
+const TEACHER_IDENTITY_URL = '/api/teacher/get_session_identity.php';
 const QUEUEABLE_WRITE_PATHS = new Set([
     '/save_progress.php', '/submit_quiz.php', '/submit_assignment.php',
     '/api/learner/submit_evaluation.php', '/api/learner/create_discussion.php',
-    '/api/learner/submit_reply.php'
+    '/api/learner/submit_reply.php', TEACHER_MARKS_PATH
 ]);
 
 self.addEventListener('install', event => {
@@ -60,6 +66,7 @@ self.addEventListener('install', event => {
 self.addEventListener('message', event => {
     if (event.data?.type === 'iskool-skip-waiting') self.skipWaiting();
     if (event.data?.type === 'iskool-replay-queued-writes') event.waitUntil(replayQueuedWrites());
+    if (event.data?.type === 'iskool-queue-status') event.waitUntil(notifyQueueStatus());
 });
 
 self.addEventListener('activate', event => {
@@ -185,13 +192,21 @@ async function networkFirst(request, cacheName) {
         throw error;
     }
 }
+// A request's body can be read only once, and fetch() uses it up: when the send then fails there is nothing left to
+// keep ("Request body is already used"). So a copy is taken BEFORE sending, here for the teacher's marks. The learner's
+// saves have the same flaw (their queue throws and the page just sees a failed fetch), but mending it there would start
+// queueing quiz and assignment submissions on screens that are not all written to expect "saved for later", so that is
+// left for a change of its own.
+const COPY_BEFORE_SEND = new Set([TEACHER_MARKS_PATH]);
 async function handleWrite(request, pathname) {
+    const spare = COPY_BEFORE_SEND.has(pathname) ? request.clone() : null;
     try {
         return await fetch(request);
     } catch (error) {
         if (!QUEUEABLE_WRITE_PATHS.has(pathname)) throw error;
-        await queueRequest(request);
+        await queueRequest(spare || request);
         await registerSync();
+        await notifyQueueStatus().catch(() => {});
         return queuedResponse(request);
     }
 }
@@ -218,14 +233,44 @@ async function queueRequest(request) {
     if (!queueUser) throw new Error('This submission cannot be safely queued without a learner identity.');
     const fields = [];
     for (const [name, value] of formData.entries()) fields.push(value instanceof File ? { name, type: 'file', value, filename: value.name } : { name, type: 'text', value });
+    // Marks saved twice for the same learner and quiz while offline: only the newest is sent, but it keeps the
+    // baseline of the oldest (the marks the server held before any of them), so the server's check against the
+    // stored marks (includes/marks_guard.php) still compares with what the teacher really started from.
+    const replacedIds = [];
+    if (urlPath(request.url) === TEACHER_MARKS_PATH) {
+        const same = (await getQueuedWrites()).filter(record => urlPath(record.url) === TEACHER_MARKS_PATH
+            && record.queueUser === queueUser && marksKey(record.fields) === marksKey(fields));
+        if (same.length) {
+            const oldest = same.reduce((first, next) => (first.createdAt <= next.createdAt ? first : next));
+            for (let i = fields.length - 1; i >= 0; i--) if (MARKS_BASELINE_FIELDS.includes(fields[i].name)) fields.splice(i, 1);
+            oldest.fields.forEach(field => { if (MARKS_BASELINE_FIELDS.includes(field.name)) fields.push(field); });
+            same.forEach(record => replacedIds.push(record.id));
+        }
+    }
     const db = await openQueueDb();
     await new Promise((resolve, reject) => {
         const transaction = db.transaction(QUEUE_STORE, 'readwrite');
-        transaction.objectStore(QUEUE_STORE).add({ url: request.url, method: request.method, csrfToken: request.headers.get('X-CSRF-Token') || '', queueUser, fields, createdAt: Date.now() });
+        const store = transaction.objectStore(QUEUE_STORE);
+        store.add({ url: request.url, method: request.method, csrfToken: request.headers.get('X-CSRF-Token') || '', queueUser, fields, createdAt: Date.now() });
+        replacedIds.forEach(id => store.delete(id));
         transaction.oncomplete = resolve;
         transaction.onerror = () => reject(transaction.error);
     });
     db.close();
+}
+const MARKS_BASELINE_FIELDS = ['expected_known', 'expected_score', 'expected_total'];
+function urlPath(url) {
+    try { return new URL(url).pathname; } catch (error) { return ''; }
+}
+function isTeacherUrl(url) {
+    return urlPath(url).startsWith(TEACHER_API_PREFIX);
+}
+function fieldValue(fields, name) {
+    const field = fields.find(item => item.name === name && item.type === 'text');
+    return field ? String(field.value) : '';
+}
+function marksKey(fields) {
+    return fieldValue(fields, 'quiz_id') + '|' + fieldValue(fields, 'user_email');
 }
 async function getQueuedWrites() {
     const db = await openQueueDb();
@@ -260,37 +305,114 @@ async function clearQueuedWrites() {
 async function clearLearnerDataCaches() {
     await Promise.all([caches.delete(CONTENT_CACHE), caches.delete(NETWORK_CACHE)]);
 }
-async function replayQueuedWrites() {
+let replayRunning = null;
+let replayAgain = false;
+// One pass at a time. The page, the browser's background sync and the worker's own start can all ask at once, and two
+// passes would send the same saved item twice. A request that arrives while a pass runs makes it go round once more.
+function replayQueuedWrites() {
+    if (replayRunning) { replayAgain = true; return replayRunning; }
+    replayRunning = (async () => {
+        try {
+            do { replayAgain = false; await replayPass(); } while (replayAgain);
+        } finally { replayRunning = null; }
+    })();
+    return replayRunning;
+}
+// Right after a phone reconnects, the first request often fails because the connection is not really ready yet. A
+// teacher's save is therefore tried again a few times, a moment apart, before the pass gives up (the page asks again
+// later, with growing gaps: net_status.js).
+const TEACHER_RETRY_DELAYS_MS = [1500, 3000, 6000];
+async function replayPass() {
     const records = await getQueuedWrites();
     for (const record of records) {
-        const body = new FormData();
-        record.fields.forEach(field => {
-            if (field.type === 'file') body.append(field.name, field.value, field.filename);
-            else body.append(field.name, field.value);
-        });
-        const headers = record.csrfToken ? { 'X-CSRF-Token': record.csrfToken } : {};
-        try {
-            const identityResponse = await fetch('/api/learner/get_session_identity.php', { cache: 'no-store', credentials: 'same-origin' });
-            if (!identityResponse.ok) return;
-            const identity = await identityResponse.json();
-            if (!record.queueUser || identity.email !== record.queueUser) {
-                await deleteQueuedWrite(record.id);
-                await notifyClients({ type: 'offline-write-discarded', url: record.url });
-                continue;
+        const teacherRecord = isTeacherUrl(record.url);
+        let attempt = 0;
+        for (;;) {
+            try {
+                if (await replayRecord(record, teacherRecord) === 'stop') return;
+                break;
+            } catch (error) {
+                const delay = teacherRecord ? TEACHER_RETRY_DELAYS_MS[attempt++] : undefined;
+                if (delay === undefined) return;
+                await new Promise(resolve => setTimeout(resolve, delay));
             }
-            const response = await fetch(record.url, { method: record.method, headers, body, credentials: 'same-origin' });
-            if (response.ok) {
-                await deleteQueuedWrite(record.id);
-                await notifyClients({ type: 'offline-write-synced', url: record.url });
-            } else if (response.status >= 400 && response.status < 500) {
-                await deleteQueuedWrite(record.id);
-                await notifyClients({ type: 'offline-write-failed', url: record.url });
-            }
-        } catch (error) { return; }
+        }
     }
 }
+// Sends one saved item. Returns 'next' to go on to the following one, or 'stop' when the rest should wait.
+async function replayRecord(record, teacherRecord) {
+    const body = new FormData();
+    record.fields.forEach(field => {
+        if (field.type === 'file') body.append(field.name, field.value, field.filename);
+        else body.append(field.name, field.value);
+    });
+    const headers = record.csrfToken ? { 'X-CSRF-Token': record.csrfToken } : {};
+    const identityResponse = await fetch(teacherRecord ? TEACHER_IDENTITY_URL : LEARNER_IDENTITY_URL, { cache: 'no-store', credentials: 'same-origin' });
+    // Nobody is signed in as that role right now: the save waits. It must not hold up the saves behind it, which
+    // can belong to the other role if a teacher and a learner both used this phone.
+    if (!identityResponse.ok) return 'next';
+    const identity = await identityResponse.json();
+    if (!record.queueUser || identity.email !== record.queueUser) {
+        await deleteQueuedWrite(record.id);
+        await notifyClients({ type: 'offline-write-discarded', url: record.url });
+        await notifyQueueStatus();
+        return 'next';
+    }
+    if (teacherRecord) {
+        // The token the save was made with belongs to a session that may be gone. The identity check above just
+        // proved the signed-in teacher is the one who made the save, so the live token is the right one to use.
+        headers['X-CSRF-Token'] = identity.csrf_token || record.csrfToken || '';
+        headers['X-iSkool-Queued-Replay'] = '1';
+    }
+    const response = await fetch(record.url, { method: record.method, headers, body, credentials: 'same-origin' });
+    if (teacherRecord) return (await settleTeacherReplay(record, response)) ? 'stop' : 'next';
+    if (response.ok) {
+        await deleteQueuedWrite(record.id);
+        await notifyClients({ type: 'offline-write-synced', url: record.url });
+    } else if (response.status >= 400 && response.status < 500) {
+        await deleteQueuedWrite(record.id);
+        await notifyClients({ type: 'offline-write-failed', url: record.url });
+    }
+    return 'next';
+}
+// What a teacher's re-sent save came to. Returns true when the rest of the queue should wait for a better moment.
+// The marks endpoint answers in JSON: success, a conflict (409: the marks changed meanwhile, so the save is NOT applied),
+// or an error. A reply that is not JSON is a sign-in or a hotspot page, and a 5xx is the server having a bad moment:
+// both keep the save in the queue to try again.
+async function settleTeacherReplay(record, response) {
+    let result = null;
+    try { result = await response.clone().json(); } catch (error) { result = null; }
+    const quizId = fieldValue(record.fields, 'quiz_id');
+    const userEmail = fieldValue(record.fields, 'user_email');
+    if (response.status === 409 && result && result.conflict) {
+        await deleteQueuedWrite(record.id);
+        await notifyClients({ type: 'offline-write-conflict', url: record.url, quizId, userEmail, currentScore: result.current_score, currentTotal: result.current_total, message: result.error || '' });
+    } else if (response.ok && result && result.success === true) {
+        await deleteQueuedWrite(record.id);
+        await notifyClients({ type: 'offline-write-synced', url: record.url, quizId, userEmail });
+    } else if (response.status >= 500 || (response.ok && !result)) {
+        return true;
+    } else {
+        await deleteQueuedWrite(record.id);
+        await notifyClients({ type: 'offline-write-failed', url: record.url, quizId, userEmail, message: (result && (result.error || result.message)) || '' });
+    }
+    await notifyQueueStatus();
+    return false;
+}
+// How many teacher saves are waiting on this phone, per signed-in teacher, so a page can show "2 changes waiting".
+async function notifyQueueStatus() {
+    const records = await getQueuedWrites();
+    const teacher = {};
+    records.filter(record => isTeacherUrl(record.url)).forEach(record => { teacher[record.queueUser] = (teacher[record.queueUser] || 0) + 1; });
+    await notifyClients({ type: 'offline-queue-status', teacher, total: records.length });
+}
 async function registerSync() {
-    if ('sync' in self.registration) await self.registration.sync.register(SYNC_TAG);
+    // Only a convenience: it lets the browser send the saves later even if the app is closed. Some browsers have it
+    // switched off (Chrome reports "Background Sync is disabled"). That must never make a save that is safely queued look
+    // like a failure; the page also sends the queue itself as soon as the phone is back online (net_status.js).
+    try {
+        if ('sync' in self.registration) await self.registration.sync.register(SYNC_TAG);
+    } catch (error) { /* the page and the next start of the worker send the queue instead */ }
 }
 async function notifyClients(message) {
     const clientList = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
