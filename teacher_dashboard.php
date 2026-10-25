@@ -121,6 +121,7 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
     <link rel="stylesheet" href="assets/css/shared/pwa_prompts.css?v=1.0">
     <link rel="stylesheet" href="assets/css/shared/pull_to_refresh.css?v=1.0">
     <link rel="stylesheet" href="assets/css/shared/net_status.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/shared/back_button.css?v=1.0">
     <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_settings.css?v=1.4">
     <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_light_mode.css?v=1.8">
     <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_light.css?v=1.0">
@@ -1618,5 +1619,7 @@ document.addEventListener('DOMContentLoaded', function () {
 <script src="assets/js/teacher/teacher_pull_to_refresh.js?v=1.0"></script>
 <script src="assets/js/shared/net_status.js?v=1.0"></script>
 <script src="assets/js/teacher/teacher_net_status.js?v=1.0"></script>
+<script src="assets/js/shared/back_button.js?v=1.0"></script>
+<script src="assets/js/teacher/teacher_back_button.js?v=1.0"></script>
 </body>
 </html>
