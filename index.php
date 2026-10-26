@@ -758,7 +758,8 @@ function getCsrfToken() {
             if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.isLocked()) {
                 return;
             }
-            window.location.href = 'dashboard';
+            // replace(), not href: same reason as after sign-in (the sign-in page must not stay below the dashboard).
+            window.location.replace('dashboard');
         };
         window.addEventListener('iskool:portrait-ready', openDashboard, { once: true });
         openDashboard();
@@ -1038,8 +1039,10 @@ function getCsrfToken() {
             const data = await res.json();
 
             if (data.success) {
-                // Keep the dimmed + spinner state going right up until the redirect fires
-                window.location.href = data.redirect;
+                // Keep the dimmed + spinner state going right up until the redirect fires.
+                // replace(), not href: the sign-in page must not stay in the history below the dashboard, or the
+                // phone's Back button from Home lands on it and it sends the person straight back in.
+                window.location.replace(data.redirect);
             } else {
                 // Show error inline — no page reload
                 errorBox.textContent   = data.message || 'Something went wrong. Please try again.';
