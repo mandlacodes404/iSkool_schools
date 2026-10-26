@@ -3,6 +3,20 @@ require_once __DIR__ . '/auth/session_guard.php';
 require_once __DIR__ . '/auth/csrf_helper.php';
 include("config.php");
 
+// An assignment that waited on the phone is sent again by the service worker (service-worker.js) with this header.
+// Nobody is looking at the page then, so a refusal is answered in JSON: the worker has to know the work did not arrive,
+// and tells the learner. Without the header nothing here behaves differently from before.
+$isQueuedReplay = $_SERVER['REQUEST_METHOD'] === 'POST' && ($_SERVER['HTTP_X_ISKOOL_QUEUED_REPLAY'] ?? '') === '1';
+function assignment_replay_refusal($message, $status, $title = null) {
+    global $isQueuedReplay;
+    if (!$isQueuedReplay) { return; }
+    while (ob_get_level() > 0) { ob_end_clean(); }
+    http_response_code($status);
+    header('Content-Type: application/json');
+    echo json_encode(['success' => false, 'error' => $message, 'title' => $title]);
+    exit();
+}
+
 if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner') {
     header("Location: index.php");
     exit();
@@ -28,6 +42,7 @@ $assignment = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
 if (!$assignment) {
+    assignment_replay_refusal('This assignment is no longer available.', 404);
     echo "Assignment not found.";
     exit();
 }
@@ -56,6 +71,7 @@ $isInAssignmentClass = $classCheckStmt->get_result()->num_rows > 0;
 $classCheckStmt->close();
 
 if (!$isInAssignmentClass) {
+    assignment_replay_refusal('You are not allowed to submit this assignment.', 403, $assignment['title'] ?? null);
     http_response_code(403);
     echo "You are not allowed to submit this assignment.";
     exit();
@@ -65,6 +81,9 @@ if (!$isInAssignmentClass) {
 $now = new DateTime('now', new DateTimeZone('SAST'));
 $due = new DateTime($assignment['due_date'], new DateTimeZone('SAST'));
 $past_due = $now > $due;
+if ($past_due) {
+    assignment_replay_refusal('The due date for this assignment had passed before your work could be sent.', 409, $assignment['title'] ?? null);
+}
 
 // Check if submission already exists
 $subStmt = $conn->prepare("SELECT * FROM submissions WHERE assignment_id = ? AND student_email = ?");
@@ -164,7 +183,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$past_due) {
             'success' => true,
             'file_url' => $fileUrl,
             'submission_text' => $submission_text
-        ]);
+        ] + ($isQueuedReplay ? ['title' => $assignment['title'] ?? null] : []));
     } else {
         echo json_encode(['success' => false, 'error' => "Execute failed: " . $conn->error]);
     }

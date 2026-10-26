@@ -1617,7 +1617,7 @@ document.addEventListener('DOMContentLoaded', function () {
 <script src="assets/js/shared/pwa_prompts.js?v=1.0"></script>
 <script src="assets/js/shared/pull_to_refresh.js?v=1.0"></script>
 <script src="assets/js/teacher/teacher_pull_to_refresh.js?v=1.0"></script>
-<script src="assets/js/shared/net_status.js?v=1.0"></script>
+<script src="assets/js/shared/net_status.js?v=1.1"></script>
 <script src="assets/js/teacher/teacher_net_status.js?v=1.0"></script>
 <script src="assets/js/shared/back_button.js?v=1.0"></script>
 <script src="assets/js/teacher/teacher_back_button.js?v=1.0"></script>

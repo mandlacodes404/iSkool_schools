@@ -246,6 +246,7 @@ $parentLink = ((int)$parentCount > 0); // true when at least one parent is linke
     <link rel="stylesheet" href="assets/css/learner/desktop_settings.css?v=1.4">   <!-- new -->
     <link rel="stylesheet" href="assets/css/learner/mobile_light.css?v=2.1">
     <link rel="stylesheet" href="assets/css/splash_light.css?v=<?= (int) @filemtime(__DIR__ . '/assets/css/splash_light.css') ?>">
+    <link rel="stylesheet" href="assets/css/shared/net_status.css?v=1.0">
     <script>
     // Desktop sidebar: restore the saved collapsed state BEFORE first paint (no flash).
     // With no saved choice, screens narrower than 1100px start as a rail.
@@ -3974,6 +3975,8 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/discussions.js?v=11.2"></script>
 <script src="assets/js/learner/syllabus.js?v=4.5"></script>
 <script src="assets/js/learner/learner_calendar.js?v=2.5"></script>
+<script src="assets/js/shared/net_status.js?v=1.1"></script>
+<script src="assets/js/learner/learner_net_status.js?v=1.0"></script>
 <script src="assets/js/learner/desktop_menu.js?v=1.4"></script>
 <script src="assets/js/learner/mobile_menu.js?v=1.4"></script>
 <script src="assets/js/learner/mobile_settings.js?v=1.7"></script>
