@@ -9,6 +9,42 @@ require_once __DIR__ . '/auth/session_guard.php';
 require_once __DIR__ . '/auth/csrf_helper.php';
 require_once 'config.php';
 
+// A submission that waited on the phone is sent again by the service worker (service-worker.js) with this header. Nobody
+// is looking at the page then, so the answer is JSON: the worker has to know whether the quiz was accepted, and tells
+// the learner if it was not. Without the header nothing below behaves differently from before.
+$isQueuedReplay = ($_SERVER['HTTP_X_ISKOOL_QUEUED_REPLAY'] ?? '') === '1';
+
+function queued_replay_reply($success, $status, array $fields = []) {
+    while (ob_get_level() > 0) { ob_end_clean(); }
+    http_response_code($status);
+    header('Content-Type: application/json');
+    echo json_encode(['success' => $success] + $fields);
+    exit();
+}
+
+// The place where the page used to just die(): a re-sent submission gets the reason as JSON instead.
+function quiz_stop($message, $status = 409, $title = null) {
+    global $isQueuedReplay;
+    if (!$isQueuedReplay) { die($message); }
+    queued_replay_reply(false, $status, ['error' => $message, 'title' => $title]);
+}
+
+// A re-sent submission whose answer got lost on the way (the phone dropped the connection after the server had saved
+// it) finds its attempt already submitted. That is delivered, not failed. The attempt is told apart by the start time
+// the quiz page posted (a few seconds of slack: it was read from the clock, the attempt's from the database).
+function quiz_already_delivered($conn, $userEmail, $quizId, $startTimestamp) {
+    if ($startTimestamp <= 0) { return false; }
+    $stmt = $conn->prepare("SELECT start_time FROM quiz_attempts WHERE user_email = ? AND quiz_id = ? AND status = 'submitted'");
+    $stmt->bind_param("si", $userEmail, $quizId);
+    $stmt->execute();
+    $found = false;
+    foreach ($stmt->get_result() as $row) {
+        if (abs(strtotime($row['start_time']) - $startTimestamp) <= 5) { $found = true; break; }
+    }
+    $stmt->close();
+    return $found;
+}
+
 // 1. Security Check
 if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_SESSION['email']) || $_SESSION['role'] !== 'learner' || !isset($_POST['quiz_id'])) {
     header("Location: index.php");
@@ -20,7 +56,7 @@ verify_csrf_token();
 // === Fetch current academic year ===
 $currentYearResult = $conn->query("SELECT id FROM academic_years WHERE is_current = 1 LIMIT 1");
 if ($currentYearResult->num_rows === 0) {
-    die("No active academic year set. Contact your admin.");
+    quiz_stop("No active academic year set. Contact your admin.", 503);
 }
 $current_academic_year_id = (int)$currentYearResult->fetch_assoc()['id'];
 
@@ -32,7 +68,11 @@ $quizStmt = $conn->prepare("SELECT title, publish_marks, status, start_time, cla
 $quizStmt->bind_param("i", $quizId);
 $quizStmt->execute();
 $quiz = $quizStmt->get_result()->fetch_assoc();
-if (!$quiz) { header("Location: learner_dashboard.php"); exit(); }
+if (!$quiz) {
+    if ($isQueuedReplay) { quiz_stop('This quiz is no longer available.', 404); }
+    header("Location: learner_dashboard.php");
+    exit();
+}
 
 $quizTitle    = $quiz['title'];
 $publishMarks = (int)$quiz['publish_marks'];
@@ -73,7 +113,7 @@ $memberStmt->execute();
 $isMember = $memberStmt->get_result()->num_rows > 0;
 $memberStmt->close();
 if (!$isMember) {
-    die("You are not authorized to submit this quiz.");
+    quiz_stop("You are not authorized to submit this quiz.", 403, $quizTitle);
 }
 
 // 4. Use server-side attempt start time only
@@ -92,7 +132,10 @@ $attempt = $attemptStmt->get_result()->fetch_assoc();
 $attemptStmt->close();
 if (!$attempt || empty($attempt['start_time'])) {
     $conn->rollback();
-    die("Invalid quiz attempt.");
+    if ($isQueuedReplay && quiz_already_delivered($conn, $userEmail, $quizId, (int)($_POST['start_time'] ?? 0))) {
+        queued_replay_reply(true, 200, ['already' => true, 'title' => $quizTitle]);
+    }
+    quiz_stop("Invalid quiz attempt.", 409, $quizTitle);
 }
 $attemptId = (int)$attempt['attempt_id'];
 $timeTaken = max(0, time() - strtotime($attempt['start_time']));
@@ -104,6 +147,7 @@ $checkStmt->execute();
 if ($checkStmt->get_result()->num_rows > 0) {
     $checkStmt->close();
     $conn->rollback();
+    if ($isQueuedReplay) { queued_replay_reply(true, 200, ['already' => true, 'title' => $quizTitle]); }
     header("Location: learner_dashboard.php");
     exit();
 }
@@ -445,7 +489,7 @@ try {
 } catch (Exception $e) {
     $conn->rollback();
     error_log("Submission Error: " . $e->getMessage());
-    die("An error occurred while saving your results.");
+    quiz_stop("An error occurred while saving your results.", 500, $quizTitle);
 }
 
 // 9. Render Final Page
@@ -461,6 +505,11 @@ if ($hasOpenEnded === 1) {
 // RENDER FUNCTION — Platform-consistent styling
 // ─────────────────────────────────────────────────────────────────────────────
 function render_page($type, $quizTitle, $score, $total, $timeTaken) {
+    global $isQueuedReplay;
+    if ($isQueuedReplay) {
+        if ($type === 'closed') { queued_replay_reply(false, 409, ['error' => 'This quiz closed before your answers could be sent.', 'title' => $quizTitle]); }
+        queued_replay_reply(true, 200, ['title' => $quizTitle, 'result' => $type]);
+    }
     $percentage  = ($total > 0) ? round(($score / $total) * 100) : 0;
     $timeStr     = $timeTaken ? floor($timeTaken / 60) . "m " . ($timeTaken % 60) . "s" : null;
 

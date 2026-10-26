@@ -111,9 +111,6 @@ final class TeacherOfflineQueueTest extends TestCase
         $this->assertStringContainsString("header('Cache-Control: no-store');", $php);
         $this->assertStringContainsString("'email' => \$_SESSION['email']", $php);
         $this->assertStringContainsString("'csrf_token' => \$_SESSION['csrf_token']", $php);
-        // the learner's endpoint is untouched
-        $learner = $this->source('api/learner/get_session_identity.php');
-        $this->assertStringNotContainsString('csrf', $learner);
     }
 
     // ── the service worker ─────────────────────────────────────────────────────────────────────────────────────────
@@ -125,24 +122,25 @@ final class TeacherOfflineQueueTest extends TestCase
         return array_map(static fn($x) => ($x[2] ?? '') === 'TEACHER_MARKS_PATH' ? '/api/teacher/save_marks.php' : $x[1], $all);
     }
 
-    public function test_the_marks_are_the_only_teacher_save_that_can_wait_and_the_learners_list_is_as_it_was(): void
+    public function test_the_marks_are_the_only_teacher_save_that_can_wait(): void
     {
         $worker = $this->source('service-worker.js');
         $paths = $this->queueable($worker);
         $teacher = array_values(array_filter($paths, static fn($p) => strpos($p, '/api/teacher/') === 0));
         $this->assertSame(['/api/teacher/save_marks.php'], $teacher, 'grading an open-ended answer, creating quizzes, announcements... all need a connection');
         $learner = array_values(array_filter($paths, static fn($p) => strpos($p, '/api/teacher/') !== 0));
+        // the learner side: see LearnerOfflineQueueTest (the quiz autosave left the list on purpose)
         $this->assertSame([
-            '/save_progress.php', '/submit_quiz.php', '/submit_assignment.php', '/api/learner/submit_evaluation.php',
+            '/submit_quiz.php', '/submit_assignment.php', '/api/learner/submit_evaluation.php',
             '/api/learner/create_discussion.php', '/api/learner/submit_reply.php',
-        ], $learner, 'the learner side of the queue is not changed by the teacher work');
+        ], $learner);
         $this->assertStringContainsString("const TEACHER_MARKS_PATH = '/api/teacher/save_marks.php';", $worker);
     }
 
     public function test_the_request_is_copied_before_it_is_sent_so_there_is_something_to_keep_when_the_send_fails(): void
     {
         $worker = $this->source('service-worker.js');
-        $this->assertStringContainsString('const COPY_BEFORE_SEND = new Set([TEACHER_MARKS_PATH]);', $worker);
+        $this->assertStringContainsString('const COPY_BEFORE_SEND = new Set([TEACHER_MARKS_PATH, ...LEARNER_SUBMISSION_PATHS]);', $worker);
         $handle = $this->body($worker, 'async function handleWrite(');
         $this->assertStringContainsString('const spare = COPY_BEFORE_SEND.has(pathname) ? request.clone() : null;', $handle);
         $this->assertLessThan(strpos($handle, 'await fetch(request)'), strpos($handle, 'request.clone()'), 'copy first, send second');
@@ -178,13 +176,14 @@ final class TeacherOfflineQueueTest extends TestCase
         $record = $this->body($worker, 'async function replayRecord(');
         $this->assertStringContainsString('teacherRecord ? TEACHER_IDENTITY_URL : LEARNER_IDENTITY_URL', $record);
         $this->assertStringContainsString('identity.email !== record.queueUser', $record);
-        $this->assertStringContainsString("headers['X-CSRF-Token'] = identity.csrf_token || record.csrfToken || '';", $record);
+        $this->assertStringContainsString("headers['X-CSRF-Token'] = liveToken || record.csrfToken || '';", $record);
+        $this->assertStringContainsString('const liveToken = identity.csrf_token || \'\';', $record);
         $this->assertStringContainsString("headers['X-iSkool-Queued-Replay'] = '1';", $record);
         // the identity check comes before the save is sent
         $this->assertLessThan(strpos($record, 'await fetch(record.url'), strpos($record, 'identity.email !== record.queueUser'));
         // a different teacher's saved marks are thrown away, and the page is told
         $this->assertStringContainsString("type: 'offline-write-discarded'", $record);
-        // learner records still go through the original branch
+        // the other learner saves still go through the original branch
         $this->assertStringContainsString("type: 'offline-write-synced', url: record.url }", $record);
         $this->assertStringContainsString("type: 'offline-write-failed', url: record.url }", $record);
     }
@@ -203,13 +202,14 @@ final class TeacherOfflineQueueTest extends TestCase
         $this->assertStringContainsString("type: 'offline-write-failed'", $settle);
     }
 
-    public function test_one_pass_at_a_time_and_a_few_quick_retries_for_a_teachers_save(): void
+    public function test_one_pass_at_a_time_and_a_few_quick_retries_for_a_teachers_save_and_a_learners_submission(): void
     {
         $worker = $this->source('service-worker.js');
         $this->assertStringContainsString('if (replayRunning) { replayAgain = true; return replayRunning; }', $worker);
-        $this->assertStringContainsString('const TEACHER_RETRY_DELAYS_MS = [1500, 3000, 6000];', $worker);
+        $this->assertStringContainsString('const REPLAY_RETRY_DELAYS_MS = [1500, 3000, 6000];', $worker);
         $pass = $this->body($worker, 'async function replayPass(');
-        $this->assertStringContainsString('teacherRecord ? TEACHER_RETRY_DELAYS_MS[attempt++] : undefined', $pass, 'a learner\'s save keeps the one-try behaviour');
+        $this->assertStringContainsString('const retries = teacherRecord || isLearnerSubmission(record.url);', $pass);
+        $this->assertStringContainsString('retries ? REPLAY_RETRY_DELAYS_MS[attempt++] : undefined', $pass, 'the other learner saves keep the one-try behaviour');
         $this->assertStringContainsString('if (delay === undefined) return;', $pass);
         // a waiting save of one role must not hold up the other role's saves
         $record = $this->body($worker, 'async function replayRecord(');
@@ -223,21 +223,22 @@ final class TeacherOfflineQueueTest extends TestCase
         $this->assertStringContainsString("'iskool-replay-queued-writes'", $worker);
         $status = $this->body($worker, 'async function notifyQueueStatus(');
         $this->assertStringContainsString('isTeacherUrl(record.url)', $status);
-        $this->assertStringContainsString("type: 'offline-queue-status', teacher, total: records.length", $status);
+        $this->assertStringContainsString("type: 'offline-queue-status', teacher, learner, total: records.length", $status);
         // the logout wipe of the queue is still there
         $this->assertStringContainsString('clearQueuedWrites()', $worker);
     }
 
     // ── the connection strip ───────────────────────────────────────────────────────────────────────────────────────
 
-    public function test_the_strip_script_builds_text_safely_and_only_announces_the_teachers_own_saves(): void
+    public function test_the_strip_script_builds_text_safely_and_only_announces_the_saves_of_the_page_that_loaded_it(): void
     {
         $js = $this->source('assets/js/shared/net_status.js');
         $this->assertStringNotContainsString('innerHTML', $js);
         $this->assertStringNotContainsString('insertAdjacentHTML', $js);
         $this->assertStringContainsString('textContent', $js);
-        $this->assertStringContainsString("path.indexOf(prefix) !== 0", $js);               // another tab's (the learner's) saves are not announced
-        $this->assertStringContainsString('data.teacher[mine]', $js);                       // only the signed-in user's waiting saves are counted
+        $this->assertStringContainsString('if (!ownsUrl(path)) return;', $js);              // another tab's (the other app's) saves are not announced
+        $this->assertStringContainsString('data[role][mine]', $js);                         // only the signed-in user's waiting saves are counted
+        $this->assertStringContainsString("var role = (options && options.role) || 'teacher';", $js, 'the teacher page passes no role and counts the teacher\'s saves, as before');
         $this->assertStringContainsString("document.addEventListener('visibilitychange'", $js);
         $this->assertStringContainsString("window.addEventListener('online'", $js);
         $this->assertStringContainsString('RETRY_STEPS_MS = [12000, 20000, 30000]', $js);
@@ -263,7 +264,7 @@ final class TeacherOfflineQueueTest extends TestCase
         $this->assertStringContainsString("'.pwa-banner--bottom'", $js);                                // never on top of the install card
     }
 
-    public function test_the_teacher_dashboard_loads_the_strip_after_the_page_scripts_and_the_learner_dashboard_does_not(): void
+    public function test_the_teacher_dashboard_loads_the_strip_after_the_page_scripts(): void
     {
         $page = $this->source('teacher_dashboard.php');
         $this->assertStringContainsString('assets/css/shared/net_status.css', $page);
@@ -278,7 +279,7 @@ final class TeacherOfflineQueueTest extends TestCase
         $this->assertLessThan($shared, $owner, 'the signed-in teacher\'s email must exist before the strip starts counting their saves');
         $this->assertLessThan($glue, $shared);
         $this->assertStringContainsString('assets/js/teacher/grades.js?v=5.4', $page, 'grades.js changed, so its cache-busting version moved');
-        $this->assertStringNotContainsString('net_status', $this->source('learner_dashboard.php'));
+        $this->assertStringContainsString('assets/js/shared/net_status.js?v=1.1', $page, 'net_status.js changed, so its cache-busting version moved');
     }
 
     public function test_the_teacher_glue_names_the_learner_and_quiz_and_forgets_stale_grades(): void
