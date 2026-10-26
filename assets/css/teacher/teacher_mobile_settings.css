@@ -35,6 +35,16 @@
 #api-content-area:has(.ms-detail) { padding-bottom: 0 !important; }
 body:has(#api-content-area .ms-detail) #mobileBottomNav { display: none !important; }
 
+/* -- Appearance page: the light / dark switch (the same sun / moon pair as the desktop Appearance page, a little bigger for thumbs).
+      Light-mode colours for these are in teacher_mobile_light.css -- */
+.ms-note { margin: 0 4px 18px; font-size: 14px; line-height: 1.5; color: var(--ms-muted); }
+.ms-g .ms-r--static:active { background: none; }
+.ms-toggle { display: inline-flex; gap: 2px; padding: 3px; flex: none; border: 1px solid rgba(255,255,255,.1); border-radius: 13px; background: #161b22; }
+.ms-tb { display: grid; place-items: center; width: 46px; height: 38px; border-radius: 10px; color: var(--ms-muted); transition: background .15s, color .15s, box-shadow .15s; }
+.ms-tb .ms-i { width: 20px; height: 20px; }
+.ms-tb.on { background: #2b323b; color: var(--ms-text); }
+.ms-tb:focus-visible { outline: 2px solid var(--ms-soft); outline-offset: 2px; }
+
 /* -- Back row (detail pages): pinned under the fixed top nav -- */
 .ms-nav { position: sticky; top: 0; z-index: 6; margin: 0 -14px; padding: 4px 8px 2px; background: #0d1117; }
 .ms-back { display: inline-flex; align-items: center; gap: 2px; min-height: 44px; padding: 0 10px 0 4px; border-radius: 12px; color: var(--ms-accent); font: 450 16px/1 var(--ms-font); }
@@ -47,8 +57,9 @@ body:has(#api-content-area .ms-detail) #mobileBottomNav { display: none !importa
 /* -- Profile card -- */
 .ms-profile { display: flex; align-items: center; gap: 14px; margin: 4px 0 6px; padding: 12px; border-radius: 16px; background: var(--ms-card); }
 .ms-av { position: relative; width: 60px; height: 60px; flex: none; border-radius: 50%; }
-.ms-av-face { display: grid; place-items: center; width: 100%; height: 100%; border-radius: 50%; overflow: hidden; background: #161b22; border: 1px solid var(--ms-line); color: #c9d1d9; font: 600 20px/1 var(--ms-font); text-transform: uppercase; }
-.ms-av-face img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ms-av-face { position: relative; display: grid; place-items: center; width: 100%; height: 100%; border-radius: 50%; overflow: hidden; background: #161b22; border: 1px solid var(--ms-line); color: #c9d1d9; font: 600 20px/1 var(--ms-font); text-transform: uppercase; }
+/* The photo fills the circle itself (absolute), so its own size can never stretch the circle's grid row and crop it. */
+.ms-av-face img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
 .ms-cam { position: absolute; right: -3px; bottom: -3px; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: #21262d; border: 2px solid #0d1117; color: var(--ms-text); }
 .ms-cam .ms-i { width: 13px; height: 13px; }
 .ms-who { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; align-self: stretch; }
@@ -104,7 +115,7 @@ body:has(#api-content-area .ms-detail) #mobileBottomNav { display: none !importa
 
 /* -- Save bar -- */
 /* On a short page the save bar sits at the bottom edge instead of floating under the last row */
-.ms-detail { display: flex; flex-direction: column; min-height: calc(100vh - var(--teacher-top-nav-height, 112px) - env(safe-area-inset-top, 0px)); }
+.ms-detail { display: flex; flex-direction: column; min-height: calc(100vh - var(--teacher-top-nav-height, 112px) - env(safe-area-inset-top, 0px)); min-height: calc(100dvh - var(--teacher-top-nav-height, 112px) - env(safe-area-inset-top, 0px)); }
 .ms-detail > #msPwBody { flex: 1; display: flex; flex-direction: column; }
 .ms-spacer { flex: 1 0 22px; }
 .ms-bar { position: sticky; bottom: 0; z-index: 5; margin: 0 -14px; padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px)); background: #0d1117; border-top: 1px solid var(--ms-line); }

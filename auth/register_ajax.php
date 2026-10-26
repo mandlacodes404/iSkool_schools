@@ -25,6 +25,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 verify_csrf_token();
 
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/rate_limit_functions.php';
+require_once __DIR__ . '/parent_invite_db.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -41,13 +43,25 @@ $gender     = $_POST['gender'] ?? '';
 $age        = (int)($_POST['age'] ?? 0);
 $defaultPic = 'uploads/default_profile.png';
 
+// A parent who came from a learner's invite link has the invite code in the pending_parent_invite cookie (set by
+// parent_link.php). When they leave the access key empty, that invite takes the place of the key, and the account is
+// linked to the learner in the same step. A parent who types the access key registers the usual way.
+$invite_code = '';
+if ($role === 'parent' && $access_key === '') {
+    $cookie_code = $_COOKIE['pending_parent_invite'] ?? '';
+    if (parent_invite_is_valid_code_format($cookie_code)) {
+        $invite_code = $cookie_code;
+    }
+}
+$use_invite = $invite_code !== '';
+
 // ── Validation ──
 if ($role === 'admin') {
     echo json_encode(['success' => false, 'message' => 'Admin accounts can only be created by the system.']);
     exit();
 }
 
-if (empty($title) || empty($first_name) || empty($surname) || empty($email) || empty($role) || empty($access_key)) {
+if (empty($title) || empty($first_name) || empty($surname) || empty($email) || empty($role) || ($access_key === '' && !$use_invite)) {
     echo json_encode(['success' => false, 'message' => 'All fields are required.']);
     exit();
 }
@@ -67,17 +81,37 @@ if ($raw_password !== $confirm_password) {
 
 $password = password_hash($raw_password, PASSWORD_DEFAULT);
 
-// ── Validate access key ──
-$keyStmt = $conn->prepare("SELECT id FROM access_keys WHERE role = ? AND access_key = ?");
-$keyStmt->bind_param("ss", $role, $access_key);
-$keyStmt->execute();
-$keyStmt->store_result();
+// ── Validate the invite, or the access key ──
+$invite = null;
+if ($use_invite) {
+    // Checked before anyone is signed in, so wrong codes are rate limited by IP and every bad code gets one message.
+    $client_ip = auth_rate_limit_client_ip();
+    $window    = 15 * 60;
 
-if ($keyStmt->num_rows === 0) {
-    echo json_encode(['success' => false, 'message' => 'Invalid or already used access key.']);
-    exit();
+    if (auth_rate_limit_is_blocked($conn, 'parent_invite_register', 'ip', $client_ip, 10, $window)) {
+        http_response_code(429);
+        echo json_encode(['success' => false, 'message' => 'Too many attempts. Please wait a few minutes and try again.']);
+        exit();
+    }
+
+    $invite = parent_invite_find_open($conn, $invite_code);
+    if ($invite === null) {
+        auth_rate_limit_record_attempt($conn, 'parent_invite_register', 'ip', $client_ip, $window);
+        echo json_encode(['success' => false, 'message' => 'This invite link is not valid or has expired. Ask your child to create a new one, or enter the parent access key from your school.']);
+        exit();
+    }
+} else {
+    $keyStmt = $conn->prepare("SELECT id FROM access_keys WHERE role = ? AND access_key = ?");
+    $keyStmt->bind_param("ss", $role, $access_key);
+    $keyStmt->execute();
+    $keyStmt->store_result();
+
+    if ($keyStmt->num_rows === 0) {
+        echo json_encode(['success' => false, 'message' => 'Invalid or already used access key.']);
+        exit();
+    }
+    $keyStmt->close();
 }
-$keyStmt->close();
 
 // ── Check for duplicate email ──
 $check = $conn->prepare("SELECT id FROM users WHERE email = ?");
@@ -86,20 +120,67 @@ $check->execute();
 $check->store_result();
 
 if ($check->num_rows > 0) {
-    echo json_encode(['success' => false, 'message' => 'This email is already registered.']);
+    $taken = $use_invite
+        ? 'This email is already registered. Log in instead, and you will come back to confirm the link.'
+        : 'This email is already registered.';
+    echo json_encode(['success' => false, 'message' => $taken]);
     exit();
 }
 $check->close();
 
 // ── Insert user ──
-$stmt = $conn->prepare("
-    INSERT INTO users 
-    (title, name, second_name, surname, email, password, role, profile_pic, gender, age)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-");
-$stmt->bind_param("sssssssssi", $title, $first_name, $second_name, $surname, $email, $password, $role, $defaultPic, $gender, $age);
+// With an invite, the account, the claim on the invite and the link to the learner are saved together or not at all:
+// if someone else used the link a moment earlier, no account is left behind.
+$linked = false;
+$in_transaction = false;
+try {
+    if ($use_invite) {
+        $conn->begin_transaction();
+        $in_transaction = true;
+    }
 
-if (!$stmt->execute()) {
+    $stmt = $conn->prepare("
+        INSERT INTO users 
+        (title, name, second_name, surname, email, password, role, profile_pic, gender, age)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ");
+    $stmt->bind_param("sssssssssi", $title, $first_name, $second_name, $surname, $email, $password, $role, $defaultPic, $gender, $age);
+
+    if (!$stmt->execute()) {
+        if ($in_transaction) {
+            $conn->rollback();
+        }
+        echo json_encode(['success' => false, 'message' => 'Registration failed. Please try again.']);
+        exit();
+    }
+
+    if ($use_invite) {
+        if (!parent_invite_claim($conn, $invite['id'], $email)) {
+            $conn->rollback();
+            $in_transaction = false;
+            auth_rate_limit_record_attempt($conn, 'parent_invite_register', 'ip', $client_ip, $window);
+            echo json_encode(['success' => false, 'message' => 'This invite link has just been used. Ask your child to create a new one, or enter the parent access key from your school.']);
+            exit();
+        }
+        parent_invite_link($conn, $email, $invite['learner_email']);
+        $conn->commit();
+        $in_transaction = false;
+        $linked = true;
+
+        // The invite is spent, so the reminder cookie must not send this parent back to a link that no longer works.
+        setcookie('pending_parent_invite', '', [
+            'expires'  => time() - 3600,
+            'path'     => '/',
+            'secure'   => true,
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
+    }
+} catch (Throwable $e) {
+    if ($in_transaction) {
+        try { $conn->rollback(); } catch (Throwable $ignored) {}
+    }
+    error_log('register_ajax failed: ' . $e->getMessage());
     echo json_encode(['success' => false, 'message' => 'Registration failed. Please try again.']);
     exit();
 }
@@ -143,7 +224,9 @@ try {
             <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:12px;">
                 <tr><td style="padding:10px 0;font-size:13px;color:#555;">
                     <span style="display:inline-block;background:#f59e0b;color:#0d1117;font-weight:700;font-size:11px;width:20px;height:20px;border-radius:50%;text-align:center;line-height:20px;margin-right:10px;">1</span>
-                    Log in and go to <strong>My Child</strong> to link your account to your child.
+                    ' . ($linked
+                        ? 'Log in. Your child is already linked, so you will see their progress on <strong>Home</strong>.'
+                        : 'Log in. Ask your child to open <strong>My Class</strong> in iSkool and create a parent link, then open that link to connect your account to them.') . '
                 </td></tr>
                 <tr><td style="padding:10px 0;font-size:13px;color:#555;">
                     <span style="display:inline-block;background:#f59e0b;color:#0d1117;font-weight:700;font-size:11px;width:20px;height:20px;border-radius:50%;text-align:center;line-height:20px;margin-right:10px;">2</span>
@@ -293,5 +376,7 @@ HTML;
     // Silently fail — registration was already successful
 }
 
-echo json_encode(['success' => true]);
+echo json_encode($linked
+    ? ['success' => true, 'linked' => true, 'learner_name' => $invite['learner_name']]
+    : ['success' => true]);
 exit();

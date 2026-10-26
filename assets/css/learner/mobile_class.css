@@ -1,0 +1,44 @@
+/* assets/css/learner/mobile_class.css
+   Learner "My Class" page for phones (max-width: 768px). Load it AFTER learner_dashboard.css and
+   mobile_settings.css (it reuses the .ms-* groups, rows and sheets from there), then mobile_class.js.
+   Desktop and tablet keep the existing My Class markup exactly as it is.
+
+   To undo it all: remove the two include lines and the <div class="lmc-m ms"> block in learner_dashboard.php. */
+/* The parent link sheet (invite link + linked parents) is built by mobile_class.js with parent_invite.js. */
+
+.lmc-m { display: none; }
+
+@media (max-width: 768px) {
+
+  /* swap the old mobile layout for the Settings-style one */
+  #myClassContent .lmc-dh,
+  #myClassContent .lmc-body { display: none !important; }
+  #myClassContent .lmc-m { display: block; }
+
+  /* #myClassContent already has 16px padding; Settings content starts 32px from the edge */
+  #myClassContent .lmc-m.ms { padding-left: 16px; padding-right: 16px; }
+  .lmc-m > .ms-gt:first-child { padding-top: 6px; }
+
+  /* read-only rows: same look as Settings rows, but no tap highlight */
+  .lmc-m .ms-r--static { cursor: default; }
+  .lmc-m .ms-r--static:active { background: none; }
+  .lmc-m .ms-rv { max-width: 50%; text-align: right; overflow-wrap: anywhere; }
+
+  /* linked / not linked: the page only flips data-linked, no markup is rebuilt */
+  .lmc-parent[data-linked="1"] .mc-off,
+  .lmc-parent[data-linked="0"] .mc-on { display: none !important; }
+
+  /* parent link sheet (the sheet is appended to <body>, so these are not scoped under .ms) */
+  .ms-sheet .mc-list { margin: 0 0 2px; }
+  .ms-sheet .mc-row { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 12px; }
+  .ms-sheet .mc-av { display: grid; place-items: center; width: 34px; height: 34px; flex: none; border-radius: 50%; background: #3a3a39; color: #cfcfcb; font: 600 13px/1 'Geist', system-ui, sans-serif; }
+  .ms-sheet .mc-nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ms-soft, #cfcfcb); font: 450 16px/1 'Geist', system-ui, sans-serif; }
+  .ms-sheet .mc-rm { flex: none; min-height: 44px; padding: 0 12px; border: 0; border-radius: 12px; background: none; color: var(--ms-muted, #8b8b86); font: 450 14px/1 'Geist', system-ui, sans-serif; cursor: pointer; }
+  .ms-sheet .mc-rm:active { background: rgba(255,255,255,.07); }
+  .ms-sheet .mc-rm[data-sure] { color: var(--ms-danger, #f08a84); }
+  .ms-sheet .mc-rm:disabled { opacity: .5; }
+  .ms-sheet .mc-result { padding: 4px 0 0; }
+  .ms-sheet .mc-result[hidden] { display: none; }
+  .ms-sheet .mc-link { display: block; width: calc(100% - 24px); margin: 0 12px; height: 44px; padding: 0 12px; box-sizing: border-box; border: 1px solid rgba(255,255,255,.1); border-radius: 12px; background: rgba(255,255,255,.04); color: var(--ms-text, #ecece9); font: 13px/1 'Geist', system-ui, sans-serif; }
+  .ms-sheet .mc-link:focus { outline: none; border-color: var(--ms-accent, #4fd1c5); }
+}

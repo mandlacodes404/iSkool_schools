@@ -28,12 +28,21 @@ require_once __DIR__ . '/auth/session_guard.php';
 require_once 'config.php'; 
 require_once __DIR__ . '/includes/app_version.php';
 require_once 'check_remember_me.php';     
+require_once __DIR__ . '/auth/parent_invite_functions.php';
 
 $errors = [
     'login' => $_SESSION['login_error'] ?? '',
     'register' => $_SESSION['register_error'] ?? ''
 ];
 $activeForm = $_SESSION['active_form'] ?? 'login';
+// parent_link.php sends a new parent straight to the register form
+if (($_GET['form'] ?? '') === 'register') {
+    $activeForm = 'register';
+}
+// A parent who came from a learner's invite link has the code in a cookie (set by parent_link.php). Only its shape is
+// checked here; auth/register_ajax.php checks the invite itself. The register form uses this flag to say the access
+// key is not needed.
+$has_parent_invite = parent_invite_is_valid_code_format($_COOKIE['pending_parent_invite'] ?? '');
 $resetMessage = $_SESSION['reset_message'] ?? '';
 $resetError   = $_SESSION['reset_error'] ?? '';
 
@@ -68,7 +77,7 @@ if ($result && $row = $result->fetch_assoc()) {
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Login - <?= htmlspecialchars($schoolName) ?></title>
 
-<link rel="manifest" href="/manifest.php?v=1.1">
+<link rel="manifest" href="/manifest.php?v=1.2">
 
 <meta name="theme-color" content="#20201f">
 
@@ -82,6 +91,23 @@ if ($result && $row = $result->fetch_assoc()) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/index.css?v=9.4">
+    <?php require __DIR__ . '/includes/login_theme_head.php'; ?>
+    <script>
+    // Phone light mode (768px and below): apply the phone theme saved by the learner dashboard BEFORE first paint, so the
+    // splash and the login page never start dark and then flip. Dark is the default. The attribute only has CSS at 768px
+    // and below (index_light.css, splash_light.css); the status bar colour (theme-color above) follows it on phones.
+    (function () {
+        try {
+            var light = localStorage.getItem(window.ISKOOL_LEARNER_MOBILE_THEME_KEY || 'iskoolLearnerMobileTheme') === 'light';
+            if (light) document.documentElement.setAttribute('data-login-mobile-theme', 'light');
+            var meta = document.querySelector('meta[name="theme-color"]');
+            var phone = window.matchMedia('(max-width: 768px)');
+            var bar = function () { if (meta) meta.setAttribute('content', light && phone.matches ? '#faf9f5' : '#20201f'); };
+            bar();
+            if (phone.addEventListener) phone.addEventListener('change', bar);
+        } catch (e) {}
+    })();
+    </script>
 
 <?php if (isset($_SESSION['email']) && isset($_SESSION['role'])): ?>
     <!-- ──────────────────────────────────────────────────────────────────
@@ -624,6 +650,7 @@ function getCsrfToken() {
                 <div class="field">
                     <label class="field-label" for="register-access-key">Access key</label>
                     <input type="text" name="access_key" id="register-access-key" placeholder="Enter your access key" required>
+                    <p id="invite-key-note" hidden style="margin:6px 0 0;font-size:12.5px;line-height:1.5;color:#8b8b86;text-align:left;">You were invited by a learner, so you do not need an access key. Leave this empty.</p>
                 </div>
 
                 <!-- NEW: Notification Agreement Checkbox -->
@@ -731,7 +758,8 @@ function getCsrfToken() {
             if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.isLocked()) {
                 return;
             }
-            window.location.href = 'dashboard';
+            // replace(), not href: same reason as after sign-in (the sign-in page must not stay below the dashboard).
+            window.location.replace('dashboard');
         };
         window.addEventListener('iskool:portrait-ready', openDashboard, { once: true });
         openDashboard();
@@ -1011,8 +1039,10 @@ function getCsrfToken() {
             const data = await res.json();
 
             if (data.success) {
-                // Keep the dimmed + spinner state going right up until the redirect fires
-                window.location.href = data.redirect;
+                // Keep the dimmed + spinner state going right up until the redirect fires.
+                // replace(), not href: the sign-in page must not stay in the history below the dashboard, or the
+                // phone's Back button from Home lands on it and it sends the person straight back in.
+                window.location.replace(data.redirect);
             } else {
                 // Show error inline — no page reload
                 errorBox.textContent   = data.message || 'Something went wrong. Please try again.';
@@ -1068,7 +1098,7 @@ function getCsrfToken() {
             const data = await res.json();
 
             if (data.success) {
-                showRegistrationSuccess();
+                showRegistrationSuccess(!!data.linked);
             } else {
                 errorBox.textContent   = data.message || 'Registration failed. Please try again.';
                 errorBox.style.display = 'block';
@@ -1088,6 +1118,10 @@ function getCsrfToken() {
     (function () {
         const f = document.getElementById('register-form'), fe = document.getElementById('register-form-el');
         const eb = document.getElementById('register-error-box'), sel = document.getElementById('register-role');
+        // Came from a learner's invite link: a parent does not need the access key
+        const FROM_INVITE = <?= $has_parent_invite ? 'true' : 'false' ?>;
+        const keyInput = document.getElementById('register-access-key'), inviteNote = document.getElementById('invite-key-note');
+        const usesInvite = () => FROM_INVITE && sel.value === 'parent';
         const T = [['Who is joining?', 'Choose the option that fits you best.'], ['Tell us about you', 'We use this to set up your profile.'], ['Set up your login', 'Last step. Your school gave you an access key.']];
         const tag = (id, step, order, half) => { const el = document.getElementById(id).closest('.field'); el.dataset.step = step; el.dataset.o = order; if (half) el.dataset.half = 1; };
         tag('register-role', 1, 1); tag('register-title', 2, 1, 1); tag('gender', 2, 2, 1); tag('register-first-name', 2, 3); tag('register-surname', 2, 4); tag('register-second-name', 2, 5, 1); tag('age', 2, 6, 1);
@@ -1097,11 +1131,21 @@ function getCsrfToken() {
             f.dataset.cur = k; eb.style.display = 'none';
             f.querySelectorAll('.reg-prog b').forEach((b, i) => b.className = i < k ? 'on' : '');
             document.getElementById('reg-prog-t').textContent = 'Step ' + k + ' of 3';
-            document.getElementById('reg-h').textContent = T[k - 1][0]; document.getElementById('reg-sub').textContent = T[k - 1][1];
+            document.getElementById('reg-h').textContent = T[k - 1][0];
+            document.getElementById('reg-sub').textContent = (k === 3 && usesInvite()) ? 'Last step. Your invite means you do not need an access key.' : T[k - 1][1];
             const pnl = document.querySelector('.form-panel'); if (pnl) pnl.scrollTo({ top: 0 });
         };
         const sync = () => f.querySelectorAll('.role-card').forEach(c => c.classList.toggle('on', c.dataset.role === sel.value));
-        f.querySelectorAll('.role-card').forEach(c => c.addEventListener('click', () => { sel.value = c.dataset.role; sync(); eb.style.display = 'none'; }));
+        const syncInvite = () => {
+            const on = usesInvite();
+            inviteNote.hidden = !on;
+            keyInput.required = !on;
+            keyInput.placeholder = on ? 'Not needed with an invite link' : 'Enter your access key';
+        };
+        sel.addEventListener('change', syncInvite);
+        f.querySelectorAll('.role-card').forEach(c => c.addEventListener('click', () => { sel.value = c.dataset.role; sync(); syncInvite(); eb.style.display = 'none'; }));
+        if (FROM_INVITE && !sel.value) { sel.value = 'parent'; sync(); }
+        syncInvite();
         const bad = msg => { eb.textContent = msg; eb.style.display = 'block'; };
         f.querySelector('.reg-next').addEventListener('click', () => {
             const k = +f.dataset.cur;
@@ -1110,11 +1154,11 @@ function getCsrfToken() {
             go(k + 1);
         });
         f.querySelector('.reg-back').addEventListener('click', () => go(Math.max(1, +f.dataset.cur - 1)));
-        fe.addEventListener('reset', () => setTimeout(() => { sync(); go(1); }));
+        fe.addEventListener('reset', () => setTimeout(() => { sync(); syncInvite(); go(1); }));
     })();
 
     // ── Inline registration success (no page reload) ─────────────────────────
-    function showRegistrationSuccess() {
+    function showRegistrationSuccess(linked) {
         // Inject a hidden success form-box into the form panel
         const formPanel = document.querySelector('.form-panel');
 
@@ -1126,13 +1170,16 @@ function getCsrfToken() {
         successBox.innerHTML = `
             <i class="fas fa-check-circle" style="font-size:3.2rem;color:#00ff99;margin-bottom:22px;filter:drop-shadow(0 0 10px rgba(0,255,153,0.4));"></i>
             <h2 style="margin-bottom:10px;">You're registered!</h2>
-            <p style="color:#888;font-size:15px;line-height:1.6;max-width:300px;margin:0 auto 30px;">
+            <p id="success-text" style="color:#888;font-size:15px;line-height:1.6;max-width:300px;margin:0 auto 30px;">
                 Your account has been created. Taking you to login…
             </p>
             <div style="width:100%;max-width:280px;background:#2a2a28;border-radius:99px;height:3px;overflow:hidden;">
                 <div id="success-progress-bar" style="height:100%;width:0%;background:#00ff99;border-radius:99px;transition:width 3s linear;"></div>
             </div>
         `;
+        if (linked) {
+            successBox.querySelector('#success-text').textContent = 'Your account has been created and your child is linked. Taking you to login…';
+        }
         formPanel.appendChild(successBox);
 
         // Fade out the register form, fade in the success card

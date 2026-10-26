@@ -1,0 +1,348 @@
+/* assets/css/index_light.css
+ *
+ * Light mode for the login / register / forgot-password page (index.php), on desktop only.
+ *
+ * Switched on by <html data-login-theme="light">, which includes/login_theme_head.php sets before
+ * first paint from the last theme used on this browser (both dashboards save it).
+ *
+ * The first block applies only on screens 769px wide and up. That covers both layouts of this page:
+ *   - 900px and up      two panels: brand panel + animation on the left, form card on the right
+ *   - 769px to 899px    one column, the phone-style layout
+ * Phones and narrow windows (768px and below) have their own switch (data-login-mobile-theme) and their own
+ * block at the end of this file. Dark mode is the default and is not touched: this file is additive, and
+ * every rule needs the "light" attribute.
+ *
+ * The splash screen is themed in splash_light.css. The animation inside the left panel is a
+ * separate document (animations/features/quiz-intro.html) and themes itself.
+ *
+ * Palette (same as the light dashboards):
+ *   paper #faf9f5   card #ffffff   ink #282924   soft #53544e   muted #6c6d66   line #dfded8
+ *   primary button #252624 (hover #3a3b37) with #faf9f5 text   error #b0413b   success #15803d
+ */
+@media (min-width: 769px) {
+
+    /* ── Page ── */
+    html[data-login-theme="light"] {
+        color-scheme: light;   /* native controls, scrollbars, select pop-ups and autofill follow */
+        background: #faf9f5;
+    }
+    html[data-login-theme="light"] body {
+        background: #faf9f5;
+        color: #282924;
+    }
+
+    /* Brand lockup above the animation + wordmark on the form side */
+    html[data-login-theme="light"] .bp-intro-eyebrow { color: #6c6d66; }
+    html[data-login-theme="light"] .bp-brand-name { color: #282924; }
+    html[data-login-theme="light"] #iskool-brand-wordmark,
+    html[data-login-theme="light"] .iskool-brand-wordmark { color: #282924; }
+    html[data-login-theme="light"] .preview-frame { box-shadow: 0 18px 48px rgba(31, 32, 29, .10); }
+
+    /* ── Form panel tokens (read by the existing input / button / progress / role-card rules) ── */
+    html[data-login-theme="light"] .form-panel {
+        --m-low: #ffffff;
+        --m-line: #dfded8;
+        --m-lift: #252624;
+        --m-lift2: #3a3b37;
+        --m-on: #282924;
+        scrollbar-color: rgba(38, 39, 35, .22) transparent;
+    }
+    html[data-login-theme="light"] .form-panel::-webkit-scrollbar-thumb { background: rgba(38, 39, 35, .22); }
+
+    /* ── Headings, labels and text ── */
+    html[data-login-theme="light"] h2,
+    html[data-login-theme="light"] .m-head h3 { color: #282924; }
+    html[data-login-theme="light"] .form-box .field-label { color: #53544e; }
+    html[data-login-theme="light"] a { color: #282924; }
+    html[data-login-theme="light"] .form-box .m-head p,
+    html[data-login-theme="light"] .form-panel #form-school-name,
+    html[data-login-theme="light"] .reg-prog,
+    html[data-login-theme="light"] .m-note,
+    html[data-login-theme="light"] .reg-link,
+    html[data-login-theme="light"] #register-form-el > p,
+    html[data-login-theme="light"] .role-card em,
+    html[data-login-theme="light"] .toggle-password { color: #6c6d66; }
+    html[data-login-theme="light"] #register-form-el > p a { color: #282924; }
+    html[data-login-theme="light"] .form-panel #form-school-dot { background: #8b8b83; }
+    html[data-login-theme="light"] .m-note { border-color: var(--m-line); }
+
+    /* Links with inline colours */
+    html[data-login-theme="light"] #login-form-el .forgot-p a,
+    html[data-login-theme="light"] #forgot-form p a { color: #6c6d66 !important; }
+    html[data-login-theme="light"] #forgot-form > p { color: #6c6d66 !important; }
+
+    /* Checkbox labels with inline colours */
+    html[data-login-theme="light"] .remember-me-row label,
+    html[data-login-theme="light"] #register-form-el label[style*="#ccc"] { color: #53544e !important; }
+
+    /* ── Inputs ── */
+    html[data-login-theme="light"] .form-box .field input,
+    html[data-login-theme="light"] .form-box .field select {
+        background: var(--m-low);
+        border-color: var(--m-line);
+        color: #282924;
+    }
+    html[data-login-theme="light"] .form-box .field input:focus,
+    html[data-login-theme="light"] .form-box .field select:focus {
+        background: var(--m-low);
+        border-color: #5e5d59;
+        box-shadow: 0 0 0 3px rgba(38, 39, 35, .09);
+    }
+    html[data-login-theme="light"] .form-box .field input::placeholder { color: #6f7069; opacity: 1; }
+    html[data-login-theme="light"] .form-box .field input:-webkit-autofill {
+        -webkit-text-fill-color: #282924;
+        box-shadow: 0 0 0 1000px var(--m-low) inset;
+    }
+
+    /* ── Buttons ── */
+    html[data-login-theme="light"] #login-btn,
+    html[data-login-theme="light"] #register-btn,
+    html[data-login-theme="light"] .reg-next,
+    html[data-login-theme="light"] #forgot-btn {
+        color: #faf9f5;
+        border: 1px solid #252624;
+        box-shadow: none;
+    }
+    html[data-login-theme="light"] #login-btn:active,
+    html[data-login-theme="light"] #register-btn:active,
+    html[data-login-theme="light"] .reg-next:active { background: #1c1d1b; }
+    html[data-login-theme="light"] button#login-btn .btn-spinner span { background: #faf9f5; }
+    html[data-login-theme="light"] .reg-back {
+        color: #282924;
+        border-color: #d0cfc8;
+    }
+    html[data-login-theme="light"] .reg-back:hover { background: rgba(38, 39, 35, .05); }
+    html[data-login-theme="light"] .reg-back:active { background: rgba(38, 39, 35, .09); }
+
+    /* ── Register: role cards (one hue per role, darker so they read on paper) ── */
+    html[data-login-theme="light"] .role-card { color: #282924; }
+    html[data-login-theme="light"] .role-card[data-role="learner"] { --rc: 176, 112, 0; }
+    html[data-login-theme="light"] .role-card[data-role="teacher"] { --rc: 29, 111, 184; }
+    html[data-login-theme="light"] .role-card[data-role="parent"] { --rc: 190, 55, 105; }
+    html[data-login-theme="light"] .role-card[data-role="school_admin"] { --rc: 110, 78, 205; }
+    html[data-login-theme="light"] .role-card:hover { border-color: #b8b7af; }
+    html[data-login-theme="light"] .role-card.on { background: #f4f3ee; }
+    html[data-login-theme="light"] .role-card:focus-visible { outline-color: #282924; }
+    html[data-login-theme="light"] .role-card::after { border-color: #b0afa7; }
+    html[data-login-theme="light"] .role-card.on::after {
+        border-color: rgb(var(--rc));
+        background: rgb(var(--rc)) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.6 6.2l2.3 2.3 4.5-5' fill='none' stroke='%23ffffff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 12px no-repeat;
+    }
+
+    /* ── Messages that carry inline colours ── */
+    html[data-login-theme="light"] [id$="-error-box"] {
+        color: #b0413b !important;
+        background: rgba(176, 65, 59, .08) !important;
+        border-color: rgba(176, 65, 59, .28) !important;
+    }
+    html[data-login-theme="light"] #password-strength-msg,
+    html[data-login-theme="light"] #password-match-msg,
+    html[data-login-theme="light"] .error-message { color: #b0413b !important; }
+
+    /* ── "Check your inbox" and "You're registered!" screens (built by script) ── */
+    html[data-login-theme="light"] #reset-sent-form > i,
+    html[data-login-theme="light"] #success-form > i {
+        color: #15803d !important;
+        filter: none !important;
+    }
+    html[data-login-theme="light"] #reset-sent-form p,
+    html[data-login-theme="light"] #success-form p { color: #6c6d66 !important; }
+    html[data-login-theme="light"] #reset-sent-form a {
+        background: #252624 !important;
+        color: #faf9f5 !important;
+    }
+    html[data-login-theme="light"] #success-form div[style*="#2a2a28"] { background: #e4e3dc !important; }
+    html[data-login-theme="light"] #success-progress-bar { background: #15803d !important; }
+
+    /* ── "Processing" overlay ── */
+    html[data-login-theme="light"] #loaderOverlay { background: #faf9f5; }
+    html[data-login-theme="light"] .loader-book i,
+    html[data-login-theme="light"] .loader-text {
+        color: #15803d;
+        text-shadow: none;
+    }
+}
+
+/* ── Two-panel layout (900px and up): the form card ── */
+@media (min-width: 900px) {
+    html[data-login-theme="light"] .form-panel {
+        --m-low: #faf9f5;
+        background: #ffffff;
+        border-color: #dfded8;
+        box-shadow: 0 1px 2px rgba(31, 32, 29, .04), 0 12px 40px rgba(31, 32, 29, .06);
+    }
+}
+
+/* ── One-column layout (769px to 899px): flat page, no card, so the controls are white ── */
+@media (min-width: 769px) and (max-width: 899px) {
+    html[data-login-theme="light"] .reg-nav {
+        background: linear-gradient(to bottom, rgba(250, 249, 245, 0), #faf9f5 16px);
+    }
+}
+
+/* ═══ Phones and narrow windows (768px and below) ═══════════════════════════════════════════════════════════
+ * Light mode for the same page on phones. It has its own switch, <html data-login-mobile-theme="light">, which the
+ * <script> in the <head> of index.php sets before first paint from the phone theme chosen in the learner dashboard
+ * (Settings > Appearance, saved in localStorage as iskoolLearnerMobileTheme). The desktop switch above
+ * (data-login-theme) never reaches phones. The same script moves the theme-color meta (the status bar) to #faf9f5
+ * while this is on.
+ *
+ * Phones get the one-column layout: no brand panel, no card, a flat page with white controls. That is the markup the
+ * 769px to 899px rules above already style, so the colours below follow that layout one for one.
+ * Same palette as the desktop block and the light phone pages of the dashboard.
+ * Dark is the default and is not touched: every rule here needs the "light" attribute.
+ * The splash is in splash_light.css.
+ * To remove it, delete this block, the setter <script> in index.php and the phone block in splash_light.css. */
+@media (max-width: 768px) {
+
+    /* ── Page ── */
+    html[data-login-mobile-theme="light"] {
+        color-scheme: light;   /* native controls, select pop-ups and autofill follow */
+        background: #faf9f5;
+    }
+    html[data-login-mobile-theme="light"] body {
+        background: #faf9f5;
+        color: #282924;
+    }
+
+    /* Logo + wordmark lockup above the form */
+    html[data-login-mobile-theme="light"] #iskool-brand-wordmark,
+    html[data-login-mobile-theme="light"] .iskool-brand-wordmark { color: #282924; }
+
+    /* ── Form tokens (read by the existing input / button / progress / role-card rules) ── */
+    html[data-login-mobile-theme="light"] .form-panel {
+        --m-low: #ffffff;
+        --m-line: #dfded8;
+        --m-lift: #252624;
+        --m-lift2: #3a3b37;
+        --m-on: #282924;
+        scrollbar-color: rgba(38, 39, 35, .22) transparent;
+    }
+    html[data-login-mobile-theme="light"] .form-panel::-webkit-scrollbar-thumb { background: rgba(38, 39, 35, .22); }
+
+    /* ── Headings, labels and text ── */
+    html[data-login-mobile-theme="light"] h2,
+    html[data-login-mobile-theme="light"] .m-head h3 { color: #282924; }
+    html[data-login-mobile-theme="light"] .form-box .field-label { color: #53544e; }
+    html[data-login-mobile-theme="light"] a { color: #282924; }
+    html[data-login-mobile-theme="light"] .form-box .m-head p,
+    html[data-login-mobile-theme="light"] .form-panel #form-school-name,
+    html[data-login-mobile-theme="light"] .reg-prog,
+    html[data-login-mobile-theme="light"] .m-note,
+    html[data-login-mobile-theme="light"] .reg-link,
+    html[data-login-mobile-theme="light"] #register-form-el > p,
+    html[data-login-mobile-theme="light"] .role-card em,
+    html[data-login-mobile-theme="light"] .toggle-password { color: #6c6d66; }
+    html[data-login-mobile-theme="light"] #register-form-el > p a { color: #282924; }
+    html[data-login-mobile-theme="light"] .form-panel #form-school-dot { background: #8b8b83; }
+    html[data-login-mobile-theme="light"] .m-note { border-color: var(--m-line); }
+
+    /* Text with inline colours (needs !important to win) */
+    html[data-login-mobile-theme="light"] #login-form-el .forgot-p a,
+    html[data-login-mobile-theme="light"] #forgot-form p a,
+    html[data-login-mobile-theme="light"] #forgot-form > p,
+    html[data-login-mobile-theme="light"] #invite-key-note { color: #6c6d66 !important; }
+    html[data-login-mobile-theme="light"] .remember-me-row label,
+    html[data-login-mobile-theme="light"] #register-form-el label[style*="#ccc"] { color: #53544e !important; }
+
+    /* ── Inputs ── */
+    html[data-login-mobile-theme="light"] .form-box .field input,
+    html[data-login-mobile-theme="light"] .form-box .field select {
+        background: var(--m-low);
+        border-color: var(--m-line);
+        color: #282924;
+    }
+    html[data-login-mobile-theme="light"] .form-box .field input:focus,
+    html[data-login-mobile-theme="light"] .form-box .field select:focus {
+        background: var(--m-low);
+        border-color: #5e5d59;
+        box-shadow: 0 0 0 3px rgba(38, 39, 35, .09);
+    }
+    html[data-login-mobile-theme="light"] .form-box .field input::placeholder { color: #6f7069; opacity: 1; }
+    html[data-login-mobile-theme="light"] .form-box .field input:-webkit-autofill {
+        -webkit-text-fill-color: #282924;
+        box-shadow: 0 0 0 1000px var(--m-low) inset;
+    }
+
+    /* ── Buttons (their background comes from --m-lift / --m-lift2 above) ── */
+    html[data-login-mobile-theme="light"] #login-btn,
+    html[data-login-mobile-theme="light"] #register-btn,
+    html[data-login-mobile-theme="light"] .reg-next {
+        color: #faf9f5;
+        border: 1px solid #252624;
+        box-shadow: none;
+    }
+    html[data-login-mobile-theme="light"] #login-btn:active,
+    html[data-login-mobile-theme="light"] #register-btn:active,
+    html[data-login-mobile-theme="light"] .reg-next:active { background: #1c1d1b; }
+    html[data-login-mobile-theme="light"] button#login-btn .btn-spinner span { background: #faf9f5; }
+    html[data-login-mobile-theme="light"] .reg-back {
+        color: #282924;
+        border-color: #d0cfc8;
+    }
+    html[data-login-mobile-theme="light"] .reg-back:hover { background: rgba(38, 39, 35, .05); }
+    html[data-login-mobile-theme="light"] .reg-back:active { background: rgba(38, 39, 35, .09); }
+
+    /* "Send Reset Link": on phones it is the plain white pill (the guided button style only covers it from 900px),
+       so light mode flips it to the same dark pill, keeping its own shape */
+    html[data-login-mobile-theme="light"] #forgot-btn {
+        background: var(--m-lift);
+        color: #faf9f5;
+        border: 1px solid #252624;
+        box-shadow: none;
+    }
+    html[data-login-mobile-theme="light"] #forgot-btn:hover { background: var(--m-lift2); }
+    html[data-login-mobile-theme="light"] #forgot-btn:active { background: #1c1d1b; }
+
+    /* Back / Continue bar that sticks to the bottom of the register form */
+    html[data-login-mobile-theme="light"] .reg-nav {
+        background: linear-gradient(to bottom, rgba(250, 249, 245, 0), #faf9f5 16px);
+    }
+
+    /* ── Register: role cards (one hue per role, darker so they read on paper) ── */
+    html[data-login-mobile-theme="light"] .role-card { color: #282924; }
+    html[data-login-mobile-theme="light"] .role-card[data-role="learner"] { --rc: 176, 112, 0; }
+    html[data-login-mobile-theme="light"] .role-card[data-role="teacher"] { --rc: 29, 111, 184; }
+    html[data-login-mobile-theme="light"] .role-card[data-role="parent"] { --rc: 190, 55, 105; }
+    html[data-login-mobile-theme="light"] .role-card[data-role="school_admin"] { --rc: 110, 78, 205; }
+    html[data-login-mobile-theme="light"] .role-card.on { background: #f4f3ee; }
+    html[data-login-mobile-theme="light"] .role-card:focus-visible { outline-color: #282924; }
+    html[data-login-mobile-theme="light"] .role-card::after { border-color: #b0afa7; }
+    html[data-login-mobile-theme="light"] .role-card.on::after {
+        border-color: rgb(var(--rc));
+        background: rgb(var(--rc)) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.6 6.2l2.3 2.3 4.5-5' fill='none' stroke='%23ffffff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 12px no-repeat;
+    }
+
+    /* ── Messages that carry inline colours ── */
+    html[data-login-mobile-theme="light"] [id$="-error-box"] {
+        color: #b0413b !important;
+        background: rgba(176, 65, 59, .08) !important;
+        border-color: rgba(176, 65, 59, .28) !important;
+    }
+    html[data-login-mobile-theme="light"] #password-strength-msg,
+    html[data-login-mobile-theme="light"] #password-match-msg,
+    html[data-login-mobile-theme="light"] .error-message { color: #b0413b !important; }
+
+    /* ── "Check your inbox" and "You're registered!" screens (built by script) ── */
+    html[data-login-mobile-theme="light"] #reset-sent-form > i,
+    html[data-login-mobile-theme="light"] #success-form > i {
+        color: #15803d !important;
+        filter: none !important;
+    }
+    html[data-login-mobile-theme="light"] #reset-sent-form p,
+    html[data-login-mobile-theme="light"] #success-form p { color: #6c6d66 !important; }
+    html[data-login-mobile-theme="light"] #reset-sent-form a {
+        background: #252624 !important;
+        color: #faf9f5 !important;
+    }
+    html[data-login-mobile-theme="light"] #success-form div[style*="#2a2a28"] { background: #e4e3dc !important; }
+    html[data-login-mobile-theme="light"] #success-progress-bar { background: #15803d !important; }
+
+    /* ── "Processing" overlay ── */
+    html[data-login-mobile-theme="light"] #loaderOverlay { background: #faf9f5; }
+    html[data-login-mobile-theme="light"] .loader-book i,
+    html[data-login-mobile-theme="light"] .loader-text {
+        color: #15803d;
+        text-shadow: none;
+    }
+}

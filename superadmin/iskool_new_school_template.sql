@@ -493,13 +493,31 @@ CREATE TABLE `parent_classes` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- A learner can have several parents; a link no longer belongs to one class (a child's class comes from
+-- class_students for the current year). Parents are linked by invite link: see parent_invites below.
 CREATE TABLE `parent_links` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `learner_email` varchar(150) NOT NULL,
-  `parent_email` varchar(150) NOT NULL,
+  `parent_email` varchar(255) NOT NULL,
+  `learner_email` varchar(255) NOT NULL,
   `class_id` int(11) DEFAULT NULL,
-  `linked_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  PRIMARY KEY (`id`)
+  `approved_at` datetime DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_link` (`parent_email`,`learner_email`),
+  KEY `class_id` (`class_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- One-use links a learner creates in My Class for a parent. Only a SHA-256 hash of the code is stored.
+CREATE TABLE `parent_invites` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `learner_email` varchar(255) NOT NULL,
+  `code_hash` char(64) NOT NULL,
+  `expires_at` datetime NOT NULL,
+  `used_at` datetime DEFAULT NULL,
+  `used_by` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_code` (`code_hash`),
+  KEY `idx_learner` (`learner_email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- ============================================================

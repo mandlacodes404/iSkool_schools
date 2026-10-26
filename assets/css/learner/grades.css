@@ -1,6 +1,10 @@
 /* assets/css/learner/grades.css */
-/* Extracted from the injected <style id="grades-styles"> block in grades.js.
-   No visual changes -- this is a 1:1 extraction. */
+/* Desktop (900px and up) follows the learner assignments, announcements and resources pages:
+   Geist, 400/500 weights, the teacher text ladder, a transparent list pane with a neutral
+   selected row, neutral subject tiles, hairline cards and a quiet detail pane.
+   Colour tokens are literal values taken from teacher_desktop_menu.css so nothing here
+   depends on which --dm-* variables the learner shell defines.
+   The mobile / shared styles further down are unchanged. */
 
 /* ══ DESKTOP SPLIT LAYOUT (>=900px) ══ */
 @media (min-width: 900px) {
@@ -14,9 +18,23 @@
 
 .grades-desktop-layout {
     --gr-listw: 320px;
+    /* Teacher palette */
+    --gr-text:   #f0efec;
+    --gr-soft:   #c2c3b7;
+    --gr-muted:  #9b9c92;
+    --gr-faint:  #7a7b73;
+    --gr-accent: #4fd1c5;
+    --gr-line:        rgba(255,255,255,0.07);
+    --gr-line-strong: rgba(255,255,255,0.14);
+    --gr-hover:  rgba(255,255,255,0.055);
+    --gr-active: rgba(255,255,255,0.095);
+    /* Mark colours: 75% and above, 50 to 74%, below 50% */
+    --gr-hi:  #22c55e;
+    --gr-mid: #f28c38;
+    --gr-lo:  #f4776f;
     /* Type weights for the whole desktop page (Geist). Tune here. */
-    --gr-w-strong: 500;  /* title, status chip, group labels, primary button */
-    --gr-w-medium: 450;  /* list rows, filter chips, values, small actions */
+    --gr-w-strong: 500;  /* title, status chip, group labels, marks, primary button */
+    --gr-w-medium: 400;  /* list rows, filter chips, values, small actions */
     display: flex;
     gap: 0;
     min-height: 500px;
@@ -37,12 +55,12 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    background: #12161c;
-    border-right: 1px solid rgba(255,255,255,0.07);
+    background: transparent;   /* same as the detail pane, which is transparent too */
+    border-right: 1px solid var(--gr-line);
 }
 .gr-lh {
     padding: 12px 12px 10px;
-    border-bottom: 1px solid rgba(255,255,255,0.07);
+    border-bottom: 1px solid var(--gr-line);
     flex-shrink: 0;
 }
 .gr-desktop-search-wrap { position: relative; }
@@ -52,7 +70,7 @@
     top: 50%;
     transform: translateY(-50%);
     pointer-events: none;
-    color: #7d8794;
+    color: var(--gr-faint);
 }
 .gr-desktop-search {
     width: 100%;
@@ -61,94 +79,100 @@
     padding: 0 10px 0 33px;
     border-radius: 8px;
     background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.07);
-    color: #e6edf3;
+    border: 1px solid var(--gr-line);
+    color: var(--gr-text);
     font-size: 13px;
+    font-weight: 400;
     font-family: inherit;
     transition: border-color 0.2s;
 }
-.gr-desktop-search:focus { outline: none; border-color: #4fd1c5; }
-.gr-desktop-search::placeholder { color: #7d8794; }
-.gr-chips { display: flex; gap: 6px; margin-top: 10px; overflow: hidden; }
+.gr-desktop-search:focus { outline: none; border-color: var(--gr-accent); }
+.gr-desktop-search::placeholder { color: var(--gr-faint); }
+
+/* Term pills under the search bar; the active pill is neutral, like the other desktop pages */
+.gr-chips { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; row-gap: 6px; }
 .gr-chip {
     height: 26px;
     padding: 0 10px;
     border-radius: 999px;
-    border: 1px solid rgba(255,255,255,0.07);
+    border: 1px solid var(--gr-line);
     background: none;
-    color: #9aa4b2;
+    color: var(--gr-muted);
     font-family: inherit;
     font-size: 12px;
-    font-weight: var(--gr-w-medium, 600);
+    font-weight: var(--gr-w-medium, 400);
     white-space: nowrap;
     cursor: pointer;
 }
-.gr-chip:hover { color: #e6edf3; }
+.gr-chip:hover { color: var(--gr-text); background: var(--gr-hover); }
 .gr-chip.on {
-    background: rgba(79,209,197,0.1);
-    border-color: rgba(79,209,197,0.4);
-    color: #4fd1c5;
+    background: var(--gr-active);
+    border-color: var(--gr-line-strong);
+    color: var(--gr-text);
+    font-weight: var(--gr-w-strong, 500);
 }
+.gr-chip:focus-visible { outline: 2px solid var(--gr-accent); outline-offset: 1px; }
+/* small dot marking the current term (in the pills and in the detail header) */
+.gr-chip .gr-cd,
+.gr-panel-status .gr-cd { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--gr-accent); vertical-align: 1px; }
+.gr-chip .gr-cd { margin-right: 6px; }
+
 .gr-sidebar-scroll {
     flex: 1;
     min-height: 0;
     overflow-y: auto;
     position: relative;
     outline: none;
+    padding-bottom: 8px;
 }
-.gr-sidebar-scroll:focus-visible { outline: 2px solid #4fd1c5; outline-offset: -2px; }
+.gr-sidebar-scroll:focus-visible { outline: 2px solid var(--gr-accent); outline-offset: -2px; }
 .gr-sidebar-scroll::-webkit-scrollbar { width: 8px; }
 .gr-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
 .gr-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; transition: background 0.15s ease; }
 .gr-sidebar-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
+
+/* Term label above the subjects (one term shows at a time, so it is a label, not a fold) */
 .gr-gh {
-    position: sticky;
-    top: 0;
-    z-index: 1;
-    background: #12161c;
-    font-size: 11px;
-    font-weight: var(--gr-w-strong, 700);
-    letter-spacing: 0.6px;
-    text-transform: uppercase;
-    color: #7d8794;
     padding: 12px 14px 6px;
+    font-size: 10px;
+    font-weight: var(--gr-w-strong, 500);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gr-muted);
 }
+
+/* Row: neutral subject tile, title and results, then the term mark */
 .gr-sidebar-item {
     display: flex;
     align-items: center;
     gap: 10px;
-    height: 52px;
+    min-height: 52px;
     padding: 0 14px;
     cursor: pointer;
-    border-left: 3px solid transparent;
 }
-.gr-sidebar-item:hover { background: rgba(255,255,255,0.04); }
-.gr-sidebar-item.active {
-    background: rgba(79,209,197,0.1);
-    border-left-color: #4fd1c5;
-}
-.gr-sidebar-status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.gr-sidebar-item:hover { background: var(--gr-hover); }
+.gr-sidebar-item.active { background: var(--gr-active); }
 .gr-sidebar-item-info { flex: 1; min-width: 0; }
 .gr-sidebar-item-title {
-    font-size: 13px;
-    font-weight: var(--gr-w-medium, 600);
-    color: #e6edf3;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--gr-soft);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 .gr-sidebar-item-meta {
-    font-size: 12px;
-    color: #7d8794;
-    margin-top: 1px;
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--gr-faint);
+    margin-top: 2px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
-.gr-row-badge { font-size: 12px; font-weight: var(--gr-w-medium, 600); flex-shrink: 0; }
-/* the selected row keeps one step more weight so it still reads as current */
-.gr-sidebar-item.active .gr-sidebar-item-title { font-weight: var(--gr-w-strong, 700); }
-.gr-list-empty { padding: 40px 20px; text-align: center; color: #7d8794; font-size: 13px; }
+/* the selected row reads as current through brighter text and one step more weight */
+.gr-sidebar-item.active .gr-sidebar-item-title { color: var(--gr-text); font-weight: var(--gr-w-strong, 500); }
+.gr-list-empty { padding: 40px 20px; text-align: center; color: var(--gr-faint); font-size: 13px; }
 
 /* ── Resize handle ── */
 .gr-split {
@@ -180,7 +204,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: #555e6a;
+    color: var(--gr-faint);
     gap: 12px;
     padding: 40px;
 }
@@ -193,7 +217,7 @@
     align-items: center;
     gap: 12px;
     padding: 0 28px;
-    border-bottom: 1px solid rgba(255,255,255,0.07);
+    border-bottom: 1px solid var(--gr-line);
     flex-shrink: 0;
 }
 
@@ -204,9 +228,9 @@
     min-width: 0;
     font-family: inherit;
     font-size: 18px;
-    font-weight: var(--gr-w-strong, 700);
+    font-weight: var(--gr-w-strong, 500);
     line-height: 1.25;
-    color: #e6edf3;
+    color: var(--gr-text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -221,18 +245,17 @@
     height: 23px;
     padding: 0 8px;
     border-radius: 6px;
-    border: 1px solid rgba(255,255,255,0.07);
+    border: 1px solid var(--gr-line);
     font-size: 11px;
-    font-weight: var(--gr-w-strong, 700);
+    font-weight: var(--gr-w-strong, 500);
     line-height: 1;
     letter-spacing: 0.5px;
     text-transform: uppercase;
     white-space: nowrap;
-    color: #9aa4b2;
+    color: var(--gr-muted);
 }
-.gr-panel-status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .gr-dsp { flex: 1; }
-.gr-act-text { font-weight: var(--gr-w-medium, 600); font-size: 13px; flex-shrink: 0; }
+.gr-act-text { font-weight: var(--gr-w-medium, 400); font-size: 13px; flex-shrink: 0; color: var(--gr-muted); }
 .gr-pri {
     display: inline-flex;
     align-items: center;
@@ -241,17 +264,17 @@
     height: 34px;
     padding: 0 18px;
     border-radius: 8px;
-    background: #4fd1c5;
+    background: #c2c3b7;
     color: #0d1117;
-    font-weight: var(--gr-w-strong, 700);
+    font-weight: var(--gr-w-strong, 500);
     font-size: 13px;
     text-decoration: none;
     flex-shrink: 0;
     cursor: pointer;
 }
-.gr-pri:hover { background: #38b2ac; }
-.gr-pri--warn { background: #e67e22; }
-.gr-pri--warn:hover { background: #d06f1c; }
+.gr-pri:hover { background: #adaea2; }
+.gr-pri--warn { background: var(--gr-lo); }
+.gr-pri--warn:hover { background: #e0625a; }
 .gr-dbody { flex: 1; min-height: 0; display: flex; }
 .gr-body { flex: 1; min-width: 0; overflow-y: auto; padding: 28px; }
 .gr-body::-webkit-scrollbar { width: 8px; }
@@ -259,127 +282,132 @@
 .gr-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
 .gr-body::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
 .gr-read { max-width: 760px; }
-.gr-lead { color: #c9d1d9; line-height: 1.7; margin: 0 0 20px; font-size: 14px; }
+.gr-lead { color: var(--gr-soft); line-height: 1.7; margin: 0 0 20px; font-size: 14px; }
 
 /* ── Context rail (hides when the detail pane is under 900px wide) ── */
 .gr-rail {
     width: 280px;
     flex-shrink: 0;
-    border-left: 1px solid rgba(255,255,255,0.07);
+    border-left: 1px solid var(--gr-line);
     padding: 24px 20px;
     overflow-y: auto;
 }
 .gr-rail h4 {
     margin: 0 0 14px;
     font-size: 12px;
-    font-weight: var(--gr-w-strong, 700);
+    font-weight: var(--gr-w-strong, 500);
     letter-spacing: 0.6px;
     text-transform: uppercase;
-    color: #7d8794;
+    color: var(--gr-muted);
 }
 .gr-kv {
     display: flex;
     justify-content: space-between;
     gap: 10px;
     padding: 10px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.07);
+    border-bottom: 1px solid var(--gr-line);
     font-size: 13px;
 }
-.gr-kv span { color: #9aa4b2; }
-.gr-kv b { font-weight: var(--gr-w-medium, 600); text-align: right; color: #e6edf3; }
+.gr-kv span { color: var(--gr-muted); }
+.gr-kv b { font-weight: var(--gr-w-medium, 400); text-align: right; color: var(--gr-text); }
 @container (max-width: 899px) { .gr-rail { display: none; } }
 
-/* ── Grades: list rows, summary cards, assessments table, info modals ── */
-.gr-chips { flex-wrap: wrap; row-gap: 6px; overflow: visible; }
-.gr-chip .gr-cd { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #4fd1c5; margin-right: 6px; vertical-align: 1px; }
-.gr-gh { display: flex; justify-content: space-between; }
-.gr-gh i { font-style: normal; font-weight: var(--gr-w-medium, 600); color: #7d8794; }
-.gr-ft { width: 34px; height: 34px; border-radius: 8px; flex-shrink: 0; display: grid; place-items: center; font-size: 11px; font-weight: var(--gr-w-strong, 700); background: rgba(79,209,197,0.1); color: #4fd1c5; }
-.gr-row-badge { font-size: 14px; font-weight: var(--gr-w-strong, 700); }
-.gr-c-hi { color: #22c55e; } .gr-c-mid { color: #f28c38; } .gr-c-lo { color: #f85149; } .gr-c-na { color: #7d8794; }
-.gr-lfoot { padding: 10px 12px; border-top: 1px solid rgba(255,255,255,0.07); flex-shrink: 0; }
+/* ── Grades: subject tiles, summary cards, assessments table, class range overview, info modals ── */
+/* Neutral subject tile, like the file tiles on the assignments and resources pages */
+.gr-ft {
+    width: 34px; height: 34px; border-radius: 8px; flex-shrink: 0; display: grid; place-items: center;
+    font-size: 11px; font-weight: var(--gr-w-strong, 500); line-height: 1;
+    background: rgba(255,255,255,0.05); color: var(--gr-soft);
+}
+.gr-row-badge { font-size: 14px; font-weight: var(--gr-w-strong, 500); flex-shrink: 0; }
+.gr-c-hi { color: var(--gr-hi); } .gr-c-mid { color: var(--gr-mid); } .gr-c-lo { color: var(--gr-lo); } .gr-c-na { color: var(--gr-faint); }
+.gr-lfoot { padding: 10px 12px; border-top: 1px solid var(--gr-line); flex-shrink: 0; }
 .gr-btn2 {
     height: 34px; padding: 0 14px; border-radius: 8px; flex-shrink: 0; cursor: pointer;
-    border: 1px solid rgba(255,255,255,0.07); background: none; color: #9aa4b2; font: inherit; font-size: 13px; font-weight: var(--gr-w-medium, 600);
+    border: 1px solid var(--gr-line-strong); background: none; color: var(--gr-muted); font: inherit; font-size: 13px; font-weight: var(--gr-w-medium, 400);
 }
-.gr-btn2:hover { color: #e6edf3; background: rgba(255,255,255,0.05); }
+.gr-btn2:hover { color: var(--gr-text); background: var(--gr-hover); }
+.gr-btn2:focus-visible { outline: 2px solid var(--gr-accent); outline-offset: 1px; }
 .gr-full { width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
 .gr-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 10px; }
-.gr-card { border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; background: #12161c; padding: 14px 16px; min-width: 0; }
-.gr-card small { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: var(--gr-w-strong, 700); letter-spacing: 0.6px; text-transform: uppercase; color: #7d8794; }
-.gr-card b { display: block; font-size: 26px; font-weight: 300; margin: 6px 0 2px; line-height: 1.1; color: #e6edf3; }
-.gr-card span.gr-cap { font-size: 12px; color: #9aa4b2; }
+.gr-card { border: 1px solid var(--gr-line); border-radius: 12px; background: none; padding: 14px 16px; min-width: 0; }
+.gr-card small { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: var(--gr-w-strong, 500); letter-spacing: 0.6px; text-transform: uppercase; color: var(--gr-muted); }
+.gr-card b { display: block; font-size: 26px; font-weight: 300; margin: 6px 0 2px; line-height: 1.1; color: var(--gr-text); }
+.gr-card span.gr-cap { font-size: 12px; color: var(--gr-muted); }
 .gr-bar1 { height: 4px; border-radius: 2px; background: rgba(255,255,255,0.08); margin: 10px 0 8px; overflow: hidden; }
-.gr-bar1 i { display: block; height: 100%; background: #4fd1c5; }
+.gr-bar1 i { display: block; height: 100%; background: #c2c3b7; }
 .gr-info {
     width: 16px; height: 16px; padding: 0; border-radius: 50%; flex-shrink: 0; cursor: pointer; display: inline-grid; place-items: center;
-    border: 1px solid rgba(255,255,255,0.22); background: none; color: #9aa4b2;
+    border: 1px solid var(--gr-line-strong); background: none; color: var(--gr-muted);
 }
-.gr-info:hover, .gr-info:focus-visible { color: #4fd1c5; border-color: #4fd1c5; outline: none; }
+.gr-info:hover, .gr-info:focus-visible { color: #c2c3b7; border-color: #c2c3b7; outline: none; }
 .gr-info svg { width: 10px; height: 10px; }
-.gr-h3 { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: var(--gr-w-strong, 700); letter-spacing: 0.6px; text-transform: uppercase; color: #7d8794; margin: 26px 0 10px; }
+.gr-h3 { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: var(--gr-w-strong, 500); letter-spacing: 0.6px; text-transform: uppercase; color: var(--gr-muted); margin: 26px 0 10px; }
 .gr-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-.gr-table th { text-align: left; color: #7d8794; font-weight: var(--gr-w-medium, 600); font-size: 12px; padding: 10px 8px; border-bottom: 1px solid rgba(255,255,255,0.07); }
-.gr-table td { padding: 11px 8px; border-bottom: 1px solid rgba(255,255,255,0.07); color: #c9d1d9; vertical-align: top; }
+.gr-table th { text-align: left; color: var(--gr-muted); font-weight: var(--gr-w-medium, 400); font-size: 12px; padding: 10px 8px; border-bottom: 1px solid var(--gr-line); }
+.gr-table td { padding: 11px 8px; border-bottom: 1px solid var(--gr-line); color: var(--gr-soft); vertical-align: top; }
 .gr-table th:nth-child(n+3), .gr-table td:nth-child(n+3) { text-align: right; }
 .gr-qr.gr-can { cursor: pointer; }
-.gr-qr.gr-can:hover td { background: rgba(255,255,255,0.03); }
-.gr-qr.gr-can:focus-visible { outline: 2px solid #4fd1c5; outline-offset: -2px; }
-.gr-qr.gr-open td { background: rgba(79,209,197,0.06); }
-.gr-qt { font-weight: var(--gr-w-medium, 600); color: #e6edf3; }
-.gr-sb { margin-left: 8px; font-size: 10px; font-weight: var(--gr-w-strong, 700); letter-spacing: 0.4px; text-transform: uppercase; color: #4fd1c5; background: rgba(79,209,197,0.1); padding: 2px 6px; border-radius: 5px; vertical-align: 1px; }
-.gr-qn { font-size: 12px; color: #f28c38; margin-top: 3px; }
-.gr-tot td { font-weight: var(--gr-w-strong, 700); color: #e6edf3; border-bottom: 0; }
+.gr-qr.gr-can:hover td { background: var(--gr-hover); }
+.gr-qr.gr-can:focus-visible { outline: 2px solid var(--gr-accent); outline-offset: -2px; }
+.gr-qr.gr-open td { background: var(--gr-hover); }
+.gr-qt { font-weight: var(--gr-w-medium, 400); color: var(--gr-text); }
+.gr-sb { margin-left: 8px; font-size: 10px; font-weight: var(--gr-w-strong, 500); letter-spacing: 0.4px; text-transform: uppercase; color: var(--gr-muted); background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 5px; vertical-align: 1px; }
+.gr-qn { font-size: 12px; color: var(--gr-mid); margin-top: 3px; }
+.gr-tot td { font-weight: var(--gr-w-strong, 500); color: var(--gr-text); border-bottom: 0; }
 .gr-xp td { padding: 0 !important; background: rgba(255,255,255,0.02); text-align: left !important; }
+
+/* Class range overview (inside an opened assessment) */
 .gr-ov { padding: 20px 18px; text-align: left; font-weight: 400; }
 .gr-ov-head { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-.gr-ov-big { font-size: 28px; font-weight: 300; line-height: 1; color: #e6edf3; }
-.gr-ov-of { color: #9aa4b2; font-size: 14px; font-weight: 400; }
+.gr-ov-big { font-size: 28px; font-weight: 300; line-height: 1; color: var(--gr-text); }
+.gr-ov-of { color: var(--gr-muted); font-size: 14px; font-weight: 400; }
 .gr-ov-sp { flex: 1; }
-.gr-ov-chip { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 999px; font-size: 12px; font-weight: var(--gr-w-medium, 450); border: 1px solid rgba(255,255,255,0.07); }
+.gr-ov-chip { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 999px; font-size: 12px; font-weight: var(--gr-w-medium, 400); border: 1px solid var(--gr-line); }
 .gr-ov-chip[hidden] { display: none; }
-.gr-ov-chip.ok { background: rgba(34,197,94,0.1); border-color: rgba(34,197,94,0.3); color: #22c55e; }
-.gr-ov-chip.mid { background: rgba(255,255,255,0.05); color: #9aa4b2; }
-.gr-ov-chip.warn { background: rgba(242,140,56,0.1); border-color: rgba(242,140,56,0.3); color: #f28c38; }
-.gr-ov-c-ok { color: #22c55e; } .gr-ov-c-mid { color: #e6edf3; } .gr-ov-c-warn { color: #f28c38; }
-.gr-ov .gr-btn2 { font-weight: var(--gr-w-medium, 450); }
-.gr-ov-msg { color: #7d8794; font-size: 13px; padding: 18px 0 6px; font-weight: 400; }
+.gr-ov-chip.ok { background: rgba(34,197,94,0.1); border-color: rgba(34,197,94,0.3); color: var(--gr-hi); }
+.gr-ov-chip.mid { background: rgba(255,255,255,0.05); color: var(--gr-muted); }
+.gr-ov-chip.warn { background: rgba(242,140,56,0.1); border-color: rgba(242,140,56,0.3); color: var(--gr-mid); }
+.gr-ov-c-ok { color: var(--gr-hi); } .gr-ov-c-mid { color: var(--gr-text); } .gr-ov-c-warn { color: var(--gr-mid); }
+.gr-ov .gr-btn2 { font-weight: var(--gr-w-medium, 400); }
+.gr-ov-msg { color: var(--gr-faint); font-size: 13px; padding: 18px 0 6px; font-weight: 400; }
 .gr-ov-rng { position: relative; margin: 56px 40px 0; height: 10px; }
 .gr-ov-tr { position: absolute; inset: 0; border-radius: 5px; background: rgba(255,255,255,0.07); }
-.gr-ov-band { position: absolute; top: 0; bottom: 0; border-radius: 5px; background: rgba(79,209,197,0.22); }
-.gr-ov-avg { position: absolute; top: -6px; bottom: -6px; width: 2px; margin-left: -1px; background: #f28c38; border-radius: 1px; }
-.gr-ov-you { position: absolute; top: 50%; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; background: #4fd1c5; border: 3px solid #fff; box-shadow: 0 0 0 3px rgba(79,209,197,0.25); }
-.gr-ov-you em { position: absolute; bottom: 26px; left: 50%; transform: translateX(-50%); white-space: nowrap; font-style: normal; font-size: 12px; font-weight: var(--gr-w-strong, 500); background: #4fd1c5; color: #0d1117; padding: 3px 9px; border-radius: 999px; }
-.gr-ov-you em::after { content: ''; position: absolute; top: 100%; left: 50%; margin-left: -5px; border: 5px solid transparent; border-top-color: #4fd1c5; }
-.gr-ov-end { position: absolute; top: 50%; transform: translateY(-50%); font-size: 11px; color: #7d8794; font-weight: 400; }
-.gr-ov-lbl { position: absolute; transform: translateX(-50%); white-space: nowrap; font-size: 12px; font-weight: 400; color: #9aa4b2; text-align: center; }
-.gr-ov-lbl b { color: #e6edf3; font-weight: var(--gr-w-medium, 450); }
-.gr-ov-lbl i { display: block; width: 1px; height: 8px; margin: 0 auto 2px; background: #7d8794; }
-.gr-ov-meta { font-size: 12px; color: #7d8794; font-weight: 400; }
-.gr-ov-key { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; color: #7d8794; margin-top: 14px; font-weight: 400; }
+.gr-ov-band { position: absolute; top: 0; bottom: 0; border-radius: 5px; background: rgba(194,195,183,0.22); }
+.gr-ov-avg { position: absolute; top: -6px; bottom: -6px; width: 2px; margin-left: -1px; background: var(--gr-mid); border-radius: 1px; }
+.gr-ov-you { position: absolute; top: 50%; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; background: #c2c3b7; border: 3px solid var(--gr-text); box-shadow: 0 0 0 3px rgba(194,195,183,0.25); }
+.gr-ov-you em { position: absolute; bottom: 26px; left: 50%; transform: translateX(-50%); white-space: nowrap; font-style: normal; font-size: 12px; font-weight: var(--gr-w-strong, 500); background: #c2c3b7; color: #0d1117; padding: 3px 9px; border-radius: 999px; }
+.gr-ov-you em::after { content: ''; position: absolute; top: 100%; left: 50%; margin-left: -5px; border: 5px solid transparent; border-top-color: #c2c3b7; }
+.gr-ov-end { position: absolute; top: 50%; transform: translateY(-50%); font-size: 11px; color: var(--gr-faint); font-weight: 400; }
+.gr-ov-lbl { position: absolute; transform: translateX(-50%); white-space: nowrap; font-size: 12px; font-weight: 400; color: var(--gr-muted); text-align: center; }
+.gr-ov-lbl b { color: var(--gr-text); font-weight: var(--gr-w-medium, 400); }
+.gr-ov-lbl i { display: block; width: 1px; height: 8px; margin: 0 auto 2px; background: var(--gr-faint); }
+.gr-ov-meta { font-size: 12px; color: var(--gr-faint); font-weight: 400; }
+.gr-ov-key { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--gr-faint); margin-top: 14px; font-weight: 400; }
 .gr-ov-key span::before { content: ''; display: inline-block; width: 10px; height: 6px; border-radius: 3px; margin-right: 6px; vertical-align: 1px; }
-.gr-ov-key .k1::before { background: rgba(79,209,197,0.35); }
-.gr-ov-key .k2::before { background: #f28c38; width: 2px; height: 12px; vertical-align: -2px; }
-.gr-more { display: block; width: 100%; text-align: left; padding: 9px 0; cursor: pointer; background: none; border: 0; border-bottom: 1px solid rgba(255,255,255,0.07); font-family: inherit; }
-.gr-more b { display: block; font-size: 13px; font-weight: var(--gr-w-medium, 600); color: #e6edf3; }
-.gr-more small { color: #7d8794; font-size: 12px; }
-.gr-more:hover b { color: #4fd1c5; }
+.gr-ov-key .k1::before { background: rgba(194,195,183,0.35); }
+.gr-ov-key .k2::before { background: var(--gr-mid); width: 2px; height: 12px; vertical-align: -2px; }
+
+/* Rail: other subjects */
+.gr-more { display: block; width: 100%; text-align: left; padding: 9px 0; cursor: pointer; background: none; border: 0; border-bottom: 1px solid var(--gr-line); font-family: inherit; }
+.gr-more b { display: block; font-size: 13px; font-weight: var(--gr-w-medium, 400); color: var(--gr-text); }
+.gr-more small { color: var(--gr-faint); font-size: 12px; }
+.gr-more:hover b { color: var(--gr-accent); }
 .gr-rail h4.gr-rail-sub { margin: 28px 0 4px; }
-.gr-list-empty { padding: 40px 20px; text-align: center; color: #7d8794; font-size: 13px; }
 #grades-dt-panel > .pr-wrap { flex: 1; min-height: 0; width: 100%; overflow-y: auto; box-sizing: border-box; padding: 28px 32px 60px; }
 
-/* Info modals */
+/* Info modals (appended to <body>, so they carry their own colour tokens, see the end of this file) */
 .gr-modal-overlay { position: fixed; inset: 0; z-index: 10050; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); padding: 24px; }
-.gr-modal-box { width: 100%; max-width: 480px; max-height: 80vh; display: flex; flex-direction: column; background: #12161c; border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; box-shadow: 0 20px 60px rgba(0,0,0,0.6); }
+.gr-modal-box { width: 100%; max-width: 480px; max-height: 80vh; display: flex; flex-direction: column; background: #1b1b1a; border: 1px solid var(--gr-line-strong); border-radius: 14px; box-shadow: 0 20px 60px rgba(0,0,0,0.6); }
 .gr-modal-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 20px 12px; }
-.gr-modal-head h3 { margin: 0; font-size: 16px; font-weight: var(--gr-w-strong, 700); color: #e6edf3; }
-.gr-modal-x { background: none; border: 0; color: #9aa4b2; font-size: 22px; line-height: 1; cursor: pointer; padding: 0 4px; }
-.gr-modal-x:hover { color: #e6edf3; }
-.gr-modal-body { padding: 0 20px; overflow-y: auto; color: #c9d1d9; font-size: 14px; line-height: 1.65; }
+.gr-modal-head h3 { margin: 0; font-size: 16px; font-weight: var(--gr-w-strong, 500); color: var(--gr-text); }
+.gr-modal-x { background: none; border: 0; color: var(--gr-muted); font-size: 22px; line-height: 1; cursor: pointer; padding: 0 4px; }
+.gr-modal-x:hover { color: var(--gr-text); }
+.gr-modal-body { padding: 0 20px; overflow-y: auto; color: var(--gr-soft); font-size: 14px; line-height: 1.65; }
 .gr-modal-body p { margin: 0 0 12px; }
 .gr-modal-body ul { margin: 0 0 12px; padding-left: 18px; }
 .gr-modal-body li { margin-bottom: 6px; }
-.gr-modal-body strong { color: #e6edf3; }
+.gr-modal-body strong { color: var(--gr-text); }
 .gr-modal-foot { display: flex; justify-content: flex-end; padding: 12px 20px 18px; }
 
 
@@ -421,9 +449,9 @@
 .subject-card:hover { border-color: rgba(255,255,255,0.1); }
 .subject-header { display: flex; align-items: center; gap: 12px; padding: 18px 20px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s; user-select: none; }
 .subject-header:hover { background: rgba(255,255,255,0.02); }
-.subject-name { flex: 1; font-size: 16px; font-weight: 800; color: #e2e8f0; display: flex; align-items: center; gap: 8px; }
+.subject-name { flex: 1; font-size: 16px; font-weight: 600; color: #e2e8f0; display: flex; align-items: center; gap: 8px; }
 .subject-count { font-size: 12px; color: #8b949e; font-weight: 600; background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 20px; }
-.subject-chevron { transition: transform 0.3s ease; color: #555e6a; flex-shrink: 0; }
+.subject-chevron { transition: transform 0.3s ease; color: #73746d; flex-shrink: 0; }
 .subject-chevron.open { transform: rotate(90deg); }
 .view-toggle-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px 6px; border-bottom: 1px solid rgba(255,255,255,0.04); }
 .view-toggle-btn { display: inline-flex; align-items: center; gap: 6px; background: none; border: none; color: #8b949e; font-size: 12px; font-weight: 700; font-family: 'Nunito', sans-serif; text-transform: uppercase; letter-spacing: 0.8px; cursor: pointer; padding: 6px 10px; border-radius: 8px; transition: all 0.2s; }
@@ -442,7 +470,7 @@
 .quiz-title-link { color: #68d391; cursor: pointer; }
 .quiz-unpublished .quiz-row-title { color: #8b949e; }
 @media (max-width: 899px) {
-    .quiz-row-title { color: #e2e8f0; font-size: 15px; }
+    .quiz-row-title { color: #e2e8f0; font-size: 15px; font-weight: 600; }
     .quiz-row-title a { color: #e2e8f0; }
     .quiz-row-title a:hover { color: #e2e8f0; }
     .quiz-title-link { color: #fff; }
@@ -457,8 +485,10 @@
 .quiz-grading-status.pending { color:#f5c38b; background:rgba(242,140,56,0.12); border:1px solid rgba(242,140,56,0.28); }
 .quiz-grading-status.done { color:#22c55e; background:rgba(34,197,94,0.12); border:1px solid rgba(34,197,94,0.28); }
 .quiz-grading-status.partial { color:#f5c38b; background:rgba(242,140,56,0.12); border:1px solid rgba(242,140,56,0.28); }
-.quiz-expand-btn { background: none; border: none; color: #555e6a; cursor: pointer; padding: 4px; display: flex; align-items: center; transition: color 0.2s; flex-shrink: 0; }
+.quiz-expand-btn { background: none; border: none; color: #73746d; cursor: pointer; padding: 4px; display: flex; align-items: center; transition: color 0.2s; flex-shrink: 0; }
 .quiz-expand-btn:hover { color: #68d391; }
+/* on the phone list it stays the list grey: a tap leaves :hover on, which would leave it green */
+.grades-mobile-layout .quiz-expand-btn:hover { color: #73746d; }
 .quiz-expand-btn svg { transition: transform 0.3s ease; }
 .quiz-expand-btn.open svg { transform: rotate(180deg); }
 .quiz-row-details { display: none; padding: 12px 16px 14px; border-top: 1px solid rgba(255,255,255,0.04); background: rgba(0,0,0,0.2); font-size: 13px; color: #8b949e; line-height: 1.7; }
@@ -790,8 +820,14 @@
 /* The info modal is appended to <body>, outside .grades-desktop-layout, so it needs its own
    font and weight tokens. It is only opened from the desktop panel. */
 .gr-modal-overlay {
+    --gr-text:   #f0efec;
+    --gr-soft:   #c2c3b7;
+    --gr-muted:  #9b9c92;
+    --gr-accent: #4fd1c5;
+    --gr-line-strong: rgba(255,255,255,0.14);
+    --gr-hover:  rgba(255,255,255,0.055);
     --gr-w-strong: 500;
-    --gr-w-medium: 450;
+    --gr-w-medium: 400;
     font-family: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
     font-weight: 400;
     font-variant-numeric: tabular-nums;
@@ -807,4 +843,501 @@
     .grades-desktop-layout .score-circle-text { font-weight: 300; }
     .grades-desktop-layout .dist-tip { font-weight: var(--gr-w-strong, 500); }
     .grades-desktop-layout .dist-legend span { font-weight: var(--gr-w-strong, 500); }
+}
+
+/* ═══ Light mode: learner Grades (desktop) ═══════════════════════════════════════════════════════════════
+   The desktop Grades page is driven by the --gr-* variables above, so most of light mode is the variable block
+   below, the same way the Assignments page does it with --las-* and the Quiz page with --lqz-*. The rest fixes
+   the colours that are hard-coded: the search box, scrollbars, resize handle, subject tiles, the "term assessed"
+   bar, the summative tag, the class range overview (track, band, "You" marker, chips), the info modals, the
+   Progress Report that opens in the right panel (card, hero, grade badges, and the status colours grades.js
+   writes inline), the phone-style accordion shown between 769px and 899px, and the fetch error state. Same
+   palette as the Home page, the sidebar, the Assignments page and the Quiz page.
+   Applies only when <html data-learner-theme="light"> on 769px and wider. Dark mode and phones are untouched, and
+   grades.js needs no change. To remove it, delete this block. */
+@media (min-width: 769px) {
+
+/* palette: titles near-black, body text grey, lines the same warm greys as the sidebar and Home */
+html[data-learner-theme="light"] .grades-desktop-layout {
+    --gr-text:   #282924;   /* titles and the selected row */
+    --gr-soft:   #53544e;   /* body text */
+    --gr-muted:  #73746d;
+    --gr-faint:  #7d7e76;
+    --gr-accent: #187a72;   /* focus rings, current-term dot and the search focus border */
+    --gr-line:        #dfded8;
+    --gr-line-strong: #d0cfc8;
+    --gr-hover:  rgba(38,39,35,.055);
+    --gr-active: rgba(38,39,35,.075);
+    /* mark colours (75% and above, 50 to 74%, below 50%), darkened so they read on a light page */
+    --gr-hi:  #15803d;
+    --gr-mid: #b85f12;
+    --gr-lo:  #bd4a43;
+    /* the layout sets no text colour of its own, so anything unstyled would inherit the dark page's white */
+    color: var(--gr-text);
+    color-scheme: light;
+}
+
+/* filter box: white, like the sidebar's search button */
+html[data-learner-theme="light"] .gr-desktop-search { background: #ffffff; }
+
+/* scrollbars (the dark ones are white at 10% and vanish on a light page) */
+html[data-learner-theme="light"] .gr-sidebar-scroll::-webkit-scrollbar-thumb,
+html[data-learner-theme="light"] .gr-body::-webkit-scrollbar-thumb { background: rgba(38,39,35,.16); }
+html[data-learner-theme="light"] .gr-sidebar-scroll::-webkit-scrollbar-thumb:hover,
+html[data-learner-theme="light"] .gr-body::-webkit-scrollbar-thumb:hover { background: rgba(38,39,35,.30); }
+
+/* resize handle between the list and the detail pane */
+html[data-learner-theme="light"] .gr-split:hover,
+html[data-learner-theme="light"] .gr-split.drag,
+html[data-learner-theme="light"] .gr-split:focus-visible {
+    background: linear-gradient(90deg, transparent 2px, #187a72 2px, #187a72 4px, transparent 4px);
+}
+
+/* empty-state icon (teal in the markup) */
+html[data-learner-theme="light"] .gr-panel-empty svg[stroke="#4fd1c5" i] { stroke: #187a72; }
+
+/* subject tile in the list, summative tag and the "term assessed" bar */
+html[data-learner-theme="light"] .gr-ft { background: rgba(38,39,35,.06); }
+html[data-learner-theme="light"] .gr-sb { background: rgba(38,39,35,.06); }
+html[data-learner-theme="light"] .gr-bar1 { background: rgba(38,39,35,.09); }
+html[data-learner-theme="light"] .gr-bar1 i { background: #3a3b37; }
+
+/* the little (i) buttons: the dark-mode hover grey would vanish */
+html[data-learner-theme="light"] .gr-info:hover,
+html[data-learner-theme="light"] .gr-info:focus-visible { color: #282924; border-color: #bdbcb4; }
+
+/* opened assessment: the strip behind the class range overview */
+html[data-learner-theme="light"] .gr-xp td { background: rgba(38,39,35,.025); }
+
+/* class range overview: chips (the green and orange tints are rebuilt from the darker colours), track, band, key */
+html[data-learner-theme="light"] .gr-ov-chip.ok   { background: rgba(21,128,61,.07);  border-color: rgba(21,128,61,.28); }
+html[data-learner-theme="light"] .gr-ov-chip.mid  { background: rgba(38,39,35,.045); }
+html[data-learner-theme="light"] .gr-ov-chip.warn { background: rgba(184,95,18,.08);  border-color: rgba(184,95,18,.30); }
+html[data-learner-theme="light"] .gr-ov-tr   { background: rgba(38,39,35,.09); }
+html[data-learner-theme="light"] .gr-ov-band { background: rgba(38,39,35,.16); }
+html[data-learner-theme="light"] .gr-ov-key .k1::before { background: rgba(38,39,35,.20); }
+
+/* the "You" marker: a dark dot with a white ring and a dark label, like the primary buttons on the other pages */
+html[data-learner-theme="light"] .gr-ov-you {
+    background: #252624;
+    border-color: #ffffff;
+    box-shadow: 0 0 0 1px rgba(38,39,35,.30), 0 2px 5px rgba(38,39,35,.22);
+}
+html[data-learner-theme="light"] .gr-ov-you em { background: #252624; color: #ffffff; }
+html[data-learner-theme="light"] .gr-ov-you em::after { border-top-color: #252624; }
+
+/* "How your term mark works" and the other info modals. They are appended to <body>, outside the layout, so they
+   carry their own tokens (see the end of this file for the dark ones) and get their own light ones here. */
+html[data-learner-theme="light"] .gr-modal-overlay {
+    --gr-text:   #282924;
+    --gr-soft:   #53544e;
+    --gr-muted:  #73746d;
+    --gr-accent: #187a72;
+    --gr-line-strong: #d0cfc8;
+    --gr-hover:  rgba(38,39,35,.055);
+    background: rgba(38,39,35,.38);
+    color-scheme: light;
+}
+html[data-learner-theme="light"] .gr-modal-box { background: #ffffff; box-shadow: 0 20px 60px rgba(38,39,35,.22); }
+
+/* fetch error state */
+html[data-learner-theme="light"] .grades-error-state { color: #bd4a43; }
+
+/* ── Progress Report (desktop: it opens in the right panel; below 900px it is the dark mobile sheet and stays dark) ── */
+@media (min-width: 900px) {
+
+html[data-learner-theme="light"] #grades-dt-panel .pr-card { background: #ffffff; border-color: #dfded8; }
+html[data-learner-theme="light"] #grades-dt-panel .pr-hero-school,
+html[data-learner-theme="light"] #grades-dt-panel .pr-hero-class,
+html[data-learner-theme="light"] #grades-dt-panel .pr-hero-trenditem-t,
+html[data-learner-theme="light"] #grades-dt-panel .pr-subjects-title { color: #73746d; }
+html[data-learner-theme="light"] #grades-dt-panel .pr-hero-avglabel,
+html[data-learner-theme="light"] #grades-dt-panel .pr-hero-trendlabel,
+html[data-learner-theme="light"] #grades-dt-panel .pr-subject-v2-meta,
+html[data-learner-theme="light"] #grades-dt-panel .pr-empty { color: #73746d; }
+html[data-learner-theme="light"] #grades-dt-panel .pr-hero-name,
+html[data-learner-theme="light"] #grades-dt-panel .pr-subject-v2-name { color: #282924; }
+html[data-learner-theme="light"] #grades-dt-panel .pr-hero-idrow,
+html[data-learner-theme="light"] #grades-dt-panel .pr-hero-trendrow,
+html[data-learner-theme="light"] #grades-dt-panel .pr-footer-legend { border-color: #dfded8; }
+html[data-learner-theme="light"] #grades-dt-panel .pr-subject-row-v2 { border-top-color: #ebeae5; }
+
+/* avatar and the current term in the trend row (mint in dark mode) */
+html[data-learner-theme="light"] #grades-dt-panel .pr-hero-avatar { background: rgba(21,128,61,.09); color: #15803d; }
+html[data-learner-theme="light"] #grades-dt-panel .pr-hero-trenditem.pr-hero-trend-current .pr-hero-trenditem-t { color: #15803d; }
+
+/* A / B / C / D badges on the subject rows and in the legend */
+html[data-learner-theme="light"] #grades-dt-panel .pr-grade-a { background: rgba(21,128,61,.10);  color: #15803d; border-color: rgba(21,128,61,.28); }
+html[data-learner-theme="light"] #grades-dt-panel .pr-grade-b { background: rgba(43,95,184,.09);  color: #2b5fb8; border-color: rgba(43,95,184,.28); }
+html[data-learner-theme="light"] #grades-dt-panel .pr-grade-c { background: rgba(184,95,18,.10);  color: #b85f12; border-color: rgba(184,95,18,.30); }
+html[data-learner-theme="light"] #grades-dt-panel .pr-grade-d { background: rgba(189,74,67,.09);  color: #bd4a43; border-color: rgba(189,74,67,.30); }
+
+/* "Learn more" pill */
+html[data-learner-theme="light"] #grades-dt-panel .pr-learn-more-btn { background: #ffffff; border-color: #d0cfc8; color: #53544e; }
+html[data-learner-theme="light"] #grades-dt-panel .pr-learn-more-btn:hover { background: rgba(38,39,35,.055); border-color: #bdbcb4; color: #282924; }
+
+/* the "?" badge on a subject with no marks this term (grades.js writes a white tint inline) */
+html[data-learner-theme="light"] #grades-dt-panel .pr-subject-v2-badge[style*="rgba(255,255,255,0.05)" i] {
+    background: rgba(38,39,35,.05) !important;
+    border-color: #dfded8 !important;
+}
+
+/* status and mark colours grades.js writes inline (the overall number, the status pill, the term trend and each
+   subject's %), darkened so they read on a light page. prSwitchTerm rewrites them from JS and the browser then
+   stores them as rgb(), so both spellings are matched. */
+html[data-learner-theme="light"] #grades-dt-panel .pr-wrap [style*="#22c55e" i],
+html[data-learner-theme="light"] #grades-dt-panel .pr-wrap [style*="rgb(34, 197, 94)" i] { color: #15803d !important; }
+html[data-learner-theme="light"] #grades-dt-panel .pr-wrap [style*="#60a5fa" i],
+html[data-learner-theme="light"] #grades-dt-panel .pr-wrap [style*="rgb(96, 165, 250)" i] { color: #2b5fb8 !important; }
+html[data-learner-theme="light"] #grades-dt-panel .pr-wrap [style*="#f59e0b" i],
+html[data-learner-theme="light"] #grades-dt-panel .pr-wrap [style*="rgb(245, 158, 11)" i] { color: #b85f12 !important; }
+html[data-learner-theme="light"] #grades-dt-panel .pr-wrap [style*="#f85149" i],
+html[data-learner-theme="light"] #grades-dt-panel .pr-wrap [style*="rgb(248, 81, 73)" i] { color: #bd4a43 !important; }
+html[data-learner-theme="light"] #grades-dt-panel .pr-wrap [style*="#555e6a" i],
+html[data-learner-theme="light"] #grades-dt-panel .pr-wrap [style*="rgb(85, 94, 106)" i] { color: #73746d !important; }
+
+/* info modals ("Learn more" and the status explainer); appended to <body>, shared with the mobile sheet */
+html[data-learner-theme="light"] .pr-info-modal-overlay { background: rgba(38,39,35,.38); }
+html[data-learner-theme="light"] .pr-info-modal-box { background: #ffffff; border-color: #dfded8; box-shadow: 0 20px 60px rgba(38,39,35,.22); }
+html[data-learner-theme="light"] .pr-info-modal-close { background: rgba(38,39,35,.06); color: #73746d; }
+html[data-learner-theme="light"] .pr-info-modal-close:hover { background: rgba(38,39,35,.10); color: #282924; }
+html[data-learner-theme="light"] .pr-info-modal-title,
+html[data-learner-theme="light"] .pr-info-modal-body strong { color: #282924; }
+html[data-learner-theme="light"] .pr-info-modal-body,
+html[data-learner-theme="light"] .pr-info-modal-notes li { color: #53544e; }
+html[data-learner-theme="light"] .pr-info-modal-notes { background: rgba(38,39,35,.03); border-color: #dfded8; }
+html[data-learner-theme="light"] .pr-info-modal-notes-title { color: #73746d; }
+html[data-learner-theme="light"] .pr-info-modal-box [style*="#22c55e" i],
+html[data-learner-theme="light"] .pr-info-modal-box [style*="rgb(34, 197, 94)" i] { color: #15803d !important; }
+html[data-learner-theme="light"] .pr-info-modal-box [style*="#60a5fa" i],
+html[data-learner-theme="light"] .pr-info-modal-box [style*="rgb(96, 165, 250)" i] { color: #2b5fb8 !important; }
+html[data-learner-theme="light"] .pr-info-modal-box [style*="#f59e0b" i],
+html[data-learner-theme="light"] .pr-info-modal-box [style*="rgb(245, 158, 11)" i] { color: #b85f12 !important; }
+html[data-learner-theme="light"] .pr-info-modal-box [style*="#f85149" i],
+html[data-learner-theme="light"] .pr-info-modal-box [style*="rgb(248, 81, 73)" i] { color: #bd4a43 !important; }
+html[data-learner-theme="light"] .pr-info-modal-box [style*="#555e6a" i],
+html[data-learner-theme="light"] .pr-info-modal-box [style*="rgb(85, 94, 106)" i] { color: #73746d !important; }
+
+}
+
+/* ── Phone-style accordion (shown between 769px and 899px, inside the light shell) ── */
+html[data-learner-theme="light"] .grades-mobile-layout { color: #282924; color-scheme: light; }
+
+html[data-learner-theme="light"] .grades-mobile-layout .grades-search { background: #ffffff; border: 1px solid #dfded8; color: #282924; }
+html[data-learner-theme="light"] .grades-mobile-layout .grades-search:focus { border-color: #bdbcb4; }
+html[data-learner-theme="light"] .grades-mobile-layout .grades-search::placeholder { color: #8b8b83; }
+html[data-learner-theme="light"] .grades-mobile-layout .grades-report-btn { background: rgba(21,128,61,.07); color: #15803d; border-color: rgba(21,128,61,.28); }
+html[data-learner-theme="light"] .grades-mobile-layout .grades-report-btn:hover { background: rgba(21,128,61,.12); }
+
+html[data-learner-theme="light"] .grades-mobile-layout .subject-card { background: #ffffff; border-color: #dfded8; }
+html[data-learner-theme="light"] .grades-mobile-layout .subject-card:hover { border-color: #d0cfc8; }
+html[data-learner-theme="light"] .grades-mobile-layout .subject-header { border-bottom-color: #ebeae5; }
+html[data-learner-theme="light"] .grades-mobile-layout .subject-header:hover { background: rgba(38,39,35,.03); }
+html[data-learner-theme="light"] .grades-mobile-layout .subject-name { color: #282924; }
+html[data-learner-theme="light"] .grades-mobile-layout .subject-count { color: #73746d; background: rgba(38,39,35,.06); }
+html[data-learner-theme="light"] .grades-mobile-layout .subject-chevron { color: #8b8b83; }
+html[data-learner-theme="light"] .grades-mobile-layout .subject-name svg[stroke="#68d391" i] { stroke: #15803d; }
+
+html[data-learner-theme="light"] .grades-mobile-layout .view-toggle-bar { border-bottom-color: #ebeae5; }
+html[data-learner-theme="light"] .grades-mobile-layout .view-toggle-btn { color: #73746d; }
+html[data-learner-theme="light"] .grades-mobile-layout .view-toggle-btn:hover,
+html[data-learner-theme="light"] .grades-mobile-layout .view-toggle-btn.active-view { background: rgba(21,128,61,.08); color: #15803d; }
+
+html[data-learner-theme="light"] .grades-mobile-layout .quiz-row { background: rgba(38,39,35,.02); border-color: #ebeae5; }
+html[data-learner-theme="light"] .grades-mobile-layout .quiz-row:hover:not(.quiz-unpublished) { border-color: rgba(21,128,61,.30); }
+html[data-learner-theme="light"] .grades-mobile-layout .quiz-row-title,
+html[data-learner-theme="light"] .grades-mobile-layout .quiz-row-title a,
+html[data-learner-theme="light"] .grades-mobile-layout .quiz-row-title a:hover,
+html[data-learner-theme="light"] .grades-mobile-layout .quiz-title-link { color: #282924; }
+html[data-learner-theme="light"] .grades-mobile-layout .quiz-unpublished .quiz-row-title { color: #73746d; }
+html[data-learner-theme="light"] .grades-mobile-layout .quiz-row-icon svg[stroke="#68d391" i] { stroke: #15803d; }
+html[data-learner-theme="light"] .grades-mobile-layout .quiz-row-icon svg[stroke="#f85149" i] { stroke: #bd4a43; }
+html[data-learner-theme="light"] .grades-mobile-layout .quiz-score-pill.high { background: rgba(21,128,61,.10); color: #15803d; }
+html[data-learner-theme="light"] .grades-mobile-layout .quiz-score-pill.mid  { background: rgba(44,122,75,.10); color: #2c7a4b; }
+html[data-learner-theme="light"] .grades-mobile-layout .quiz-score-pill.low  { background: rgba(189,74,67,.09); color: #bd4a43; }
+html[data-learner-theme="light"] .grades-mobile-layout .quiz-score-pill.hidden-score { background: rgba(38,39,35,.06); color: #73746d; }
+html[data-learner-theme="light"] .grades-mobile-layout .quiz-grading-status.pending,
+html[data-learner-theme="light"] .grades-mobile-layout .quiz-grading-status.partial { color: #b85f12; background: rgba(184,95,18,.09); border-color: rgba(184,95,18,.30); }
+html[data-learner-theme="light"] .grades-mobile-layout .quiz-grading-status.done { color: #15803d; background: rgba(21,128,61,.08); border-color: rgba(21,128,61,.28); }
+html[data-learner-theme="light"] .grades-mobile-layout .quiz-expand-btn { color: #8b8b83; }
+html[data-learner-theme="light"] .grades-mobile-layout .quiz-expand-btn:hover { color: #15803d; }
+html[data-learner-theme="light"] .grades-mobile-layout .quiz-row-details { background: rgba(38,39,35,.03); border-top-color: #ebeae5; color: #73746d; }
+html[data-learner-theme="light"] .grades-mobile-layout .quiz-row-details strong { color: #282924; }
+html[data-learner-theme="light"] .grades-mobile-layout .grades-status-text--done { color: #15803d; }
+html[data-learner-theme="light"] .grades-mobile-layout .grades-status-text--pending { color: #b85f12; }
+html[data-learner-theme="light"] .grades-mobile-layout .grades-unpublished-note { color: #73746d; }
+html[data-learner-theme="light"] .grades-mobile-layout .summative-badge { color: #15803d; border-color: rgba(21,128,61,.30); }
+
+html[data-learner-theme="light"] .grades-mobile-layout .term-selector { background: #ffffff; border-color: #d0cfc8; color: #282924; }
+html[data-learner-theme="light"] .grades-mobile-layout .term-selector:focus { border-color: #bdbcb4; }
+html[data-learner-theme="light"] .grades-mobile-layout .term-table-wrap { border-color: #dfded8; }
+html[data-learner-theme="light"] .grades-mobile-layout .term-table th { color: #15803d; background: rgba(38,39,35,.03); border-bottom-color: #dfded8; }
+html[data-learner-theme="light"] .grades-mobile-layout .term-table td { color: #53544e; border-bottom-color: #ebeae5; }
+html[data-learner-theme="light"] .grades-mobile-layout .term-table-total td { color: #15803d; border-top-color: rgba(21,128,61,.30) !important; }
+html[data-learner-theme="light"] .grades-mobile-layout .term-total-result,
+html[data-learner-theme="light"] .grades-mobile-layout .term-table-earned { color: #15803d; }
+html[data-learner-theme="light"] .grades-mobile-layout .term-still-pending,
+html[data-learner-theme="light"] .grades-mobile-layout .no-summative { color: #73746d; }
+
+html[data-learner-theme="light"] .grades-mobile-layout .grades-mobile-empty { color: #73746d; }
+html[data-learner-theme="light"] .grades-mobile-layout .grades-mobile-empty-title { color: #282924; }
+html[data-learner-theme="light"] .grades-mobile-layout .grades-mobile-empty-body { color: #73746d; }
+html[data-learner-theme="light"] .grades-mobile-layout .grades-mobile-empty svg[stroke="#68d391" i] { stroke: #15803d; }
+
+/* performance overview inside an opened row: score ring and the class distribution bar */
+html[data-learner-theme="light"] .grades-mobile-layout .grade-inline-stats { background: rgba(38,39,35,.025); border-color: #dfded8; }
+html[data-learner-theme="light"] .grades-mobile-layout .grade-inline-stats.loading,
+html[data-learner-theme="light"] .grades-mobile-layout .grade-inline-stats.error { color: #73746d; }
+html[data-learner-theme="light"] .grades-mobile-layout .grade-inline-title,
+html[data-learner-theme="light"] .grades-mobile-layout .score-circle-text { color: #282924; }
+html[data-learner-theme="light"] .grades-mobile-layout .score-out-of,
+html[data-learner-theme="light"] .grades-mobile-layout .dist-labels { color: #73746d; }
+html[data-learner-theme="light"] .grades-mobile-layout .sc-track { stroke: rgba(38,39,35,.08); }
+html[data-learner-theme="light"] .grades-mobile-layout .sc-fill { stroke: #15803d; }
+html[data-learner-theme="light"] .grades-mobile-layout .dist-bar-wrap { background: rgba(38,39,35,.08); }
+html[data-learner-theme="light"] .grades-mobile-layout .dist-marker.me { border-color: #15803d; box-shadow: 0 1px 3px rgba(38,39,35,.25); }
+html[data-learner-theme="light"] .grades-mobile-layout .dist-line.low  { background: #bd4a43; }
+html[data-learner-theme="light"] .grades-mobile-layout .dist-line.avg  { background: #d97706; }
+html[data-learner-theme="light"] .grades-mobile-layout .dist-line.high { background: #16a34a; }
+html[data-learner-theme="light"] .grades-mobile-layout .dist-tip { background: #252624; border-color: #252624; color: #ffffff; }
+html[data-learner-theme="light"] .grades-mobile-layout .dist-tip::after { border-top-color: #252624; }
+html[data-learner-theme="light"] .grades-mobile-layout .dist-legend { background: rgba(38,39,35,.03); color: #73746d; }
+html[data-learner-theme="light"] .grades-mobile-layout .dist-legend-dot--me   { color: #15803d; }
+html[data-learner-theme="light"] .grades-mobile-layout .dist-legend-dot--low  { color: #bd4a43; }
+html[data-learner-theme="light"] .grades-mobile-layout .dist-legend-dot--avg  { color: #d97706; }
+html[data-learner-theme="light"] .grades-mobile-layout .dist-legend-dot--high { color: #16a34a; }
+
+}
+
+/* ═══ Light mode: learner Grades (phones) ══════════════════════════════════════════════════════════════════
+   Phones only (max-width: 768px), switched on by <html data-learner-mobile-theme="light"> (mobile_theme.js).
+   The page shell (page background, header, bottom nav, profile dropdown) is in mobile_light.css, which finds this page
+   by its markup: .grades-mobile-layout (the accordion, its empty state and everything opened inside it) and
+   .grades-error-state (the fetch error). This block colours what is inside the page: the search box, the Progress
+   Report button, the subject accordion, the quiz rows and their score pills, the Term Marks table and the
+   performance overview (score ring and class distribution bar). Same palette as the desktop light block above and the
+   phone-style accordion it already has for 769px to 899px; the difference is that on phones the accordion is flat
+   (no card), so the rows sit straight on the cream page and use the darker #dfded8 line.
+   The Progress Report and quiz Review sheets and the info modals are not inside the page (they are appended to <body>
+   and styled by the css grades.js injects), so they have their own block at the end of this file.
+   Dark mode and desktop are untouched, and grades.js needs no change.
+   To remove it, delete this block, the two grades markers in mobile_light.css and the same two in PAGE in mobile_theme.js. */
+@media (max-width: 768px) {
+
+html[data-learner-mobile-theme="light"] .grades-mobile-layout { color: #282924; color-scheme: light; }
+
+/* search box and the Progress Report button */
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .grades-search { background: #ffffff; border: 1px solid #dfded8; color: #282924; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .grades-search:focus { border-color: #bdbcb4; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .grades-search::placeholder { color: #8b8b83; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .grades-report-btn { background: rgba(21,128,61,.08); color: #15803d; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .grades-report-btn:hover { background: rgba(21,128,61,.13); }
+
+/* subject accordion: flat rows divided by a line; the open one gets a faint tint */
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .subject-card,
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .subject-card:hover { border-bottom-color: #dfded8; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .subject-header:not(.subject-header--collapsed) { background: rgba(38,39,35,.04); }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .subject-name { color: #282924; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .subject-count { color: #73746d; background: rgba(38,39,35,.06); }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .subject-chevron { color: #73746d; }
+
+/* Quiz List / Term Marks switch */
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .view-toggle-bar { border-bottom-color: #ebeae5; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .view-toggle-btn { color: #73746d; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .view-toggle-btn:hover,
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .view-toggle-btn.active-view { background: rgba(21,128,61,.08); color: #15803d; }
+
+/* quiz rows (the hover rule is repeated because a tap leaves :hover on, and the dark phone css sets it too) */
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-row,
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-row:hover:not(.quiz-unpublished) { background: rgba(38,39,35,.025); border-color: #dfded8; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-row-title,
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-row-title a,
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-row-title a:hover,
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-title-link { color: #282924; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-unpublished .quiz-row-title { color: #73746d; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-score-pill.high { background: rgba(21,128,61,.10); color: #15803d; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-score-pill.mid  { background: rgba(44,122,75,.10); color: #2c7a4b; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-score-pill.low  { background: rgba(189,74,67,.09); color: #bd4a43; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-score-pill.hidden-score { background: rgba(38,39,35,.06); color: #73746d; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-grading-status.pending,
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-grading-status.partial { color: #b85f12; background: rgba(184,95,18,.09); border-color: rgba(184,95,18,.30); }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-grading-status.done { color: #15803d; background: rgba(21,128,61,.08); border-color: rgba(21,128,61,.28); }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-expand-btn { color: #73746d; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-expand-btn:hover { color: #73746d; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-row-details { background: rgba(38,39,35,.03); border-top-color: #ebeae5; color: #73746d; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .quiz-row-details strong { color: #282924; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .grades-status-text--done { color: #15803d; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .grades-status-text--pending { color: #b85f12; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .grades-unpublished-note { color: #73746d; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .summative-badge { color: #15803d; border-color: rgba(21,128,61,.30); }
+
+/* Term Marks table */
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .term-selector { background: #ffffff; border-color: #d0cfc8; color: #282924; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .term-selector:focus { border-color: #bdbcb4; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .term-table-wrap { border-color: #dfded8; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .term-table th { color: #15803d; background: rgba(38,39,35,.03); border-bottom-color: #dfded8; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .term-table td { color: #53544e; border-bottom-color: #ebeae5; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .term-table-total td { color: #15803d; border-top-color: rgba(21,128,61,.30) !important; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .term-total-result,
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .term-table-earned { color: #15803d; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .term-still-pending,
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .no-summative { color: #73746d; }
+
+/* empty state ("No grades yet") */
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .grades-mobile-empty { color: #73746d; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .grades-mobile-empty-title { color: #282924; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .grades-mobile-empty-body { color: #73746d; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .grades-mobile-empty svg[stroke="#68d391" i] { stroke: #15803d; }
+
+/* performance overview inside an opened row: score ring and the class distribution bar */
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .grade-inline-stats { background: rgba(38,39,35,.025); border-color: #dfded8; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .grade-inline-stats.loading,
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .grade-inline-stats.error { color: #73746d; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .grade-inline-title,
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .score-circle-text { color: #282924; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .score-out-of,
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .dist-labels { color: #73746d; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .sc-track { stroke: rgba(38,39,35,.08); }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .sc-fill { stroke: #15803d; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .dist-bar-wrap { background: rgba(38,39,35,.08); }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .dist-marker.me { border-color: #15803d; box-shadow: 0 1px 3px rgba(38,39,35,.25); }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .dist-line.low  { background: #bd4a43; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .dist-line.avg  { background: #d97706; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .dist-line.high { background: #16a34a; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .dist-tip { background: #252624; border-color: #252624; color: #ffffff; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .dist-tip::after { border-top-color: #252624; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .dist-legend { background: rgba(38,39,35,.03); color: #73746d; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .dist-legend-dot--me   { color: #15803d; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .dist-legend-dot--low  { color: #bd4a43; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .dist-legend-dot--avg  { color: #d97706; }
+html[data-learner-mobile-theme="light"] .grades-mobile-layout .dist-legend-dot--high { color: #16a34a; }
+
+/* fetch error */
+html[data-learner-mobile-theme="light"] .grades-error-state { color: #bd4a43; }
+
+}
+
+
+/* ═══ Light mode: learner Grades sheets and modals (phones) ════════════════════════════════════════════════
+   Phones only (max-width: 768px), switched on by <html data-learner-mobile-theme="light"> (mobile_theme.js).
+   Covers what grades.js appends to <body> on phones: the Progress Report sheet (#prReportModal), the quiz Review sheet
+   (the same overlay, with .review-modal-sheet) and the small centred info dialog opened by "Learn more" and the
+   status pill (#prInfoModal). Their css is injected by grades.js as <style id="pr-styles"> AFTER this file loads, so
+   every rule here carries the extra html[...] and :has( ) selectors to win on specificity, not on order.
+   They only go light while the Grades page is what is under them: the :has( ) looks for .grades-mobile-layout inside
+   #api-content-area, the same marker mobile_light.css uses. If one of them is ever opened from a page that is still
+   dark, it stays dark with that page.
+   The colours are the same as the desktop Progress Report block above and the page block before this one. The overlay
+   is the same warm 38% as the desktop modals instead of 55% black, and grades.js uses the matching status bar colour
+   (sheetsAreLight() / SHEET_OVERLAY_DIMMED_COLOR_LIGHT). Dark mode and desktop are untouched.
+   To remove it, delete this block and the light branch in darkenBrowserBarForSheet() in grades.js. */
+@media (max-width: 768px) {
+
+/* sheet shell: the cream page colour, a lighter dim over the page, a dark grabber */
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-modal-overlay,
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-overlay { color-scheme: light; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-modal-overlay { background: rgba(38,39,35,.38); }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-modal-sheet { background: #faf9f5; color: #282924; box-shadow: 0 -8px 30px rgba(31,32,29,.14); }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-modal-grabber { background: rgba(38,39,35,.22); }
+
+/* ── Progress Report ── */
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-hero-school,
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-hero-class,
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-hero-trenditem-t,
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-hero-avglabel,
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-hero-trendlabel,
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-subjects-title,
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-subject-v2-meta,
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-empty { color: #73746d; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-hero-name,
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-subject-v2-name { color: #282924; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-hero-idrow,
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-hero-trendrow,
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-footer-legend { border-color: #dfded8; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-subject-row-v2 { border-top-color: #ebeae5; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-hero-avatar { background: rgba(21,128,61,.09); color: #15803d; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-hero-trenditem.pr-hero-trend-current .pr-hero-trenditem-t { color: #15803d; }
+
+/* A / B / C / D badges on the subject rows and in the legend */
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-grade-a { background: rgba(21,128,61,.10);  color: #15803d; border-color: rgba(21,128,61,.28); }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-grade-b { background: rgba(43,95,184,.09);  color: #2b5fb8; border-color: rgba(43,95,184,.28); }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-grade-c { background: rgba(184,95,18,.10);  color: #b85f12; border-color: rgba(184,95,18,.30); }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-grade-d { background: rgba(189,74,67,.09);  color: #bd4a43; border-color: rgba(189,74,67,.30); }
+
+/* "Learn more" */
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-learn-more-btn { background: #ffffff; border-color: #d0cfc8; color: #53544e; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-learn-more-btn:hover { background: rgba(38,39,35,.055); border-color: #bdbcb4; color: #282924; }
+
+/* the "?" badge on a subject with no marks this term (grades.js writes a white tint inline) */
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-subject-v2-badge[style*="rgba(255,255,255,0.05)" i] { background: rgba(38,39,35,.05) !important; border-color: #dfded8 !important; }
+
+/* status and mark colours grades.js writes inline (overall number, status pill, term trend, each subject's %), darkened
+   to read on cream. prSwitchTerm rewrites them from JS and the browser then stores them as rgb(), so both are matched. */
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-modal-sheet .pr-wrap [style*="#22c55e" i],
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-modal-sheet .pr-wrap [style*="rgb(34, 197, 94)" i] { color: #15803d !important; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-modal-sheet .pr-wrap [style*="#60a5fa" i],
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-modal-sheet .pr-wrap [style*="rgb(96, 165, 250)" i] { color: #2b5fb8 !important; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-modal-sheet .pr-wrap [style*="#f59e0b" i],
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-modal-sheet .pr-wrap [style*="rgb(245, 158, 11)" i] { color: #b85f12 !important; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-modal-sheet .pr-wrap [style*="#f85149" i],
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-modal-sheet .pr-wrap [style*="rgb(248, 81, 73)" i] { color: #bd4a43 !important; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-modal-sheet .pr-wrap [style*="#555e6a" i],
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-modal-sheet .pr-wrap [style*="rgb(85, 94, 106)" i] { color: #73746d !important; }
+
+/* ── Quiz Review ── */
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-loading[style*="#8b949e" i] { color: #73746d !important; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-scorehead { border-bottom-color: #dfded8; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-pct { background: rgba(24,122,114,.08); border-color: rgba(24,122,114,.30); color: #187a72; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-title { color: #282924; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-meta { color: #73746d; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-not-published { color: #282924; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-not-published i { color: #187a72; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-not-published p,
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-error { color: #73746d; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-qbox { border-bottom-color: #dfded8; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-qmeta { background: rgba(38,39,35,.04); border-color: #dfded8; color: #73746d; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-qtext { color: #282924; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-qimage { border-color: #dfded8; }
+
+/* answer choices: white rows; right is green, wrong is red */
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-choice { background: #ffffff; border-color: #dfded8; color: #53544e; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-choice.qr-correct { border-color: rgba(21,128,61,.40); background: rgba(21,128,61,.07); color: #282924; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-choice.qr-incorrect { border-color: rgba(189,74,67,.42); background: rgba(189,74,67,.07); color: #282924; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-choice i.qr-icon-correct { color: #16a34a; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-choice i.qr-icon-incorrect { color: #bd4a43; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-badge-user { color: #187a72; background: rgba(24,122,114,.08); border-color: rgba(24,122,114,.25); }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-deduction-note { color: #9a4f0e; }
+
+/* fill-in-the-blank, open-ended answers and teacher grading */
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-fitb-row { background: #ffffff; border-color: #dfded8; color: #53544e; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-fitb-row.qr-correct { border-color: rgba(21,128,61,.40); background: rgba(21,128,61,.07); }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-fitb-row.qr-incorrect { border-color: rgba(189,74,67,.42); background: rgba(189,74,67,.07); }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-fitb-answer { color: #282924; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-fitb-correct { color: #73746d; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-open-box { background: #ffffff; border-color: #dfded8; color: #282924; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-open-grade { background: rgba(21,128,61,.07); border-color: rgba(21,128,61,.28); color: #166534; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .qr-open-pending { background: rgba(184,95,18,.08); border-color: rgba(184,95,18,.30); color: #9a4f0e; }
+
+/* ── Info dialog ("About Progress Report" and the status explainer) ── */
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-overlay { background: rgba(38,39,35,.38); }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-box { background: #ffffff; border-color: #dfded8; color: #282924; box-shadow: 0 20px 60px rgba(38,39,35,.22); }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-close { background: rgba(38,39,35,.06); color: #73746d; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-close:hover { background: rgba(38,39,35,.10); color: #282924; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-title,
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-body strong { color: #282924; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-body,
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-notes li { color: #53544e; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-notes { background: rgba(38,39,35,.03); border-color: #dfded8; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-notes-title { color: #73746d; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-box [style*="#22c55e" i],
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-box [style*="rgb(34, 197, 94)" i] { color: #15803d !important; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-box [style*="#60a5fa" i],
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-box [style*="rgb(96, 165, 250)" i] { color: #2b5fb8 !important; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-box [style*="#f59e0b" i],
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-box [style*="rgb(245, 158, 11)" i] { color: #b85f12 !important; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-box [style*="#f85149" i],
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-box [style*="rgb(248, 81, 73)" i] { color: #bd4a43 !important; }
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-box [style*="#555e6a" i],
+html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-box [style*="rgb(85, 94, 106)" i] { color: #73746d !important; }
+
 }

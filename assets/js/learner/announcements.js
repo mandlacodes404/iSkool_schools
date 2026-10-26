@@ -104,7 +104,8 @@ function saveAnnouncementPageState() {
         panelScroll:   (document.querySelector('.lan-body') || {}).scrollTop || 0,
         mobileSearch: document.getElementById('lanMobileSearch')?.value || '',
         openFolders: Array.from(document.querySelectorAll('.lan-mobile-folder-body:not(.collapsed)')).map(el => el.id),
-        openDesktopGroups: Array.from(document.querySelectorAll('.lan-desktop-teacher-body:not(.collapsed)')).map(el => el.id),
+        // Desktop sender groups the learner has folded away (open is the default)
+        collapsedTeachers: Array.from(window._lanCollapsed || []),
     };
     if (window.learnerPageState) window.learnerPageState.set('announcements', state);
     else sessionStorage.setItem('announcementPageState', JSON.stringify(state));
@@ -152,14 +153,9 @@ function restoreAnnouncementPageState() {
                     if (chev) chev.classList.toggle('open', open);
                 });
             }
-            if (Array.isArray(state.openDesktopGroups)) {
-                document.querySelectorAll('.lan-desktop-teacher-body').forEach(body => {
-                    const open = state.openDesktopGroups.includes(body.id);
-                    body.classList.toggle('collapsed', !open);
-                    const header = body.previousElementSibling;
-                    const chevron = header ? header.querySelector('.lan-desktop-teacher-chevron') : null;
-                    if (chevron) chevron.classList.toggle('open', open);
-                });
+            if (Array.isArray(state.collapsedTeachers)) {
+                window._lanCollapsed = new Set(state.collapsedTeachers);
+                if (typeof window.lanRenderDesktopList === 'function') window.lanRenderDesktopList();
             }
             const selectedIdx = state.selectedKey
                 ? (window._allLearnerAnnouncementsFlat || []).findIndex(ann => `${ann._type || 'teacher'}:${ann.id}` === state.selectedKey)
@@ -345,7 +341,7 @@ function renderAnnouncements(data) {
         html += `
             <div class="lan-mobile-folder-header lan-mobile-folder-header--collapsed" onclick="toggleLanMobileFolder('${swGid}', this)">
                 <div class="lan-mobile-folder-icon">
-                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="#d29522" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="#73746d" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
                     </svg>
                 </div>
@@ -365,7 +361,7 @@ function renderAnnouncements(data) {
                     onclick="openMobileLearnerAnnouncement(${mobileFlatIdx})"
                     onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openMobileLearnerAnnouncement(${mobileFlatIdx}); }">
                     <div class="lan-mobile-card-icon">
-                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="#f28c38" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
+                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="#73746d" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
                             <path d="M11 6a13 13 0 0 0 8.4-2.8A1 1 0 0 1 21 4v12a1 1 0 0 1-1.6.8A13 13 0 0 0 11 14H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/>
                             <path d="M6 14a12 12 0 0 0 2.4 7.2 2 2 0 0 0 3.2-2.4A8 8 0 0 1 10 14"/>
                             <path d="M8 6v8"/>
@@ -397,7 +393,7 @@ function renderAnnouncements(data) {
             html += `
                 <div class="lan-mobile-folder-header lan-mobile-folder-header--collapsed" onclick="toggleLanMobileFolder('${tGid}', this)">
                     <div class="lan-mobile-folder-icon">
-                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="#f28c38" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="#73746d" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
                         </svg>
                     </div>
@@ -417,7 +413,7 @@ function renderAnnouncements(data) {
                         onclick="openMobileLearnerAnnouncement(${mobileFlatIdx})"
                         onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openMobileLearnerAnnouncement(${mobileFlatIdx}); }">
                         <div class="lan-mobile-card-icon">
-                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="#f28c38" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
+                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="#73746d" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
                                 <path d="M11 6a13 13 0 0 0 8.4-2.8A1 1 0 0 1 21 4v12a1 1 0 0 1-1.6.8A13 13 0 0 0 11 14H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/>
                                 <path d="M6 14a12 12 0 0 0 2.4 7.2 2 2 0 0 0 3.2-2.4A8 8 0 0 1 10 14"/>
                                 <path d="M8 6v8"/>
@@ -611,6 +607,7 @@ window._lanFilter = 'all';
 window._lanTerm = '';
 window._lanRead = null;
 window._lanReadTimer = null;
+window._lanCollapsed = window._lanCollapsed || new Set();
 
 function lanKey(ann) { return `${ann._type || 'teacher'}:${ann.id}`; }
 function lanReadStoreKey() { return 'lan.read.' + (window.learnerQueueUser || ''); }
@@ -631,27 +628,6 @@ function lanSaveRead() {
     try { localStorage.setItem(lanReadStoreKey(), JSON.stringify(Array.from(window._lanRead))); } catch (e) {}
 }
 
-function lanDaysAgo(ann) {
-    const t = getLearnerAnnouncementTime(ann);
-    if (!t) return 999;
-    const a = new Date(); a.setHours(0, 0, 0, 0);
-    const b = new Date(t); b.setHours(0, 0, 0, 0);
-    return Math.round((a - b) / 86400000);
-}
-function lanGroupOf(ann) {
-    const d = lanDaysAgo(ann);
-    return d <= 0 ? 'Today' : d <= 7 ? 'This week' : 'Earlier';
-}
-function lanRowTime(ann) {
-    const t = getLearnerAnnouncementTime(ann);
-    if (!t) return '';
-    const d = new Date(t), days = lanDaysAgo(ann);
-    if (days <= 0) return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
-    if (days === 1) return 'Yesterday';
-    if (days < 7) return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()];
-    return d.getDate() + ' ' + d.toLocaleString('en-GB', { month: 'short' });
-}
-function lanPlain(ann) { return String(ann.message || '').replace(/\s+/g, ' ').trim(); }
 function lanUnreadCount() {
     return (window._allLearnerAnnouncementsFlat || []).filter(a => !window._lanRead.has(lanKey(a))).length;
 }
@@ -686,31 +662,75 @@ window.lanRenderDesktopList = function () {
         return ok && (!term || `${ann.title || ''} ${ann.teacher || ''} ${ann.message || ''}`.toLowerCase().includes(term));
     });
 
+    // Group by sender: school-wide first, then each teacher. The flat list is already in that
+    // order (most recent first), the same way the learner assignments list groups by teacher.
+    const groups = [];
+    const byGroup = new Map();
+    visible.forEach(item => {
+        const isSchool = item.ann._type === 'school';
+        const sender = item.ann.teacher || item.ann.sender || (isSchool ? 'School Admin' : 'Teacher');
+        const key = isSchool ? 'school' : 'teacher:' + sender;
+        let g = byGroup.get(key);
+        if (!g) { g = { key, label: isSchool ? 'School-wide' : sender, rows: [] }; byGroup.set(key, g); groups.push(g); }
+        g.rows.push(item);
+    });
+    groups.forEach(g => g.rows.sort((a, b) => getLearnerAnnouncementTime(b.ann) - getLearnerAnnouncementTime(a.ann)));
+
+    if (!window._lanCollapsed) window._lanCollapsed = new Set();
+    const CHEV = '<svg class="lan-gl-chev" viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+
     let html = '';
-    ['Today', 'This week', 'Earlier'].forEach(group => {
-        const rows = visible.filter(({ ann }) => lanGroupOf(ann) === group)
-            .sort((a, b) => getLearnerAnnouncementTime(b.ann) - getLearnerAnnouncementTime(a.ann));
-        if (!rows.length) return;
-        html += `<div class="lan-gh">${group}</div>`;
+    groups.forEach(({ key, label, rows }) => {
+        // a search always shows every match, whatever was folded away
+        const collapsed = !term && window._lanCollapsed.has(key);
+        html += `
+            <div class="lan-group">
+                <div class="lan-gl" role="button" tabindex="0" aria-expanded="${collapsed ? 'false' : 'true'}"
+                     data-group="${escapeLearnerAnnouncementHtml(key)}"
+                     onclick="lanToggleGroup(this)" onkeydown="lanGroupKeydown(event, this)">
+                    ${CHEV}<span class="lan-gl-name">${escapeLearnerAnnouncementHtml(label)}</span>
+                </div>
+                <div class="lan-gb${collapsed ? ' collapsed' : ''}">`;
         rows.forEach(({ ann, idx }) => {
-            const isSchool = ann._type === 'school';
-            const sender = ann.teacher || ann.sender || (isSchool ? 'School Admin' : 'Teacher');
-            const initials = ann.initials || getLearnerAnnouncementInitials(sender);
             const unread = !read.has(lanKey(ann));
+            const stateText = unread ? 'Unread' : 'Read';
             const active = showActive && idx === window._learnerAnnouncementSelectedIdx ? ' active' : '';
             html += `
-                <div class="lan-sidebar-item lan-row${active}" id="lan-sidebar-${idx}" onclick="selectDesktopLearnerAnnouncement(${idx})">
-                    <span class="lan-ava${isSchool ? ' lan-ava--school' : ''}">${escapeLearnerAnnouncementHtml(initials)}</span>
-                    <div class="lan-sidebar-item-info">
-                        <div class="lan-sidebar-item-title${unread ? ' lan-unread' : ''}">${escapeLearnerAnnouncementHtml(ann.title || '')}</div>
-                        <div class="lan-sidebar-item-meta">${escapeLearnerAnnouncementHtml(sender)} &middot; ${escapeLearnerAnnouncementHtml(lanPlain(ann).slice(0, 140))}</div>
-                    </div>
-                    <span class="lan-rr"><span class="lan-tm">${escapeLearnerAnnouncementHtml(lanRowTime(ann))}</span>${unread ? '<span class="lan-udot"></span>' : ''}</span>
-                </div>`;
+                    <div class="lan-sidebar-item${active}" id="lan-sidebar-${idx}" onclick="selectDesktopLearnerAnnouncement(${idx})">
+                        <span class="lan-sidebar-dot${unread ? ' is-unread' : ''}" role="img" aria-label="${stateText}" title="${stateText}"></span>
+                        <div class="lan-sidebar-item-info">
+                            <div class="lan-sidebar-item-title${unread ? ' lan-unread' : ''}">${escapeLearnerAnnouncementHtml(ann.title || '')}</div>
+                            <div class="lan-sidebar-item-meta">${escapeLearnerAnnouncementHtml(ann.display_date || '')}</div>
+                        </div>
+                    </div>`;
         });
+        html += `
+                </div>
+            </div>`;
     });
     list.innerHTML = html || `<div class="lan-list-empty">${items.length ? 'No announcements match.' : "Your teachers haven't posted any announcements yet."}</div>`;
     list.scrollTop = keepScroll;
+};
+
+// Fold / unfold one sender group. The DOM is updated in place so the list does not jump.
+window.lanToggleGroup = function (headerEl) {
+    if (!headerEl) return;
+    const body = headerEl.nextElementSibling;
+    if (!body) return;
+    const key = headerEl.dataset.group || '';
+    if (!window._lanCollapsed) window._lanCollapsed = new Set();
+    const nowCollapsed = !body.classList.contains('collapsed');
+    body.classList.toggle('collapsed', nowCollapsed);
+    headerEl.setAttribute('aria-expanded', nowCollapsed ? 'false' : 'true');
+    if (nowCollapsed) window._lanCollapsed.add(key);
+    else window._lanCollapsed.delete(key);
+    saveAnnouncementPageState();
+};
+
+window.lanGroupKeydown = function (e, headerEl) {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    e.preventDefault();
+    window.lanToggleGroup(headerEl);
 };
 
 window.lanSetFilter = function (key) { window._lanFilter = key; window.lanRenderDesktopList(); };
@@ -764,7 +784,9 @@ window.lanMarkAllRead = function () {
 // ↑ / ↓ move through the list
 window.lanListKeydown = function (e) {
     if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    // rows inside a folded group are hidden, so up / down step over them
     const ids = Array.from(document.querySelectorAll('#lan-list .lan-sidebar-item'))
+        .filter(el => el.offsetParent !== null)
         .map(el => parseInt(el.id.replace('lan-sidebar-', ''), 10));
     if (!ids.length) return;
     e.preventDefault();
@@ -779,7 +801,7 @@ window.lanListKeydown = function (e) {
 window.lanEnsureSelection = function () {
     if (window.innerWidth < 900) return;
     if (document.querySelector('#lan-list .lan-sidebar-item.active')) return;
-    const first = document.querySelector('#lan-list .lan-sidebar-item');
+    const first = Array.from(document.querySelectorAll('#lan-list .lan-sidebar-item')).find(el => el.offsetParent !== null);
     if (first) window.selectDesktopLearnerAnnouncement(parseInt(first.id.replace('lan-sidebar-', ''), 10));
 };
 
@@ -849,11 +871,10 @@ window.selectDesktopLearnerAnnouncement = function(flatIdx) {
     const isSchool = ann._type === 'school';
     const sender = ann.teacher || ann.sender || (isSchool ? 'School Admin' : 'Teacher');
     const roleLabel = isSchool ? 'School Admin' : 'Teacher';
-    const initials = ann.initials || getLearnerAnnouncementInitials(sender);
     const isRead = window._lanRead ? window._lanRead.has(lanKey(ann)) : true;
 
     const chips =
-        (isSchool ? '<span class="lan-panel-status" style="background:rgba(210,149,34,0.12);border-color:rgba(210,149,34,0.35);color:#d29522;">School-wide</span>' : '') +
+        (isSchool ? '<span class="lan-panel-status">School-wide</span>' : '') +
         (ann.is_edited ? '<span class="lan-panel-status">Edited</span>' : '');
 
     // More from the same sender (most recent first)
@@ -880,11 +901,8 @@ window.selectDesktopLearnerAnnouncement = function(flatIdx) {
             <div class="lan-body">
                 <div class="lan-read">
                     <div class="lan-auth">
-                        <span class="lan-ava lan-ava--lg${isSchool ? ' lan-ava--school' : ''}">${escapeLearnerAnnouncementHtml(initials)}</span>
-                        <div>
-                            <b>${escapeLearnerAnnouncementHtml(sender)}</b>
-                            <small>${escapeLearnerAnnouncementHtml(roleLabel)} &middot; Posted ${escapeLearnerAnnouncementHtml(ann.display_date || '')}</small>
-                        </div>
+                        <b>${escapeLearnerAnnouncementHtml(sender)}</b>
+                        <small>${escapeLearnerAnnouncementHtml(roleLabel)} &middot; Posted ${escapeLearnerAnnouncementHtml(ann.display_date || '')}</small>
                     </div>
                     ${ann.is_edited ? `<div class="lan-edn">Edited ${escapeLearnerAnnouncementHtml(ann.edited_date || '')}. Changes are highlighted.</div>` : ''}
                     <div class="lan-msg">${renderLearnerAnnouncementBody(ann)}</div>
@@ -903,7 +921,7 @@ window.selectDesktopLearnerAnnouncement = function(flatIdx) {
 
     // Keep the selected row visible inside the list (scrolls the list only)
     const listBox = document.getElementById('lan-list');
-    if (listBox && sidebarItem) {
+    if (listBox && sidebarItem && sidebarItem.offsetParent !== null) {
         const top = sidebarItem.offsetTop, bottom = top + sidebarItem.offsetHeight;
         if (top < listBox.scrollTop + 34) listBox.scrollTop = Math.max(0, top - 34);
         else if (bottom > listBox.scrollTop + listBox.clientHeight) listBox.scrollTop = bottom - listBox.clientHeight;
@@ -912,9 +930,15 @@ window.selectDesktopLearnerAnnouncement = function(flatIdx) {
     if (window.learnerPageState) wireAnnouncementScrollState();
 };
 
-// Nunito 400/600/700 for the desktop announcements page. 600 is the medium weight, so load it
-// explicitly instead of letting the browser quietly fall back to 700 (or 400).
+// Desktop type is Geist 300/400/500 (see announcements.css). Nunito stays loaded for the mobile views.
 function lanEnsureFont() {
+    if (!document.getElementById('lan-geist-font')) {
+        const g = document.createElement('link');
+        g.id = 'lan-geist-font';
+        g.rel = 'stylesheet';
+        g.href = 'https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500&display=swap';
+        document.head.appendChild(g);
+    }
     if (document.getElementById('lan-nunito-font')) return;
     const link = document.createElement('link');
     link.id = 'lan-nunito-font';

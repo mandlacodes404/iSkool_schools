@@ -1,7 +1,9 @@
 /* assets/css/learner/assignments.css */
-/* Extracted from inline <style> blocks and inline style="" attributes
-   previously injected via innerHTML in assignments.js. No visual
-   changes — this is a 1:1 extraction. */
+/* Desktop (900px and up) follows the teacher pages: Geist, 400/500 weights,
+   the teacher text ladder, grouped list with rings that fill when done.
+   Colour tokens are literal values taken from teacher_desktop_menu.css so
+   nothing here depends on which --dm-* variables the learner shell defines.
+   The mobile styles further down are unchanged. */
 
 @media (min-width: 900px) {
     .las-desktop-layout { display: flex !important; }
@@ -15,9 +17,21 @@
 
 .las-desktop-layout {
     --las-listw: 320px;
+    /* Teacher palette */
+    --las-text:   #f0efec;
+    --las-soft:   #c2c3b7;
+    --las-muted:  #9b9c92;
+    --las-faint:  #7a7b73;
+    --las-accent: #4fd1c5;
+    --las-ok:     #22c55e;
+    --las-danger: #f4776f;
+    --las-line:        rgba(255,255,255,0.07);
+    --las-line-strong: rgba(255,255,255,0.14);
+    --las-hover:  rgba(255,255,255,0.055);
+    --las-active: rgba(255,255,255,0.095);
     /* Type weights for the whole desktop page (Geist). Tune here. */
     --las-w-strong: 500;  /* title, status chip, group labels, primary button */
-    --las-w-medium: 450;  /* list rows, filter chips, values, small actions */
+    --las-w-medium: 400;  /* values, small actions */
     display: flex;
     gap: 0;
     min-height: 500px;
@@ -38,12 +52,12 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    background: #12161c;
-    border-right: 1px solid rgba(255,255,255,0.07);
+    background: transparent;   /* same as the detail pane, which is transparent too */
+    border-right: 1px solid var(--las-line);
 }
 .las-lh {
     padding: 12px 12px 10px;
-    border-bottom: 1px solid rgba(255,255,255,0.07);
+    border-bottom: 1px solid var(--las-line);
     flex-shrink: 0;
 }
 .las-desktop-search-wrap { position: relative; }
@@ -53,7 +67,7 @@
     top: 50%;
     transform: translateY(-50%);
     pointer-events: none;
-    color: #7d8794;
+    color: var(--las-faint);
 }
 .las-desktop-search {
     width: 100%;
@@ -62,94 +76,118 @@
     padding: 0 10px 0 33px;
     border-radius: 8px;
     background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.07);
-    color: #e6edf3;
+    border: 1px solid var(--las-line);
+    color: var(--las-text);
     font-size: 13px;
+    font-weight: 400;
     font-family: inherit;
     transition: border-color 0.2s;
 }
-.las-desktop-search:focus { outline: none; border-color: #4fd1c5; }
-.las-desktop-search::placeholder { color: #7d8794; }
+.las-desktop-search:focus { outline: none; border-color: var(--las-accent); }
+.las-desktop-search::placeholder { color: var(--las-faint); }
+
+/* Filter pills stay under the search bar; the active pill is neutral, like the teacher chips */
 .las-chips { display: flex; gap: 6px; margin-top: 10px; overflow: hidden; }
 .las-chip {
     height: 26px;
     padding: 0 10px;
     border-radius: 999px;
-    border: 1px solid rgba(255,255,255,0.07);
+    border: 1px solid var(--las-line);
     background: none;
-    color: #9aa4b2;
+    color: var(--las-muted);
     font-family: inherit;
     font-size: 12px;
-    font-weight: var(--las-w-medium, 600);
+    font-weight: 400;
     white-space: nowrap;
     cursor: pointer;
 }
-.las-chip:hover { color: #e6edf3; }
+.las-chip:hover { color: var(--las-text); background: var(--las-hover); }
 .las-chip.on {
-    background: rgba(79,209,197,0.1);
-    border-color: rgba(79,209,197,0.4);
-    color: #4fd1c5;
+    background: var(--las-active);
+    border-color: var(--las-line-strong);
+    color: var(--las-text);
+    font-weight: var(--las-w-strong, 500);
 }
+.las-chip:focus-visible { outline: 2px solid var(--las-accent); outline-offset: 1px; }
+
 .las-sidebar-scroll {
     flex: 1;
     min-height: 0;
     overflow-y: auto;
     position: relative;
     outline: none;
+    padding-bottom: 8px;
 }
-.las-sidebar-scroll:focus-visible { outline: 2px solid #4fd1c5; outline-offset: -2px; }
+.las-sidebar-scroll:focus-visible { outline: 2px solid var(--las-accent); outline-offset: -2px; }
 .las-sidebar-scroll::-webkit-scrollbar { width: 8px; }
 .las-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
 .las-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; transition: background 0.15s ease; }
 .las-sidebar-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
-.las-gh {
-    position: sticky;
-    top: 0;
-    z-index: 1;
-    background: #12161c;
-    font-size: 11px;
-    font-weight: var(--las-w-strong, 700);
-    letter-spacing: 0.6px;
-    text-transform: uppercase;
-    color: #7d8794;
+
+/* Collapsible teacher group (same idea as the class groups on the teacher pages) */
+.las-gl {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     padding: 12px 14px 6px;
+    color: var(--las-muted);
+    font-size: 10px;
+    font-weight: var(--las-w-strong, 500);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    user-select: none;
+    outline: none;
 }
+.las-gl:hover { color: var(--las-soft); }
+.las-gl:focus-visible { outline: 2px solid var(--las-accent); outline-offset: -2px; }
+.las-gl-chev { flex-shrink: 0; transition: transform 0.15s ease; }
+.las-gl[aria-expanded="false"] .las-gl-chev { transform: rotate(-90deg); }
+.las-gl-name { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.las-gb.collapsed { display: none; }
+
+/* Row: empty ring that fills green once the work is handed in */
 .las-sidebar-item {
     display: flex;
     align-items: center;
     gap: 10px;
-    height: 52px;
-    padding: 0 14px;
+    min-height: 48px;
+    padding: 6px 14px;
     cursor: pointer;
-    border-left: 3px solid transparent;
 }
-.las-sidebar-item:hover { background: rgba(255,255,255,0.04); }
-.las-sidebar-item.active {
-    background: rgba(79,209,197,0.1);
-    border-left-color: #4fd1c5;
+.las-sidebar-item:hover { background: var(--las-hover); }
+.las-sidebar-item.active { background: var(--las-active); }
+.las-sidebar-dot {
+    width: 7px;
+    height: 7px;
+    box-sizing: border-box;
+    border-radius: 50%;
+    border: 1.5px solid var(--las-faint);
+    background: transparent;
+    flex-shrink: 0;
 }
-.las-sidebar-status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.las-sidebar-dot.is-done { background: var(--las-ok); border-color: var(--las-ok); }
 .las-sidebar-item-info { flex: 1; min-width: 0; }
 .las-sidebar-item-title {
-    font-size: 13px;
-    font-weight: var(--las-w-medium, 600);
-    color: #e6edf3;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--las-soft);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 .las-sidebar-item-meta {
-    font-size: 12px;
-    color: #7d8794;
-    margin-top: 1px;
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--las-faint);
+    margin-top: 2px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
-.las-row-badge { font-size: 12px; font-weight: var(--las-w-medium, 600); flex-shrink: 0; }
-/* the selected row keeps one step more weight so it still reads as current */
-.las-sidebar-item.active .las-sidebar-item-title { font-weight: var(--las-w-strong, 700); }
-.las-list-empty { padding: 40px 20px; text-align: center; color: #7d8794; font-size: 13px; }
+/* the selected row reads as current through brighter text and one step more weight */
+.las-sidebar-item.active .las-sidebar-item-title { color: var(--las-text); font-weight: var(--las-w-strong, 500); }
+.las-list-empty { padding: 40px 20px; text-align: center; color: var(--las-faint); font-size: 13px; }
 
 /* ── Resize handle ── */
 .las-split {
@@ -181,7 +219,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: #555e6a;
+    color: var(--las-faint);
     gap: 12px;
     padding: 40px;
 }
@@ -194,7 +232,7 @@
     align-items: center;
     gap: 12px;
     padding: 0 28px;
-    border-bottom: 1px solid rgba(255,255,255,0.07);
+    border-bottom: 1px solid var(--las-line);
     flex-shrink: 0;
 }
 
@@ -205,9 +243,9 @@
     min-width: 0;
     font-family: inherit;
     font-size: 18px;
-    font-weight: var(--las-w-strong, 700);
+    font-weight: var(--las-w-strong, 500);
     line-height: 1.25;
-    color: #e6edf3;
+    color: var(--las-text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -222,18 +260,18 @@
     height: 23px;
     padding: 0 8px;
     border-radius: 6px;
-    border: 1px solid rgba(255,255,255,0.07);
+    border: 1px solid var(--las-line);
     font-size: 11px;
-    font-weight: var(--las-w-strong, 700);
+    font-weight: var(--las-w-strong, 500);
     line-height: 1;
     letter-spacing: 0.5px;
     text-transform: uppercase;
     white-space: nowrap;
-    color: #9aa4b2;
+    color: var(--las-muted);
 }
 .las-panel-status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .las-dsp { flex: 1; }
-.las-act-text { font-weight: var(--las-w-medium, 600); font-size: 13px; flex-shrink: 0; }
+.las-act-text { font-weight: var(--las-w-medium, 400); font-size: 13px; flex-shrink: 0; color: var(--las-muted); }
 .las-pri {
     display: inline-flex;
     align-items: center;
@@ -242,17 +280,17 @@
     height: 34px;
     padding: 0 18px;
     border-radius: 8px;
-    background: #4fd1c5;
+    background: #c2c3b7;
     color: #0d1117;
-    font-weight: var(--las-w-strong, 700);
+    font-weight: var(--las-w-strong, 500);
     font-size: 13px;
     text-decoration: none;
     flex-shrink: 0;
     cursor: pointer;
 }
-.las-pri:hover { background: #38b2ac; }
-.las-pri--warn { background: #e67e22; }
-.las-pri--warn:hover { background: #d06f1c; }
+.las-pri:hover { background: #adaea2; }
+.las-pri--warn { background: var(--las-danger); }
+.las-pri--warn:hover { background: #e0625a; }
 .las-dbody { flex: 1; min-height: 0; display: flex; }
 .las-body { flex: 1; min-width: 0; overflow-y: auto; padding: 28px; }
 .las-body::-webkit-scrollbar { width: 8px; }
@@ -260,84 +298,84 @@
 .las-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
 .las-body::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
 .las-read { max-width: 760px; }
-.las-lead { color: #c9d1d9; line-height: 1.7; margin: 0 0 20px; font-size: 14px; }
+.las-lead { color: var(--las-soft); line-height: 1.7; margin: 0 0 20px; font-size: 14px; }
 
 /* ── Context rail (hides when the detail pane is under 900px wide) ── */
 .las-rail {
     width: 280px;
     flex-shrink: 0;
-    border-left: 1px solid rgba(255,255,255,0.07);
+    border-left: 1px solid var(--las-line);
     padding: 24px 20px;
     overflow-y: auto;
 }
 .las-rail h4 {
     margin: 0 0 14px;
     font-size: 12px;
-    font-weight: var(--las-w-strong, 700);
+    font-weight: var(--las-w-strong, 500);
     letter-spacing: 0.6px;
     text-transform: uppercase;
-    color: #7d8794;
+    color: var(--las-muted);
 }
 .las-kv {
     display: flex;
     justify-content: space-between;
     gap: 10px;
     padding: 10px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.07);
+    border-bottom: 1px solid var(--las-line);
     font-size: 13px;
 }
-.las-kv span { color: #9aa4b2; }
-.las-kv b { font-weight: var(--las-w-medium, 600); text-align: right; color: #e6edf3; }
+.las-kv span { color: var(--las-muted); }
+.las-kv b { font-weight: var(--las-w-medium, 400); text-align: right; color: var(--las-text); }
 @container (max-width: 899px) { .las-rail { display: none; } }
 
 /* ── Inline submission composer (desktop) ── */
-.las-panel-status--ok { background: rgba(34,197,94,0.08); border-color: rgba(34,197,94,0.3); color: #22c55e; }
-.las-h3 { font-size: 12px; font-weight: var(--las-w-strong, 700); letter-spacing: 0.6px; text-transform: uppercase; color: #7d8794; margin: 26px 0 10px; }
-.las-muted { color: #7d8794; font-size: 13px; line-height: 1.6; margin: 0; }
-.las-comp { border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; background: #12161c; padding: 16px; }
-.las-lbl { display: block; font-size: 12px; font-weight: var(--las-w-medium, 600); color: #9aa4b2; margin: 16px 0 6px; }
+.las-panel-status--ok { background: rgba(34,197,94,0.08); border-color: rgba(34,197,94,0.3); color: var(--las-ok); }
+.las-h3 { font-size: 12px; font-weight: var(--las-w-strong, 500); letter-spacing: 0.6px; text-transform: uppercase; color: var(--las-muted); margin: 26px 0 10px; }
+.las-muted { color: var(--las-muted); font-size: 13px; line-height: 1.6; margin: 0; }
+.las-comp { border: 1px solid var(--las-line); border-radius: 12px; background: transparent; padding: 16px; }
+.las-lbl { display: block; font-size: 12px; font-weight: var(--las-w-medium, 400); color: var(--las-muted); margin: 16px 0 6px; }
 .las-lbl--first { margin-top: 0; }
-.las-lbl em { font-style: normal; font-weight: 400; color: #7d8794; }
+.las-lbl em { font-style: normal; font-weight: 400; color: var(--las-faint); }
 .las-comp-textarea {
     width: 100%; box-sizing: border-box; min-height: 120px; resize: vertical;
-    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px;
-    color: #e6edf3; font: inherit; font-size: 13px; line-height: 1.6; padding: 10px 12px; outline: 0;
+    background: rgba(255,255,255,0.04); border: 1px solid var(--las-line); border-radius: 8px;
+    color: var(--las-text); font: inherit; font-size: 13px; line-height: 1.6; padding: 10px 12px; outline: 0;
 }
-.las-comp-textarea:focus { border-color: #4fd1c5; }
+.las-comp-textarea:focus { border-color: var(--las-accent); }
 .las-comp-file {
     width: 100%; box-sizing: border-box; padding: 12px; cursor: pointer;
-    border: 1px dashed rgba(255,255,255,0.18); border-radius: 10px; background: none;
-    color: #9aa4b2; font: inherit; font-size: 13px;
+    border: 1px dashed var(--las-line-strong); border-radius: 10px; background: none;
+    color: var(--las-muted); font: inherit; font-size: 13px;
 }
-.las-comp-file:hover, .las-comp-file:focus { border-color: #4fd1c5; outline: 0; }
+.las-comp-file:hover, .las-comp-file:focus { border-color: var(--las-accent); outline: 0; }
 .las-comp-file::file-selector-button {
     margin-right: 12px; height: 30px; padding: 0 12px; border-radius: 7px;
-    border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.05);
-    color: #e6edf3; font: inherit; font-weight: var(--las-w-medium, 600); cursor: pointer;
+    border: 1px solid var(--las-line-strong); background: rgba(255,255,255,0.05);
+    color: var(--las-text); font: inherit; font-weight: var(--las-w-medium, 400); cursor: pointer;
 }
-.las-comp-hint { color: #7d8794; font-size: 12px; margin: 10px 0 0; line-height: 1.5; }
-.las-comp-hint a { color: #4fd1c5; font-weight: var(--las-w-medium, 600); text-decoration: none; }
+.las-comp-hint { color: var(--las-faint); font-size: 12px; margin: 10px 0 0; line-height: 1.5; }
+.las-comp-hint a { color: var(--las-accent); font-weight: var(--las-w-medium, 400); text-decoration: none; }
 .las-comp .las-submission-error { margin-top: 12px; }
 .las-comp-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
-.las-comp-cancel, .las-comp-submit { height: 34px; padding: 0 16px; border-radius: 8px; font: inherit; font-size: 13px; font-weight: var(--las-w-strong, 700); cursor: pointer; }
-.las-comp-cancel { color: #9aa4b2; border: 1px solid rgba(255,255,255,0.07); background: none; }
-.las-comp-cancel:hover { color: #e6edf3; background: rgba(255,255,255,0.05); }
-.las-comp-submit { color: #0d1117; border: 0; background: #4fd1c5; min-width: 150px; }
-.las-comp-submit:hover { background: #38b2ac; }
+.las-comp-cancel, .las-comp-submit { height: 34px; padding: 0 16px; border-radius: 8px; font: inherit; font-size: 13px; font-weight: var(--las-w-strong, 500); cursor: pointer; }
+.las-comp-cancel { color: var(--las-muted); border: 1px solid var(--las-line); background: none; }
+.las-comp-cancel:hover { color: var(--las-text); background: var(--las-hover); }
+.las-comp-submit { color: #0d1117; border: 0; background: #c2c3b7; min-width: 150px; }
+.las-comp-submit:hover { background: #adaea2; }
 .las-comp-submit .btn-spinner span { background: #0d1117; }
-.las-okrow { display: flex; align-items: center; gap: 8px; color: #22c55e; font-weight: var(--las-w-medium, 600); font-size: 13px; }
-.las-subtxt { margin: 12px 0 0; white-space: pre-wrap; color: #c9d1d9; font-size: 14px; line-height: 1.7; }
+.las-okrow { display: flex; align-items: center; gap: 8px; color: var(--las-ok); font-weight: var(--las-w-medium, 400); font-size: 13px; }
+.las-subtxt { margin: 12px 0 0; white-space: pre-wrap; color: var(--las-soft); font-size: 14px; line-height: 1.7; }
 .las-file {
     display: flex; align-items: center; gap: 12px; max-width: 440px;
-    border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 10px 12px; background: #12161c;
+    border: 1px solid var(--las-line); border-radius: 10px; padding: 10px 12px; background: transparent;
 }
 .las-comp .las-file { margin-top: 12px; background: rgba(255,255,255,0.03); }
-.las-fi { width: 34px; height: 34px; border-radius: 8px; background: rgba(79,209,197,0.1); color: #4fd1c5; display: grid; place-items: center; flex-shrink: 0; }
+.las-fi { width: 34px; height: 34px; border-radius: 8px; background: rgba(255,255,255,0.05); color: var(--las-soft); display: grid; place-items: center; flex-shrink: 0; }
 .las-fx { flex: 1; min-width: 0; }
-.las-fx b { display: block; font-size: 13px; color: #e6edf3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.las-fx small { display: block; color: #7d8794; font-size: 12px; }
-.las-btn2 { height: 30px; padding: 0 12px; border-radius: 7px; border: 1px solid rgba(255,255,255,0.1); background: none; color: #9aa4b2; font: inherit; font-size: 12px; font-weight: var(--las-w-medium, 600); cursor: pointer; }
-.las-btn2:hover { color: #e6edf3; background: rgba(255,255,255,0.05); }
+.las-fx b { display: block; font-size: 13px; color: var(--las-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.las-fx small { display: block; color: var(--las-faint); font-size: 12px; }
+.las-btn2 { height: 30px; padding: 0 12px; border-radius: 7px; border: 1px solid var(--las-line-strong); background: none; color: var(--las-muted); font: inherit; font-size: 12px; font-weight: var(--las-w-medium, 400); cursor: pointer; }
+.las-btn2:hover { color: var(--las-text); background: var(--las-hover); }
 
 
 /* ── MOBILE LIST STYLES (flat, no card wrapper) ── */
@@ -372,7 +410,7 @@
 .las-mobile-folder-name {
     flex: 1;
     font-size: 16px;
-    font-weight: 800;
+    font-weight: 600;
     color: #e2e8f0;
     display: flex;
     align-items: center;
@@ -392,7 +430,7 @@
 }
 .las-mobile-folder-chevron {
     flex-shrink: 0;
-    color: #555e6a;
+    color: #73746d;
     transition: transform 0.3s ease;
 }
 .las-mobile-folder-chevron.open { transform: rotate(90deg); }
@@ -437,8 +475,8 @@
 }
 .las-mobile-row-body { flex: 1; min-width: 0; }
 .las-mobile-row-title {
-    font-size: 16px;
-    font-weight: 700;
+    font-size: 15px;
+    font-weight: 600;
     color: #e2e8f0;
     margin: 0;
     white-space: nowrap;
@@ -468,7 +506,7 @@
 }
 .las-mobile-row-chevron {
     flex-shrink: 0;
-    color: #555e6a;
+    color: #73746d;
 }
 
 /* ── MOBILE SEARCH BAR ── */
@@ -858,4 +896,216 @@
     .las-desktop-layout .las-submission-current-file a { font-weight: var(--las-w-medium, 450); }
     .las-desktop-layout .las-submission-cancel,
     .las-desktop-layout .las-submission-submit { font-weight: var(--las-w-strong, 500); }
+}
+
+/* ═══ Light mode: learner Assignments (desktop) ════════════════════════════════════════════════════════════
+   The desktop Assignments page is driven by the --las-* variables above, so most of light mode is the variable
+   block below, the same way the Home page does it with --lhd-* and the Quiz page with --lqz-*. The rest fixes the
+   colours that are hard-coded: the search box, scrollbars, resize handle, primary and submit buttons, the
+   submission composer and file cards, the error message, the status colours assignments.js writes inline, the
+   phone-style list and submission form shown between 769px and 899px, and the fetch error state. Same palette
+   as the Home page, the sidebar and the Quiz page.
+   Applies only when <html data-learner-theme="light"> on 769px and wider. Dark mode and phones are untouched, and
+   assignments.js needs no change. To remove it, delete this block. */
+@media (min-width: 769px) {
+
+/* palette: titles near-black, body text grey, lines the same warm greys as the sidebar and Home */
+html[data-learner-theme="light"] .las-desktop-layout {
+    --las-text:   #282924;   /* titles and the selected row */
+    --las-soft:   #53544e;   /* body text */
+    --las-muted:  #73746d;
+    --las-faint:  #7d7e76;
+    --las-accent: #187a72;   /* focus rings, links and the search focus border */
+    --las-ok:     #15803d;   /* "Submitted": the ring, the chip and the tick row */
+    --las-danger: #bd4a43;
+    --las-line:        #dfded8;
+    --las-line-strong: #d0cfc8;
+    --las-hover:  rgba(38,39,35,.055);
+    --las-active: rgba(38,39,35,.075);
+    /* the layout sets no text colour of its own, so anything unstyled would inherit the dark page's white */
+    color: var(--las-text);
+    color-scheme: light;
+}
+
+/* filter box: white, like the sidebar's search button */
+html[data-learner-theme="light"] .las-desktop-search { background: #ffffff; }
+
+/* scrollbars (the dark ones are white at 10% and vanish on a light page) */
+html[data-learner-theme="light"] .las-sidebar-scroll::-webkit-scrollbar-thumb,
+html[data-learner-theme="light"] .las-body::-webkit-scrollbar-thumb { background: rgba(38,39,35,.16); }
+html[data-learner-theme="light"] .las-sidebar-scroll::-webkit-scrollbar-thumb:hover,
+html[data-learner-theme="light"] .las-body::-webkit-scrollbar-thumb:hover { background: rgba(38,39,35,.30); }
+
+/* resize handle between the list and the detail pane */
+html[data-learner-theme="light"] .las-split:hover,
+html[data-learner-theme="light"] .las-split.drag,
+html[data-learner-theme="light"] .las-split:focus-visible {
+    background: linear-gradient(90deg, transparent 2px, #187a72 2px, #187a72 4px, transparent 4px);
+}
+
+/* primary button in the header (Add your work / Update submission): dark, like the Home button */
+html[data-learner-theme="light"] .las-pri { background: #252624; color: #ffffff; }
+html[data-learner-theme="light"] .las-pri:hover { background: #3a3b37; }
+html[data-learner-theme="light"] .las-pri--warn { background: var(--las-danger); }
+html[data-learner-theme="light"] .las-pri--warn:hover { background: #a63f38; }
+
+/* "Submitted" chip: the green tint is built from the dark-mode green, so it is rebuilt from the darker one */
+html[data-learner-theme="light"] .las-panel-status--ok { background: rgba(21,128,61,.07); border-color: rgba(21,128,61,.28); }
+
+/* submission composer, submitted-work card and file cards: white cards, fields one step back */
+html[data-learner-theme="light"] .las-comp { background: #ffffff; }
+html[data-learner-theme="light"] .las-comp-textarea { background: #faf9f5; }
+html[data-learner-theme="light"] .las-comp-file::file-selector-button { background: #faf9f5; }
+html[data-learner-theme="light"] .las-file { background: #ffffff; }
+html[data-learner-theme="light"] .las-comp .las-file { background: #faf9f5; }
+html[data-learner-theme="light"] .las-fi { background: rgba(38,39,35,.06); }
+
+/* Submit assignment / Update submission */
+html[data-learner-theme="light"] .las-comp-submit { background: #252624; color: #ffffff; }
+html[data-learner-theme="light"] .las-comp-submit:hover { background: #3a3b37; }
+html[data-learner-theme="light"] .las-comp-submit .btn-spinner span { background: #ffffff; }
+
+/* error under the form (shared with the phone-style form, so this covers both): the dark-mode pink is unreadable on light */
+html[data-learner-theme="light"] .las-submission-error { color: #a8332c; border-color: rgba(189,74,67,.35); background: rgba(189,74,67,.08); }
+
+/* status colours assignments.js writes inline (lasTaskState and the status chip), darkened so they read on a light page.
+   Text first (the "Time left" value in the Details rail), then the dot in the status chip. */
+html[data-learner-theme="light"] .las-desktop-layout [style*="#22c55e" i] { color: #15803d !important; }
+html[data-learner-theme="light"] .las-desktop-layout [style*="#f4776f" i] { color: #bd4a43 !important; }
+html[data-learner-theme="light"] .las-desktop-layout [style*="#7a7b73" i] { color: #73746d !important; }
+html[data-learner-theme="light"] .las-desktop-layout [style*="#c2c3b7" i] { color: #53544e !important; }
+html[data-learner-theme="light"] .las-panel-status-dot[style*="#22c55e" i] { background: #16a34a !important; }
+html[data-learner-theme="light"] .las-panel-status-dot[style*="#9b9c92" i] { background: #8b8b83 !important; }
+html[data-learner-theme="light"] .las-panel-status-dot[style*="#7a7b73" i] { background: #73746d !important; }
+
+/* ── 769px to 899px: the split layout starts at 900px, so until then the phone-style list, detail view and
+      submission form are what show. Their colours are hard-coded for a dark page. ── */
+html[data-learner-theme="light"] .las-mobile-folder-header { border-bottom-color: #dfded8; }
+html[data-learner-theme="light"] .las-mobile-folder-header:active,
+html[data-learner-theme="light"] .las-mobile-folder-header:not(.las-mobile-folder-header--collapsed) { background: rgba(38,39,35,.04); }
+html[data-learner-theme="light"] .las-mobile-folder-name,
+html[data-learner-theme="light"] .las-mobile-row-title { color: #282924; }
+html[data-learner-theme="light"] .las-mobile-folder-count { color: #73746d; background: rgba(38,39,35,.06); }
+html[data-learner-theme="light"] .las-mobile-folder-chevron,
+html[data-learner-theme="light"] .las-mobile-row-chevron { color: #8b8b83; }
+html[data-learner-theme="light"] .las-mobile-row::after { background: #ebeae5; }
+html[data-learner-theme="light"] .las-mobile-row:active { background: rgba(38,39,35,.04); }
+/* row due date: the base rule first, then the done / pending variants (same specificity, so order matters) */
+html[data-learner-theme="light"] .las-mobile-row-meta { color: #73746d; }
+html[data-learner-theme="light"] .las-mobile-row-meta--done { color: #6b4fc7; }
+html[data-learner-theme="light"] .las-mobile-row-meta--pending { color: #b85f12; }
+html[data-learner-theme="light"] .las-mobile-search-wrap svg { color: #282924; }
+html[data-learner-theme="light"] .las-mobile-search { background: #ffffff; border: 1px solid #dfded8; color: #282924; }
+html[data-learner-theme="light"] .las-mobile-search:focus { border-color: #bdbcb4; }
+html[data-learner-theme="light"] .las-mobile-search::placeholder { color: #8b8b83; }
+html[data-learner-theme="light"] .las-mobile-empty-title { color: #282924; }
+html[data-learner-theme="light"] .las-mobile-empty-body { color: #73746d; }
+html[data-learner-theme="light"] .las-mobile-list [stroke="#a78bfa" i] { stroke: #6b4fc7; }
+html[data-learner-theme="light"] .las-status-dot--done { background: #16a34a; }
+html[data-learner-theme="light"] .las-status-dot--pending { background: #d97706; }
+
+/* phone-style assignment detail */
+html[data-learner-theme="light"] .las-mobile-detail-avatar { border-color: rgba(107,79,199,.35); background: rgba(107,79,199,.08); color: #6b4fc7; }
+html[data-learner-theme="light"] .las-mobile-detail-author-name,
+html[data-learner-theme="light"] .las-mobile-detail-title { color: #282924; }
+html[data-learner-theme="light"] .las-mobile-detail-author-role,
+html[data-learner-theme="light"] .las-mobile-detail-posted,
+html[data-learner-theme="light"] .las-mobile-detail-meta { color: #73746d; }
+html[data-learner-theme="light"] .las-mobile-detail-meta { border-bottom-color: #dfded8; }
+html[data-learner-theme="light"] .las-mobile-detail-role-badge { color: #6b4fc7; }
+html[data-learner-theme="light"] .las-mobile-detail-role-sep { color: #8b8b83; }
+html[data-learner-theme="light"] .las-mobile-detail-status { color: #53544e; border-color: #dfded8; background: #ffffff; }
+html[data-learner-theme="light"] .las-mobile-detail-desc { color: #53544e; }
+html[data-learner-theme="light"] .las-mobile-detail-link { color: #6b4fc7; border-color: rgba(107,79,199,.35); background: rgba(107,79,199,.08); }
+html[data-learner-theme="light"] .las-mobile-detail-action { color: #ffffff; background: #252624; border-color: #252624; }
+html[data-learner-theme="light"] .las-mobile-detail-action--locked { color: #73746d; background: rgba(38,39,35,.04); border-color: #dfded8; }
+
+/* phone-style submission form */
+html[data-learner-theme="light"] .las-submission-form { border-color: #dfded8; background: #ffffff; }
+html[data-learner-theme="light"] .las-submission-form-heading { color: #282924; }
+html[data-learner-theme="light"] .las-submission-form-help,
+html[data-learner-theme="light"] .las-submission-current-file,
+html[data-learner-theme="light"] .las-submission-label span { color: #73746d; }
+html[data-learner-theme="light"] .las-submission-label { color: #53544e; }
+html[data-learner-theme="light"] .las-submission-textarea,
+html[data-learner-theme="light"] .las-submission-file { color: #282924; background: #faf9f5; border-color: #d0cfc8; }
+html[data-learner-theme="light"] .las-submission-textarea:focus,
+html[data-learner-theme="light"] .las-submission-file:focus { border-color: #187a72; box-shadow: 0 0 0 3px rgba(24,122,114,.14); }
+html[data-learner-theme="light"] .las-submission-current-file a { color: #187a72; }
+html[data-learner-theme="light"] .las-submission-cancel { color: #53544e; border-color: #dfded8; background: #ffffff; }
+html[data-learner-theme="light"] .las-submission-submit { color: #ffffff; border-color: #252624; background: #252624; }
+html[data-learner-theme="light"] .las-submission-submit .btn-spinner span { background: #ffffff; }
+
+/* fetch error state ("Unable to load assignments") */
+html[data-learner-theme="light"] .las-error-state p { color: #bd4a43; }
+
+}
+
+
+/* ── Phones (768px and narrower): light mode ───────────────────────────────────────────────────────────
+   Applies only when <html data-learner-mobile-theme="light"> (mobile_theme.js, Settings > Appearance).
+   Dark mode and 769px and wider are untouched. Same rules as the 769–899px block above, with the mobile
+   mockup's choices: status colours are amber (pending) and green (submitted), and the purple accents are
+   neutral. The page background and the menu are in mobile_light.css. */
+@media (max-width: 768px) {
+
+html[data-learner-mobile-theme="light"] .las-mobile-folder-header { border-bottom-color: #dfded8; }
+html[data-learner-mobile-theme="light"] .las-mobile-folder-header:active,
+html[data-learner-mobile-theme="light"] .las-mobile-folder-header:not(.las-mobile-folder-header--collapsed) { background: rgba(38,39,35,.04); }
+html[data-learner-mobile-theme="light"] .las-mobile-folder-name,
+html[data-learner-mobile-theme="light"] .las-mobile-row-title { color: #282924; }
+html[data-learner-mobile-theme="light"] .las-mobile-folder-count { color: #73746d; background: rgba(38,39,35,.06); }
+html[data-learner-mobile-theme="light"] .las-mobile-folder-chevron,
+html[data-learner-mobile-theme="light"] .las-mobile-row-chevron { color: #73746d; }
+html[data-learner-mobile-theme="light"] .las-mobile-row::after { background: #ebeae5; }
+html[data-learner-mobile-theme="light"] .las-mobile-row:active { background: rgba(38,39,35,.04); }
+/* row due date: the base rule first, then the done / pending variants (same specificity, so order matters) */
+html[data-learner-mobile-theme="light"] .las-mobile-row-meta { color: #73746d; }
+html[data-learner-mobile-theme="light"] .las-mobile-row-meta--done { color: #15803d; }
+html[data-learner-mobile-theme="light"] .las-mobile-row-meta--pending { color: #b85f12; }
+html[data-learner-mobile-theme="light"] .las-mobile-search-wrap svg { color: #282924; }
+html[data-learner-mobile-theme="light"] .las-mobile-search { background: #ffffff; border: 1px solid #dfded8; color: #282924; }
+html[data-learner-mobile-theme="light"] .las-mobile-search:focus { border-color: #bdbcb4; }
+html[data-learner-mobile-theme="light"] .las-mobile-search::placeholder { color: #8b8b83; }
+html[data-learner-mobile-theme="light"] .las-mobile-empty-title { color: #282924; }
+html[data-learner-mobile-theme="light"] .las-mobile-empty-body { color: #73746d; }
+html[data-learner-mobile-theme="light"] .las-mobile-list [stroke="#a78bfa" i] { stroke: #73746d; }
+html[data-learner-mobile-theme="light"] .las-status-dot--done { background: #16a34a; }
+html[data-learner-mobile-theme="light"] .las-status-dot--pending { background: #d97706; }
+
+/* phone-style assignment detail */
+html[data-learner-mobile-theme="light"] .las-mobile-detail-avatar { border-color: #d0cfc8; background: #ffffff; color: #53544e; }
+html[data-learner-mobile-theme="light"] .las-mobile-detail-author-name,
+html[data-learner-mobile-theme="light"] .las-mobile-detail-title { color: #282924; }
+html[data-learner-mobile-theme="light"] .las-mobile-detail-author-role,
+html[data-learner-mobile-theme="light"] .las-mobile-detail-posted,
+html[data-learner-mobile-theme="light"] .las-mobile-detail-meta { color: #73746d; }
+html[data-learner-mobile-theme="light"] .las-mobile-detail-meta { border-bottom-color: #dfded8; }
+html[data-learner-mobile-theme="light"] .las-mobile-detail-role-badge { color: #53544e; }
+html[data-learner-mobile-theme="light"] .las-mobile-detail-role-sep { color: #8b8b83; }
+html[data-learner-mobile-theme="light"] .las-mobile-detail-status { color: #53544e; border-color: #dfded8; background: #ffffff; }
+html[data-learner-mobile-theme="light"] .las-mobile-detail-desc { color: #53544e; }
+html[data-learner-mobile-theme="light"] .las-mobile-detail-link { color: #53544e; border-color: #dfded8; background: #ffffff; }
+html[data-learner-mobile-theme="light"] .las-mobile-detail-action { color: #ffffff; background: #252624; border-color: #252624; }
+html[data-learner-mobile-theme="light"] .las-mobile-detail-action--locked { color: #73746d; background: rgba(38,39,35,.04); border-color: #dfded8; }
+
+/* phone-style submission form */
+html[data-learner-mobile-theme="light"] .las-submission-form { border-color: #dfded8; background: #ffffff; }
+html[data-learner-mobile-theme="light"] .las-submission-form-heading { color: #282924; }
+html[data-learner-mobile-theme="light"] .las-submission-form-help,
+html[data-learner-mobile-theme="light"] .las-submission-current-file,
+html[data-learner-mobile-theme="light"] .las-submission-label span { color: #73746d; }
+html[data-learner-mobile-theme="light"] .las-submission-label { color: #53544e; }
+html[data-learner-mobile-theme="light"] .las-submission-textarea,
+html[data-learner-mobile-theme="light"] .las-submission-file { color: #282924; background: #faf9f5; border-color: #d0cfc8; }
+html[data-learner-mobile-theme="light"] .las-submission-textarea:focus,
+html[data-learner-mobile-theme="light"] .las-submission-file:focus { border-color: #187a72; box-shadow: 0 0 0 3px rgba(24,122,114,.14); }
+html[data-learner-mobile-theme="light"] .las-submission-current-file a { color: #187a72; }
+html[data-learner-mobile-theme="light"] .las-submission-cancel { color: #53544e; border-color: #dfded8; background: #ffffff; }
+html[data-learner-mobile-theme="light"] .las-submission-submit { color: #ffffff; border-color: #252624; background: #252624; }
+html[data-learner-mobile-theme="light"] .las-submission-submit .btn-spinner span { background: #ffffff; }
+
+/* fetch error state */
+html[data-learner-mobile-theme="light"] .las-error-state p { color: #bd4a43; }
+
 }

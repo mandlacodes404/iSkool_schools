@@ -1,0 +1,75 @@
+/* ═══════════════════════════════════════════════════════════════════════════════════════════════════════════
+   iSkool app prompts: the "new version ready" banner and the "install the app" card.
+   Shared by learner_dashboard.php and teacher_dashboard.php. Script: assets/js/shared/pwa_prompts.js
+
+   Dark by default (both dashboards are dark). The learner's light themes follow the attribute the learner
+   already sets: data-learner-mobile-theme on phones (768px and below), data-learner-theme on desktop.
+   ═══════════════════════════════════════════════════════════════════════════════════════════════════════════ */
+
+.pwa-banner {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    z-index: 6000;               /* above the menu (5000) and its backdrop (4999) */
+    box-sizing: border-box;
+    max-width: 520px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px 12px;
+    padding: 12px 14px;
+    border-radius: 16px;
+    background: #2a2a28;
+    color: #f3f2ee;
+    border: 1px solid rgba(255, 255, 255, .10);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .45);
+    font: 600 13px/1.35 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    animation: pwa-in-down .22s ease-out both;
+}
+.pwa-banner--top    { top: calc(env(safe-area-inset-top, 0px) + 8px); }
+.pwa-banner--bottom { animation-name: pwa-in-up; z-index: 4500; }   /* under the menu: opening it covers the card */
+
+.pwa-banner__text    { flex: 1 1 170px; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.pwa-banner__title   { font-weight: 800; font-size: 14px; }
+.pwa-banner__sub     { opacity: .78; }
+.pwa-banner__sub svg { width: 15px; height: 15px; vertical-align: -3px; margin: 0 1px; }
+.pwa-banner__actions { display: flex; gap: 8px; margin-left: auto; }
+
+.pwa-btn {
+    min-height: 40px;
+    padding: 0 16px;
+    border-radius: 12px;
+    border: 1px solid transparent;
+    font: inherit;
+    font-weight: 800;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+.pwa-btn--primary { background: #4fd1c5; color: #0d1117; }
+.pwa-btn--ghost   { background: transparent; color: inherit; border-color: rgba(255, 255, 255, .20); }
+.pwa-btn[disabled] { opacity: .45; cursor: default; }
+.pwa-btn:focus-visible { outline: 2px solid #4fd1c5; outline-offset: 2px; }
+
+@keyframes pwa-in-down { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+@keyframes pwa-in-up   { from { opacity: 0; transform: translateY(8px); }  to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .pwa-banner { animation: none; } }
+
+/* Learner light themes: the same cream / white / dark-button palette the rest of the light mode uses. */
+@media (max-width: 768px) {
+    html[data-learner-mobile-theme="light"] .pwa-banner {
+        background: #ffffff; color: #282924; border-color: #dfded8; box-shadow: 0 10px 30px rgba(38, 39, 35, .18);
+    }
+    html[data-learner-mobile-theme="light"] .pwa-btn--primary { background: #252624; color: #ffffff; }
+    html[data-learner-mobile-theme="light"] .pwa-btn--ghost   { border-color: #dfded8; }
+    html[data-learner-mobile-theme="light"] .pwa-btn:focus-visible { outline-color: #187a72; }
+}
+@media (min-width: 769px) {
+    html[data-learner-theme="light"] .pwa-banner {
+        background: #ffffff; color: #282924; border-color: #dfded8; box-shadow: 0 10px 30px rgba(38, 39, 35, .18);
+    }
+    html[data-learner-theme="light"] .pwa-btn--primary { background: #252624; color: #ffffff; }
+    html[data-learner-theme="light"] .pwa-btn--ghost   { border-color: #dfded8; }
+    html[data-learner-theme="light"] .pwa-btn:focus-visible { outline-color: #187a72; }
+}

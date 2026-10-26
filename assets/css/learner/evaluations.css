@@ -379,20 +379,40 @@
 
 .lev-desktop-layout {
     --lev-listw: 320px;
-    /* Type weights for the whole desktop page (Geist). Tune here. */
-    --lev-w-strong: 500;  /* title, status chip, group labels, primary button */
-    --lev-w-medium: 450;  /* list rows, filter chips, values, small actions */
+    /* Teacher palette */
+    --lev-text:   #f0efec;
+    --lev-soft:   #c2c3b7;
+    --lev-muted:  #9b9c92;
+    --lev-faint:  #7a7b73;
+    --lev-accent: #4fd1c5;
+    --lev-line:        rgba(255,255,255,0.07);
+    --lev-line-strong: rgba(255,255,255,0.14);
+    --lev-hover:  rgba(255,255,255,0.055);
+    --lev-active: rgba(255,255,255,0.095);
+    /* Type weights for the whole desktop quiz page (Geist). Tune here. */
+    --lev-w-strong: 500;  /* title, status chip, group labels, primary button, selected row */
+    --lev-w-medium: 400;  /* filter chips, values, small actions */
     display: flex;
     gap: 0;
     min-height: 500px;
     font-family: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-size: 14px;
     font-weight: 400;
-    font-variant-numeric: tabular-nums; /* marks, dates and counts line up */
+    font-variant-numeric: tabular-nums; /* marks, times and counts line up */
     -webkit-font-smoothing: antialiased; /* keeps light weights from looking heavy on dark */
     -moz-osx-font-smoothing: grayscale;
+    line-height: normal;
+    color: var(--lev-text);
 }
+/* The mockup sizes everything border-box; without this the header is
+   65px instead of 64px and the rail is 321px instead of 280px. */
+.lev-desktop-layout,
+.lev-desktop-layout *,
+.lev-desktop-layout *::before,
+.lev-desktop-layout *::after { box-sizing: border-box; }
+.lev-desktop-layout :focus-visible { outline: 2px solid var(--lev-accent); outline-offset: -2px; }
 
-/* ── List pane ── */
+/* ── List pane (transparent, same as the detail pane) ── */
 .lev-sidebar {
     width: var(--lev-listw);
     min-width: 260px;
@@ -402,12 +422,12 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    background: #12161c;
-    border-right: 1px solid rgba(255,255,255,0.07);
+    background: transparent;
+    border-right: 1px solid var(--lev-line);
 }
 .lev-lh {
     padding: 12px 12px 10px;
-    border-bottom: 1px solid rgba(255,255,255,0.07);
+    border-bottom: 1px solid var(--lev-line);
     flex-shrink: 0;
 }
 .lev-desktop-search-wrap { position: relative; }
@@ -417,7 +437,7 @@
     top: 50%;
     transform: translateY(-50%);
     pointer-events: none;
-    color: #7d8794;
+    color: var(--lev-faint);
 }
 .lev-desktop-search {
     width: 100%;
@@ -426,33 +446,36 @@
     padding: 0 10px 0 33px;
     border-radius: 8px;
     background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.07);
-    color: #e6edf3;
+    border: 1px solid var(--lev-line);
+    color: var(--lev-text);
     font-size: 13px;
+    font-weight: 400;
     font-family: inherit;
     transition: border-color 0.2s;
 }
-.lev-desktop-search:focus { outline: none; border-color: #4fd1c5; }
-.lev-desktop-search::placeholder { color: #7d8794; }
-.lev-chips { display: flex; gap: 6px; margin-top: 10px; overflow: hidden; }
+.lev-desktop-search:focus { outline: none; border-color: var(--lev-accent); }
+.lev-desktop-search::placeholder { color: var(--lev-faint); }
+/* Filter pills stay under the search bar; the active pill is neutral, like the teacher chips */
+.lev-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
 .lev-chip {
     height: 26px;
     padding: 0 10px;
     border-radius: 999px;
-    border: 1px solid rgba(255,255,255,0.07);
+    border: 1px solid var(--lev-line);
     background: none;
-    color: #9aa4b2;
+    color: var(--lev-muted);
     font-family: inherit;
     font-size: 12px;
-    font-weight: var(--lev-w-medium, 600);
+    font-weight: var(--lev-w-medium);
     white-space: nowrap;
     cursor: pointer;
 }
-.lev-chip:hover { color: #e6edf3; }
+.lev-chip:hover { color: var(--lev-text); background: var(--lev-hover); }
 .lev-chip.on {
-    background: rgba(79,209,197,0.1);
-    border-color: rgba(79,209,197,0.4);
-    color: #4fd1c5;
+    background: var(--lev-active);
+    border-color: var(--lev-line-strong);
+    color: var(--lev-text);
+    font-weight: var(--lev-w-strong);
 }
 .lev-sidebar-scroll {
     flex: 1;
@@ -460,58 +483,77 @@
     overflow-y: auto;
     position: relative;
     outline: none;
+    padding-bottom: 8px;
 }
-.lev-sidebar-scroll:focus-visible { outline: 2px solid #4fd1c5; outline-offset: -2px; }
+.lev-sidebar-scroll:focus-visible { outline: 2px solid var(--lev-accent); outline-offset: -2px; }
 .lev-sidebar-scroll::-webkit-scrollbar { width: 8px; }
 .lev-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
 .lev-sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; transition: background 0.15s ease; }
 .lev-sidebar-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
-.lev-gh {
-    position: sticky;
-    top: 0;
-    z-index: 1;
-    background: #12161c;
-    font-size: 11px;
-    font-weight: var(--lev-w-strong, 700);
-    letter-spacing: 0.6px;
-    text-transform: uppercase;
-    color: #7d8794;
+
+/* Collapsible teacher group (same as the learner assignments list) */
+.lev-gl {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     padding: 12px 14px 6px;
+    color: var(--lev-muted);
+    font-size: 10px;
+    font-weight: var(--lev-w-strong);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    user-select: none;
+    outline: none;
 }
+.lev-gl:hover { color: var(--lev-soft); }
+.lev-gl-chev { flex-shrink: 0; transition: transform 0.15s ease; }
+.lev-gl[aria-expanded="false"] .lev-gl-chev { transform: rotate(-90deg); }
+.lev-gl-name { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lev-gb.collapsed { display: none; }
+
+/* Row: ring (green once submitted), title, date */
 .lev-sidebar-item {
     display: flex;
     align-items: center;
     gap: 10px;
-    height: 52px;
-    padding: 0 14px;
+    min-height: 48px;
+    padding: 6px 14px;
     cursor: pointer;
-    border-left: 3px solid transparent;
 }
-.lev-sidebar-item:hover { background: rgba(255,255,255,0.04); }
-.lev-sidebar-item.active {
-    background: rgba(79,209,197,0.1);
-    border-left-color: #4fd1c5;
+.lev-sidebar-item:hover { background: var(--lev-hover); }
+.lev-sidebar-item.active { background: var(--lev-active); }
+.lev-sidebar-dot {
+    width: 7px;
+    height: 7px;
+    box-sizing: border-box;
+    border-radius: 50%;
+    border: 1.5px solid var(--lev-faint);
+    background: transparent;
+    flex-shrink: 0;
 }
-.lev-sidebar-status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.lev-sidebar-dot.is-done { background: #22c55e; border-color: #22c55e; }
 .lev-sidebar-item-info { flex: 1; min-width: 0; }
 .lev-sidebar-item-title {
-    font-size: 13px;
-    font-weight: var(--lev-w-medium, 600);
-    color: #e6edf3;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--lev-soft);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 .lev-sidebar-item-meta {
-    font-size: 12px;
-    color: #7d8794;
-    margin-top: 1px;
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--lev-faint);
+    margin-top: 2px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
-.lev-row-badge { font-size: 12px; font-weight: var(--lev-w-medium, 600); flex-shrink: 0; }
-.lev-list-empty { padding: 40px 20px; text-align: center; color: #7d8794; font-size: 13px; }
+/* the selected row reads as current through brighter text and one step more weight */
+.lev-sidebar-item.active .lev-sidebar-item-title { color: var(--lev-text); font-weight: var(--lev-w-strong); }
+.lev-list-empty { padding: 40px 20px; text-align: center; color: var(--lev-faint); font-size: 13px; }
 
 /* ── Resize handle ── */
 .lev-split {
@@ -543,7 +585,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: #555e6a;
+    color: var(--lev-faint);
     gap: 12px;
     padding: 40px;
 }
@@ -556,20 +598,18 @@
     align-items: center;
     gap: 12px;
     padding: 0 28px;
-    border-bottom: 1px solid rgba(255,255,255,0.07);
+    border-bottom: 1px solid var(--lev-line);
     flex-shrink: 0;
 }
-
-.lev-dh, .lev-dh *, .lev-dh *::before, .lev-dh *::after { box-sizing: border-box; }
 /* id prefix so a host-level #api-content-area h2 rule cannot recolour the title */
 #lev-main-panel .lev-dh-title {
     margin: 0;
     min-width: 0;
     font-family: inherit;
     font-size: 18px;
-    font-weight: var(--lev-w-strong, 700);
+    font-weight: var(--lev-w-strong);
     line-height: 1.25;
-    color: #e6edf3;
+    color: var(--lev-text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -584,18 +624,17 @@
     height: 23px;
     padding: 0 8px;
     border-radius: 6px;
-    border: 1px solid rgba(255,255,255,0.07);
+    border: 1px solid var(--lev-line);
     font-size: 11px;
-    font-weight: var(--lev-w-strong, 700);
+    font-weight: var(--lev-w-strong);
     line-height: 1;
     letter-spacing: 0.5px;
     text-transform: uppercase;
     white-space: nowrap;
-    color: #9aa4b2;
+    color: var(--lev-muted);
 }
 .lev-panel-status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .lev-dsp { flex: 1; }
-.lev-act-text { font-weight: var(--lev-w-medium, 600); font-size: 13px; flex-shrink: 0; }
 .lev-pri {
     display: inline-flex;
     align-items: center;
@@ -604,15 +643,15 @@
     height: 34px;
     padding: 0 18px;
     border-radius: 8px;
-    background: #4fd1c5;
+    background: #c2c3b7;
     color: #0d1117;
-    font-weight: var(--lev-w-strong, 700);
+    font-weight: var(--lev-w-strong);
     font-size: 13px;
     text-decoration: none;
     flex-shrink: 0;
     cursor: pointer;
 }
-.lev-pri:hover { background: #38b2ac; }
+.lev-pri:hover { background: #adaea2; }
 .lev-pri--warn { background: #e67e22; }
 .lev-pri--warn:hover { background: #d06f1c; }
 .lev-dbody { flex: 1; min-height: 0; display: flex; }
@@ -622,93 +661,84 @@
 .lev-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
 .lev-body::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
 .lev-read { max-width: 760px; }
-.lev-lead { color: #c9d1d9; line-height: 1.7; margin: 0 0 20px; font-size: 14px; }
+.lev-lead { color: var(--lev-soft); line-height: 1.7; margin: 0 0 20px; font-size: 14px; }
 
 /* ── Context rail (hides when the detail pane is under 900px wide) ── */
 .lev-rail {
     width: 280px;
     flex-shrink: 0;
-    border-left: 1px solid rgba(255,255,255,0.07);
+    border-left: 1px solid var(--lev-line);
     padding: 24px 20px;
     overflow-y: auto;
 }
 .lev-rail h4 {
     margin: 0 0 14px;
     font-size: 12px;
-    font-weight: var(--lev-w-strong, 700);
+    font-weight: var(--lev-w-strong);
     letter-spacing: 0.6px;
     text-transform: uppercase;
-    color: #7d8794;
+    color: var(--lev-muted);
 }
 .lev-kv {
     display: flex;
     justify-content: space-between;
     gap: 10px;
     padding: 10px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.07);
+    border-bottom: 1px solid var(--lev-line);
     font-size: 13px;
 }
-.lev-kv span { color: #9aa4b2; }
-.lev-kv b { font-weight: var(--lev-w-medium, 600); text-align: right; color: #e6edf3; }
+.lev-kv span { color: var(--lev-muted); }
+.lev-kv b { font-weight: var(--lev-w-medium); text-align: right; color: var(--lev-text); }
 @container (max-width: 899px) { .lev-rail { display: none; } }
 
-/* ── Evaluations: rows, progress, statement cards, scale, completed state ── */
-.lev-chips { flex-wrap: wrap; row-gap: 6px; overflow: visible; }
-.lev-gh { display: flex; justify-content: space-between; }
-.lev-gh i { font-style: normal; font-weight: var(--lev-w-medium, 600); color: #7d8794; }
-.lev-sidebar-item.lev-row { height: 66px; }
-.lev-row .lev-sidebar-item-title { font-weight: var(--lev-w-medium, 450); color: #9aa4b2; }
-.lev-row .lev-sidebar-item-title.lev-unread { font-weight: var(--lev-w-strong, 700); color: #e6edf3; }
-.lev-ava { width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0; display: grid; place-items: center; background: #1c222b; color: #9aa4b2; font-size: 12px; font-weight: var(--lev-w-medium, 600); }
-.lev-rr { display: flex; flex-direction: column; align-items: flex-end; gap: 7px; flex-shrink: 0; min-width: 40px; }
-.lev-tm { font-size: 12px; color: #7d8794; }
-.lev-udot { width: 8px; height: 8px; border-radius: 50%; background: #4fd1c5; }
-.lev-prog { display: flex; align-items: center; gap: 10px; font-size: 12px; color: #9aa4b2; flex-shrink: 0; }
+/* ── Evaluations: progress, statement cards, scale, completed state ── */
+.lev-prog { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--lev-muted); flex-shrink: 0; }
 .lev-pbar { width: 110px; height: 5px; border-radius: 3px; background: rgba(255,255,255,0.1); overflow: hidden; }
-.lev-pbar i { display: block; height: 100%; background: #4fd1c5; transition: width 0.2s; }
+.lev-pbar i { display: block; height: 100%; background: #c2c3b7; transition: width 0.2s; }
 .lev-pri:disabled { opacity: 0.35; cursor: not-allowed; }
-.lev-pri:disabled:hover { background: #4fd1c5; }
+.lev-pri:disabled:hover { background: #c2c3b7; }
 .lev-pri { border: 0; font-family: inherit; }
-.lev-muted { color: #7d8794; font-size: 13px; flex-shrink: 0; }
-.lev-desc { color: #c9d1d9; line-height: 1.7; margin: 0 0 20px; font-size: 14px; white-space: pre-line; }
-.lev-qb { border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; background: #12161c; padding: 16px; margin-bottom: 12px; }
+.lev-muted { color: var(--lev-muted); font-size: 13px; flex-shrink: 0; }
+.lev-desc { color: var(--lev-soft); line-height: 1.7; margin: 0 0 20px; font-size: 14px; white-space: pre-line; }
+/* Statement cards: transparent with a thin border, like the other detail panels */
+.lev-qb { border: 1px solid var(--lev-line); border-radius: 12px; background: transparent; padding: 16px; margin-bottom: 12px; }
 .lev-qh { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 14px; }
-.lev-qn { width: 24px; height: 24px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.18); display: grid; place-items: center; font-size: 12px; font-weight: var(--lev-w-medium, 450); color: #9aa4b2; flex-shrink: 0; }
-.lev-qn.done { background: #4fd1c5; border-color: #4fd1c5; color: #0d1117; }
-.lev-qt { font-size: 15px; line-height: 1.5; color: #e6edf3; padding-top: 1px; }
+.lev-qn { width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--lev-line-strong); display: grid; place-items: center; font-size: 12px; font-weight: var(--lev-w-medium); color: var(--lev-muted); flex-shrink: 0; }
+.lev-qn.done { background: #c2c3b7; border-color: #c2c3b7; color: #0d1117; }
+.lev-qt { font-size: 15px; line-height: 1.5; color: var(--lev-text); padding-top: 1px; }
 .lev-lk { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
 .lev-lo { position: relative; cursor: pointer; display: block; }
 .lev-lo input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
 .lev-lo span {
     display: flex; flex-direction: column; align-items: center; gap: 8px; height: 100%; box-sizing: border-box;
-    padding: 12px 6px 10px; border: 1px solid rgba(255,255,255,0.07); border-radius: 10px;
-    font-size: 12px; color: #9aa4b2; text-align: center; line-height: 1.3; transition: border-color 0.15s, background 0.15s;
+    padding: 12px 6px 10px; border: 1px solid var(--lev-line); border-radius: 10px;
+    font-size: 12px; color: var(--lev-muted); text-align: center; line-height: 1.3; transition: border-color 0.15s, background 0.15s;
 }
 .lev-lo span::before { content: ''; width: 14px; height: 14px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.25); flex-shrink: 0; }
-.lev-lo:hover span { border-color: rgba(255,255,255,0.22); color: #e6edf3; }
-.lev-lo input:checked + span { border-color: #4fd1c5; background: rgba(79,209,197,0.1); color: #e6edf3; }
-.lev-lo input:checked + span::before { border-color: #4fd1c5; background: radial-gradient(circle, #4fd1c5 45%, transparent 50%); }
-.lev-lo input:focus-visible + span { outline: 2px solid #4fd1c5; outline-offset: 2px; }
+.lev-lo:hover span { border-color: rgba(255,255,255,0.22); color: var(--lev-text); }
+.lev-lo input:checked + span { border-color: #c2c3b7; background: rgba(194,195,183,0.1); color: var(--lev-text); }
+.lev-lo input:checked + span::before { border-color: #c2c3b7; background: radial-gradient(circle, #c2c3b7 45%, transparent 50%); }
+.lev-lo input:focus-visible + span { outline: 2px solid #c2c3b7; outline-offset: 2px; }
 @container (max-width: 620px) {
     .lev-lk { grid-template-columns: 1fr; }
     .lev-lo span { flex-direction: row; justify-content: flex-start; padding: 10px 12px; }
 }
 .lev-cmt { margin-top: 22px; }
-.lev-cmt label { display: block; font-size: 12px; font-weight: var(--lev-w-medium, 600); color: #9aa4b2; margin-bottom: 6px; }
-.lev-cmt label em { font-style: normal; font-weight: 400; color: #7d8794; }
+.lev-cmt label { display: block; font-size: 12px; font-weight: var(--lev-w-medium); color: var(--lev-muted); margin-bottom: 6px; }
+.lev-cmt label em { font-style: normal; font-weight: 400; color: var(--lev-faint); }
 .lev-cmt textarea {
     width: 100%; box-sizing: border-box; min-height: 96px; resize: vertical; background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; color: #e6edf3; font: inherit; font-size: 13px; line-height: 1.6; padding: 10px 12px; outline: 0;
+    border: 1px solid var(--lev-line); border-radius: 8px; color: var(--lev-text); font: inherit; font-size: 13px; line-height: 1.6; padding: 10px 12px; outline: 0;
 }
 .lev-cmt textarea:focus { border-color: #4fd1c5; }
-.lev-fin { text-align: center; padding: 70px 20px; color: #9aa4b2; font-size: 14px; }
+.lev-fin { text-align: center; padding: 70px 20px; color: var(--lev-muted); font-size: 14px; }
 .lev-fin svg { width: 52px; height: 52px; stroke: #22c55e; stroke-width: 1.5; fill: none; }
-.lev-fin b { display: block; font-size: 18px; font-weight: var(--lev-w-strong, 500); color: #e6edf3; margin: 14px 0 6px; }
-.lev-help { font-size: 12px; line-height: 1.6; color: #7d8794; margin: 20px 0 0; }
-.lev-more { display: block; width: 100%; text-align: left; padding: 9px 0; cursor: pointer; background: none; border: 0; border-bottom: 1px solid rgba(255,255,255,0.07); font-family: inherit; }
-.lev-more b { display: block; font-size: 13px; font-weight: var(--lev-w-medium, 450); color: #e6edf3; }
-.lev-more small { color: #7d8794; font-size: 12px; }
-.lev-more:hover b { color: #4fd1c5; }
+.lev-fin b { display: block; font-size: 18px; font-weight: var(--lev-w-strong); color: var(--lev-text); margin: 14px 0 6px; }
+.lev-help { font-size: 12px; line-height: 1.6; color: var(--lev-faint); margin: 20px 0 0; }
+.lev-more { display: block; width: 100%; text-align: left; padding: 9px 0; cursor: pointer; background: none; border: 0; border-bottom: 1px solid var(--lev-line); font-family: inherit; }
+.lev-more b { display: block; font-size: 13px; font-weight: var(--lev-w-medium); color: var(--lev-text); }
+.lev-more small { color: var(--lev-faint); font-size: 12px; }
+.lev-more:hover b { color: var(--lev-accent); }
 .lev-rail h4.lev-rail-sub { margin: 28px 0 4px; }
 
 
@@ -744,7 +774,7 @@
 .lev-mobile-folder-name {
     flex: 1;
     font-size: 16px;
-    font-weight: 800;
+    font-weight: 600;
     color: #e2e8f0;
     display: flex;
     align-items: center;
@@ -764,7 +794,7 @@
 }
 .lev-mobile-folder-chevron {
     flex-shrink: 0;
-    color: #555e6a;
+    color: #73746d;
     transition: transform 0.3s ease;
 }
 .lev-mobile-folder-chevron.open { transform: rotate(90deg); }
@@ -806,7 +836,7 @@
 .lev-mobile-row-body { flex: 1; min-width: 0; }
 .lev-mobile-row-title {
     font-size: 15px;
-    font-weight: 700;
+    font-weight: 600;
     color: #e2e8f0;
     margin: 0;
     white-space: nowrap;
@@ -829,7 +859,7 @@
 }
 .lev-mobile-row-chevron {
     flex-shrink: 0;
-    color: #555e6a;
+    color: #73746d;
 }
 
 /* ── MOBILE SEARCH BAR ── */
@@ -914,3 +944,225 @@
    same muted colour as the date rather than a state-specific accent. */
 .lev-mobile-row-status--done,
 .lev-mobile-row-status--pending { color: inherit; }
+/* ═══ Light mode: learner Evaluations (desktop) ════════════════════════════════════════════════════════════
+   The desktop Evaluations page is driven by the --lev-* variables above, so most of light mode is the variable
+   block below, the same way the Home page does it with --lhd-*, the Quiz page with --lqz-* and Assignments with
+   --las-*. The rest fixes the colours that are hard-coded: the search box, scrollbars, resize handle, the submit
+   button, the progress bar, the numbered statement badges, the 5-point scale, the comments box, the status dots
+   evaluations.js writes inline, the phone-style list and detail form shown between 769px and 899px, the
+   completed state and the fetch error. Same palette as the Home page, the sidebar, Quiz and Assignments.
+   Applies only when <html data-learner-theme="light"> on 769px and wider. Dark mode and phones are untouched, and
+   evaluations.js needs no change. To remove it, delete this block. */
+@media (min-width: 769px) {
+
+/* palette: titles near-black, body text grey, lines the same warm greys as the sidebar and Home */
+html[data-learner-theme="light"] .lev-desktop-layout {
+    --lev-text:   #282924;   /* titles and the selected row */
+    --lev-soft:   #53544e;   /* body text */
+    --lev-muted:  #73746d;
+    --lev-faint:  #7d7e76;
+    --lev-accent: #187a72;   /* focus rings, links and the search focus border */
+    --lev-line:        #dfded8;
+    --lev-line-strong: #d0cfc8;
+    --lev-hover:  rgba(38,39,35,.055);
+    --lev-active: rgba(38,39,35,.075);
+    color-scheme: light;
+}
+
+/* filter box: white, like the sidebar's search button */
+html[data-learner-theme="light"] .lev-desktop-search { background: #ffffff; }
+
+/* scrollbars (the dark ones are white at 10% and vanish on a light page) */
+html[data-learner-theme="light"] .lev-sidebar-scroll::-webkit-scrollbar-thumb,
+html[data-learner-theme="light"] .lev-body::-webkit-scrollbar-thumb { background: rgba(38,39,35,.16); }
+html[data-learner-theme="light"] .lev-sidebar-scroll::-webkit-scrollbar-thumb:hover,
+html[data-learner-theme="light"] .lev-body::-webkit-scrollbar-thumb:hover { background: rgba(38,39,35,.30); }
+
+/* resize handle between the list and the detail pane */
+html[data-learner-theme="light"] .lev-split:hover,
+html[data-learner-theme="light"] .lev-split.drag,
+html[data-learner-theme="light"] .lev-split:focus-visible {
+    background: linear-gradient(90deg, transparent 2px, #187a72 2px, #187a72 4px, transparent 4px);
+}
+
+/* green "completed" dot in the list */
+html[data-learner-theme="light"] .lev-sidebar-dot.is-done { background: #16a34a; border-color: #16a34a; }
+
+/* status dots in the header chip: evaluations.js writes #22c55e / #e67e22 inline, darkened so they read on light */
+html[data-learner-theme="light"] .lev-panel-status-dot[style*="#22c55e" i] { background: #16a34a !important; }
+html[data-learner-theme="light"] .lev-panel-status-dot[style*="#e67e22" i] { background: #d97706 !important; }
+
+/* "Submit feedback": dark, like the Home button (its disabled state keeps the same fade) */
+html[data-learner-theme="light"] .lev-pri { background: #252624; color: #ffffff; }
+html[data-learner-theme="light"] .lev-pri:hover { background: #3a3b37; }
+html[data-learner-theme="light"] .lev-pri:disabled:hover { background: #252624; }
+
+/* progress bar and the numbered statement badges: the light-grey fills become the same dark as the button */
+html[data-learner-theme="light"] .lev-pbar { background: rgba(38,39,35,.10); }
+html[data-learner-theme="light"] .lev-pbar i { background: #252624; }
+html[data-learner-theme="light"] .lev-qn.done { background: #252624; border-color: #252624; color: #ffffff; }
+
+/* 5-point scale: unselected ring, hover, selected card and the focus ring */
+html[data-learner-theme="light"] .lev-lo span::before { border-color: #bdbcb4; }
+html[data-learner-theme="light"] .lev-lo:hover span { border-color: #bdbcb4; }
+html[data-learner-theme="light"] .lev-lo input:checked + span { border-color: #252624; background: rgba(38,39,35,.05); }
+html[data-learner-theme="light"] .lev-lo input:checked + span::before {
+    border-color: #252624;
+    background: radial-gradient(circle, #252624 45%, transparent 50%);
+}
+html[data-learner-theme="light"] .lev-lo input:focus-visible + span { outline-color: #252624; }
+
+/* comments box */
+html[data-learner-theme="light"] .lev-cmt textarea { background: #faf9f5; }
+html[data-learner-theme="light"] .lev-cmt textarea:focus { border-color: #187a72; }
+
+/* completed state (desktop) */
+html[data-learner-theme="light"] .lev-fin svg { stroke: #16a34a; }
+html[data-learner-theme="light"] .lev-panel-empty svg[stroke="#4fd1c5" i] { stroke: #187a72; }
+
+/* ── Phone-style list and detail form: below 900px the desktop layout is hidden and these are what show.
+      Their colours are hard-coded for a dark page. ── */
+html[data-learner-theme="light"] .lev-mobile-folder-header { border-bottom-color: #dfded8; }
+html[data-learner-theme="light"] .lev-mobile-folder-header:active,
+html[data-learner-theme="light"] .lev-mobile-folder-header:not(.lev-mobile-folder-header--collapsed) { background: rgba(38,39,35,.04); }
+html[data-learner-theme="light"] .lev-mobile-folder-name,
+html[data-learner-theme="light"] .lev-mobile-row-title { color: #282924; }
+html[data-learner-theme="light"] .lev-mobile-folder-count { color: #73746d; background: rgba(38,39,35,.06); }
+html[data-learner-theme="light"] .lev-mobile-folder-chevron,
+html[data-learner-theme="light"] .lev-mobile-row-chevron { color: #8b8b83; }
+html[data-learner-theme="light"] .lev-mobile-row::after { background: #ebeae5; }
+html[data-learner-theme="light"] .lev-mobile-row:active { background: rgba(38,39,35,.04); }
+html[data-learner-theme="light"] .lev-mobile-row-meta { color: #73746d; }
+html[data-learner-theme="light"] .lev-mobile-search-wrap svg { color: #282924; }
+html[data-learner-theme="light"] .lev-mobile-search { background: #ffffff; border: 1px solid #dfded8; color: #282924; }
+html[data-learner-theme="light"] .lev-mobile-search:focus { border-color: #bdbcb4; }
+html[data-learner-theme="light"] .lev-mobile-search::placeholder { color: #8b8b83; }
+html[data-learner-theme="light"] .lev-mobile-empty-title { color: #282924; }
+html[data-learner-theme="light"] .lev-mobile-empty-body { color: #73746d; }
+
+/* the blue accent (#4fa8fd) is used on the folder and row icons, the badge, the avatar, the description bar,
+   the statement bar and the selected option; it becomes a darker blue on light */
+html[data-learner-theme="light"] .lev-mobile-list [stroke="#4fa8fd" i],
+html[data-learner-theme="light"] .lev-mobile-detail [stroke="#4fa8fd" i] { stroke: #1d6fb8; }
+html[data-learner-theme="light"] .lev-mobile-detail-badge,
+html[data-learner-theme="light"] .lev-mobile-detail-avatar { color: #1d6fb8; border-color: rgba(29,111,184,.35); background: rgba(29,111,184,.08); }
+html[data-learner-theme="light"] .lev-mobile-detail-role-badge { color: #1d6fb8; }
+html[data-learner-theme="light"] .lev-mobile-detail-role-sep { color: #8b8b83; }
+html[data-learner-theme="light"] .lev-mobile-detail-title { color: #282924; border-bottom-color: #dfded8; }
+html[data-learner-theme="light"] .lev-mobile-detail-author-name { color: #282924; }
+html[data-learner-theme="light"] .lev-mobile-detail-author-role,
+html[data-learner-theme="light"] .lev-mobile-detail-posted { color: #73746d; }
+
+html[data-learner-theme="light"] .lev-mobile-detail .eval-description { background: rgba(38,39,35,.03); border-left-color: #1d6fb8; color: #53544e; }
+html[data-learner-theme="light"] .lev-mobile-detail .question-text { color: #282924; border-left-color: #1d6fb8; }
+html[data-learner-theme="light"] .lev-mobile-detail .option-label span { color: #53544e; background: #ffffff; border-color: #dfded8; }
+html[data-learner-theme="light"] .lev-mobile-detail .option-label span::before { border-color: #bdbcb4; }
+html[data-learner-theme="light"] .lev-mobile-detail .option-label:hover span { color: #282924; background: rgba(29,111,184,.05); border-color: rgba(29,111,184,.40); }
+html[data-learner-theme="light"] .lev-mobile-detail .option-label:hover span::before { border-color: #1d6fb8; }
+html[data-learner-theme="light"] .lev-mobile-detail .option-label input[type="radio"]:checked + span { color: #282924; background: rgba(29,111,184,.08); border-color: #1d6fb8; }
+html[data-learner-theme="light"] .lev-mobile-detail .option-label input[type="radio"]:checked + span::before {
+    background: #1d6fb8;
+    border-color: #1d6fb8;
+    box-shadow: 0 0 0 3px rgba(29,111,184,.15);
+}
+html[data-learner-theme="light"] .lev-mobile-detail .lev-comments-field label { color: #282924; }
+html[data-learner-theme="light"] .lev-mobile-detail .lev-comments-field textarea { color: #282924; background: #faf9f5; border-color: #d0cfc8; }
+html[data-learner-theme="light"] .lev-mobile-detail .lev-comments-field textarea:focus { outline: none; border-color: #187a72; box-shadow: 0 0 0 3px rgba(24,122,114,.14); }
+html[data-learner-theme="light"] .lev-mobile-detail .eval-submit-btn { background: #252624; color: #ffffff; }
+html[data-learner-theme="light"] .lev-mobile-detail .eval-submit-btn:hover { background: #3a3b37; }
+
+/* completed state (phone-style detail) */
+html[data-learner-theme="light"] .lev-completed-title { color: #15803d; }
+html[data-learner-theme="light"] .lev-completed-copy { color: #73746d; }
+html[data-learner-theme="light"] .lev-completed-state [stroke="#22c55e" i] { stroke: #16a34a; }
+
+/* fetch error state */
+html[data-learner-theme="light"] .eval-error-state { color: #bd4a43; }
+
+}
+
+/* ═══ Light mode: learner Evaluations (phones) ═════════════════════════════════════════════════════════════
+   Phones only (max-width: 768px), switched on by <html data-learner-mobile-theme="light"> (mobile_theme.js).
+   The page shell (page background, header, bottom nav, profile dropdown) is in mobile_light.css, which finds this page
+   by its markup: .lev-mobile-list (the list and its empty states), .lev-mobile-detail (an open evaluation, its form
+   and the completed state) and .eval-error-state (the fetch error). This block colours what is inside the page: the
+   search box, the teacher folders, the evaluation rows, the detail header, the description and statement cards,
+   the answer options, the comments box, the Submit button, the completed state and the error. Same palette as the
+   desktop light block above and the other phone pages (Resources, Announcements, Assignments, Quiz).
+   Dark mode and desktop are untouched, and evaluations.js needs no change (the blue and green icon strokes it sets
+   are darkened here, the same way the 769px to 899px block does it).
+   To remove it, delete this block, the three .lev-/.eval- markers in mobile_light.css and the same three in PAGE in mobile_theme.js. */
+@media (max-width: 768px) {
+
+/* search box */
+html[data-learner-mobile-theme="light"] .lev-mobile-search-wrap svg { color: #282924; }
+html[data-learner-mobile-theme="light"] .lev-mobile-search { background: #ffffff; border: 1px solid #dfded8; color: #282924; }
+html[data-learner-mobile-theme="light"] .lev-mobile-search:focus { border-color: #bdbcb4; }
+html[data-learner-mobile-theme="light"] .lev-mobile-search::placeholder { color: #8b8b83; }
+
+/* teacher folders */
+html[data-learner-mobile-theme="light"] .lev-mobile-folder-header { border-bottom-color: #dfded8; }
+html[data-learner-mobile-theme="light"] .lev-mobile-folder-header:active,
+html[data-learner-mobile-theme="light"] .lev-mobile-folder-header:not(.lev-mobile-folder-header--collapsed) { background: rgba(38,39,35,.04); }
+html[data-learner-mobile-theme="light"] .lev-mobile-folder-name { color: #282924; }
+html[data-learner-mobile-theme="light"] .lev-mobile-folder-count { color: #73746d; background: rgba(38,39,35,.06); }
+html[data-learner-mobile-theme="light"] .lev-mobile-folder-chevron,
+html[data-learner-mobile-theme="light"] .lev-mobile-row-chevron { color: #73746d; }
+
+/* evaluation rows */
+html[data-learner-mobile-theme="light"] .lev-mobile-row-title { color: #282924; }
+html[data-learner-mobile-theme="light"] .lev-mobile-row-meta { color: #73746d; }
+html[data-learner-mobile-theme="light"] .lev-mobile-row::after { background: #ebeae5; }
+html[data-learner-mobile-theme="light"] .lev-mobile-row:active { background: rgba(38,39,35,.04); }
+
+/* the blue accent (#4fa8fd) set as a stroke on the folder, row, empty-state and badge icons becomes a darker blue */
+html[data-learner-mobile-theme="light"] .lev-mobile-list [stroke="#4fa8fd" i],
+html[data-learner-mobile-theme="light"] .lev-mobile-detail [stroke="#4fa8fd" i] { stroke: #1d6fb8; }
+
+/* empty states ("No evaluations yet", "Not enrolled yet") */
+html[data-learner-mobile-theme="light"] .lev-mobile-empty { color: #8b8b83; }
+html[data-learner-mobile-theme="light"] .lev-mobile-empty-title { color: #282924; }
+html[data-learner-mobile-theme="light"] .lev-mobile-empty-body { color: #73746d; }
+
+/* an open evaluation: badge, author row and title */
+html[data-learner-mobile-theme="light"] .lev-mobile-detail-badge,
+html[data-learner-mobile-theme="light"] .lev-mobile-detail-avatar { color: #1d6fb8; border-color: rgba(29,111,184,.35); background: rgba(29,111,184,.08); }
+html[data-learner-mobile-theme="light"] .lev-mobile-detail-role-badge { color: #1d6fb8; }
+html[data-learner-mobile-theme="light"] .lev-mobile-detail-role-sep { color: #8b8b83; }
+html[data-learner-mobile-theme="light"] .lev-mobile-detail-title { color: #282924; border-bottom-color: #dfded8; }
+html[data-learner-mobile-theme="light"] .lev-mobile-detail-author-name { color: #282924; }
+html[data-learner-mobile-theme="light"] .lev-mobile-detail-author-role,
+html[data-learner-mobile-theme="light"] .lev-mobile-detail-posted { color: #73746d; }
+
+/* description and the statements */
+html[data-learner-mobile-theme="light"] .lev-mobile-detail .eval-description { background: rgba(38,39,35,.03); border-left-color: #1d6fb8; color: #53544e; }
+html[data-learner-mobile-theme="light"] .lev-mobile-detail .question-text { color: #282924; border-left-color: #1d6fb8; }
+
+/* answer options: white rows, a grey ring, and the darker blue when hovered or selected */
+html[data-learner-mobile-theme="light"] .lev-mobile-detail .option-label span { color: #53544e; background: #ffffff; border-color: #dfded8; }
+html[data-learner-mobile-theme="light"] .lev-mobile-detail .option-label span::before { border-color: #bdbcb4; }
+html[data-learner-mobile-theme="light"] .lev-mobile-detail .option-label:hover span { color: #282924; background: rgba(29,111,184,.05); border-color: rgba(29,111,184,.40); }
+html[data-learner-mobile-theme="light"] .lev-mobile-detail .option-label:hover span::before { border-color: #1d6fb8; }
+html[data-learner-mobile-theme="light"] .lev-mobile-detail .option-label input[type="radio"]:checked + span { color: #282924; background: rgba(29,111,184,.08); border-color: #1d6fb8; }
+html[data-learner-mobile-theme="light"] .lev-mobile-detail .option-label input[type="radio"]:checked + span::before {
+    background: #1d6fb8;
+    border-color: #1d6fb8;
+    box-shadow: 0 0 0 3px rgba(29,111,184,.15);
+}
+
+/* comments box and the Submit button (dark with white text, like the primary buttons on the other pages) */
+html[data-learner-mobile-theme="light"] .lev-mobile-detail .lev-comments-field label { color: #282924; }
+html[data-learner-mobile-theme="light"] .lev-mobile-detail .lev-comments-field textarea { color: #282924; background: #ffffff; border-color: #d0cfc8; }
+html[data-learner-mobile-theme="light"] .lev-mobile-detail .lev-comments-field textarea:focus { outline: none; border-color: #187a72; box-shadow: 0 0 0 3px rgba(24,122,114,.14); }
+html[data-learner-mobile-theme="light"] .lev-mobile-detail .eval-submit-btn { background: #252624; color: #ffffff; }
+html[data-learner-mobile-theme="light"] .lev-mobile-detail .eval-submit-btn:hover { background: #3a3b37; }
+
+/* completed state */
+html[data-learner-mobile-theme="light"] .lev-completed-title { color: #15803d; }
+html[data-learner-mobile-theme="light"] .lev-completed-copy { color: #73746d; }
+html[data-learner-mobile-theme="light"] .lev-completed-state [stroke="#22c55e" i] { stroke: #16a34a; }
+
+/* fetch error ("Error loading evaluations.") */
+html[data-learner-mobile-theme="light"] .eval-error-state { color: #bd4a43; }
+
+}

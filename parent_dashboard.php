@@ -1,434 +1,215 @@
 <?php
-require_once __DIR__ . '/auth/session_guard.php';
-require_once 'config.php';
+/**
+ * iSkool parent app: the page shell.
+ *
+ * Loaded by dashboard.php for the "parent" role. The page only draws the frame (sidebar on desktop, header and
+ * bottom tabs on phones, the account menu); everything inside it comes from api/parent/*.php through
+ * assets/js/parent/parent_app.js. A parent only ever sees the learners linked to them (parent_links).
+ */
 
-if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'parent') {
-    header("Location: index.php");
+require_once __DIR__ . '/auth/session_guard.php';
+require_once __DIR__ . '/auth/parent_app_functions.php';
+require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/includes/app_version.php';
+
+if (!isset($_SESSION['email']) || ($_SESSION['role'] ?? '') !== 'parent') {
+    header('Location: index.php');
     exit();
 }
 
-$parentEmail = $_SESSION['email'];
-$parentName  = $_SESSION['name'] ?? 'Parent';
+$parent_email = $_SESSION['email'];
 
-// Clean up old session junk
-unset($_SESSION['school_id']);
-
-/* ---------- SCHOOL NAME & LOGO (from school_name table) ---------- */
-$schoolName = 'Your School';
-$schoolLogo = 'Uploads/schools/default_school.png';
-
-$result = $conn->query("SELECT setting_value FROM school_name WHERE setting_key = 'school_name' LIMIT 1");
-if ($result && $row = $result->fetch_assoc()) {
-    $schoolName = trim($row['setting_value']) ?: $schoolName;
-}
-
-$result = $conn->query("SELECT setting_value FROM school_name WHERE setting_key = 'school_logo' LIMIT 1");
-if ($result && $row = $result->fetch_assoc()) {
-    $logoPath = trim($row['setting_value']);
-    if (!empty($logoPath) && file_exists($logoPath)) {
-        $schoolLogo = $logoPath;
-    }
-}
-
-/* ---------- PARENT PROFILE PICTURE ---------- */
-$stmt = $conn->prepare("SELECT profile_picture FROM users WHERE email = ? AND role = 'parent'");
-$stmt->bind_param("s", $parentEmail);
+$parent_name = '';
+$parent_initials = 'P';
+$stmt = $conn->prepare("SELECT name, surname FROM users WHERE email = ? AND role = 'parent' LIMIT 1");
+$stmt->bind_param('s', $parent_email);
 $stmt->execute();
-$result = $stmt->get_result();
-$parentProfile = 'default.png';
-if ($row = $result->fetch_assoc()) {
-    $parentProfile = $row['profile_picture'] ?: $parentProfile;
+if ($row = $stmt->get_result()->fetch_assoc()) {
+    $parent_name = parent_full_name($row['name'], $row['surname']);
+    if ($parent_name !== '') {
+        $parent_initials = parent_person_initials($row['name'], $row['surname']);
+    }
 }
 $stmt->close();
+if ($parent_name === '') {
+    $parent_name = 'Parent';
+}
 
-/* ---------- JOIN CLASS (safe & secure) ---------- */
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['join_class'])) {
-    require_once __DIR__ . '/auth/csrf_helper.php';
-    verify_csrf_token();
+$school = parent_school_info($conn, __DIR__);
 
-    $classId = (int)$_POST['class_id'];
+function pa_e($value): string
+{
+    return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+}
 
-    $check = $conn->prepare("SELECT 1 FROM parent_classes WHERE parent_email = ? AND class_id = ?");
-    $check->bind_param("si", $parentEmail, $classId);
-    $check->execute();
-    $check->store_result();
+// The five tabs: Home, Report, Syllabus, News and Events. "Add a child" is not a tab; it sits in the account menus.
+$nav = [
+    ['home',     'Home',     '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/>'],
+    ['report',   'Report',   '<path d="M4 20h16"/><path d="M7 20v-9"/><path d="M12 20V5"/><path d="M17 20v-6"/>'],
+    ['syllabus', 'Syllabus', '<path d="M2 5h7a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H2z"/><path d="M22 5h-7a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h8z"/>'],
+    ['news',     'News',     '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>'],
+    ['events',   'Events',   '<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>'],
+];
 
-    if ($check->num_rows === 0) {
-        $insert = $conn->prepare("INSERT INTO parent_classes (parent_email, class_id) VALUES (?, ?)");
-        $insert->bind_param("si", $parentEmail, $classId);
-        $insert->execute();
-        $insert->close();
+// Headings above some of the pages, like the learner menu's "Learning" and "Academics": Home on its own, then these two groups.
+$groups = ['report' => 'Progress', 'news' => 'School'];
+
+function pa_icon(string $paths, int $size = 20, string $width = '1.8'): string
+{
+    return '<svg width="' . $size . '" height="' . $size . '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' . $width
+        . '" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' . $paths . '</svg>';
+}
+
+/** The school's logo, or its initials when there is no logo (same fallback as the learner menu). */
+function pa_school_mark(array $school): string
+{
+    if (!empty($school['logo'])) {
+        return '<img class="pa-mark" src="' . pa_e($school['logo']) . '" alt="">';
     }
-    $check->close();
-
-    header("Location: parent_dashboard.php");
-    exit();
+    return '<span class="pa-mark pa-mark--initials" aria-hidden="true">' . pa_e($school['initials']) . '</span>';
 }
 
-/* ---------- AVAILABLE CLASSES (current DB = current school) ---------- */
-$classResult = $conn->query("SELECT id, name FROM classes ORDER BY name ASC");
-
-/* ---------- JOINED CLASSES ---------- */
-$joinedStmt = $conn->prepare("SELECT class_id FROM parent_classes WHERE parent_email = ?");
-$joinedStmt->bind_param("s", $parentEmail);
-$joinedStmt->execute();
-$joinedResult = $joinedStmt->get_result();
-
-$joinedClassIds = [];
-while ($row = $joinedResult->fetch_assoc()) {
-    $joinedClassIds[] = (int)$row['class_id'];
+/** The page links of the sidebar and the phone menu, with the group headings between them. */
+function pa_nav_links(array $nav, array $groups): string
+{
+    $html = '';
+    foreach ($nav as [$id, $label, $icon]) {
+        if (isset($groups[$id])) {
+            $html .= '<div class="pa-nav-group" aria-hidden="true">' . pa_e($groups[$id]) . '</div>';
+        }
+        $html .= '<a class="pa-nav-link" href="#/' . $id . '" data-route="' . $id . '">' . pa_icon($icon, 18)
+            . '<span class="pa-nav-label">' . pa_e($label) . '</span></a>';
+    }
+    return $html;
 }
-$joinedStmt->close();
+
+/** The avatar, the parent's name with the "Parent" role under it, and the up/down chevron (the account row at the bottom of the menu). */
+function pa_account_row(string $initials, string $name): string
+{
+    return '<span class="pa-avatar">' . pa_e($initials) . '</span>'
+        . '<span class="pa-account-text">'
+        . '<span class="pa-account-name">' . pa_e($name) . '</span>'
+        . '<span class="pa-account-role">Parent</span>'
+        . '</span>'
+        . '<span class="pa-account-chev" aria-hidden="true"></span>';
+}
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
-    <meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Parent Dashboard</title>
-    <style>
-:root {
-    --bg-color: #0d1117;
-    --sidebar-bg: #1a202c;
-    --text-color: #e2e8f0;
-    --accent-color: #4fd1c5;
-    --secondary-accent: #f6877a;
-    --card-bg: #1a202c;
-    --button-bg: #f7fafc;
-    --button-hover-bg: #edf2f7;
-    --warning-color: #c0392b;
-    --shadow-glow: rgba(79, 209, 197, 0.3);
-    --card-radius: 16px;
-    --sidebar-width: 240px;
-    --sidebar-collapsed-width: 64px;
-    --transition-speed: 0.3s;
-}
-
-/* (all the CSS you already had – unchanged) */
-body{font-family:'Inter',Arial,sans-serif;display:flex;height:100vh;background:var(--bg-color);color:var(--text-color);overflow:hidden;margin:0}
-.sidebar{width:var(--sidebar-width);background:#1a1919ff;display:flex;flex-direction:column;padding:20px;box-sizing:border-box;transition:width var(--transition-speed) ease,left var(--transition-speed) ease;position:fixed;top:0;left:0;height:100vh;z-index:5000;overflow-y:visible;box-shadow:2px 0 8px rgba(0,0,0,.2);font-weight:400}
-.sidebar.collapsed{width:var(--sidebar-collapsed-width)}
-.sidebar h2{margin:0 0 20px;font-size:16px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:opacity var(--transition-speed) ease,font-size var(--transition-speed) ease}
-.sidebar.collapsed h2{font-size:12px;opacity:.7;text-align:center}
-.sidebar a,.sidebar button,.sidebar .footer,.sidebar .logout{color:var(--text-color);text-decoration:none;padding:10px 12px;margin-bottom:6px;border-radius:var(--card-radius);display:flex;align-items:center;transition:background var(--transition-speed) ease,transform .15s ease;white-space:nowrap;overflow:hidden;font-weight:400;background:none;border:none;cursor:pointer;width:100%;text-align:left;position:relative}
-.sidebar a:hover,.sidebar button:hover,.sidebar .footer:hover,.sidebar .logout:hover{background:rgba(79,209,197,.08);transform:translateX(2px)}
-.sidebar.collapsed a,.sidebar.collapsed button,.sidebar.collapsed .footer,.sidebar.collapsed .logout{justify-content:center;padding:10px}
-.sidebar.collapsed a span,.sidebar.collapsed button span,.sidebar.collapsed .footer span,.sidebar.collapsed .logout span{display:none}
-.sidebar a svg,.sidebar button svg,.sidebar .footer svg,.sidebar .logout svg{width:20px;height:20px;margin-right:10px;fill:currentColor;flex-shrink:0}
-.sidebar.collapsed a svg,.sidebar.collapsed button svg,.sidebar .footer svg,.sidebar.collapsed .logout svg{margin-right:0}
-.sidebar .join-class-form{margin-top:12px;padding:12px;border-radius:var(--card-radius);background:rgba(255,255,255,.03)}
-.sidebar select{width:100%;padding:10px;border-radius:999px;border:1.5px solid var(--accent-color);background:var(--card-bg);color:var(--text-color);font-size:14px;transition:border-color .3s ease,box-shadow .3s ease}
-.sidebar select:hover,.sidebar select:focus{border-color:var(--secondary-accent);box-shadow:0 0 6px var(--shadow-glow);outline:none}
-.sidebar .join-class-btn{background:var(--secondary-accent);color:#1a202c;padding:10px;border-radius:999px;border:none;font-weight:400;margin-top:10px;width:100%;text-align:center;transition:background .3s ease,transform .15s ease}
-.sidebar .join-class-btn:hover{background:#f56565;transform:scale(1.01)}
-.sidebar .logout{background:var(--warning-color);color:#fff;text-align:center;transition:background .3s ease,transform .15s ease}
-.sidebar .logout:hover{background:#a93226;transform:scale(1.01)}
-.sidebar.collapsed .logout{font-size:12px}
-.sidebar .footer{position:absolute;bottom:15px;width:calc(100% - 40px);font-size:12px;opacity:.6;cursor:default}
-.sidebar.collapsed .footer{width:calc(100% - 20px);font-size:10px;text-align:center}
-.main-content{flex:1;background:var(--bg-color);padding:0;overflow:hidden;display:flex;flex-direction:column;margin-left:var(--sidebar-width);transition:margin-left var(--transition-speed) ease}
-.sidebar.collapsed ~ .main-content{margin-left:var(--sidebar-collapsed-width)}
-iframe{border:none;width:100%;flex:1;overflow:auto;background:var(--card-bg)}
-.main-header{padding:10px 18px;border-bottom:1px solid rgba(255,255,255,.1);background:linear-gradient(180deg,rgba(26,32,44,.8),var(--bg-color));display:flex;justify-content:space-between;align-items:center}
-.main-header .logo-container{display:flex;align-items:center;gap:10px}
-.main-header .school-name{font-size:18px;font-weight:500;color:var(--text-color);display:none}
-@media(min-width:769px){.main-header .school-name{display:inline}}
-.main-header .logout{background:var(--warning-color);color:#fff;padding:8px 16px;border-radius:8px;text-decoration:none;transition:background .3s ease,transform .2s ease}
-.main-header .logout:hover{background:#a93226;transform:scale(1.02)}
-.toggle-btn{background:none;border:none;cursor:pointer;font-size:24px;color:#e2dadaff;transition:color .3s ease}
-.toggle-btn:hover{color:var(--secondary-accent)}
-.main-header #settingsBtn{background:none;border:none;cursor:pointer;font-size:20px;font-weight:600;color:var(--text-color);transition:color .3s ease,transform .2s ease;display:flex;align-items:center;padding:8px}
-.main-header #settingsBtn:hover{color:var(--secondary-accent);transform:scale(1.02)}
-.my-classes-content{display:none;padding:24px;flex:1;overflow:auto;background:var(--card-bg);border-radius:var(--card-radius);margin:20px}
-.my-classes-content.active{display:block}
-.my-classes-content h3{color:var(--accent-color);margin-top:0;font-weight:600;font-size:20px}
-.my-classes-content ul{padding-left:20px;color:var(--text-color)}
-.my-classes-content ul li{margin-bottom:8px;font-size:16px}
-.my-classes-content p{color:var(--text-color);opacity:.9;font-size:15px}
-#loaderOverlay{position:absolute;top:0;left:var(--sidebar-width);width:calc(100% - var(--sidebar-width));height:100%;background:rgba(0,0,0,.5);display:none;flex-direction:column;justify-content:center;align-items:center;z-index:1000;transition:left var(--transition-speed) ease,width var(--transition-speed) ease}
-.sidebar.collapsed ~ #loaderOverlay{left:var(--sidebar-collapsed-width);width:calc(100% - var(--sidebar-collapsed-width))}
-.loader{border:6px solid #e2e8f0;border-top:6px solid var(--accent-color);border-radius:50%;width:60px;height:60px;animation:spin 1s linear infinite;margin-top:12px}
-.loader-text{color:var(--text-color);font-size:18px;font-weight:600;text-align:center}
-@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
-@media(max-width:768px){body{flex-direction:column}.sidebar{left:-100%;width:var(--sidebar-width)}.sidebar.active{left:0}.sidebar.collapsed{left:-100%}.main-content{margin-left:0 !important}.sidebar.active ~ .main-content{transform:translateX(var(--sidebar-width));filter:blur(2px)}.main-header{padding:10px 12px}.main-header .logout{display:none}#loaderOverlay{left:0;width:100%}iframe{height:calc(100vh - 60px)}.my-classes-content{margin:12px;padding:16px}}
-@media(max-width:480px){.sidebar a,.sidebar button{font-size:12px;padding:8px 10px}.my-classes-content ul{padding-left:0;list-style:none;text-align:center}}
-@media(min-width:769px){#mobileToggle{display:none}.sidebar{left:0}}
-/* ---------- ACTIVE LINK STYLE ---------- */
-.sidebar a.active,.sidebar button.active{background:rgba(79,209,197,.2);border-left:4px solid var(--accent-color)}
-.sidebar span{opacity:1;transition:opacity var(--transition-speed) ease}
-.sidebar.collapsed span{opacity:0}
-#mobileBottomNav{display:none;position:fixed;bottom:0;left:0;width:100%;height:60px;background:rgba(20,20,20,.6);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);justify-content:space-around;align-items:center;border-top:1px solid rgba(255,255,255,.1);z-index:4000}
-#mobileBottomNav a{color:var(--text-color);text-decoration:none;font-size:11px;text-align:center;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:color .3s ease,transform .2s ease}
-#mobileBottomNav a svg{width:22px;height:22px;margin-bottom:4px;fill:currentColor}
-#mobileBottomNav a.active,#mobileBottomNav a:hover{color:var(--accent-color);transform:translateY(-2px)}
-@media(max-width:768px){#mobileBottomNav{display:flex}iframe{height:calc(100vh - 60px)}.sidebar a.desktop-only{display:none}}
-.parent-name{margin-top:4px;font-size:18px;font-weight:500;color:#fff;max-height:30px;opacity:1;overflow:hidden}
-.parent-email{font-size:12px;color:#aaa;margin-top:1px;max-height:20px;opacity:1;overflow:hidden}
-.sidebar.collapsed .parent-name,.sidebar.collapsed .parent-email{max-height:0;opacity:0}
-    </style>
-<script>
-function getCsrfToken() {
-    const meta = document.querySelector('meta[name="csrf-token"]');
-    return meta ? meta.getAttribute('content') : '';
-}
-</script></head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>iSkool Parent</title>
+    <meta name="csrf-token" content="<?= pa_e($_SESSION['csrf_token'] ?? '') ?>">
+    <link rel="icon" href="icon.svg?v=1.4" type="image/svg+xml">
+    <script>
+        // Set the saved theme and the sidebar's collapsed state before anything paints, so there is no flash.
+        // Light is the default. With no saved choice the sidebar is a narrow rail on windows under 1100px.
+        (function () {
+            try {
+                var t = localStorage.getItem('parentApp.theme');
+                if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+                var c = localStorage.getItem('parentApp.menuCollapsed');
+                if (c === '1' || (c === null && window.innerWidth < 1100)) document.documentElement.classList.add('pa-collapsed');
+            } catch (e) {}
+        })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Geist:wght@400;500;600&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/parent/parent_app.css?v=1.7">
+    <link rel="stylesheet" href="assets/css/parent/parent_menu.css?v=1.0">
+</head>
 <body>
-<?php $currentPage = basename($_SERVER['PHP_SELF']); ?>
+<div class="pa" id="parentApp" data-email="<?= pa_e($parent_email) ?>" data-version="<?= pa_e(iskool_app_version_label()) ?>">
 
-<div class="sidebar">
-    <div class="profile-picture-wrapper" style="position:relative;display:inline-block;cursor:pointer;">
-        <img src="Uploads/parents/<?=htmlspecialchars($parentProfile?:'default.png')?>" 
-             alt="Profile Picture" class="parent-avatar"
-             style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:3px solid #757272ff;">
-        <input type="file" id="parentProfileInput" accept="image/*" style="display:none;">
-    </div>
-
-    <div class="parent-name"><?=htmlspecialchars($parentName)?></div>
-    <div class="parent-email"><?=htmlspecialchars($parentEmail)?></div>
-
-    <div class="sidebar-links">
-        <!-- JOIN CLASS -->
-        <button type="button" onclick="toggleJoinClassForm()" data-page="join-class">
-            <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-            <span>Join a Class</span>
+    <!-- Desktop: sidebar. Same structure as the learner menu: school logo and name, the pages, the account row at the bottom. -->
+    <aside class="pa-side" id="paSide" aria-label="Parent menu">
+        <div class="pa-brand">
+            <?= pa_school_mark($school) ?>
+            <div class="pa-brand-text">
+                <span class="pa-brand-name" title="<?= pa_e($school['name']) ?>"><?= pa_e($school['name']) ?></span>
+            </div>
+            <button type="button" class="pa-toggle" id="paToggle" aria-controls="paSide" aria-expanded="true" aria-label="Collapse sidebar"></button>
+        </div>
+        <button type="button" class="pa-search" id="paSearchBtn" aria-label="Search pages and actions">
+            <span class="pa-nav-label">Search</span><kbd class="pa-kbd" id="paSearchKbd"></kbd>
         </button>
+        <nav class="pa-nav" aria-label="Parent app">
+            <?= pa_nav_links($nav, $groups) ?>
+        </nav>
+        <div class="pa-account" id="paAccountDesktop">
+            <button type="button" class="pa-account-btn" id="paAccountBtn" aria-haspopup="menu" aria-expanded="false" aria-controls="paMenuDesktop">
+                <?= pa_account_row($parent_initials, $parent_name) ?>
+            </button>
+            <div class="pa-menu pa-menu-up" id="paMenuDesktop" data-pa-menu hidden></div>
+        </div>
+    </aside>
 
-        <div class="join-class-form" id="joinClassForm" style="display:none;">
-            <p style="color:var(--warning-color);font-weight:bold;font-size:14px;">
-                Warning: You can only choose your class *once*. Make sure you select the correct one.
-            </p>
-            <form method="POST">
-                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
-                <select name="class_id" required>
-                    <option value="">-- Select Class --</option>
-                   <?php while ($c = $classResult->fetch_assoc()): 
-    if (!in_array($c['id'], $joinedClassIds)): ?>
-        <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['name']) ?></option>
-    <?php endif;
-endwhile; 
-$classResult->data_seek(0); // Reset pointer for later use if needed ?>
-                </select>
-                <button type="submit" name="join_class" class="join-class-btn">Join Class</button>
-            </form>
+    <div class="pa-body">
+
+        <!-- Phone: header, same structure as the learner app (menu, school logo, profile) -->
+        <header class="pa-top">
+            <button type="button" class="pa-icon-btn" id="paMenuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="paDrawer">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
+            <div class="pa-top-logo">
+                <?php if ($school['logo']): ?>
+                    <img class="pa-logo" src="<?= pa_e($school['logo']) ?>" alt="<?= pa_e($school['name']) ?>">
+                <?php else: ?>
+                    <span class="pa-logo pa-logo-initials" role="img" aria-label="<?= pa_e($school['name']) ?>"><?= pa_e($school['initials']) ?></span>
+                <?php endif; ?>
+            </div>
+            <div class="pa-top-right" id="paAccountMobile">
+                <button type="button" class="pa-avatar-btn" id="paAvatarBtn" aria-label="Profile menu" aria-haspopup="menu" aria-expanded="false" aria-controls="paMenuMobile">
+                    <span class="pa-avatar"><?= pa_e($parent_initials) ?></span>
+                </button>
+                <div class="pa-menu pa-menu-down" id="paMenuMobile" data-pa-menu hidden></div>
+            </div>
+        </header>
+
+        <div class="pa-content">
+            <div class="pa-switcher" id="paSwitcher" hidden></div>
+            <main class="pa-view" id="paView" tabindex="-1" aria-busy="true">
+                <p class="pa-muted pa-loading">Loading…</p>
+            </main>
         </div>
 
-        <!-- MY CLASSES (button) -->
-        <button type="button" onclick="showClasses()" data-page="my-classes">
-            <svg viewBox="0 0 24 24"><path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5zm0 2.18l6.36 3.18L12 20.18 5.64 7.36 12 4.18z"/></svg>
-            <span>My Children’s Classes</span>
-        </button>
-
-        <!-- GRADES (button) -->
-        <button type="button" onclick="showGrades()" data-page="parent_grades.php">
-            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-            <span>Grades</span>
-        </button>
-
-        <!-- ANNOUNCEMENTS -->
-        <a href="view_announcements_parent.php" target="mainFrame" class="desktop-only" data-page="view_announcements_parent.php">
-            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-            <span>View Announcements</span>
-        </a>
-
-        <!-- MESSAGE TEACHER -->
-        <a href="message_teacher.php" target="mainFrame" class="desktop-only" data-page="message_teacher.php">
-            <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V5h12v2z"/></svg>
-            <span>Message a Teacher</span>
-        </a>
-
-        <!-- VIEW SENT MESSAGES -->
-        <a href="view_messages_parent.php" target="mainFrame" class="desktop-only" data-page="view_messages_parent.php">
-            <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4v4l4-4h6c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 9H6V9h12v2zm0-3H6V6h12v2z"/></svg>
-            <span>View Sent Messages</span>
-        </a>
-
-        <!-- LOGOUT -->
-        <a href="logout.php" class="logout" data-page="logout.php">
-            <svg viewBox="0 0 24 24"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.59L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
-            <span>Logout</span>
-        </a>
+        <!-- Phone: bottom tabs -->
+        <nav class="pa-tabs" aria-label="Parent app">
+            <?php foreach ($nav as [$id, $label, $icon]): ?>
+                <a class="pa-tab" href="#/<?= $id ?>" data-route="<?= $id ?>"><?= pa_icon($icon, 22) ?><span><?= pa_e($label) ?></span></a>
+            <?php endforeach; ?>
+        </nav>
     </div>
 
-    <div class="footer" style="font-size:12px;">
-        <svg viewBox="0 0 24 24" style="width:16px;height:16px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-        <span><strong>iSkool v.1.0.0</strong></span>
-    </div>
-</div>
-
-<div class="main-content">
-    <div class="main-header">
-        <button id="mobileToggle" class="toggle-btn" onclick="toggleSidebar()"></button>
-        <div class="logo-container">
-            <img src="<?=htmlspecialchars($schoolLogo)?>" alt="School Logo" class="school-logo"
-                 style="width:40px;height:40px;border-radius:8px;object-fit:cover;border:3px solid #757272ff;">
-            <span class="school-name"><?=htmlspecialchars($schoolName)?></span>
+    <!-- Phone: slide-in menu. School logo and name at the top, the account row at the bottom (it opens the sheet below). -->
+    <div class="pa-overlay" id="paOverlay"></div>
+    <aside class="pa-drawer" id="paDrawer" aria-label="Menu" aria-hidden="true">
+        <div class="pa-drawer-head">
+            <?= pa_school_mark($school) ?>
+            <div class="pa-brand-text">
+                <span class="pa-brand-name"><?= pa_e($school['name']) ?></span>
+            </div>
         </div>
-        <button id="settingsBtn" title="Settings">
-            <svg viewBox="0 0 24 24" style="width:24px;height:24px;"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.5.5 0 0 0 .12-.61l-1.92-3.32a.5.5 0 0 0-.61-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.5.5 0 0 0-.5-.43h-3.84a.5.5 0 0 0-.5.43l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.5.5 0 0 0-.61.22L3.86 10.08a.5.5 0 0 0 .12.61l2.03 1.58c-.05.3-.07.62-.07.94 0 .33.02.64.07.94l-2.03 1.58a.5.5 0 0 0-.12.61l1.92 3.32a.5.5 0 0 0 .61.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54a.5.5 0 0 0 .5.43h3.84a.5.5 0 0 0 .5-.43l.36-2.54c.59-.24 1.13-.57 1.62-.94l2.39.96a.5.5 0 0 0 .61-.22l1.92-3.32a.5.5 0 0 0-.12-.61l-2.03-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+        <button type="button" class="pa-search" id="paDrawerSearch" aria-label="Search pages and actions">
+            <span class="pa-nav-label">Search</span>
         </button>
-    </div>
+        <nav class="pa-nav" aria-label="Parent app">
+            <?= pa_nav_links($nav, $groups) ?>
+        </nav>
+        <button type="button" class="pa-account-btn pa-drawer-account" id="paDrawerAccount" aria-haspopup="menu" aria-expanded="false" aria-controls="paMenuSheet">
+            <?= pa_account_row($parent_initials, $parent_name) ?>
+        </button>
+    </aside>
 
-    <div class="my-classes-content" id="myClassesContent">
-        <h3>My Children’s Classes</h3>
-        <?php if (!empty($joinedClassIds)): ?>
-            <ul>
-                <?php
-                $ids = implode(',', array_map('intval', $joinedClassIds));
-                $placeholders = implode(',', array_fill(0, count($joinedClassIds), '?'));
-                $types = str_repeat('i', count($joinedClassIds));
-                $joinedNamesSql = "SELECT name FROM classes WHERE id IN ("
-                    . $placeholders .
-                    ")";
-                $joinedStmt = $conn->prepare($joinedNamesSql);
-                $joinedStmt->bind_param($types, ...$joinedClassIds);
-                $joinedStmt->execute();
-                $joinedNames = $joinedStmt->get_result();
-                while ($cls = $joinedNames->fetch_assoc()): ?>
-                    <li><?=htmlspecialchars($cls['name'])?></li>
-                <?php endwhile; ?>
-                <?php $joinedStmt->close(); ?>
-            </ul>
-        <?php else: ?>
-            <p>You haven’t joined any classes yet.</p>
-        <?php endif; ?>
-    </div>
-
-    <iframe name="mainFrame" src="view_announcements_parent.php"></iframe>
+    <!-- Phone: account sheet. It sits outside the drawer on purpose: the drawer slides with a transform, which would
+         turn a fixed-position sheet inside it into one that is positioned against the drawer instead of the screen. -->
+    <div class="pa-sheet-bg" id="paSheetBg"></div>
+    <div class="pa-menu pa-sheet" id="paMenuSheet" data-pa-menu role="menu" aria-label="Account"></div>
 </div>
 
-<div id="loaderOverlay">
-    <div class="loader-text">Processing...</div>
-    <div class="loader"></div>
-</div>
-
-<div id="mobileOverlay" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.4);z-index:1500;"></div>
-
-<nav id="mobileBottomNav">
-    <a href="view_announcements_parent.php" target="mainFrame" data-page="view_announcements_parent.php">
-        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-        Announcements
-    </a>
-    <a href="message_teacher.php" target="mainFrame" data-page="message_teacher.php">
-        <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V5h12v2z"/></svg>
-        Message
-    </a>
-    <a href="view_messages_parent.php" target="mainFrame" data-page="view_messages_parent.php">
-        <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4v4l4-4h6c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 9H6V9h12v2zm0-3H6V6h12v2z"/></svg>
-        Sent
-    </a>
-    <a href="#" onclick="showGrades();return false;" data-page="parent_grades.php">
-        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-        Grades
-    </a>
-</nav>
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    /* ---------- PROFILE UPLOAD ---------- */
-    const avatar = document.querySelector(".parent-avatar");
-    const input  = document.getElementById("parentProfileInput");
-    if (avatar && input) {
-        avatar.addEventListener("click", () => input.click());
-        input.addEventListener("change", e => {
-            const file = e.target.files[0];
-            if (!file) return;
-            avatar.src = URL.createObjectURL(file);
-            const fd = new FormData();
-            fd.append('profile', file);
-            fetch('upload_parent_profile.php', {method:'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body:fd})
-                .then(r=>r.json())
-                .then(d=>{ if(d.success) avatar.src='Uploads/parents/'+d.file+'?t='+Date.now(); else alert(d.error||'Upload failed'); });
-        });
-    }
-
-    const iframe   = document.querySelector("iframe");
-    const loader   = document.getElementById("loaderOverlay");
-    const sidebar  = document.querySelector(".sidebar");
-    const mobileOv = document.getElementById("mobileOverlay");
-    const allNav   = document.querySelectorAll('.sidebar a, .sidebar button, #mobileBottomNav a');
-
-    /* ---------- LOADER ---------- */
-    document.querySelector("form")?.addEventListener("submit", () => loader.style.display="flex");
-    iframe.addEventListener("load", () => loader.style.display="none");
-
-    /* ---------- ACTIVE LINK (same as learner/teacher) ---------- */
-    function setActive(page) {
-        allNav.forEach(el => el.classList.toggle('active', el.getAttribute('data-page')===page));
-    }
-
-    // initial page
-    setActive('<?= $currentPage ?>');
-
-    // any click
-    allNav.forEach(el => {
-        el.addEventListener('click', function () {
-            const dp = this.getAttribute('data-page');
-            if (!dp) return;
-            if (dp==='my-classes' || dp==='join-class') { setActive(dp); return; }
-            setActive(dp);
-        });
-    });
-
-    // iframe load
-    iframe.addEventListener('load', () => {
-        try {
-            const src = iframe.contentWindow.location.pathname.split('/').pop();
-            if (src) setActive(src);
-        } catch(e){/*ignore cross-origin*/}
-    });
-
-    /* ---------- MY CLASSES / GRADES ---------- */
-    function hideMyClasses() {
-        const mc = document.getElementById('myClassesContent');
-        if (mc) mc.classList.remove('active');
-        if (iframe) iframe.style.display = 'block';
-    }
-
-    window.showClasses = function () {
-        document.getElementById('myClassesContent').classList.add('active');
-        iframe.style.display = 'none';
-        setActive('my-classes');
-        if (window.innerWidth<=768) toggleSidebar();
-    };
-
-    window.showGrades = function () {
-        iframe.src = 'parent_grades.php';
-        hideMyClasses();
-        loader.style.display = 'flex';
-        setActive('parent_grades.php');
-        if (window.innerWidth<=768) toggleSidebar();
-    };
-
-    // hide My Classes when any normal link is clicked
-    document.querySelectorAll('.sidebar a[target="mainFrame"], #mobileBottomNav a').forEach(l => l.addEventListener('click', hideMyClasses));
-
-    /* ---------- SIDEBAR TOGGLE ---------- */
-    window.toggleSidebar = function () {
-        if (window.innerWidth<=768) {
-            sidebar.classList.toggle('active');
-            mobileOv.style.display = sidebar.classList.contains('active') ? 'block' : 'none';
-        } else {
-            sidebar.classList.toggle('collapsed');
-            localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
-        }
-    };
-    mobileOv.addEventListener('click', () => { sidebar.classList.remove('active'); mobileOv.style.display='none'; });
-
-    /* ---------- JOIN CLASS FORM ---------- */
-    window.toggleJoinClassForm = function () {
-        const f = document.getElementById('joinClassForm');
-        f.style.display = f.style.display==='none' ? 'block' : 'none';
-        if (window.innerWidth<=768) toggleSidebar();
-    };
-
-    /* ---------- SETTINGS ---------- */
-    document.getElementById('settingsBtn').addEventListener('click', () => {
-        iframe.src = 'parent_settings.php';
-        hideMyClasses();
-        loader.style.display = 'flex';
-    });
-});
-</script>
+<script src="assets/js/parent/parent_menu.js?v=1.0"></script>
+<script src="assets/js/parent/parent_app.js?v=1.8"></script>
 </body>
 </html>

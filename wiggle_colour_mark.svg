@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-labelledby="title desc">
+  <title id="title">Wiggle colour mark</title>
+  <desc id="desc">Four soft irregular coloured shapes arranged as a compact abstract mark.</desc>
+
+  <defs>
+    <linearGradient id="blue" x1="20%" y1="0%" x2="85%" y2="100%">
+      <stop offset="0%" stop-color="#79B8FF"/>
+      <stop offset="100%" stop-color="#4F8FE8"/>
+    </linearGradient>
+    <linearGradient id="yellow" x1="10%" y1="15%" x2="90%" y2="90%">
+      <stop offset="0%" stop-color="#FFE08C"/>
+      <stop offset="100%" stop-color="#FFBB3E"/>
+    </linearGradient>
+    <linearGradient id="coral" x1="15%" y1="5%" x2="90%" y2="100%">
+      <stop offset="0%" stop-color="#FF9F9E"/>
+      <stop offset="100%" stop-color="#F36E79"/>
+    </linearGradient>
+    <linearGradient id="green" x1="20%" y1="0%" x2="85%" y2="100%">
+      <stop offset="0%" stop-color="#76D4AD"/>
+      <stop offset="100%" stop-color="#3BB889"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#18263A" flood-opacity=".10"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#shadow)">
+    <!-- Yellow / left -->
+    <path fill="url(#yellow)"
+      d="M105 238
+         C91 204 101 162 132 139
+         C160 117 202 118 229 141
+         C252 161 259 197 246 228
+         C234 257 207 279 174 286
+         C142 292 116 274 105 238Z"/>
+
+    <!-- Blue / top -->
+    <path fill="url(#blue)"
+      d="M189 137
+         C194 99 220 69 256 63
+         C294 56 332 75 348 107
+         C363 138 355 177 333 201
+         C311 225 272 232 239 219
+         C207 206 183 174 189 137Z"/>
+
+    <!-- Coral / bottom -->
+    <path fill="url(#coral)"
+      d="M198 307
+         C211 278 243 257 278 256
+         C315 255 347 274 360 306
+         C373 338 362 376 334 399
+         C307 421 265 426 231 412
+         C197 398 183 340 198 307Z"/>
+
+    <!-- Green / right -->
+    <path fill="url(#green)"
+      d="M361 210
+         C373 184 399 169 424 175
+         C449 181 465 204 463 232
+         C461 259 444 286 419 295
+         C394 303 371 291 360 269
+         C351 251 352 229 361 210Z"/>
+  </g>
+</svg>

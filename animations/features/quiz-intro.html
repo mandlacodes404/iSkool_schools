@@ -4,6 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>iSkool — Quizzes</title>
+<script>
+/* Light mode (desktop login page only). This file is shown inside index.php's left panel, which sets
+   <html data-login-theme="light"> from the last theme used on this browser. Follow it before the first paint
+   and keep following it. Opened on its own, it uses the same saved value. Dark is the default. */
+(function(){
+  var root=document.documentElement;
+  function apply(t){ if(t==='light') root.dataset.loginTheme='light'; else delete root.dataset.loginTheme; }
+  var t='';
+  try{ if(window.parent!==window) t=window.parent.document.documentElement.dataset.loginTheme||''; }catch(e){}
+  if(!t){ try{ t=localStorage.getItem('iskoolDesktopThemeLastUsed')||''; }catch(e){} }
+  apply(t);
+  window.addEventListener('storage',function(e){ if(e.key==='iskoolDesktopThemeLastUsed') apply(e.newValue); });
+})();
+</script>
 <style>
 
 :root{
@@ -343,6 +357,116 @@ p{color:var(--muted);line-height:1.55;font-size:16px}
 @media(prefers-reduced-motion:reduce){
   *,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
+
+/* =====================================================================
+   LIGHT MODE
+   Only when <html data-login-theme="light"> (set by the script in <head>,
+   which index.php's theme drives). Dark is the default above and is not
+   changed. The tokens flip most of the film; the rules below replace the
+   colours that were written out by hand for the dark paper.
+   paper #faf9f5  card #fff  ink #282924  --dim #66675f  amber #8a5a06
+===================================================================== */
+html[data-login-theme="light"]{
+  color-scheme:light;
+  --paper:#faf9f5; --ink:#282924; --muted:#66675f; --line:rgba(38,39,35,.14);
+  --card:#ffffff; --soft:#efeee8; --shadow:0 24px 60px rgba(31,32,29,.12);
+  --dim:#66675f; --text2:#53544e; --on-ink:#faf9f5;
+  --rule:rgba(38,39,35,.10); --rule2:rgba(38,39,35,.16); --dash:rgba(38,39,35,.28); --ring:#a5a49c;
+  --amber:#8a5a06; --amber-dot:#c98a14; --amber-bg:rgba(201,138,20,.10); --amber-line:rgba(201,138,20,.34);
+}
+
+/* text that was a light grey on the dark paper */
+html[data-login-theme="light"] .mark,
+html[data-login-theme="light"] .qShell .row,
+html[data-login-theme="light"] .qtype,
+html[data-login-theme="light"] .oe-line,
+html[data-login-theme="light"] .wl,
+html[data-login-theme="light"] .wnote,
+html[data-login-theme="light"] .aa,
+html[data-login-theme="light"] .verdict,
+html[data-login-theme="light"] .rrow .sc,
+html[data-login-theme="light"] .rrow .pc,
+html[data-login-theme="light"] .rcol,
+html[data-login-theme="light"] .sphead span,
+html[data-login-theme="light"] .sq .qt em,
+html[data-login-theme="light"] .so .tagr,
+html[data-login-theme="light"] .oeans,
+html[data-login-theme="light"] .status,
+html[data-login-theme="light"] .flipnum,
+html[data-login-theme="light"] .lscore .of,
+html[data-login-theme="light"] .final .quiet,
+html[data-login-theme="light"] .ssub,
+html[data-login-theme="light"] .ahead,
+html[data-login-theme="light"] .rhead,
+html[data-login-theme="light"] .tag,
+html[data-login-theme="light"] .total .u{color:var(--dim)}
+html[data-login-theme="light"] .opt,
+html[data-login-theme="light"] .so,
+html[data-login-theme="light"] .aa .chip,
+html[data-login-theme="light"] .rrow .rv{color:var(--text2)}
+
+/* hairlines, borders and dashes that were white-alpha */
+html[data-login-theme="light"] .qShell{border-color:var(--dash)}
+html[data-login-theme="light"] .qShell .dash,
+html[data-login-theme="light"] .final .line{background:var(--dash)}
+html[data-login-theme="light"] .qcard,
+html[data-login-theme="light"] .weightinner,
+html[data-login-theme="light"] .weightrow{border-color:var(--rule2)}
+html[data-login-theme="light"] .opt,
+html[data-login-theme="light"] .sq{border-color:rgba(38,39,35,.12)}
+html[data-login-theme="light"] .oe-line{border-color:rgba(38,39,35,.24)}
+html[data-login-theme="light"] #q3a{border-color:rgba(38,39,35,.2)!important;color:var(--text2)!important}
+html[data-login-theme="light"] .arow,
+html[data-login-theme="light"] .rrow,
+html[data-login-theme="light"] .paperhead,
+html[data-login-theme="light"] .pubrow{border-color:var(--rule)}
+html[data-login-theme="light"] .ahead,
+html[data-login-theme="light"] .rhead{border-bottom-color:var(--rule)}
+html[data-login-theme="light"] .rrow .rv{border-color:rgba(38,39,35,.2)}
+html[data-login-theme="light"] .rrow.hot{background:rgba(38,39,35,.04)}
+html[data-login-theme="light"] .script{box-shadow:0 16px 40px rgba(31,32,29,.14)}
+
+/* the dark "ink" fills: the text on them was #0a0a0a, now it is the paper colour */
+html[data-login-theme="light"] .mark.on,
+html[data-login-theme="light"] .rrow.hot .rv,
+html[data-login-theme="light"] .status.pub,
+html[data-login-theme="light"] .tag[data-tone="ink"],
+html[data-login-theme="light"] .pubbtn{color:var(--on-ink)}
+html[data-login-theme="light"] .rrow.hot .rv{background:var(--ink);border-color:var(--ink)}
+html[data-login-theme="light"] .pubbtn:after{border-color:rgba(250,249,245,.4)}
+html[data-login-theme="light"] .pubbtn.is-clicked{box-shadow:0 0 0 5px rgba(38,39,35,.14)}
+html[data-login-theme="light"] .pubbtn.done{background:var(--soft);color:var(--ink);border:1px solid rgba(38,39,35,.2)}
+
+/* states that must keep winning over the grey defaults set above */
+html[data-login-theme="light"] .qcard.editing{border-color:var(--ink);box-shadow:0 0 0 3px rgba(38,39,35,.08)}
+html[data-login-theme="light"] .opt.right{background:var(--soft);border-color:rgba(38,39,35,.2);color:var(--ink)}
+html[data-login-theme="light"] .so.ok{color:var(--ink)}
+html[data-login-theme="light"] .so.no{color:var(--dim);text-decoration-color:var(--ring)}
+html[data-login-theme="light"] .verdict.done{color:var(--ink)}
+html[data-login-theme="light"] .flipnum.real{color:var(--ink)}
+
+/* radio / checkbox rings, switch, bars, dots */
+html[data-login-theme="light"] .opt i,
+html[data-login-theme="light"] .so i{border-color:var(--ring)}
+html[data-login-theme="light"] .opt.right i,
+html[data-login-theme="light"] .so.ok i{background:var(--ink);border-color:var(--ink)}
+html[data-login-theme="light"] .toggle{background:#cfcec6}
+html[data-login-theme="light"] .toggle.on{background:var(--ink)}
+html[data-login-theme="light"] .toggle:after{box-shadow:0 1px 3px rgba(31,32,29,.3)}
+html[data-login-theme="light"] .wbar i{background:#cfcec6}
+html[data-login-theme="light"] .wbar i.me{background:var(--ink)}
+html[data-login-theme="light"] .verdict .dot{background:#b5b4ac}
+html[data-login-theme="light"] .verdict.done .dot{background:var(--ink)}
+html[data-login-theme="light"] .cursor{box-shadow:0 0 0 5px rgba(38,39,35,.14)}
+html[data-login-theme="light"] .cursor.press{box-shadow:0 0 0 9px rgba(38,39,35,.2)}
+
+/* "Your call": amber, darkened so the text reads on a light card */
+html[data-login-theme="light"] .verdict.wait{color:var(--amber)}
+html[data-login-theme="light"] .verdict.wait .dot{background:var(--amber-dot)}
+html[data-login-theme="light"] .yourcall{color:var(--amber);background:var(--amber-bg);border-color:var(--amber-line)}
+html[data-login-theme="light"] .yourcall i{background:var(--amber-dot)!important}
+html[data-login-theme="light"] .sq.oe .qt em{color:var(--amber);background:var(--amber-bg);border-color:var(--amber-line)}
+html[data-login-theme="light"] .sq.oe.graded .qt em{color:var(--ink);background:var(--soft);border-color:rgba(38,39,35,.2)}
 
 </style>
 </head>

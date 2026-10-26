@@ -65,6 +65,24 @@ window.fetchTeacherResources = async function() {
     }
 };
 
+/** Escapes text for safe HTML-attribute interpolation (used for data-title,
+ * which the shared search bar reads). Local to this file so Resources doesn't
+ * depend on another page's helper being loaded. */
+function escapeTeacherResourceHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, char => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+    }[char]));
+}
+
+/** Small inline stroke icon, same 24x24 / 1.75 stroke family as asDpIcon in
+ * assignments.js. Only what the empty-state button needs. */
+function rsDpIcon(name, size) {
+    const paths = {
+        plus: '<path d="M12 5v14M5 12h14"/>'
+    };
+    return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] || ''}</svg>`;
+}
+
 function renderTeacherResources(data) {
     const apiArea = document.getElementById('api-content-area');
     if (!apiArea) return;
@@ -92,11 +110,12 @@ function renderTeacherResources(data) {
                 const flatIndex = window._allResourcesFlat.findIndex(r => r.id === item.id);
                 itemsHtml += `
                     <div class="rs-sidebar-item" id="rs-sidebar-${flatIndex}"
+                        data-title="${escapeTeacherResourceHtml(item.title)}"
                         onclick="selectDesktopResource(${flatIndex})">
-                        <div class="rs-sidebar-item-icon">${getTeacherFileIcon(item.ext, isVideo)}</div>
+                        <span class="rs-sidebar-dot" aria-hidden="true"></span>
                         <div class="rs-sidebar-item-info">
                             <div class="rs-sidebar-item-title">${item.title}</div>
-                            <div class="rs-sidebar-item-meta">${isVideo ? 'VIDEO' : item.ext.toUpperCase()} &middot; ${item.uploaded_at}</div>
+                            <div class="rs-sidebar-item-meta">${item.uploaded_at}</div>
                         </div>
                     </div>`;
             });
@@ -108,6 +127,18 @@ function renderTeacherResources(data) {
             );
         });
     }
+
+    // ── Empty-state copy for the desktop main panel ──
+    const resourceCount = window._allResourcesFlat.length;
+    const videoCount    = window._allResourcesFlat.filter(r => r.resource_type === 'video').length;
+    const fileCount     = resourceCount - videoCount;
+    const classCount    = new Set(window._allResourcesFlat.map(r => r.class_name)).size;
+    const emptyTitle = resourceCount ? 'Pick a resource' : 'No resources yet';
+    const emptyBody  = resourceCount
+        ? `${resourceCount} ${resourceCount === 1 ? 'resource' : 'resources'} across ${classCount} ${classCount === 1 ? 'class' : 'classes'}. ` +
+          `${fileCount} ${fileCount === 1 ? 'file' : 'files'}, ${videoCount} ${videoCount === 1 ? 'video' : 'videos'}.`
+        : 'Upload a file or add a YouTube video and it will show up here, grouped by class.';
+    const emptyCta   = resourceCount ? 'Upload a resource' : 'Upload your first resource';
 
     // ── Build full HTML ──
     let html = `
@@ -124,17 +155,16 @@ function renderTeacherResources(data) {
                         New
                     </button>
                 </div>
+                ${window.buildTeacherSearchBar('rs', { placeholder: 'Search resources...' })}
                 <div class="rs-sidebar-scroll">${sidebarHtml}</div>
             </div>
             <div class="rs-main-panel tchr-flat-panel" id="rs-main-panel">
                 <div class="rs-panel-empty">
-                    <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fd1c5" stroke-width="1.5" fill="none">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                        <polyline points="14 2 14 8 20 8"></polyline>
-                        <line x1="16" y1="13" x2="8" y2="13"></line>
-                        <line x1="16" y1="17" x2="8" y2="17"></line>
-                    </svg>
-                    <p>Select a resource from the left to view it</p>
+                    <h2 class="rs-panel-empty-title">${emptyTitle}</h2>
+                    <p class="rs-panel-empty-body">${emptyBody}</p>
+                    <button type="button" class="rs-dp-btn rs-dp-btn--primary" onclick="openUploadResourceForm()">
+                        ${rsDpIcon('plus', 14)}${emptyCta}
+                    </button>
                 </div>
             </div>
 
@@ -170,7 +200,7 @@ function renderTeacherResources(data) {
 
             group.items.forEach(item => {
                 const isVideo = item.resource_type === 'video';
-                const icon = getTeacherFileIcon(item.ext, isVideo, '#f28c38', 1.2);
+                const icon = getTeacherFileIcon(item.ext, isVideo, '#73746d', 1.2);
                 // Open/view is desktop-only (see rs-mobile-info-pill above the
                 // list) — the row itself is no longer clickable on mobile.
                 // Delete keeps working via its own button below, unaffected.
@@ -193,7 +223,7 @@ function renderTeacherResources(data) {
             });
 
             const folderIcon = `
-                <svg viewBox="0 0 24 24" width="20" height="20" stroke="#f28c38" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="rs-mobile-folder-icon">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="#73746d" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="rs-mobile-folder-icon">
                     <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
                 </svg>`;
 
@@ -465,56 +495,63 @@ function openUploadResourcePanel(panel) {
     if (newBtn) newBtn.classList.add('active');
 
     panel.innerHTML = `
-        <div class="rs-panel-content">
+        <div class="rs-panel-content tchr-create-form tchr-create-form--resource">
+            <p class="tchr-create-crumb">Resources</p>
             <div class="rs-panel-form-header">
                 <div class="rs-panel-form-title">Upload Resource</div>
                 <button onclick="fetchTeacherResources()" class="rs-panel-form-close-btn">&times;</button>
             </div>
 
-            <label class="teacher-modal-label">Resource Title</label>
-            <input type="text" id="resourceTitle" class="teacher-modal-input" placeholder="e.g. Chapter 3 Notes">
-
-            <label class="teacher-modal-label">Select Class</label>
-            <div id="resourceClassPicker"></div>
-
-            <label class="teacher-modal-label">Resource Type</label>
-            <div class="rs-form-section-gap">
-                <button id="rsTypeFile" onclick="rsSetType('file')" class="rs-type-toggle-btn active">
-                    📎 File
-                </button>
-                <button id="rsTypeVideo" onclick="rsSetType('video')" class="rs-type-toggle-btn">
-                    ▶ Video (YouTube)
-                </button>
-            </div>
-
-            <div id="rsFileSection">
-                <label class="teacher-modal-label">Select File (Max 10MB)</label>
-                <div class="teacher-file-drop" id="teacherFileDropArea">
-                    <svg viewBox="0 0 24 24" width="32" height="32" stroke="#4fd1c5" stroke-width="1.5" fill="none">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="17 8 12 3 7 8"></polyline>
-                        <line x1="12" y1="3" x2="12" y2="15"></line>
-                    </svg>
-                    <p>Click or drag file here</p>
-                    <p class="rs-drop-hint">PDF, DOC, PPT, JPG, PNG, ZIP</p>
-                    <input type="file" id="resourceFile" accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.zip" class="rs-hidden-file-input">
+            <section class="rs-form-section">
+                <h3 class="rs-form-h">Details</h3>
+                <div class="rs-form-fld">
+                    <label class="teacher-modal-label" for="resourceTitle">Resource Title</label>
+                    <input type="text" id="resourceTitle" class="teacher-modal-input" placeholder="e.g. Chapter 3 Notes" autocomplete="off">
                 </div>
-                <div id="resourceFileName" class="rs-file-name-display"></div>
-            </div>
+                <div class="rs-form-fld">
+                    <span class="teacher-modal-label" id="rsClassLabel">Select Class</span>
+                    <div id="resourceClassPicker" aria-labelledby="rsClassLabel"></div>
+                </div>
+            </section>
 
-            <div id="rsVideoSection" class="rs-video-section">
-                <label class="teacher-modal-label">YouTube URL</label>
-                <input type="text" id="resourceVideoUrl" class="teacher-modal-input"
-                    placeholder="e.g. https://www.youtube.com/watch?v=...">
-                <p class="rs-video-warning">
-                    ⚠️ Set the video to <strong>Unlisted</strong> on YouTube so only learners with the link can watch it.
-                </p>
-            </div>
+            <section class="rs-form-section">
+                <h3 class="rs-form-h">Resource type</h3>
+                <div class="rs-form-section-gap">
+                    <button id="rsTypeFile" onclick="rsSetType('file')" class="rs-type-toggle-btn active">File</button>
+                    <button id="rsTypeVideo" onclick="rsSetType('video')" class="rs-type-toggle-btn">Video (YouTube)</button>
+                </div>
 
-            <label class="teacher-modal-label rs-email-label">
-                <input type="checkbox" id="resourceForceEmail">
-                Also send email notification
-            </label>
+                <div id="rsFileSection" class="rs-form-fld">
+                    <label class="teacher-modal-label">Select File<span class="rs-form-opt">Max 10MB</span></label>
+                    <div class="teacher-file-drop" id="teacherFileDropArea">
+                        <svg viewBox="0 0 24 24" width="28" height="28" stroke="currentColor" stroke-width="1.5" fill="none">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        <p>Click or drag file here</p>
+                        <p class="rs-drop-hint">PDF, DOC, PPT, JPG, PNG, ZIP</p>
+                        <input type="file" id="resourceFile" accept=".pdf,.doc,.docx,.ppt,.pptx,.jpg,.jpeg,.png,.zip" class="rs-hidden-file-input">
+                    </div>
+                    <div id="resourceFileName" class="rs-file-name-display"></div>
+                </div>
+
+                <div id="rsVideoSection" class="rs-video-section rs-form-fld">
+                    <label class="teacher-modal-label" for="resourceVideoUrl">YouTube URL</label>
+                    <input type="text" id="resourceVideoUrl" class="teacher-modal-input"
+                        placeholder="e.g. https://www.youtube.com/watch?v=...">
+                    <p class="rs-video-warning">
+                        Set the video to <strong>Unlisted</strong> on YouTube so only learners with the link can watch it.
+                    </p>
+                </div>
+            </section>
+
+            <section class="rs-form-section">
+                <label class="rs-email-box">
+                    <input type="checkbox" id="resourceForceEmail">
+                    <span>Also send email notification</span>
+                </label>
+            </section>
 
             <div id="uploadResourceError" class="rs-form-error"></div>
 

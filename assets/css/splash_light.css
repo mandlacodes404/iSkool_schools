@@ -1,0 +1,50 @@
+/* assets/css/splash_light.css
+ *
+ * Light mode for the splash screen, on desktop only.
+ *
+ * Shared by three pages so the splash looks the same from the login page to the dashboard:
+ *   - index.php                   #animation-wrapper   (<html data-login-theme="light">)
+ *   - learner_dashboard.php       #dash-splash         (<html data-learner-theme="light">)
+ *   - teacher_dashboard.php       #dash-splash         (<html data-teacher-theme="light">)
+ *
+ * The first block applies only on screens 769px wide and up (the desktop switch). Phones and narrow windows
+ * (768px and below) follow the phone switch instead, in the second block at the end of this file.
+ * Dark mode is the default and is not touched: every rule below needs the "light" attribute.
+ * The colours are the same paper/ink pair the light dashboards use.
+ */
+@media (min-width: 769px) {
+
+    html[data-login-theme="light"] #animation-wrapper,
+    html[data-learner-theme="light"] #dash-splash,
+    html[data-teacher-theme="light"] #dash-splash {
+        background: #faf9f5;
+    }
+
+    html[data-login-theme="light"] #splash-wordmark,
+    html[data-learner-theme="light"] #dash-splash-wordmark,
+    html[data-teacher-theme="light"] #dash-splash-wordmark {
+        color: #282924;
+    }
+}
+
+/* ═══ Phones and narrow windows (768px and below): learner only ═══════════════════════════════════════════════
+ * The same paper/ink pair, switched on by the phone theme instead of the desktop one:
+ *   - index.php               <html data-login-mobile-theme="light">   set in the <head> of index.php, before first paint, from
+ *                             the phone theme the learner dashboard saves (localStorage iskoolLearnerMobileTheme)
+ *   - learner_dashboard.php   <html data-learner-mobile-theme="light">  set by mobile_theme.js (loaded in the <head>)
+ * The teacher dashboard has no phone light mode, so its splash stays dark on phones.
+ * The page behind the splash is handled where it is set: index_light.css on the login page, and the
+ * #dash-splash-bg-override <style> in learner_dashboard.php on the dashboard.
+ * To remove it, delete this block (and the phone block in index_light.css, the setter <script> in index.php). */
+@media (max-width: 768px) {
+
+    html[data-login-mobile-theme="light"] #animation-wrapper,
+    html[data-learner-mobile-theme="light"] #dash-splash {
+        background: #faf9f5;
+    }
+
+    html[data-login-mobile-theme="light"] #splash-wordmark,
+    html[data-learner-mobile-theme="light"] #dash-splash-wordmark {
+        color: #282924;
+    }
+}

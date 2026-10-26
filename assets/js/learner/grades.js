@@ -141,7 +141,7 @@ window.fetchGrades = async function () {
     if (typeof window.setActive === 'function') window.setActive('grades');
 
     if (typeof window.configureHeader === 'function') {
-        window.configureHeader({ title: 'Grades', mode: 'standard' });
+        window.configureHeader({ title: 'Grades', mode: 'standard', color: '#68d391' });
     }
 
     const apiArea = document.getElementById('api-content-area');
@@ -240,7 +240,7 @@ function renderGrades(data) {
             <div class="subject-card" id="scard-${gi}">
                 <div class="subject-header subject-header--collapsed" onclick="toggleSubjectCard(${gi})">
                     <div class="subject-name">
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#68d391" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#73746d" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
                         </svg>
                         ${escHtml(group.group)}
@@ -540,7 +540,7 @@ window.grRenderDesktopList = function () {
     const visible = groups.map((g, gi) => ({ g, gi }))
         .filter(({ g, gi }) => grQuizzes(gi, term).length && (!q || String(g.group || '').toLowerCase().includes(q)));
 
-    let html = `<div class="gr-gh"><span>Term ${term}${term === cur ? ' &middot; Current' : ''}</span><i>${visible.length}</i></div>`;
+    let html = `<div class="gr-gh">Term ${term}${term === cur ? ' &middot; Current' : ''}</div>`;
     visible.forEach(({ g, gi }) => {
         const L = grQuizzes(gi, term), m = grCalc(L);
         const pend = L.filter(x => Number(x.publish_marks) !== 1).length;
@@ -788,7 +788,7 @@ window.selectDesktopGradeSubject = function (gi, term, keepOpen) {
         <div class="gr-dh">
             <h2 class="gr-dh-title">${escHtml(group.group)}</h2>
             <span class="gr-panel-status">Term ${t}</span>
-            ${t === cur ? '<span class="gr-panel-status" style="background:rgba(79,209,197,0.1);border-color:rgba(79,209,197,0.35);color:#4fd1c5;">Current</span>' : ''}
+            ${t === cur ? '<span class="gr-panel-status"><span class="gr-cd"></span>Current</span>' : ''}
             <span class="gr-dsp"></span>
         </div>
         <div class="gr-dbody">
@@ -896,12 +896,12 @@ function buildQuizList(quizzes, gi) {
                </span>` : '';
 
         const iconHtml = published
-            ? `<svg viewBox="0 0 24 24" width="16" height="16" stroke="#68d391" stroke-width="1.3" fill="none">
+            ? `<svg viewBox="0 0 24 24" width="16" height="16" stroke="#73746d" stroke-width="1.3" fill="none">
                     <line x1="18" y1="20" x2="18" y2="10"/>
                     <line x1="12" y1="20" x2="12" y2="4"/>
                     <line x1="6"  y1="20" x2="6"  y2="14"/>
                </svg>`
-            : `<svg viewBox="0 0 24 24" width="16" height="16" stroke="#f85149" stroke-width="1.3" fill="none">
+            : `<svg viewBox="0 0 24 24" width="16" height="16" stroke="#73746d" stroke-width="1.3" fill="none">
                     <rect x="3" y="11" width="18" height="11" rx="2"/>
                     <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                </svg>`;
@@ -2337,6 +2337,16 @@ window.prCloseInfoModal = function () {
 // it's the one color the overlay can never reach.
 // ─────────────────────────────────────────────────────────────────────────────
 const SHEET_OVERLAY_DIMMED_COLOR = '#0e0e0e'; // #20201f composited under rgba(0,0,0,0.55)
+// Light mode on phones (see the "Light mode: learner Grades sheets and modals (phones)" block in grades.css): the page under the
+// sheet is #faf9f5 and the overlay is rgba(38,39,35,0.38), so the bar is #faf9f5 composited under that.
+const SHEET_OVERLAY_DIMMED_COLOR_LIGHT = '#a9a9a5';
+
+// Same condition as the css: phones, light chosen, and the Grades page is what is under the sheet.
+function sheetsAreLight() {
+    return window.innerWidth <= 768 &&
+        document.documentElement.getAttribute('data-learner-mobile-theme') === 'light' &&
+        !!document.querySelector('#api-content-area .grades-mobile-layout');
+}
 
 function darkenBrowserBarForSheet() {
     if (window.innerWidth > 899) return null;
@@ -2346,8 +2356,12 @@ function darkenBrowserBarForSheet() {
         themeColor: themeColorMeta ? themeColorMeta.getAttribute('content') : null,
         headerBg: mainHeader ? mainHeader.style.background : ''
     };
-    if (themeColorMeta) themeColorMeta.setAttribute('content', SHEET_OVERLAY_DIMMED_COLOR);
-    if (mainHeader) mainHeader.style.background = '#20201f';
+    const light = sheetsAreLight();
+    if (themeColorMeta) themeColorMeta.setAttribute('content', light ? SHEET_OVERLAY_DIMMED_COLOR_LIGHT : SHEET_OVERLAY_DIMMED_COLOR);
+    // light: the header stays cream (mobile_light.css) and the overlay dims it, so it is not forced dark
+    if (mainHeader && !light) mainHeader.style.background = '#20201f';
+    // light: a scrolled coloured page tints the header (mobile_light.css) -- not under the sheet, where the bar is the dimmed cream
+    if (mainHeader && light) mainHeader.setAttribute('data-sheet-open', '');
     return saved;
 }
 
@@ -2357,6 +2371,7 @@ function restoreBrowserBarAfterSheet(saved) {
     const mainHeader = document.querySelector('.main-header');
     if (themeColorMeta && saved.themeColor !== null) themeColorMeta.setAttribute('content', saved.themeColor);
     if (mainHeader) mainHeader.style.background = saved.headerBg;
+    if (mainHeader) mainHeader.removeAttribute('data-sheet-open');
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -2763,9 +2778,15 @@ window.closeQuizReviewModal = function () {
     if (modal) modal.remove();
 };
 
-// Nunito 400/600/700 for the desktop grades page. 600 is the medium weight, so load it
-// explicitly instead of letting the browser quietly fall back to 700 (or 400).
+// Desktop type is Geist 300/400/500 (see grades.css). Nunito stays loaded for the mobile views.
 function grEnsureFont() {
+    if (!document.getElementById('gr-geist-font')) {
+        const g = document.createElement('link');
+        g.id = 'gr-geist-font';
+        g.rel = 'stylesheet';
+        g.href = 'https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500&display=swap';
+        document.head.appendChild(g);
+    }
     if (document.getElementById('gr-nunito-font')) return;
     const link = document.createElement('link');
     link.id = 'gr-nunito-font';

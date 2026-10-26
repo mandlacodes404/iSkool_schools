@@ -180,95 +180,118 @@ function format_relative_time($datetime) {
 $monday = date('Y-m-d', strtotime('monday this week'));
 $sunday = date('Y-m-d', strtotime('sunday this week'));
 
-$week_events = [];
+// One lookup for every date-range event list (the week strip and the desktop
+// "Coming up" list), so the four source queries live in a single place.
+function collect_teacher_events($conn, $email, $current_year_id, $from, $to) {
+    $events = [];
 
-$stmt = $conn->prepare("
-    SELECT a.due_date AS event_date, a.title, c.name AS class_name
-    FROM assignments a
-    JOIN classes c ON a.class_id = c.id
-    WHERE a.created_by = ? AND a.academic_year_id = ?
-      AND DATE(a.due_date) BETWEEN ? AND ?
-");
-$stmt->bind_param("siss", $email, $current_year_id, $monday, $sunday);
-$stmt->execute();
-$res = $stmt->get_result();
-while ($row = $res->fetch_assoc()) {
-    $week_events[] = [
-        'type'       => 'assignment',
-        'date'       => date('Y-m-d', strtotime($row['event_date'])),
-        'title'      => $row['title'],
-        'class_name' => $row['class_name'],
-        'label'      => 'Due',
-    ];
+    $stmt = $conn->prepare("
+        SELECT a.due_date AS event_date, a.title, c.name AS class_name
+        FROM assignments a
+        JOIN classes c ON a.class_id = c.id
+        WHERE a.created_by = ? AND a.academic_year_id = ?
+          AND DATE(a.due_date) BETWEEN ? AND ?
+    ");
+    $stmt->bind_param("siss", $email, $current_year_id, $from, $to);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    while ($row = $res->fetch_assoc()) {
+        $events[] = [
+            'type'       => 'assignment',
+            'date'       => date('Y-m-d', strtotime($row['event_date'])),
+            'title'      => $row['title'],
+            'class_name' => $row['class_name'],
+            'label'      => 'Due',
+        ];
+    }
+    $stmt->close();
+
+    $stmt = $conn->prepare("
+        SELECT q.start_time AS event_date, q.title, c.name AS class_name
+        FROM quizzes q
+        JOIN classes c ON q.class_id = c.id
+        WHERE q.created_by = ? AND q.academic_year_id = ?
+          AND DATE(q.start_time) BETWEEN ? AND ?
+    ");
+    $stmt->bind_param("siss", $email, $current_year_id, $from, $to);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    while ($row = $res->fetch_assoc()) {
+        $events[] = [
+            'type'       => 'quiz',
+            'date'       => date('Y-m-d', strtotime($row['event_date'])),
+            'title'      => $row['title'],
+            'class_name' => $row['class_name'],
+            'label'      => 'Quiz',
+        ];
+    }
+    $stmt->close();
+
+    $stmt = $conn->prepare("
+        SELECT ae.event_date, ae.title, ae.event_type, c.name AS class_name
+        FROM academic_events ae
+        JOIN classes c ON ae.class_id = c.id
+        WHERE ae.created_by = ? AND ae.academic_year_id = ?
+          AND ae.event_date BETWEEN ? AND ?
+    ");
+    $stmt->bind_param("siss", $email, $current_year_id, $from, $to);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    while ($row = $res->fetch_assoc()) {
+        $events[] = [
+            'type'       => 'academic',
+            'date'       => $row['event_date'],
+            'title'      => $row['title'],
+            'class_name' => $row['class_name'],
+            'label'      => ucfirst($row['event_type']),
+        ];
+    }
+    $stmt->close();
+
+    $stmt = $conn->prepare("
+        SELECT event_date, title
+        FROM teacher_reminders
+        WHERE user_email = ?
+          AND event_date BETWEEN ? AND ?
+    ");
+    $stmt->bind_param("sss", $email, $from, $to);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    while ($row = $res->fetch_assoc()) {
+        $events[] = [
+            'type'       => 'reminder',
+            'date'       => $row['event_date'],
+            'title'      => $row['title'],
+            'class_name' => null,
+            'label'      => 'Reminder',
+        ];
+    }
+    $stmt->close();
+
+    // Sort chronologically so lists read in date order.
+    usort($events, function ($a, $b) {
+        return strtotime($a['date']) <=> strtotime($b['date']);
+    });
+
+    return $events;
 }
-$stmt->close();
 
-$stmt = $conn->prepare("
-    SELECT q.start_time AS event_date, q.title, c.name AS class_name
-    FROM quizzes q
-    JOIN classes c ON q.class_id = c.id
-    WHERE q.created_by = ? AND q.academic_year_id = ?
-      AND DATE(q.start_time) BETWEEN ? AND ?
-");
-$stmt->bind_param("siss", $email, $current_year_id, $monday, $sunday);
-$stmt->execute();
-$res = $stmt->get_result();
-while ($row = $res->fetch_assoc()) {
-    $week_events[] = [
-        'type'       => 'quiz',
-        'date'       => date('Y-m-d', strtotime($row['event_date'])),
-        'title'      => $row['title'],
-        'class_name' => $row['class_name'],
-        'label'      => 'Quiz',
-    ];
-}
-$stmt->close();
+$week_events = collect_teacher_events($conn, $email, $current_year_id, $monday, $sunday);
 
-$stmt = $conn->prepare("
-    SELECT ae.event_date, ae.title, ae.event_type, c.name AS class_name
-    FROM academic_events ae
-    JOIN classes c ON ae.class_id = c.id
-    WHERE ae.created_by = ? AND ae.academic_year_id = ?
-      AND ae.event_date BETWEEN ? AND ?
-");
-$stmt->bind_param("siss", $email, $current_year_id, $monday, $sunday);
-$stmt->execute();
-$res = $stmt->get_result();
-while ($row = $res->fetch_assoc()) {
-    $week_events[] = [
-        'type'       => 'academic',
-        'date'       => $row['event_date'],
-        'title'      => $row['title'],
-        'class_name' => $row['class_name'],
-        'label'      => ucfirst($row['event_type']),
-    ];
-}
-$stmt->close();
+// ── NEW: Desktop home "Coming up" ──
+// Next 5 events from today over the next 30 days (not limited to this week).
+$upcoming = array_slice(
+    collect_teacher_events($conn, $email, $current_year_id, date('Y-m-d'), date('Y-m-d', strtotime('+30 days'))),
+    0, 5
+);
 
-$stmt = $conn->prepare("
-    SELECT event_date, title
-    FROM teacher_reminders
-    WHERE user_email = ?
-      AND event_date BETWEEN ? AND ?
-");
-$stmt->bind_param("sss", $email, $monday, $sunday);
-$stmt->execute();
-$res = $stmt->get_result();
-while ($row = $res->fetch_assoc()) {
-    $week_events[] = [
-        'type'       => 'reminder',
-        'date'       => $row['event_date'],
-        'title'      => $row['title'],
-        'class_name' => null,
-        'label'      => 'Reminder',
-    ];
-}
-$stmt->close();
-
-// Sort chronologically so the "row list under the strip" reads in date order.
-usort($week_events, function ($a, $b) {
-    return strtotime($a['date']) <=> strtotime($b['date']);
-});
+// ── NEW: Teacher display name for the desktop home greeting ──
+// Same expression save_academic_event.php uses ("Mrs Dlamini").
+$nameStmt = $conn->prepare("SELECT CONCAT(COALESCE(title,''), ' ', surname) AS display_name FROM users WHERE email = ?");
+$nameStmt->bind_param("s", $email);
+$nameStmt->execute();
+$teacher_name = trim($nameStmt->get_result()->fetch_assoc()['display_name'] ?? '');
+$nameStmt->close();
 
 // ── NEW: School name for the mobile home header ──
 // Same source/fallback as the learner-side api/learner/get_my_class.php,
@@ -310,4 +333,8 @@ echo json_encode([
     'week_events' => $week_events,
     'week_start'  => $monday,
     'school_name' => $school_name,
+
+    // New desktop-home payload.
+    'upcoming'     => $upcoming,
+    'teacher_name' => $teacher_name,
 ]);

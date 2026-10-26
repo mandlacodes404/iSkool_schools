@@ -473,6 +473,12 @@ function render_page($type, $quizTitle, $score, $total, $timeTaken) {
     elseif ($percentage >= 60)  $scoreColor = '#4fd1c5';
     elseif ($percentage >= 40)  $scoreColor = '#f59e0b';
     else                        $scoreColor = '#f85149';
+
+    // Darker twin of the colour above, used by assets/css/learner/submit_quiz_light.css (desktop light mode)
+    if ($percentage >= 80)      $scoreColorLight = '#15803d';
+    elseif ($percentage >= 60)  $scoreColorLight = '#187a72';
+    elseif ($percentage >= 40)  $scoreColorLight = '#a85410';
+    else                        $scoreColorLight = '#b0413b';
     ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -504,6 +510,7 @@ function render_page($type, $quizTitle, $score, $total, $timeTaken) {
             --teal-dim:    rgba(79,209,197,0.12);
             --teal-glow:   rgba(79,209,197,0.25);
             --score-color: <?= $scoreColor ?>;
+            --score-color-light: <?= $scoreColorLight ?>;
             --radius:      16px;
         }
 
@@ -772,6 +779,7 @@ function render_page($type, $quizTitle, $score, $total, $timeTaken) {
         }
         .back-btn:hover { background: rgba(79,209,197,0.2); }
     </style>
+    <?php $learnerThemeCss = 'submit_quiz_light.css'; require __DIR__ . '/includes/learner_theme_head.php'; ?>
 </head>
 <body>
 

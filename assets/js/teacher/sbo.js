@@ -77,7 +77,7 @@ function parseSBODate(raw) {
     return new Date(String(raw).trim().replace(/^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2})/, '$1T$2'));
 }
 
-function formatSBOUpdatedDateTime(updatedAt) {
+function formatSBOUpdatedDateTime(updatedAt, dateOnly) {
     if (!updatedAt) return '';
 
     const date = parseSBODate(updatedAt);
@@ -88,6 +88,8 @@ function formatSBOUpdatedDateTime(updatedAt) {
         month: 'short',
         year: 'numeric'
     });
+    if (dateOnly) return formattedDate;
+
     const formattedTime = date.toLocaleTimeString('en-ZA', {
         hour: '2-digit',
         minute: '2-digit',
@@ -108,37 +110,26 @@ function renderTeacherSyllabus(data) {
     if (!briefs.length) {
         sidebarHtml = `<p class="sbo-empty-state-inline">No syllabus briefs found.</p>`;
     } else {
-        // Group by term, then by class within each term
-        const byTerm = {};
+        // One folder per class (the term no longer groups the list)
+        const byClass = {};
         briefs.forEach((brief, idx) => {
-            const t = brief.term || 0;
-            if (!byTerm[t]) byTerm[t] = {};
             const classKey = brief.class_id;
-            if (!byTerm[t][classKey]) byTerm[t][classKey] = { class_name: brief.class_name, items: [] };
-            byTerm[t][classKey].items.push({ brief, idx });
+            if (!byClass[classKey]) byClass[classKey] = { class_name: brief.class_name, items: [] };
+            byClass[classKey].items.push({ brief, idx });
         });
 
-        Object.keys(byTerm).sort((a,b) => a - b).forEach(term => {
-            sidebarHtml += `<div class="sbo-sidebar-term-label">TERM ${term}</div>`;
-
-            const classesInTerm = Object.values(byTerm[term])
-                .sort((a, b) => a.class_name.localeCompare(b.class_name));
-
-            classesInTerm.forEach((clsGroup, clsIdx) => {
-                const classGroupId = `sbo-class-group-${term}-${clsIdx}`;
+        Object.values(byClass)
+            .sort((a, b) => a.class_name.localeCompare(b.class_name))
+            .forEach((clsGroup, clsIdx) => {
+                const classGroupId = `sbo-class-group-${clsIdx}`;
                 let itemsHtml = '';
                 clsGroup.items.forEach(({ brief, idx }) => {
-                    const updatedAt = formatSBOUpdatedDateTime(brief.updated_at);
+                    const updatedAt = formatSBOUpdatedDateTime(brief.updated_at, true);
                     itemsHtml += `
                         <div class="sbo-sidebar-item" id="sbo-sidebar-${idx}"
                             data-title="${brief.subject}"
                             onclick="selectDesktopSBO(${idx})">
-                            <div class="sbo-sidebar-item-icon">
-                                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
-                                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-                                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-                                </svg>
-                            </div>
+                            <span class="sbo-sidebar-dot" aria-hidden="true"></span>
                             <div class="sbo-sidebar-item-info">
                                 <div class="sbo-sidebar-item-title">${brief.subject}</div>
                                 <div class="sbo-sidebar-item-meta">${updatedAt}</div>
@@ -152,7 +143,6 @@ function renderTeacherSyllabus(data) {
                     itemsHtml
                 );
             });
-        });
     }
 
     // ── Empty-state copy for the desktop main panel ──
@@ -165,7 +155,7 @@ function renderTeacherSyllabus(data) {
           (thinCount
               ? `${thinCount} ${thinCount === 1 ? 'has' : 'have'} no topics or assessments yet.`
               : 'Each one has topics and assessments.')
-        : 'Release one to a class and it will show up here, grouped by term.';
+        : 'Release one to a class and it will show up here, grouped by class.';
     const emptyCta   = briefCount ? 'Release a syllabus' : 'Release your first syllabus';
 
     let html = `
@@ -298,7 +288,7 @@ function buildMobileSBOFolders(briefs) {
                     onclick="openMobileTeacherSBO(${flatIndex})"
                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMobileTeacherSBO(${flatIndex});}">
                     <div class="sbo-mobile-row-icon">
-                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="#a67c52" stroke-width="1.2" fill="none">
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="#73746d" stroke-width="1.2" fill="none">
                             <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
                             <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
                             <line x1="12" y1="6"  x2="16" y2="6"/>
@@ -322,7 +312,7 @@ function buildMobileSBOFolders(briefs) {
         });
 
         const folderIcon = `
-            <svg viewBox="0 0 24 24" width="20" height="20" stroke="#a67c52" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="sbo-mobile-folder-icon">
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="#73746d" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="sbo-mobile-folder-icon">
                 <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
             </svg>`;
 

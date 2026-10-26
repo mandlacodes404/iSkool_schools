@@ -120,23 +120,19 @@ function renderTeacherAssignments(data) {
             const classGroupId = `as-class-group-${classGroupIdx++}`;
             let itemsHtml = '';
             entries.forEach(({ assignment, index }) => {
-                const { color: dotColor } = getTeacherAssignmentProgress(assignment);
+                const { submitted, total } = getTeacherAssignmentProgress(assignment);
+                const allIn = total > 0 && submitted >= total;
+                const dotLabel = allIn ? 'Every learner has submitted' : 'Waiting on submissions';
 
                 itemsHtml += `
                     <div class="as-sidebar-item" id="as-sidebar-${index}"
                         data-title="${escapeTeacherAssignmentHtml(assignment.title)}"
                         onclick="selectDesktopAssignment(${index})">
-                        <div class="as-sidebar-item-icon">
-                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
-                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                <polyline points="14 2 14 8 20 8"></polyline>
-                            </svg>
-                        </div>
+                        <span class="as-sidebar-dot${allIn ? ' is-done' : ''}" role="img" aria-label="${dotLabel}" title="${dotLabel}"></span>
                         <div class="as-sidebar-item-info">
                             <div class="as-sidebar-item-title">${assignment.title}</div>
-                            <div class="as-sidebar-item-meta">${assignment.class_name} &middot; Due ${assignment.due_date}</div>
+                            <div class="as-sidebar-item-meta">Due ${assignment.due_date}</div>
                         </div>
-                        <span class="as-sidebar-status-dot" style="--as-dot-color:${dotColor};"></span>
                     </div>`;
             });
             sidebarHtml += window.buildCollapsibleClassGroup(
@@ -258,7 +254,7 @@ function renderTeacherAssignments(data) {
                         onclick="openMobileTeacherAssignment(${index})"
                         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMobileTeacherAssignment(${index});}">
                         <div class="as-mobile-row-icon">
-                            <svg viewBox="0 0 24 24" width="23" height="23" stroke="#a78bfa" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <svg viewBox="0 0 24 24" width="23" height="23" stroke="#73746d" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                                 <polyline points="14 2 14 8 20 8"></polyline>
                             </svg>
@@ -269,9 +265,9 @@ function renderTeacherAssignments(data) {
                             <div class="as-mobile-row-progress">
                                 <div class="as-mobile-row-progress-bar">
                                     <div class="as-mobile-row-progress-fill"
-                                        style="--as-progress-width:${subPercent}%;--as-progress-color:rgba(167,139,250,0.35);"></div>
+                                        style="--as-progress-width:${subPercent}%;--as-progress-color:#73746d;"></div>
                                 </div>
-                                <span class="as-mobile-row-progress-label" style="--as-progress-color:#a78bfa;">${subCount}/${totalCount}</span>
+                                <span class="as-mobile-row-progress-label" style="--as-progress-color:#73746d;">${subCount}/${totalCount}</span>
                             </div>
                         </div>
                         <div class="as-mobile-row-chevron">
@@ -283,7 +279,7 @@ function renderTeacherAssignments(data) {
             });
 
             const folderIcon = `
-                <svg viewBox="0 0 24 24" width="20" height="20" stroke="#a78bfa" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="as-mobile-folder-icon">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="#73746d" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="as-mobile-folder-icon">
                     <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
                 </svg>`;
 
@@ -865,7 +861,8 @@ window.openCreateAssignment = async function() {
         const backFn = isDesktop ? `selectDesktopAssignment(window._lastSelectedAssignmentIdx)` : `fetchTeacherAssignments()`;
 
         target.innerHTML = `
-            <div class="as-form-wrap ${isDesktop ? 'as-form-wrap--desktop' : 'as-form-wrap--mobile'}">
+            <div class="as-form-wrap ${isDesktop ? 'as-form-wrap--desktop tchr-create-form' : 'as-form-wrap--mobile'}">
+                ${isDesktop ? '<p class="tchr-create-crumb">Assignments</p>' : ''}
                 <div class="as-form-header ${isDesktop ? 'as-form-header--desktop' : ''}">
                     <h2 class="as-form-title ${isDesktop ? 'as-form-title--desktop' : ''}">
                         Create New Assignment

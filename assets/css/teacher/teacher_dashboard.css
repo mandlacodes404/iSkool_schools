@@ -20,6 +20,10 @@
             font-weight: 600;
             display: flex;
             height: 100vh;
+            /* dvh = the height you can actually see. On a phone, 100vh is the height with the browser's address
+               bar tucked away, so while the bar is showing, the bottom of the page sits under it. Browsers that
+               do not know dvh ignore the second line and keep the first. */
+            height: 100dvh;
             background: var(--bg-color);
             color: var(--text-color);
             overflow: hidden;
@@ -40,10 +44,12 @@
            differences:
              - mobile widths only, so desktop (e.g. two-finger swipe-back on
                a trackpad) behaves exactly as before;
-             - overscroll-behavior-y is left alone. The learner sets it to
-               `contain` because it has its own custom pull-to-refresh; this
-               page has none, so the browser's native pull-to-refresh keeps
-               working. */
+             - overscroll-behavior-y is not set here. The teacher dashboard
+               has its own pull-to-refresh now (assets/js/shared/
+               pull_to_refresh.js); pull_to_refresh.css sets `contain` on
+               the page it refreshes, so the browser's native
+               pull-to-refresh, which reloads the whole app, does not also
+               fire. */
         @media (max-width: 768px) {
             html,
             body,
@@ -66,6 +72,7 @@
             visibility: hidden;
             opacity: 0;
             height: 100vh;
+            height: 100dvh; /* the menu's last items must not sit under the browser's address bar */
             z-index: 5000;
             overflow-y: auto;
             overflow-x: hidden;
@@ -196,15 +203,28 @@
         }
         #desktopMenuToggle:hover { background: #30363d; }
 
-        /* Mobile hamburger */
+        /* Mobile hamburger — same button as the learner's #mobileToggle: a thin
+           (1.5px) 20px icon, 8px side padding. The 10px top/bottom padding keeps
+           the button 40px tall so the header height doesn't change, and the
+           -4px margin puts the icon at the same left edge as on the learner. */
         #mobileToggle {
             display: none;
             background: none;
             border: none;
-            color: #e2e8f0;
+            color: #e0e6f0;
             font-size: 26px;
             cursor: pointer;
-            padding: 4px;
+            padding: 10px 8px;
+            margin-left: -4px;
+            transition: color 0.3s ease;
+        }
+        #mobileToggle svg {
+            display: block;
+            width: 20px;
+            height: 20px;
+            stroke: currentColor;
+            flex-shrink: 0;
+            transition: stroke 0.3s ease;
         }
 
         .top-nav-brand {
@@ -406,7 +426,7 @@
         #mobileOverlay {
             position: fixed;
             top: 0; left: 0;
-            width: 100vw; height: 100vh;
+            width: 100vw; height: 100vh; height: 100dvh;
             background: rgba(0,0,0,0.55);
             backdrop-filter: blur(6px);
             opacity: 0;
@@ -582,39 +602,52 @@
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ── MOBILE BOTTOM NAV ── */
+        /* ── MOBILE BOTTOM NAV ──
+           Same structure as the parent app's bar (parent_app.css .pa-tabs): centred tabs, thin 22px line icons
+           with the parent bar's glyphs, 11px labels, bold bright active tab. It is 85px high plus the phone's
+           safe area (--mbn-h; the old bar was 82px, the parent bar is 64px). The background is the teacher's own
+           glass and stays dynamic (see DYNAMIC BOTTOM NAV below). The teacher app is dark on phones, so no light
+           variant. */
+        :root { --mbn-h: 85px; }
         #mobileBottomNav {
             display: none;
             position: fixed;
-            bottom: 0; left: 0;
+            bottom: 0; left: 0; right: 0;
             width: 100%;
-            height: 82px;
-            background: rgba(66,65,65,0.35);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
-            z-index: 4000;
-            justify-content: space-around;
-            align-items: flex-start;
+            height: calc(var(--mbn-h) + env(safe-area-inset-bottom, 0px));
+            padding: 0 0 env(safe-area-inset-bottom, 0px);
             box-sizing: border-box;
+            background: rgba(66,65,65,0.32);
+            backdrop-filter: blur(28px) saturate(180%);
+            -webkit-backdrop-filter: blur(28px) saturate(180%);
+            border-top: 1px solid rgba(255,255,255,0.14);
+            box-shadow: 0 -4px 24px rgba(0,0,0,0.35);
+            z-index: 4000;
         }
         #mobileBottomNav a {
-            color: var(--text-color);
-            text-decoration: none;
-            font-size: 11px;
-            text-align: center;
-            flex: 1;
+            flex: 1 1 0;
+            min-width: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start;
-            padding-top: 5px;
-            transition: all 0.2s;
+            justify-content: flex-start;   /* icon + label hug the top of the bar (like WhatsApp / GitHub) */
+            padding-top: 10px;
+            gap: 2px;
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 600;
+            color: #9b9c92;
+            -webkit-tap-highlight-color: transparent;
         }
-        #mobileBottomNav a i { font-size: 20px; margin-bottom: 4px; }
-        #mobileBottomNav a.active,
-        #mobileBottomNav a:hover { color: var(--accent-color); transform: translateY(-3px); }
+        #mobileBottomNav a span {
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        #mobileBottomNav a svg { width: 22px; height: 22px; flex-shrink: 0; }
+        #mobileBottomNav a.active { color: #ecece9; font-weight: 700; }
+        #mobileBottomNav a.active svg { stroke-width: 2.2; }
 
         /* ── MOBILE LAYOUT ── */
         @media (max-width: 768px) {
@@ -636,13 +669,9 @@
                second time pushed it entirely off-screen (past the right edge)
                while the menu was open. It now travels with .main-content
                exactly like the learner header does. */
-            .sidebar.active ~ #mobileBottomNav { filter: blur(5px); pointer-events: none; }
-            iframe { height: calc(100vh - 120px) !important; }
+            .sidebar.active ~ #mobileBottomNav { pointer-events: none; }
+            iframe { height: calc(100vh - 126px) !important; height: calc(100dvh - 126px) !important; }
             #mobileBottomNav { display: flex !important; }
-            #mobileBottomNav {
-                padding-bottom: env(safe-area-inset-bottom);
-                height: calc(82px + env(safe-area-inset-bottom));
-            }
             .sidebar a.desktop-only,
             .sidebar a.mobile-bottom-link { display: none; }
             .teacher-desktop-create { display: none !important; }
@@ -845,6 +874,19 @@
             .top-nav-wrapper.header-scrolled:not([data-page-color]) {
                 border-bottom: 1px solid rgba(255,255,255,0.07) !important;
             }
+
+            /* No line under the header on phones: not at rest, not scrolled,
+               on no page, in dark or light. This comes last and is
+               !important so it also wins over the 2px page-colour border
+               that configureTeacherHeader writes inline, and over the
+               scrolled rule above. A scrolled page still takes its
+               signature colour as the header background, so the header
+               and the page stay clearly separate without a line. */
+            .top-nav-wrapper,
+            .top-nav-wrapper.header-scrolled,
+            .top-nav-wrapper.header-scrolled:not([data-page-color]) {
+                border-bottom: none !important;
+            }
         }
 
         /* ── DYNAMIC BOTTOM NAV — mobile only ───────────────────────────
@@ -868,11 +910,11 @@
             }
 
             #mobileBottomNav.nav-scrolled {
-                background: rgba(66,65,65,0.35) !important;
-                border-top: 1px solid rgba(255,255,255,0.1) !important;
-                backdrop-filter: blur(20px) !important;
-                -webkit-backdrop-filter: blur(20px) !important;
-                box-shadow: 0 -4px 20px rgba(0,0,0,0.3) !important;
+                background: rgba(66,65,65,0.32) !important;
+                border-top: 1px solid rgba(255,255,255,0.14) !important;
+                backdrop-filter: blur(28px) saturate(180%) !important;
+                -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+                box-shadow: 0 -4px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05) !important;
             }
         }
 
@@ -999,3 +1041,237 @@
         }
 
         .drawer-icon svg { transition: transform 0.3s ease; display: block; }
+
+ 
+/* ═══════════════════════════════════════════════════════════════════════════
+   TEACHER DESKTOP CREATE FORMS
+   Shared presentation for the remaining create flows. Mobile forms are not
+   targeted; the existing Evaluations, Grades and Syllabus styles stay canonical.
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (min-width: 900px) {
+    .tchr-create-form.as-form-wrap--desktop {
+        max-width: 860px;
+        padding: 40px 40px 72px;
+    }
+    .tchr-create-form {
+        --tcf-line: var(--dm-line, rgba(255,255,255,.07));
+        --tcf-line-strong: var(--dm-line-strong, rgba(255,255,255,.14));
+        --tcf-text: var(--dm-text, #e8eaed);
+        --tcf-soft: var(--dm-soft, #b6bbc3);
+        --tcf-muted: var(--dm-muted, #8a9099);
+        --tcf-faint: var(--dm-faint, #5f656e);
+        --tcf-accent: var(--dm-accent, #4fd1c5);
+        box-sizing: border-box;
+        width: 100%;
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 40px 40px 72px;
+        color: var(--tcf-text);
+        font-family: var(--dm-font, 'Geist', 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif);
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 1.5;
+        animation: tchr-create-form-in .18s ease;
+    }
+    @keyframes tchr-create-form-in { from { opacity: 0; } to { opacity: 1; } }
+    .tchr-create-form .tchr-create-crumb {
+        margin: 0 0 8px;
+        color: var(--tcf-muted);
+        font-size: 13px;
+        font-weight: 400;
+    }
+    .tchr-create-form .as-form-header,
+    .tchr-create-form .an-panel-form-header,
+    .tchr-create-form .rs-panel-form-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        margin: 0 0 28px;
+        padding: 0;
+        border: 0;
+        background: transparent;
+    }
+    .tchr-create-form .as-form-title,
+    .tchr-create-form .an-panel-form-title,
+    .tchr-create-form .rs-panel-form-title,
+    .tchr-create-form > div > h2 {
+        margin: 0;
+        color: var(--tcf-text);
+        font-size: 28px;
+        font-weight: 500;
+        line-height: 1.15;
+        letter-spacing: -.025em;
+    }
+    .tchr-create-form .as-form-title--desktop { font-size: 28px; font-weight: 500; }
+    .tchr-create-form .as-form-close-btn,
+    .tchr-create-form .an-panel-form-close-btn,
+    .tchr-create-form .rs-panel-form-close-btn {
+        color: var(--tcf-muted);
+        font-size: 22px;
+        border: 1px solid var(--tcf-line-strong);
+        border-radius: 8px;
+        width: 32px;
+        height: 32px;
+        flex: 0 0 32px;
+        display: grid;
+        place-items: center;
+    }
+    .tchr-create-form .teacher-modal-label {
+        display: block;
+        margin: 22px 0 7px;
+        color: var(--tcf-soft);
+        font-size: 13px;
+        font-weight: 500;
+        line-height: 1.4;
+    }
+    .tchr-create-form .teacher-modal-input,
+    .tchr-create-form input[type="text"],
+    .tchr-create-form input[type="number"],
+    .tchr-create-form input[type="datetime-local"],
+    .tchr-create-form input[type="file"],
+    .tchr-create-form select,
+    .tchr-create-form textarea {
+        box-sizing: border-box;
+        width: 100%;
+        min-height: 38px;
+        margin: 0;
+        padding: 9px 12px;
+        border: 1px solid var(--tcf-line-strong);
+        border-radius: 8px;
+        background: transparent;
+        color: var(--tcf-text);
+        font: inherit;
+        font-weight: 400;
+        box-shadow: none;
+        transition: border-color .15s ease, box-shadow .15s ease;
+    }
+    .tchr-create-form input[type="file"] { padding: 8px 10px; }
+    .tchr-create-form textarea { min-height: 94px; resize: vertical; }
+    .tchr-create-form input::placeholder,
+    .tchr-create-form textarea::placeholder { color: var(--tcf-faint); }
+    .tchr-create-form .teacher-modal-input:focus,
+    .tchr-create-form input:focus,
+    .tchr-create-form select:focus,
+    .tchr-create-form textarea:focus {
+        outline: none;
+        border-color: var(--tcf-accent);
+        box-shadow: 0 0 0 3px rgba(79,209,197,.14);
+    }
+    .tchr-create-form .teacher-modal-input:focus-visible,
+    .tchr-create-form button:focus-visible {
+        outline: 2px solid var(--tcf-accent);
+        outline-offset: 2px;
+    }
+    .tchr-create-form .as-term-banner,
+    .tchr-create-form .cq-section {
+        margin: 28px 0 0;
+        padding: 22px 0 0;
+        border: 0;
+        border-top: 1px solid var(--tcf-line);
+        border-radius: 0;
+        background: transparent;
+        text-align: left;
+    }
+    .tchr-create-form .as-term-banner { border-left: 0; }
+    .tchr-create-form .as-term-banner-title {
+        color: var(--tcf-soft);
+        font-size: 13px;
+        font-weight: 500;
+    }
+    .tchr-create-form .as-term-banner-subtitle { color: var(--tcf-muted); }
+    .tchr-create-form .cq-section-title {
+        color: var(--tcf-text);
+        font-size: 14px;
+        font-weight: 500;
+    }
+    .tchr-create-form .cq-section-help { color: var(--tcf-muted); font-weight: 400; }
+    .tchr-create-form .cq-step {
+        background: transparent;
+        border-color: var(--tcf-line-strong);
+        color: var(--tcf-muted);
+        border-radius: 7px;
+        font-weight: 500;
+    }
+    .tchr-create-form .cq-preview-card,
+    .tchr-create-form .cq-learner-card {
+        background: rgba(255,255,255,.025);
+        border-color: var(--tcf-line);
+    }
+    .tchr-create-form .cq-preview-textarea {
+        box-sizing: border-box;
+        background: transparent;
+        border-color: var(--tcf-line-strong);
+        color: var(--tcf-text);
+    }
+    .tchr-create-form .cq-mode-card { background: transparent !important; }
+    .tchr-create-form .as-email-checkbox-label {
+        margin-top: 22px;
+        background: transparent;
+        border: 1px solid var(--tcf-line);
+        border-radius: 8px;
+        color: var(--tcf-soft);
+    }
+    .tchr-create-form .rs-type-toggle-btn {
+        border-radius: 8px;
+        border-color: var(--tcf-line-strong);
+    }
+    .tchr-create-form .teacher-file-drop {
+        background: transparent;
+        border-color: var(--tcf-line-strong);
+        border-radius: 10px;
+    }
+    .tchr-create-form .an-email-label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .tchr-create-form input[type="checkbox"],
+    .tchr-create-form input[type="radio"] { accent-color: var(--tcf-accent); }
+    .tchr-create-form .as-form-actions,
+    .tchr-create-form .an-panel-form-actions,
+    .tchr-create-form .rs-panel-form-actions {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid var(--tcf-line);
+    }
+    .tchr-create-form .teacher-modal-cancel,
+    .tchr-create-form .teacher-modal-submit,
+    .tchr-create-form .as-form-cancel-btn,
+    .tchr-create-form .as-form-submit-btn {
+        min-height: 36px;
+        padding: 0 14px;
+        border-radius: 8px;
+        font: inherit;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+    }
+    .tchr-create-form .teacher-modal-cancel,
+    .tchr-create-form .as-form-cancel-btn {
+        color: var(--tcf-text);
+        background: transparent;
+        border: 1px solid var(--tcf-line-strong);
+    }
+    .tchr-create-form .teacher-modal-submit,
+    .tchr-create-form .as-form-submit-btn {
+        color: #04211f;
+        background: var(--tcf-accent);
+        border: 1px solid var(--tcf-accent);
+    }
+    .tchr-create-form .teacher-modal-submit:hover,
+    .tchr-create-form .as-form-submit-btn:hover { filter: brightness(1.06); }
+    .tchr-create-form .as-form-error,
+    .tchr-create-form .an-form-error,
+    .tchr-create-form .rs-form-error { margin-top: 12px; }
+    .tchr-create-form .cq-grid { gap: 18px; }
+}
+@media (min-width: 900px) and (max-width: 1200px) {
+    .tchr-create-form,
+    .tchr-create-form.as-form-wrap--desktop { padding: 32px 28px 56px; }
+}

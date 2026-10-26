@@ -1,0 +1,49 @@
+/* ═══════════════════════════════════════════════════════════════════════════════════════════════════════════
+   Pull to refresh: the small spinner that sits in the gap above the page while you pull it down.
+   Script: assets/js/shared/pull_to_refresh.js. Used by the teacher dashboard.
+   (The learner dashboard has its own copy of this gesture, built into learner_dashboard.php, and does not use this file.)
+   ═══════════════════════════════════════════════════════════════════════════════════════════════════════════ */
+
+.iskool-ptr {
+    position: fixed;
+    left: 50%;
+    top: 0;                                 /* the script sets it to the top edge of the page being pulled */
+    width: 42px;
+    height: 42px;
+    margin-left: -21px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;                          /* above the page, below the menu (5000) and its backdrop (4999) */
+    color: rgb(120, 120, 128);              /* the ring's colour; same grey the learner's spinner uses */
+    opacity: 0;
+    transform: translateY(-80px);
+    transition: opacity .18s ease, transform .18s ease;
+    pointer-events: none;
+}
+.iskool-ptr svg { width: 32px; height: 32px; }
+.iskool-ptr.is-spinning svg { animation: iskool-ptr-spin 1.35s linear infinite; }
+@keyframes iskool-ptr-spin { to { transform: rotate(360deg); } }
+
+/* Read out by screen readers ("Refreshing", "Updated"); not drawn. */
+.iskool-ptr-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .iskool-ptr { transition: none; }
+}
+
+/* Phones: the app pulls to refresh itself (the script adds this class to the page it refreshes). Without this the
+   browser would also run its own pull-to-refresh at the same time, which reloads the whole app and throws away where
+   you were. "contain" keeps the pull inside the page; the page's own scrolling is unchanged. Same width as the
+   script's default maxWidth (768px). */
+@media (max-width: 768px) {
+    .iskool-ptr-scroller { overscroll-behavior-y: contain; }
+}

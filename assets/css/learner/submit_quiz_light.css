@@ -1,0 +1,96 @@
+/* ═══ Light mode: submit_quiz.php (the card shown after a quiz is handed in, desktop) ══════════════════════════
+   One card, three states: the score ("Quiz Complete"), "Marks Pending" and "Quiz Closed". Like take_quiz.php it opens
+   inside the dashboard's #mainFrame, so includes/learner_theme_head.php copies the saved choice onto this page and loads
+   this file.
+
+   The page already runs on CSS variables, so most of light mode is the palette block below. The rest fixes the colours
+   that are written straight into the page's <style> or into the SVG icons.
+
+   The score colour is worked out in PHP from the percentage and is a bright green / teal / amber / red that is too pale
+   for text on white, so the page also prints a darker twin (--score-color-light) and the first block switches to it.
+
+   Two blocks, one per screen size. The first (769px and wider) follows <html data-learner-theme="light">, the desktop
+   choice. The second, at the end of the file (768px and narrower), follows <html data-learner-mobile-theme="light">, the
+   phone choice from Settings > Appearance on a phone; the include sets that attribute and the browser bar colour too.
+   Dark mode is untouched in both.
+   To remove it, delete this file, the include line and the --score-color-light line in submit_quiz.php. */
+@media (min-width: 769px) {
+
+/* ── palette ─────────────────────────────────────────────────────────────────────────────────────────────── */
+html[data-learner-theme="light"] {
+    --bg:          #faf9f5;
+    --surface:     #ffffff;      /* the card */
+    --surface2:    #f4f3ee;      /* the stat boxes */
+    --border:      #dfded8;
+    --text:        #282924;
+    --muted:       #6c6d66;
+    --teal:        #187a72;
+    --teal-dim:    rgba(24,122,114,.10);
+    --teal-glow:   rgba(24,122,114,.18);
+    --score-color: var(--score-color-light, #187a72);
+    color-scheme: light;
+}
+
+/* the card sits on a cream page, so it gets a soft shadow instead of the heavy dark one */
+html[data-learner-theme="light"] .card { box-shadow: 0 18px 52px rgba(31,32,29,.14); }
+
+/* coloured bar along the top of the card ("Quiz Closed" is hard-coded red) */
+html[data-learner-theme="light"] .card-bar.closed { background: linear-gradient(90deg, #b0413b, transparent); }
+
+/* rings: the empty track was white at 6%, which disappears on a light card */
+html[data-learner-theme="light"] .circle-track,
+html[data-learner-theme="light"] .ring-track { stroke: rgba(38,39,35,.09); }
+
+/* "Marks Pending" and "Quiz Closed" icons (the SVG strokes are written into the markup) */
+html[data-learner-theme="light"] .state-icon.closed { background: rgba(176,65,59,.10); }
+html[data-learner-theme="light"] .state-icon.pending svg { stroke: #187a72; }
+html[data-learner-theme="light"] .state-icon.closed svg { stroke: #b0413b; }
+
+/* "Back to Gradebook" (Quiz Closed only): the dark button the rest of learner light mode uses */
+html[data-learner-theme="light"] .back-btn { background: #252624; color: #ffffff; border-color: #252624; }
+html[data-learner-theme="light"] .back-btn:hover { background: #3a3b37; border-color: #3a3b37; }
+
+}
+
+/* ═══ Phones (768px and narrower): follows <html data-learner-mobile-theme="light"> ═════════════════════════════════
+   The page's own phone block makes the body and the card #20201f. Here the page is cream and the card is white with
+   the same soft shadow as desktop, so the card (score ring, stat boxes, the "Back to Gradebook" button) stands out.
+   The palette and every colour fix below are the desktop ones, repeated for the phone attribute. */
+@media (max-width: 768px) {
+
+/* ── palette ───────────────────────────────────────────────────────────────────────────────────────────────── */
+html[data-learner-mobile-theme="light"] {
+    --bg:          #faf9f5;
+    --surface:     #ffffff;      /* the card */
+    --surface2:    #f4f3ee;      /* the stat boxes */
+    --border:      #dfded8;
+    --text:        #282924;
+    --muted:       #6c6d66;
+    --teal:        #187a72;
+    --teal-dim:    rgba(24,122,114,.10);
+    --teal-glow:   rgba(24,122,114,.18);
+    --score-color: var(--score-color-light, #187a72);
+    color-scheme: light;
+}
+
+html[data-learner-mobile-theme="light"],
+html[data-learner-mobile-theme="light"] body { background: #faf9f5; }
+html[data-learner-mobile-theme="light"] .card { background: #ffffff; box-shadow: 0 18px 52px rgba(31,32,29,.14); }
+
+/* coloured bar along the top of the card ("Quiz Closed" is hard-coded red) */
+html[data-learner-mobile-theme="light"] .card-bar.closed { background: linear-gradient(90deg, #b0413b, transparent); }
+
+/* rings: the empty track was white at 6%, which disappears on a light card */
+html[data-learner-mobile-theme="light"] .circle-track,
+html[data-learner-mobile-theme="light"] .ring-track { stroke: rgba(38,39,35,.09); }
+
+/* "Marks Pending" and "Quiz Closed" icons (the SVG strokes are written into the markup) */
+html[data-learner-mobile-theme="light"] .state-icon.closed { background: rgba(176,65,59,.10); }
+html[data-learner-mobile-theme="light"] .state-icon.pending svg { stroke: #187a72; }
+html[data-learner-mobile-theme="light"] .state-icon.closed svg { stroke: #b0413b; }
+
+/* "Back to Gradebook" (Quiz Closed only): the dark button the rest of learner light mode uses */
+html[data-learner-mobile-theme="light"] .back-btn { background: #252624; color: #ffffff; border-color: #252624; }
+html[data-learner-mobile-theme="light"] .back-btn:hover { background: #3a3b37; border-color: #3a3b37; }
+
+}

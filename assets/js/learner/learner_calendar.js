@@ -94,6 +94,7 @@ window.fetchLearnerCalendar = async function () {
         window.configureHeader({
             title: 'Calendar',
             mode: 'detail',
+            color: '#4fd1c5',
             // The mobile calendar is reached from the menu, so Back always
             // returns to the learner Home view rather than browser history.
             backAction: () => window.returnToLearnerHome?.()
@@ -598,6 +599,73 @@ function buildLearnerCalShell(month, year, events) {
                 .lcal-upcoming-card:hover {
                     border-color: transparent;
                 }
+            }
+
+            /* ═══ Light mode: learner Calendar (phones) ════════════════════════════════════════════════════════════════
+               The same page in the learner light palette the other light phone pages use: the cream page, a white month card
+               with warm-grey lines, the dark pill for today and the Upcoming cards. It only applies when Light is chosen in
+               Settings > Appearance on a phone (<html data-learner-mobile-theme="light">, set by mobile_theme.js).
+               The event dots, legend dots, day pills and the Upcoming type and date are coloured inline by the code above, so
+               they are matched by value and swapped for a darker one that holds up on white: text at 4.5:1 or better, dots
+               at 3:1 or better. The page background, header and bottom nav come from the gate in mobile_light.css, which lists
+               .lcal-body for this page. Dark mode and the desktop calendar are untouched. To remove it, delete this block. */
+            @media (max-width: 768px) {
+
+                /* id prefix: quiz.css sets "#api-content-area h2" (teal), which a class-only rule would lose to */
+                html[data-learner-mobile-theme="light"] #api-content-area .lcal-page-title { color: #282924; }
+                html[data-learner-mobile-theme="light"] .lcal-legend-item { color: #6b6c65; }
+
+                /* month card */
+                html[data-learner-mobile-theme="light"] .lcal-main { background: #ffffff; border: 1px solid #dfded8; }
+                html[data-learner-mobile-theme="light"] .lcal-nav-row { border-bottom-color: #ebeae5; }
+                html[data-learner-mobile-theme="light"] .lcal-nav-btn { background: #f4f3ee; border-color: #dfded8; color: #53544e; }
+                html[data-learner-mobile-theme="light"] .lcal-nav-btn:hover { background: rgba(24,122,114,.08); border-color: rgba(24,122,114,.30); color: #187a72; }
+                html[data-learner-mobile-theme="light"] .lcal-month-label { color: #282924; }
+                html[data-learner-mobile-theme="light"] .lcal-grid { border-bottom-color: #ebeae5; }
+                html[data-learner-mobile-theme="light"] .lcal-day-header { color: #6b6c65; border-right-color: #ebeae5; }
+                html[data-learner-mobile-theme="light"] .lcal-cell { border-right-color: #ebeae5; border-bottom-color: #ebeae5; }
+                html[data-learner-mobile-theme="light"] .lcal-cell-empty { background: rgba(38,39,35,.03); }
+                html[data-learner-mobile-theme="light"] .lcal-cell-today { background: rgba(24,122,114,.06); }
+
+                /* day numbers: grey, near-black on days with events, and today is the dark pill (last, so it wins on a day with events) */
+                html[data-learner-mobile-theme="light"] .lcal-day-num { color: #6b6c65; }
+                html[data-learner-mobile-theme="light"] .lcal-cell-has-events .lcal-day-num { color: #282924; }
+                html[data-learner-mobile-theme="light"] .lcal-cell-today .lcal-day-num { background: #252624; color: #faf9f5; }
+
+                /* dots in the cells and in the legend (inline background): Quiz, Completed, Assignment, Academic */
+                html[data-learner-mobile-theme="light"] .lcal-dot[style*="#fdd663" i],
+                html[data-learner-mobile-theme="light"] .lcal-legend-dot[style*="#fdd663" i] { background: #a87800 !important; }
+                html[data-learner-mobile-theme="light"] .lcal-dot[style*="#22c55e" i],
+                html[data-learner-mobile-theme="light"] .lcal-legend-dot[style*="#22c55e" i] { background: #1a7f37 !important; }
+                html[data-learner-mobile-theme="light"] .lcal-dot[style*="#a78bfa" i],
+                html[data-learner-mobile-theme="light"] .lcal-legend-dot[style*="#a78bfa" i] { background: #6b4fc7 !important; }
+                html[data-learner-mobile-theme="light"] .lcal-dot[style*="#f472b6" i],
+                html[data-learner-mobile-theme="light"] .lcal-legend-dot[style*="#f472b6" i] { background: #be3769 !important; }
+
+                /* day pills (shown from 601px up; inline color and background) and the "+N more" pill */
+                html[data-learner-mobile-theme="light"] .lcal-pill[style*="#a78bfa" i] { color: #6b4fc7 !important; background: rgba(107,79,199,.09) !important; }
+                html[data-learner-mobile-theme="light"] .lcal-pill[style*="#fdd663" i] { color: #876000 !important; background: rgba(135,96,0,.10) !important; }
+                html[data-learner-mobile-theme="light"] .lcal-pill[style*="#22c55e" i] { color: #166534 !important; background: rgba(22,101,52,.09) !important; }
+                html[data-learner-mobile-theme="light"] .lcal-pill[style*="#f472b6" i] { color: #be3769 !important; background: rgba(190,55,105,.08) !important; }
+                html[data-learner-mobile-theme="light"] .lcal-pill-more { color: #6b6c65 !important; background: rgba(38,39,35,.06) !important; }
+
+                /* Upcoming list */
+                html[data-learner-mobile-theme="light"] .lcal-upcoming-title { color: #6b6c65; }
+                html[data-learner-mobile-theme="light"] .lcal-upcoming-card,
+                html[data-learner-mobile-theme="light"] .lcal-upcoming-empty { background: #ffffff; border: 1px solid #dfded8; }
+                html[data-learner-mobile-theme="light"] .lcal-upcoming-card:hover { border-color: #dfded8; }
+                html[data-learner-mobile-theme="light"] .lcal-upcoming-title-text { color: #282924; }
+                html[data-learner-mobile-theme="light"] .lcal-upcoming-meta,
+                html[data-learner-mobile-theme="light"] .lcal-upcoming-empty { color: #6b6c65; }
+                html[data-learner-mobile-theme="light"] .lcal-upcoming-type[style*="#a78bfa" i],
+                html[data-learner-mobile-theme="light"] .lcal-upcoming-date[style*="#a78bfa" i] { color: #6b4fc7 !important; }
+                html[data-learner-mobile-theme="light"] .lcal-upcoming-type[style*="#fdd663" i],
+                html[data-learner-mobile-theme="light"] .lcal-upcoming-date[style*="#fdd663" i] { color: #876000 !important; }
+                html[data-learner-mobile-theme="light"] .lcal-upcoming-type[style*="#22c55e" i],
+                html[data-learner-mobile-theme="light"] .lcal-upcoming-date[style*="#22c55e" i] { color: #166534 !important; }
+                html[data-learner-mobile-theme="light"] .lcal-upcoming-type[style*="#f472b6" i],
+                html[data-learner-mobile-theme="light"] .lcal-upcoming-date[style*="#f472b6" i] { color: #be3769 !important; }
+
             }
         </style>
 

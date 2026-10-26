@@ -94,17 +94,12 @@ function renderTeacherEvaluations(data) {
                 const key = `${gIdx}-${eIdx}`;
                 itemsHtml += `
                     <div class="ev-sidebar-item" id="ev-sidebar-${key}"
+                        data-title="${escapeTeacherEvalHtml(ev.title)}"
                         onclick="selectDesktopEval(${gIdx}, ${eIdx})">
-                        <div class="ev-sidebar-item-icon">
-                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
-                                <line x1="18" y1="20" x2="18" y2="10"></line>
-                                <line x1="12" y1="20" x2="12" y2="4"></line>
-                                <line x1="6" y1="20" x2="6" y2="14"></line>
-                            </svg>
-                        </div>
+                        <span class="ev-sidebar-dot" aria-hidden="true"></span>
                         <div class="ev-sidebar-item-info">
                             <div class="ev-sidebar-item-title">${ev.title}</div>
-                            <div class="ev-sidebar-item-meta">${ev.response_count} response${ev.response_count !== 1 ? 's' : ''}</div>
+                            ${ev.display_date ? `<div class="ev-sidebar-item-meta">${ev.display_date}</div>` : ''}
                         </div>
                     </div>`;
             });
@@ -145,6 +140,7 @@ function renderTeacherEvaluations(data) {
                         New
                     </button>
                 </div>
+                ${window.buildTeacherSearchBar('ev', { placeholder: 'Search evaluations...' })}
                 <div class="ev-sidebar-scroll">
                     ${sidebarHtml}
                 </div>
@@ -202,7 +198,7 @@ function renderTeacherEvaluations(data) {
                         onclick="openMobileTeacherEvaluation(${window._allEvalsFlat.findIndex(e => e.groupIndex === groupIndex && e.evIndex === evIndex)})"
                         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMobileTeacherEvaluation(${window._allEvalsFlat.findIndex(e => e.groupIndex === groupIndex && e.evIndex === evIndex)});}">
                         <div class="ev-mobile-row-icon">
-                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="#1e90ff" stroke-width="1.2" fill="none">
+                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="#73746d" stroke-width="1.2" fill="none">
                                 <line x1="18" y1="20" x2="18" y2="10"></line>
                                 <line x1="12" y1="20" x2="12" y2="4"></line>
                                 <line x1="6" y1="20" x2="6" y2="14"></line>
@@ -224,7 +220,7 @@ function renderTeacherEvaluations(data) {
             });
 
             const folderIcon = `
-                <svg viewBox="0 0 24 24" width="20" height="20" stroke="#1e90ff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="ev-mobile-folder-icon">
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="#73746d" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="ev-mobile-folder-icon">
                     <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
                 </svg>`;
 

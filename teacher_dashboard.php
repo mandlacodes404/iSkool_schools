@@ -33,6 +33,9 @@ $stmtTeacher->close();
 
 $teacherFullName = trim($teacherName . ' ' . $teacherSurname);
 $teacherEmail    = $_SESSION['email'];
+$teacherThemeStorageKey = 'iskoolTeacherDesktopTheme:' . hash('sha256', ($_SESSION['current_school_db'] ?? '') . '|' . $teacherEmail);
+// Phones have their own light / dark choice (Settings > Appearance), saved apart from the desktop one.
+$teacherMobileThemeStorageKey = 'iskoolTeacherMobileTheme:' . hash('sha256', ($_SESSION['current_school_db'] ?? '') . '|' . $teacherEmail);
 
 $tFirstInitial   = !empty($teacherName)    ? strtoupper(substr(trim($teacherName), 0, 1))    : '';
 $tLastInitial    = !empty($teacherSurname) ? strtoupper(substr(trim($teacherSurname), 0, 1)) : '';
@@ -87,25 +90,42 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
     <meta name="msapplication-navbutton-color" content="#0d1117">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
-    <link rel="stylesheet" href="assets/css/teacher/dashboard.css?v=4.8">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=1.1">
+    <!-- Phone canvas: the colour behind the page, there from the very first frame (when the app opens, and in the
+         instant between two pages) so a white or wrong-coloured edge never shows. Dark phone mode only, the same
+         colour as the body (--bg-color in teacher_dashboard.css): in light mode the page colour is decided page by
+         page (teacher_mobile_light.css), so <html> is left alone and takes whatever <body> paints. -->
+    <style>
+        @media (max-width: 768px) {
+            html:not([data-teacher-mobile-theme="light"]) { background-color: #0d1117; }
+        }
+    </style>
+    <link rel="stylesheet" href="assets/css/teacher/dashboard.css?v=5.3">
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
-    <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=6.8">
-    <link rel="stylesheet" href="assets/css/teacher/assignments.css?v=2.5">
-    <link rel="stylesheet" href="assets/css/teacher/resources.css?v=2.1">
-    <link rel="stylesheet" href="assets/css/teacher/sbo.css?v=2.1">
-    <link rel="stylesheet" href="assets/css/teacher/evaluations.css?v=2.7">
-    <link rel="stylesheet" href="assets/css/teacher/grades.css?v=3.0">
+    <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=7.3">
+    <link rel="stylesheet" href="assets/css/teacher/assignments.css?v=3.4">
+    <link rel="stylesheet" href="assets/css/teacher/resources.css?v=2.5">
+    <link rel="stylesheet" href="assets/css/teacher/sbo.css?v=2.3">
+    <link rel="stylesheet" href="assets/css/teacher/evaluations.css?v=3.1">
+    <link rel="stylesheet" href="assets/css/teacher/grades.css?v=3.2">
     <link rel="stylesheet" href="assets/css/teacher/teacher_calendar.css?v=1.3">
     <title>Dashboard - <?= htmlspecialchars($schoolName) ?></title>
-    <link rel="manifest" href="/manifest.php?v=1.1">
+    <link rel="manifest" href="/manifest.php?v=1.2">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Geist:wght@400..600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=13.2">
-    <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_menu.css?v=1.1">
-    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_menu.css?v=1.0">
-    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_settings.css?v=1.0">
-    <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_settings.css?v=1.0">   
+    <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=14.0">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_menu.css?v=2.4">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_menu.css?v=1.5">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_settings.css?v=1.3">
+    <link rel="stylesheet" href="assets/css/shared/pwa_prompts.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/shared/pull_to_refresh.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/shared/net_status.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/shared/back_button.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_settings.css?v=1.4">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_light_mode.css?v=1.8">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_light.css?v=1.5">
+    <link rel="stylesheet" href="assets/css/splash_light.css?v=<?= (int) @filemtime(__DIR__ . '/assets/css/splash_light.css') ?>">
     <script>
     // Desktop sidebar: restore the saved collapsed state BEFORE first paint (no flash).
     // With no saved choice, screens narrower than 1440px start as a rail.
@@ -114,8 +134,24 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
             var s = localStorage.getItem('iskoolTeacherMenuCollapsed');
             if (s === '1' || (s === null && window.innerWidth < 1440)) document.documentElement.classList.add('dm-collapsed');
         } catch (e) {}
+        // Desktop light mode (769px and up): applying the saved value before <body> is painted prevents a
+        // visible dark-to-light flash on Home. Phones have their own switch, see teacher_mobile_theme.js below.
+        window.ISKOOL_TEACHER_THEME_KEY = <?php echo json_encode($teacherThemeStorageKey); ?>;
+        window.ISKOOL_TEACHER_MOBILE_THEME_KEY = <?php echo json_encode($teacherMobileThemeStorageKey); ?>;
+        try {
+            var theme = localStorage.getItem(window.ISKOOL_TEACHER_THEME_KEY);
+            document.documentElement.dataset.teacherTheme = theme === 'light' ? 'light' : 'dark';
+            // Remember the theme last shown on this browser. The login page is shown before anyone signs in, so
+            // it reads this value (includes/login_theme_head.php).
+            localStorage.setItem('iskoolDesktopThemeLastUsed', theme === 'light' ? 'light' : 'dark');
+        } catch (e) {
+            document.documentElement.dataset.teacherTheme = 'dark';
+        }
     })();
     </script>
+    <!-- Phone light / dark: sets <html data-teacher-mobile-theme> and the status bar colour before first paint
+         (see teacher_mobile_theme.js). Needs the theme-color <meta> tag above. -->
+    <script src="assets/js/teacher/teacher_mobile_theme.js?v=1.3"></script>
 <script>
 function getCsrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
@@ -137,6 +173,10 @@ function getCsrfToken() {
     body { background-color: #0a0a0a !important; }
     @media (max-width: 899px) {
         body { background-color: #20201f !important; }
+    }
+    /* Desktop light mode (769px and up): the splash is light, see assets/css/splash_light.css */
+    @media (min-width: 769px) {
+        html[data-teacher-theme="light"] body { background-color: #faf9f5 !important; }
     }
 </style>
 <div id="dash-splash">
@@ -454,9 +494,9 @@ if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.wasLockedAtLoad
 
             <div class="top-nav-left">
                 <!-- Mobile hamburger -->
-                <button id="mobileToggle" onclick="toggleSidebar()">
-                    <svg viewBox="0 0 24 24" width="26" height="26" stroke="currentColor"
-                         stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <button id="mobileToggle" onclick="toggleSidebar()" aria-label="Toggle Mobile Menu">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="3" y1="12" x2="21" y2="12"></line>
                         <line x1="3" y1="6"  x2="21" y2="6"></line>
                         <line x1="3" y1="18" x2="21" y2="18"></line>
@@ -670,36 +710,22 @@ if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.wasLockedAtLoad
     </div>
 </div>
 
-<!-- Mobile Bottom Nav — UNCHANGED -->
-<nav id="mobileBottomNav">
-     <a href="javascript:void(0)" data-page="teacher_manual" onclick="loadTeacherManual()">
-        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:4px;">
-            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-            <polyline points="9 22 9 12 15 12 15 22"></polyline>
-        </svg>
+<!-- Phone bottom bar. Same look as the parent app's bar: 64px high, solid, thin line icons, four tabs. -->
+<nav id="mobileBottomNav" aria-label="Teacher app">
+    <a href="javascript:void(0)" data-page="teacher_manual" onclick="loadTeacherManual()">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>
         <span>Home</span>
     </a>
     <a href="javascript:void(0)" data-page="teacher_assignments" onclick="fetchTeacherAssignments()">
-        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:4px;">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
-            <line x1="12" y1="18" x2="12" y2="12"></line>
-            <line x1="9"  y1="15" x2="15" y2="15"></line>
-        </svg>
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6"/><path d="M9 17h4"/></svg>
         <span>Assignments</span>
     </a>
     <a href="javascript:void(0)" data-page="teacher_resources" onclick="fetchTeacherResources()">
-        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:4px;">
-            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-        </svg>
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 5h7a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H2z"/><path d="M22 5h-7a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h8z"/></svg>
         <span>Resources</span>
     </a>
     <a href="javascript:void(0)" data-page="teacher_announcements" onclick="fetchTeacherAnnouncements()">
-        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:4px;">
-            <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
-            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-        </svg>
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
         <span>Announcement</span>
     </a>
 </nav>
@@ -1490,11 +1516,10 @@ if ('serviceWorker' in navigator) {
     const teacherHadServiceWorkerController = Boolean(navigator.serviceWorker.controller);
     navigator.serviceWorker.addEventListener('message', event => {
         if (event.data?.type !== 'iskool-update-available') return;
-        if (window.confirm('An iSkool update is available. Refresh now?')) {
-            navigator.serviceWorker.getRegistration('/').then(registration => {
-                registration?.waiting?.postMessage({ type: 'iskool-skip-waiting' });
-            });
-        }
+        // An in-app banner (assets/js/shared/pwa_prompts.js) instead of a browser pop-up. Its Update button asks the
+        // waiting worker to take over; the controllerchange handler below reloads the page. If the banner script
+        // has not loaded yet, it picks this flag up when it starts.
+        if (window.iskoolPwa) window.iskoolPwa.offerUpdate(); else window.__iskoolUpdatePending = true;
     });
     navigator.serviceWorker.addEventListener('controllerchange', () => {
         if (!teacherHadServiceWorkerController || teacherUpdateReloading) return;
@@ -1573,21 +1598,28 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
-<script src="assets/js/teacher/dashboard.js?v=13.3"></script>
+<script src="assets/js/teacher/dashboard.js?v=13.8"></script>
 <script src="assets/js/teacher/class-picker.js?v=1.1"></script>
-<script src="assets/js/teacher/quizzes.js?v=7.8"></script>
-<script src="assets/js/teacher/announcements.js?v=5.8"></script>
-<script src="assets/js/teacher/evaluations.js?v=4.9"></script>
-<script src="assets/js/teacher/resources.js?v=4.4"></script>
-<script src="assets/js/teacher/grades.js?v=5.0"></script>
-<script src="assets/js/teacher/assignments.js?v=5.0"></script>
-<script src="assets/js/teacher/sbo.js?v=4.9"></script>
+<script src="assets/js/teacher/quizzes.js?v=8.6"></script>
+<script src="assets/js/teacher/announcements.js?v=6.2"></script>
+<script src="assets/js/teacher/evaluations.js?v=5.3"></script>
+<script src="assets/js/teacher/resources.js?v=4.9"></script>
+<script src="assets/js/teacher/grades.js?v=5.4"></script>
+<script src="assets/js/teacher/assignments.js?v=5.5"></script>
+<script src="assets/js/teacher/sbo.js?v=5.1"></script>
 <script src="assets/js/teacher/analytics.js?v=4.3"></script>
 <script src="assets/js/teacher/teacher_calendar.js?v=2.0"></script>
 <script src="assets/js/teacher/teacher_desktop_menu.js?v=1.0"></script>
 <script src="assets/js/teacher/teacher_mobile_menu.js?v=1.0"></script>
 <script>window.ISKOOL_TEACHER = <?= json_encode(['name'=>$teacherFullName,'email'=>$teacherEmail,'initials'=>$teacherInitials], JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?>;</script>
-<script src="assets/js/teacher/teacher_mobile_settings.js?v=1.0"></script>
-<script src="assets/js/teacher/teacher_desktop_settings.js?v=1.0"></script>
+<script src="assets/js/teacher/teacher_mobile_settings.js?v=1.1"></script>
+<script src="assets/js/teacher/teacher_desktop_settings.js?v=1.4"></script>
+<script src="assets/js/shared/pwa_prompts.js?v=1.0"></script>
+<script src="assets/js/shared/pull_to_refresh.js?v=1.0"></script>
+<script src="assets/js/teacher/teacher_pull_to_refresh.js?v=1.0"></script>
+<script src="assets/js/shared/net_status.js?v=1.0"></script>
+<script src="assets/js/teacher/teacher_net_status.js?v=1.0"></script>
+<script src="assets/js/shared/back_button.js?v=1.0"></script>
+<script src="assets/js/teacher/teacher_back_button.js?v=1.0"></script>
 </body>
 </html>

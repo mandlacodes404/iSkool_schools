@@ -136,7 +136,7 @@
     color: #8b949e;
 }
 .eval-card {
-    background: #161b22;
+    background: var(--dm-card, #161b22);
     border-radius: 12px;
     padding: 25px;
     margin-bottom: 20px;
@@ -1678,18 +1678,35 @@
     min-height: 500px;
 }
 
-/* Left sidebar */
+/* Left sidebar — same list pane as assignments.css */
 .an-sidebar {
-    width: 280px; min-width: 240px; max-width: 300px;
-    display: flex; flex-direction: column; overflow: hidden;
+    width: 280px;
+    min-width: 240px;
+    max-width: 300px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    font-family: var(--dm-font, 'Geist', 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif);
 }
 .an-sidebar-header {
-    padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.07);
-    font-size: 11px; font-weight: 800; letter-spacing: 1.5px;
-    color: #ffffff; text-transform: uppercase; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    color: var(--dm-muted, #9b9c92);
+    text-transform: uppercase;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
 }
-.an-sidebar-scroll { flex: 1; overflow-y: auto; padding: 8px 0; }
+.an-sidebar-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 0;
+}
 @media (min-width: 900px) {
     .an-sidebar-scroll::-webkit-scrollbar { width: 8px; }
 }
@@ -1699,56 +1716,51 @@
 
 .an-sidebar-class-label {
     padding: 8px 16px 4px;
-    font-size: 10px; font-weight: 700;
-    color: #8b949e; text-transform: uppercase; letter-spacing: 0.8px;
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--dm-muted, #9b9c92);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
 }
 .an-sidebar-class-label.tchr-sidebar-class-label--toggle {
     padding-top: 8px;
     padding-bottom: 6px;
 }
-
-/* School label — distinct from class labels */
-.an-sidebar-school-label {
-    display: flex; align-items: center; gap: 5px;
-    color: #f59e0b;
-    border-top: 1px solid rgba(255,255,255,0.05);
-    margin-top: 4px; padding-top: 12px;
-}
-.an-sidebar-scroll > .an-sidebar-school-label:first-child {
-    border-top: none; margin-top: 0;
-}
-/* Keep the orange tint on hover instead of the shared muted-gray hover */
-.an-sidebar-school-label.tchr-sidebar-class-label--toggle:hover {
-    color: #fbbf24;
-}
+.an-sidebar-class-label.tchr-sidebar-class-label--toggle:hover { color: var(--dm-soft, #c2c3b7); }
 
 .an-sidebar-item {
-    display: flex; align-items: flex-start; gap: 10px;
-    padding: 10px 16px 10px 32px; cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 8px;
+    padding: 10px 8px 10px 24px;
+    border-radius: 8px;
+    cursor: pointer;
     border-left: 3px solid transparent;
     transition: all 0.15s ease;
 }
 .an-sidebar-item:hover { background: rgba(255,255,255,0.04); }
-.an-sidebar-item.active {
-    background: rgba(79,209,197,0.08);
-    border-left-color: #4fd1c5;
+.an-sidebar-item.active { background: #383838; }
+.an-sidebar-dot {
+    flex: none;
+    box-sizing: border-box;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    border: 1.5px solid var(--dm-faint, #7a7b73);
 }
-/* School items active state uses orange accent */
-.an-sidebar-item.an-school-item.active {
-    background: rgba(245,158,11,0.08);
-    border-left-color: #f59e0b;
-}
-.an-sidebar-item-icon { flex-shrink: 0; opacity: 0.7; margin-top: 2px; }
+.an-sidebar-dot.is-done { background: #22c55e; border-color: #22c55e; }
 .an-sidebar-item-info { flex: 1; min-width: 0; }
 .an-sidebar-item-title {
-    font-size: 13px; font-weight: 600; color: #c9d1d9;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--dm-soft, #c2c3b7);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
-.an-sidebar-item.active .an-sidebar-item-title { color: #e2e8f0; }
-.an-sidebar-item-meta {
-    font-size: 11px; color: #555e6a; margin-top: 3px;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-}
+.an-sidebar-item.active .an-sidebar-item-title { color: var(--dm-text, #f0efec); }
+.an-sidebar-item-meta { font-size: 11px; color: var(--dm-faint, #7a7b73); margin-top: 2px; }
 
 /* Right panel */
 .an-main-panel {
@@ -1760,39 +1772,96 @@
 .an-main-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; transition: background 0.15s ease; }
 .an-main-panel::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
 
+/* Empty state — same structure and measurements as .as-panel-empty in
+   assignments.css (title, muted body, primary button). */
 .an-panel-empty {
-    flex: 1; display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    color: #555e6a; gap: 8px; padding: 40px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 6px;
+    padding: 40px;
+    font-family: var(--dm-font, 'Geist', 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif);
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--dm-text, #f0efec);
 }
-.an-panel-empty svg { opacity: 0.25; }
-.an-panel-empty p { font-size: 13px; text-align: center; max-width: 240px; line-height: 1.5; }
+.an-panel-empty-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 400;
+    letter-spacing: -0.015em;
+    color: var(--dm-text, #f0efec);
+}
+.an-panel-empty-body {
+    margin: 0;
+    max-width: 340px;
+    color: var(--dm-muted, #9b9c92);
+}
+.an-panel-empty .an-dp-btn { margin-top: 16px; }
+.an-panel-empty :focus-visible {
+    outline: 2px solid var(--dm-accent, #4fd1c5);
+    outline-offset: 2px;
+}
 
-.an-panel-content { padding: 24px 28px; max-width: 720px; }
+/* Detail column — same measurements and colours as .as-dp in assignments.css */
+.an-panel-content {
+    width: 100%;
+    max-width: 860px;
+    margin: 0 auto;
+    box-sizing: border-box;
+    padding: 40px 40px 72px;
+    font-family: var(--dm-font, 'Geist', 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif);
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--dm-text, #f0efec);
+}
+@media (max-width: 1200px) {
+    .an-panel-content { padding: 32px 28px 56px; }
+}
 .an-panel-header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 20px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid rgba(255,255,255,0.07);
+    gap: 16px 24px;
+    margin-bottom: 36px;
     flex-wrap: wrap;
 }
-.an-panel-title { font-size: 20px; font-weight: 700; color: #e2e8f0; margin-bottom: 6px; line-height: 1.3; }
-.an-panel-meta  { font-size: 12px; color: #8b949e; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-.an-panel-actions { display: flex; gap: 8px; flex-shrink: 0; flex-wrap: wrap; }
-.an-panel-message { font-size: 14px; color: #c9d1d9; line-height: 1.75; white-space: pre-wrap; }
+.an-panel-title {
+    margin: 0;
+    font-size: 28px;
+    line-height: 1.15;
+    font-weight: 500;
+    letter-spacing: -0.025em;
+    color: var(--dm-text, #f0efec);
+    overflow-wrap: anywhere;
+}
+.an-panel-meta {
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--dm-muted, #9b9c92);
+    display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+}
+.an-panel-actions { display: flex; gap: 8px; flex-shrink: 0; padding-top: 2px; }
+.an-panel-message {
+    max-width: 64ch;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--dm-soft, #c2c3b7);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
 
-/* School badge in panel */
+/* School badge in panel — neutral pill, same as .as-dp-pill */
 .an-school-badge {
     display: inline-flex; align-items: center; gap: 4px;
-    font-size: 10px; font-weight: 600; letter-spacing: 0.5px;
-    text-transform: uppercase;
-    padding: 2px 8px; border-radius: 20px;
-    background: rgba(245,158,11,0.1);
-    border: 1px solid rgba(245,158,11,0.25);
-    color: #f59e0b;
+    padding: 2px 11px;
+    border: 1px solid var(--dm-line-strong, rgba(255,255,255,0.14));
+    border-radius: 999px;
+    font-size: 13px; font-weight: 500;
+    color: var(--dm-soft, #c2c3b7);
 }
 
 /* Mobile list — flat, edge-to-edge folders + rows, matching the
@@ -1868,7 +1937,7 @@
     order: 2;
     margin-left: auto;
     flex-shrink: 0;
-    color: #555e6a;
+    color: #73746d;
 }
 /* The wrapper span becomes the real flex row for icon + name + count. */
 .an-mobile-folder-label > span {
@@ -1926,7 +1995,7 @@
 .an-mobile-row-title { font-size: 15px; font-weight: 700; color: #e2e8f0; margin-bottom: 4px; }
 .an-mobile-row-msg   { font-size: 12px; color: #8b949e; line-height: 1.5; margin-bottom: 6px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .an-mobile-row-date  { font-size: 11px; color: #484f58; }
-.an-mobile-row-chevron { flex-shrink: 0; color: #555e6a; }
+.an-mobile-row-chevron { flex-shrink: 0; color: #73746d; }
 
 /* Mobile detail page (openMobileTeacherAnnouncement) */
 .an-mobile-detail { padding: 16px; }
@@ -1950,9 +2019,15 @@
 
 /* ── New button (matches pattern used in assignments/resources) ── */
 .an-new-btn {
+    font-family: inherit;
     text-transform: none;
     letter-spacing: normal;
     font-size: 12px;
+}
+@media (min-width: 900px) {
+    .an-sidebar-header .an-new-btn { font-weight: 500; }
+    /* "Search announcements..." text in the search pill (desktop list pane only) */
+    .an-sidebar input::placeholder { color: #c2c3b7; opacity: 1; }
 }
 
 .an-school-icon {
@@ -1989,8 +2064,8 @@
 }
 .an-panel-form-title {
     font-size: 18px;
-    font-weight: 800;
-    color: #e2e8f0;
+    font-weight: 500;
+    color: var(--dm-text, #f0efec);
 }
 .an-panel-form-close-btn {
     background: none;
@@ -2068,39 +2143,54 @@
 .an-panel-relative {
     position: relative;
 }
-/* ── Delete button (panel) ── */
+/* ── Panel buttons — same as .as-dp-btn / .as-dp-btn--danger ── */
+.an-panel-edit-btn,
 .an-panel-delete-btn {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    background: rgba(248,81,73,0.1);
-    border: 1px solid rgba(248,81,73,0.25);
-    color: #f85149;
-    padding: 10px 20px;
+    gap: 7px;
+    height: 32px;
+    padding: 0 14px;
+    border: 1px solid var(--dm-line-strong, rgba(255,255,255,0.14));
     border-radius: 8px;
+    background: none;
+    font: inherit;
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 500;
+    color: var(--dm-text, #f0efec);
+    white-space: nowrap;
     cursor: pointer;
-    transition: background 0.15s;
+    transition: background 0.15s ease;
 }
-.an-panel-delete-btn:hover { background: rgba(248,81,73,0.18); }
+.an-panel-edit-btn:hover { background: var(--dm-hover, rgba(255,255,255,0.055)); }
+.an-panel-delete-btn { color: var(--dm-danger, #f4776f); border-color: rgba(244,119,111,0.35); }
+.an-panel-delete-btn:hover { background: rgba(244,119,111,0.08); }
 
-/* ── Edit button (panel) ── */
-.an-panel-edit-btn {
+.an-dp-btn {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    background: rgba(79,209,197,0.1);
-    border: 1px solid rgba(79,209,197,0.25);
-    color: #4fd1c5;
-    padding: 10px 20px;
+    gap: 7px;
+    height: 32px;
+    padding: 0 14px;
+    border: 1px solid var(--dm-line-strong, rgba(255,255,255,0.14));
     border-radius: 8px;
+    background: none;
+    font: inherit;
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 500;
+    color: var(--dm-text, #f0efec);
+    text-decoration: none;
+    white-space: nowrap;
     cursor: pointer;
-    transition: background 0.15s;
+    transition: background 0.15s ease, filter 0.15s ease;
 }
-.an-panel-edit-btn:hover { background: rgba(79,209,197,0.18); }
+.an-dp-btn:hover { background: var(--dm-hover, rgba(255,255,255,0.055)); text-decoration: none; }
+.an-dp-btn--primary {
+    background: var(--dm-accent, #4fd1c5);
+    border-color: var(--dm-accent, #4fd1c5);
+    color: #04211f;
+}
+.an-dp-btn--primary:hover { background: var(--dm-accent, #4fd1c5); filter: brightness(1.08); }
 
 /* ── "Edited" tag (sidebar item title) ──
    Orange accent (Claude-logo orange, #d97757) marks anything edit-related,
@@ -2129,7 +2219,7 @@
 
 /* ── "Edited <date>" meta text (panel header) ── */
 .an-panel-edited-meta {
-    color: #d97757;
+    color: var(--dm-muted, #9b9c92);
 }
 
 /* ── Edit form helper text ── */
@@ -2153,4 +2243,26 @@
 }
 .an-delete-confirm-btn {
     background: #e74c3c;
+}
+
+/* ─────────────────────────────────────────────
+   DESKTOP BUTTONS — #c2c3b7 instead of the accent teal (>= 900px only).
+   Solid buttons: #c2c3b7 with #0d1117 text. Tinted buttons: a #c2c3b7 tint, outline and text.
+   Mobile keeps the teal rules above. The "+ New" button (.teacher-upload-btn /
+   .teacher-desktop-create) is deliberately not touched here.
+   ───────────────────────────────────────────── */
+@media (min-width: 900px) {
+    .teacher-modal-submit { background: #c2c3b7; color: #0d1117; }
+    .teacher-modal-submit:hover:not(:disabled) { background: #adaea2; }
+
+    .teacher-quiz-action-btn.publish { background: #c2c3b7; color: #0d1117; }
+    .teacher-quiz-action-btn.results,
+    .teacher-edit-marks-btn,
+    .cal-add-btn {
+        background: rgba(194,195,183,0.1);
+        border-color: rgba(194,195,183,0.3);
+        color: #c2c3b7;
+    }
+    .teacher-edit-marks-btn:hover,
+    .cal-add-btn:hover { background: rgba(194,195,183,0.2); }
 }

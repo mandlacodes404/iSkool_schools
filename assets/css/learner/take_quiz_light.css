@@ -1,0 +1,222 @@
+/* ═══ Light mode: take_quiz.php (the learner's quiz session, desktop) ══════════════════════════════════════════
+   take_quiz.php opens inside the dashboard's #mainFrame, so it is its own document and never saw the
+   <html data-learner-theme> attribute that Settings > Appearance sets. includes/learner_theme_head.php copies the saved
+   choice onto this page and loads this file.
+
+   Most of the page already runs on CSS variables (:root, then the desktop re-tone at 769px), so the first block below
+   just re-points those variables to the learner light palette (the same one the sidebar, Home and Quiz pages use).
+   The rest fixes what is hard-coded in the page's own <style>: white-on-dark overlays, the teal buttons, the modals and
+   the two small "Quiz Unavailable" / "Time's Up" pages that take_quiz.php can print instead of the quiz.
+
+   Two blocks, one per screen size. The first (769px and wider) follows <html data-learner-theme="light">, the desktop
+   choice. The second, at the end of the file (768px and narrower), follows <html data-learner-mobile-theme="light">, the
+   phone choice from Settings > Appearance on a phone; the include sets that attribute and the browser bar colour too.
+   Dark mode is untouched in both.
+   To remove it, delete this file and the include line in take_quiz.php. */
+@media (min-width: 769px) {
+
+/* ── palette ─────────────────────────────────────────────────────────────────────────────────────────────────
+   Beats the page's own `:root { … }` by specificity, so the order of the two does not matter.
+   Muted greys, orange and red are a shade darker than on the Home page because the top bar and sidebar are the
+   slightly darker #f4f3ee, and small labels there have to stay readable (4.5:1 or better). */
+html[data-learner-theme="light"] {
+    --bg:            #faf9f5;                  /* page */
+    --surface:       #f4f3ee;                  /* top bar, sidebar, footer bar (same tone as the dashboard sidebar) */
+    --surface-2:     #f4f3ee;
+    --border:        #dfded8;
+    --border-strong: #d0cfc8;
+    --border-active: rgba(24,122,114,.40);
+    --teal:          #187a72;
+    --teal-dim:      rgba(24,122,114,.10);
+    --teal-glow:     rgba(24,122,114,.18);
+    --green:         #15803d;
+    --green-dim:     rgba(21,128,61,.10);
+    --orange:        #a85410;
+    --orange-dim:    rgba(168,84,16,.10);
+    --red:           #b0413b;
+    --text-1:        #282924;
+    --text-2:        #53544e;
+    --text-3:        #6c6d66;
+    color-scheme: light;                       /* native scrollbars, textarea and text-input chrome */
+}
+
+/* ── top bar ─────────────────────────────────────────────────────────────────────────────────────────────── */
+html[data-learner-theme="light"] .back-btn:hover { background: rgba(38,39,35,.06); }
+html[data-learner-theme="light"] .ring-track { stroke: rgba(38,39,35,.12); }
+html[data-learner-theme="light"] .timer-pill.warn   { border-color: rgba(168,84,16,.45); background: rgba(168,84,16,.06); }
+html[data-learner-theme="light"] .timer-pill.danger { border-color: rgba(176,65,59,.45); background: rgba(176,65,59,.06); }
+
+/* ── sidebar: scrollbar, legend squares, question palette ────────────────────────────────────────────────── */
+html[data-learner-theme="light"] .sidebar::-webkit-scrollbar-thumb { background: rgba(38,39,35,.16); }
+html[data-learner-theme="light"] .ld-answered { background: rgba(38,39,35,.22); }
+html[data-learner-theme="light"] .p-item.answered { background: rgba(38,39,35,.07); }
+html[data-learner-theme="light"] .p-item.current,
+html[data-learner-theme="light"] .p-item.answered.current { background: rgba(24,122,114,.09); }
+
+/* ── answers ─────────────────────────────────────────────────────────────────────────────────────────────────
+   Options and inputs become white on the cream page (the dark desktop look leaves them transparent). The selected
+   and focus states are set again after the white, because the white rule is more specific than the page's own. */
+html[data-learner-theme="light"] .choice-item,
+html[data-learner-theme="light"] .open-answer-box,
+html[data-learner-theme="light"] .fitb-input { background: #ffffff; }
+
+html[data-learner-theme="light"] .choice-item.selected { background: rgba(24,122,114,.07); }
+html[data-learner-theme="light"] .choice-item.selected .choice-radio { color: #ffffff; }   /* the A / B / C key on the teal fill */
+
+html[data-learner-theme="light"] .fitb-input:focus,
+html[data-learner-theme="light"] .fitb-input.selected { background: rgba(24,122,114,.06); }
+
+/* ── Previous / Next / Submit ────────────────────────────────────────────────────────────────────────────────
+   Primary actions are the dark button the rest of learner light mode uses (Start quiz, Join a class). */
+html[data-learner-theme="light"] #prevBtn:hover { background: rgba(38,39,35,.05); }
+
+html[data-learner-theme="light"] #nextBtn,
+html[data-learner-theme="light"] .submit-btn { background: #252624; border-color: #252624; color: #ffffff; }
+html[data-learner-theme="light"] #nextBtn:hover,
+html[data-learner-theme="light"] .submit-btn:hover { background: #3a3b37; border-color: #3a3b37; filter: none; }
+
+/* ── modals: Submit Quiz?, Exit Quiz?, Time's Up! ────────────────────────────────────────────────────────────
+   Same backdrop and shadow as the Join a class dialog on the dashboard. */
+html[data-learner-theme="light"] .modal-overlay { background: rgba(38,39,35,.30); }
+html[data-learner-theme="light"] .modal-box { background: #ffffff; box-shadow: 0 18px 52px rgba(31,32,29,.18); }
+
+html[data-learner-theme="light"] .modal-btn.primary { background: #252624; color: #ffffff; }
+html[data-learner-theme="light"] .modal-btn.primary:hover { background: #3a3b37; filter: none; }
+html[data-learner-theme="light"] .modal-btn.secondary:hover { background: rgba(38,39,35,.06); }
+html[data-learner-theme="light"] .modal-btn.danger:hover { background: #983832; }
+
+/* "1 minute remaining!" toast: keep the amber it has in dark mode (the --orange it uses is darker here) */
+html[data-learner-theme="light"] .toast { background: #f59e0b; color: #0d1117; }
+
+/* The image lightbox stays dark on purpose: a photo viewer reads best on a dim backdrop. */
+
+/* ── the small pages take_quiz.php prints instead of the quiz ("Quiz Unavailable", "Time's Up!") ────────────────
+   They set their own dark body and card colours and have no variables, so they are re-coloured directly.
+   body is safe to set here: on the quiz page itself these two values equal --bg and --text-1. */
+html[data-learner-theme="light"] body { background: #faf9f5; color: #282924; }
+html[data-learner-theme="light"] .state-card { background: #ffffff; border-color: #dfded8; }
+html[data-learner-theme="light"] .state-card h1 { color: #b0413b; }
+html[data-learner-theme="light"] .state-card p { color: #53544e; }
+html[data-learner-theme="light"] .state-card .state-icon { background: rgba(176,65,59,.10); }
+html[data-learner-theme="light"] .state-card .state-icon svg { stroke: #b0413b; }
+html[data-learner-theme="light"] .state-card a { background: #252624; color: #ffffff; }
+html[data-learner-theme="light"] .state-card a:hover { background: #3a3b37; }
+html[data-learner-theme="light"] .state-card .spinner { border-color: rgba(38,39,35,.10); border-top-color: #187a72; }
+
+}
+
+/* ═══ Phones (768px and narrower): follows <html data-learner-mobile-theme="light"> ═════════════════════════════════
+   The phone layout is the page's own MOBILE block: a top bar, one card per question with the answers under it, a fixed
+   Previous / Next bar and a fixed Submit button, and the Submit / Exit / Time's Up cards. The sidebar is hidden on
+   phones, so it is not styled here. The palette is the same as the desktop block above, and primary buttons are the
+   same dark button the rest of learner light mode uses. The dark phone look hard-codes #20201f for the page, top bar,
+   question card and modal, so those are set again here with a more specific selector. */
+@media (max-width: 768px) {
+
+/* ── palette ───────────────────────────────────────────────────────────────────────────────────────────────── */
+html[data-learner-mobile-theme="light"] {
+    --bg:            #faf9f5;
+    --surface:       #f4f3ee;                  /* the bottom Previous / Next bar */
+    --surface-2:     #f4f3ee;
+    --border:        #dfded8;
+    --border-strong: #d0cfc8;
+    --border-active: rgba(24,122,114,.40);
+    --teal:          #187a72;
+    --teal-dim:      rgba(24,122,114,.10);
+    --teal-glow:     rgba(24,122,114,.18);
+    --green:         #15803d;
+    --green-dim:     rgba(21,128,61,.10);
+    --orange:        #a85410;
+    --orange-dim:    rgba(168,84,16,.10);
+    --red:           #b0413b;
+    --text-1:        #282924;
+    --text-2:        #53544e;
+    --text-3:        #6c6d66;
+    color-scheme: light;
+}
+
+/* page (the phone dark block sets html, body to #20201f). Also the colour of the "Unavailable" / "Time's Up" pages. */
+html[data-learner-mobile-theme="light"],
+html[data-learner-mobile-theme="light"] body { background: #faf9f5; color: #282924; }
+
+/* ── top bar ───────────────────────────────────────────────────────────────────────────────────────────────── */
+html[data-learner-mobile-theme="light"] .topbar { background: #faf9f5; }
+html[data-learner-mobile-theme="light"] .back-btn { background: rgba(38,39,35,.05); }
+html[data-learner-mobile-theme="light"] .back-btn:hover { background: rgba(38,39,35,.09); }
+html[data-learner-mobile-theme="light"] .ring-track { stroke: rgba(38,39,35,.12); }
+html[data-learner-mobile-theme="light"] .timer-pill.warn   { border-color: rgba(168,84,16,.45); background: rgba(168,84,16,.06); }
+html[data-learner-mobile-theme="light"] .timer-pill.danger { border-color: rgba(176,65,59,.45); background: rgba(176,65,59,.06); }
+
+/* ── multi-page progress dots (the rules are repeated for done / active because the first one is more specific) ── */
+html[data-learner-mobile-theme="light"] .step-dot { background: rgba(38,39,35,.12); }
+html[data-learner-mobile-theme="light"] .step-dot.done { background: var(--green); }
+html[data-learner-mobile-theme="light"] .step-dot.active { background: var(--teal); }
+
+/* ── question card ─────────────────────────────────────────────────────────────────────────────────────────────
+   Same as dark: the card is the page colour with a hairline, and the answers sit on it. */
+html[data-learner-mobile-theme="light"] .question-card { background: #faf9f5; }
+html[data-learner-mobile-theme="light"] .pts-badge { border-color: rgba(24,122,114,.25); }
+
+/* ── answers ───────────────────────────────────────────────────────────────────────────────────────────────────
+   Options and inputs are white on the cream card (dark leaves them near-transparent, which would disappear). The
+   selected and focus states are set again after the white because the white rule is more specific than the page's. */
+html[data-learner-mobile-theme="light"] .choice-item,
+html[data-learner-mobile-theme="light"] .open-answer-box,
+html[data-learner-mobile-theme="light"] .fitb-input { background: #ffffff; }
+html[data-learner-mobile-theme="light"] .choice-item,
+html[data-learner-mobile-theme="light"] .open-answer-box { border-color: #dfded8; }
+html[data-learner-mobile-theme="light"] .choice-radio { border-color: rgba(38,39,35,.28); }
+
+html[data-learner-mobile-theme="light"] .choice-item.selected { background: rgba(24,122,114,.07); border-color: var(--teal); }
+html[data-learner-mobile-theme="light"] .open-answer-box:focus { background: rgba(24,122,114,.06); border-color: var(--teal); }
+html[data-learner-mobile-theme="light"] .fitb-input:focus,
+html[data-learner-mobile-theme="light"] .fitb-input.selected { background: rgba(24,122,114,.06); }
+
+html[data-learner-mobile-theme="light"] .fitb-chip { border-color: rgba(24,122,114,.30); background: rgba(24,122,114,.08); }
+html[data-learner-mobile-theme="light"] .fitb-chip.used { background: rgba(38,39,35,.05); }
+
+/* ── Previous / Next / Submit ──────────────────────────────────────────────────────────────────────────────── */
+html[data-learner-mobile-theme="light"] #prevBtn { background: rgba(38,39,35,.04); }
+html[data-learner-mobile-theme="light"] #prevBtn:hover { background: rgba(38,39,35,.08); }
+
+html[data-learner-mobile-theme="light"] #nextBtn,
+html[data-learner-mobile-theme="light"] .submit-btn { background: #252624; border-color: #252624; color: #ffffff; }
+html[data-learner-mobile-theme="light"] #nextBtn:hover,
+html[data-learner-mobile-theme="light"] .submit-btn:hover { background: #3a3b37; border-color: #3a3b37; box-shadow: none; }
+
+/* ── the cards: Submit Quiz?, Exit Quiz?, Time's Up! ───────────────────────────────────────────────────────────
+   Unlike desktop, phones keep the round icon at the top of the card, so its colours are set here. The strokes are
+   written into the markup, so they are set on the svg. The backdrop is the one the desktop block uses; the include
+   moves the browser bar to the matching dimmed cream while a card is open. */
+html[data-learner-mobile-theme="light"] .modal-overlay { background: rgba(38,39,35,.30); }
+html[data-learner-mobile-theme="light"] .modal-box { background: #ffffff; border-color: #dfded8; box-shadow: 0 18px 52px rgba(31,32,29,.18); }
+
+html[data-learner-mobile-theme="light"] .modal-icon.warn { background: rgba(168,84,16,.10); }
+html[data-learner-mobile-theme="light"] .modal-icon.danger { background: rgba(176,65,59,.10); }
+html[data-learner-mobile-theme="light"] .modal-icon.warn svg { stroke: #a85410; }
+html[data-learner-mobile-theme="light"] .modal-icon.danger svg { stroke: #b0413b; }
+html[data-learner-mobile-theme="light"] .modal-icon.success svg { stroke: #187a72; }
+
+html[data-learner-mobile-theme="light"] .modal-btn.primary { background: #252624; color: #ffffff; }
+html[data-learner-mobile-theme="light"] .modal-btn.primary:hover { background: #3a3b37; }
+html[data-learner-mobile-theme="light"] .modal-btn.secondary { background: rgba(38,39,35,.05); }
+html[data-learner-mobile-theme="light"] .modal-btn.secondary:hover { background: rgba(38,39,35,.09); }
+html[data-learner-mobile-theme="light"] .modal-btn.danger:hover { background: #983832; }
+
+/* "1 minute remaining!" toast: keep the amber it has in dark mode (the --orange it uses is darker here) */
+html[data-learner-mobile-theme="light"] .toast { background: #f59e0b; color: #0d1117; }
+
+/* The image lightbox stays dark on purpose: a photo viewer reads best on a dim backdrop. */
+
+/* ── the small pages take_quiz.php prints instead of the quiz ("Quiz Unavailable", "Time's Up!") ────────────────
+   They set their own dark card colours and have no variables, so they are re-coloured directly (body is above). */
+html[data-learner-mobile-theme="light"] .state-card { background: #ffffff; border-color: #dfded8; }
+html[data-learner-mobile-theme="light"] .state-card h1 { color: #b0413b; }
+html[data-learner-mobile-theme="light"] .state-card p { color: #53544e; }
+html[data-learner-mobile-theme="light"] .state-card .state-icon { background: rgba(176,65,59,.10); }
+html[data-learner-mobile-theme="light"] .state-card .state-icon svg { stroke: #b0413b; }
+html[data-learner-mobile-theme="light"] .state-card a { background: #252624; color: #ffffff; }
+html[data-learner-mobile-theme="light"] .state-card a:hover { background: #3a3b37; }
+html[data-learner-mobile-theme="light"] .state-card .spinner { border-color: rgba(38,39,35,.10); border-top-color: #187a72; }
+
+}

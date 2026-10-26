@@ -90,12 +90,13 @@ function wireManualScrollState() {
 
 function buildMobileHomeLoadingState() {
     return `
-        <div aria-busy="true" aria-label="Loading home" style="padding:20px 16px 120px;">
-            <div style="height:88px;border-radius:12px;background:rgba(255,255,255,0.05);margin-bottom:18px;"></div>
+        <div class="lh-home-loading" aria-busy="true" aria-label="Loading home" style="padding:10px 2px 120px;">
+            <div style="height:18px;width:96px;border-radius:6px;background:rgba(255,255,255,0.08);margin:10px 0 8px;"></div>
+            <div style="height:38px;width:160px;border-radius:8px;background:rgba(255,255,255,0.05);margin-bottom:18px;"></div>
+            <div style="height:176px;border-radius:28px;background:rgba(255,255,255,0.05);margin-bottom:24px;"></div>
             <div style="height:18px;width:92px;border-radius:6px;background:rgba(255,255,255,0.08);margin-bottom:10px;"></div>
-            <div style="height:146px;border-radius:12px;background:rgba(255,255,255,0.05);margin-bottom:18px;"></div>
-            <div style="height:18px;width:72px;border-radius:6px;background:rgba(255,255,255,0.08);margin-bottom:10px;"></div>
-            <div style="height:146px;border-radius:12px;background:rgba(255,255,255,0.05);"></div>
+            <div style="height:60px;border-radius:18px;background:rgba(255,255,255,0.05);margin-bottom:8px;"></div>
+            <div style="height:60px;border-radius:18px;background:rgba(255,255,255,0.05);"></div>
         </div>`;
 }
 
@@ -163,7 +164,7 @@ window.loadManual = async function(containerId = 'api-content-area') {
         const classData  = classRes.ok ? await classRes.json().catch(() => null) : null;
         if (classData) homeData.myClass = classData;
 
-        const manualStyleHref = 'assets/css/learner/manual.css?v=7.6';
+        const manualStyleHref = 'assets/css/learner/manual.css?v=8.7';
         const existingManualStyle = document.getElementById('manual-style');
         if (existingManualStyle) {
             existingManualStyle.href = manualStyleHref;
@@ -185,7 +186,7 @@ window.loadManual = async function(containerId = 'api-content-area') {
     } catch (error) {
         if (!isCurrentNavigation()) return;
         console.error('Home load failed:', error);
-        apiArea.innerHTML = `<p style="color:#ff5555;text-align:center;margin-top:50px;">
+        apiArea.innerHTML = `<p class="lh-home-error" style="color:#ff5555;text-align:center;margin-top:50px;">
             Could not load home screen.</p>`;
     } finally {
         if (loader && isCurrentNavigation()) loader.style.display = 'none';
@@ -257,111 +258,203 @@ function buildHomeLayout(data, manualHtml) {
 
     const isMobile = window.innerWidth <= 768;
 
-    if (isMobile) {
-        // ── MOBILE: GitHub-style stacked layout ──
-        return `
-        <style>
-            @media (max-width: 768px) {
-                .lh-mobile-wrapper,
-                .lh-mobile-wrapper * {
-                    font-weight: 300 !important;
-                }
-            }
-        </style>
-        <div class="lh-mobile-wrapper">
+    if (isMobile) return buildMobileHomeV2(data);
 
-            <!-- MY CLASS CARD -->
-            ${buildMobileClassCard(data.myClass)}
+    return buildDesktopHome(data, manualHtml);
+}
 
-            <!-- TO-DO SECTION -->
-            <div class="lh-section">
-                <div class="lh-section-header">
-                    <div class="lh-section-title">
-                        <div style="width:22px;height:22px;border-radius:6px;background:#4fd1c518;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">
-                            <svg viewBox="0 0 24 24" width="13" height="13" stroke="#4fd1c5" stroke-width="2.5" fill="none">
-                                <path d="M9 11l3 3L22 4"/>
-                                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
-                            </svg>
-                        </div>
-                        To-Do
-                    </div>
-                    ${todoSlice.length > 0 ? `<span class="lh-badge">${todoSlice.length}</span>` : ''}
-                </div>
-                ${buildMobileTodo(todoSlice)}
+
+// ─────────────────────────────────────────────
+// DESKTOP HOME ("Focus" layout)
+// To-do first: one featured next step, the rest of the to-do list,
+// what's new, then calendar + coming up in a side column.
+// A class with nothing posted yet gets the getting-started variant.
+// ─────────────────────────────────────────────
+window.LHD = {
+    months: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+    days:   ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
+    colors: { quiz:'#fdd663', assignment:'#a78bfa', evaluation:'#f28c38', resource:'#f28c38', announcement:'#f59e0b', academic:'#f472b6' },
+    icons: {
+        quiz: '<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>',
+        assignment: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>',
+        evaluation: '<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
+        resource: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
+        announcement: '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>',
+        guide: '<path d="M2 5.5C4 4.5 7 4.5 12 7c5-2.5 8-2.5 10-1.5V19c-2-1-5-1-10 1.5C7 18 4 18 2 19z"/><path d="M12 7v13"/>',
+        done: '<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>',
+        calendar: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+        chevron: '<path d="m9 6 6 6-6 6"/>'
+    },
+    esc(s) {
+        return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+    },
+    svg(name, size = 19) {
+        return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${this.icons[name] || ''}</svg>`;
+    },
+    date(iso) {
+        const d = new Date(String(iso || '').replace(' ', 'T'));
+        return isNaN(d) ? null : d;
+    },
+    short(iso) { const d = this.date(iso); return d ? `${d.getDate()} ${this.months[d.getMonth()]}` : ''; },
+    full(iso)  { const d = this.date(iso); return d ? `${d.getDate()} ${this.months[d.getMonth()]} ${d.getFullYear()}` : ''; },
+    daysUntil(iso) {
+        const d = this.date(iso); if (!d) return null;
+        const t = new Date(); t.setHours(0, 0, 0, 0); d.setHours(0, 0, 0, 0);
+        return Math.round((d - t) / 864e5);
+    },
+    // Chip on a to-do: quizzes and evaluations are simply "Open"; assignments count down.
+    chip(it) {
+        if (it.type !== 'assignment') return 'Open';
+        const n = this.daysUntil(it.due_date);
+        if (n === null) return '';
+        return n <= 0 ? 'Due today' : n === 1 ? 'Tomorrow' : `In ${n} days`;
+    },
+    chipColor(text, type) { return text === 'Open' ? this.colors.evaluation : (this.colors[type] || this.colors.quiz); },
+    meta(it) {
+        const lower = s => s ? s.charAt(0).toLowerCase() + s.slice(1) : '';
+        if (it.type === 'quiz') return `Quiz, ${lower(it.meta)}`;
+        if (it.type === 'assignment') return it.due_date ? `Assignment, due ${this.full(it.due_date)}` : `Assignment, ${lower(it.meta)}`;
+        return it.meta ? `Evaluation, ${it.meta}` : 'Evaluation';
+    },
+    go(type, id) { return `openLearnerHomeDesktop('${this.colors[type] ? type : 'quiz'}',${Number(id) || 0})`; },
+
+    tile(icon, color, size) { return `<span class="lhd-tile" style="--c:${color}">${this.svg(icon, size)}</span>`; },
+    row(o) {
+        return `<button type="button" class="lhd-row" onclick="${o.go}">
+            ${this.tile(o.icon, o.color)}
+            <span class="lhd-row-text"><span class="lhd-row-title">${this.esc(o.title)}</span><span class="lhd-row-meta">${this.esc(o.meta)}</span></span>
+            ${o.chip ? `<span class="lhd-chip" style="--c:${o.chipColor}">${this.esc(o.chip)}</span>` : ''}
+            ${o.when ? `<span class="lhd-when">${this.esc(o.when)}</span>` : ''}
+            ${o.chevron ? `<span class="lhd-chev">${this.svg('chevron', 18)}</span>` : ''}
+        </button>`;
+    },
+    empty(icon, title, text) {
+        return `<div class="lhd-empty">${this.tile(icon, '#8b949e', 20)}<div><div class="lhd-row-title">${title}</div><div class="lhd-empty-text">${text}</div></div></div>`;
+    },
+    section(title, count, inner) {
+        return `<section class="lhd-sec"><div class="lhd-sec-head"><h2>${title}</h2>${count ? `<span class="lhd-count">${count}</span>` : ''}</div>${inner}</section>`;
+    },
+    hero(o) {
+        return `<section class="lhd-hero" aria-label="${o.aria}">
+            <div class="lhd-hero-top">${this.tile(o.icon, '#4fd1c5')}<span class="lhd-hero-label">${o.label}</span>${o.chip ? `<span class="lhd-chip" style="--c:${o.chipColor}">${this.esc(o.chip)}</span>` : ''}</div>
+            <h2 class="lhd-hero-title">${this.esc(o.title)}</h2>
+            <p class="lhd-hero-text">${this.esc(o.text)}</p>
+            <div class="lhd-hero-actions">
+                <button type="button" class="lhd-btn" onclick="${o.go}">${o.cta}</button>
+                ${o.link ? `<button type="button" class="lhd-link" onclick="${o.linkGo}">${o.link}</button>` : ''}
             </div>
+        </section>`;
+    }
+};
 
-            <!-- RECENTS SECTION -->
-            <div class="lh-section">
-                <div class="lh-section-header">
-                    <div class="lh-section-title">
-                        <div style="width:22px;height:22px;border-radius:6px;background:#f28c3818;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">
-                            <svg viewBox="0 0 24 24" width="13" height="13" stroke="#f28c38" stroke-width="2.5" fill="none">
-                                <circle cx="12" cy="12" r="10"/>
-                                <polyline points="12 6 12 12 16 14"/>
-                            </svg>
-                        </div>
-                        Recent
-                    </div>
-                    ${recentSlice.length > 0 ? `<span class="lh-badge">${recentSlice.length}</span>` : ''}
-                </div>
-                <div class="lh-card lh-card-recent">
-                    ${buildMobileRecent(recentSlice)}
-                </div>
-            </div>
+// Where a click on the desktop home goes. Assignments and announcements open the
+// exact item (split layout, >= 900px); everything else opens its list page.
+window.openLearnerHomeDesktop = function(type, id) {
+    if (type === 'quiz')       { window.learnerQuizCache = null; return window.fetchQuizzes?.(); }
+    if (type === 'evaluation') { window.evaluationCache = null;  return window.fetchEvaluations?.(); }
+    if (type === 'resource')   { return window.fetchResources?.(); }
+    if (id && window.innerWidth > 899) return window.openLearnerDesktopSnapshotItem?.(type, id);
+    if (type === 'assignment') { window.learnerAssignmentCache = null; return window.fetchAssignments?.(); }
+    window.announcementCache = null; return window.fetchAnnouncements?.();
+};
+window.openLearnerGuide   = function() { document.getElementById('lhd-guide')?.showModal(); };
+// TODO: point this at whatever your sidebar's "My Class" item calls.
+window.openLearnerMyClass = function() { return (window.fetchMyClass || window.loadMyClass || window.showMyClass)?.(); };
 
-            <!-- UPCOMING EVENTS SECTION -->
-            <div class="lh-section lh-events-section">
-                <div class="lh-section-header" onclick="window.fetchLearnerCalendar ? fetchLearnerCalendar() : null" style="cursor:pointer;">
-                    <div class="lh-section-title">
-                        <div style="width:22px;height:22px;border-radius:6px;background:#f472b618;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;">
-                            <svg viewBox="0 0 24 24" width="13" height="13" stroke="#f472b6" stroke-width="2.5" fill="none">
-                                <rect x="3" y="4" width="18" height="18" rx="2"/>
-                                <line x1="16" y1="2" x2="16" y2="6"/>
-                                <line x1="8" y1="2" x2="8" y2="6"/>
-                                <line x1="3" y1="10" x2="21" y2="10"/>
-                            </svg>
-                        </div>
-                        Upcoming Events
-                    </div>
-                    ${eventsSlice.length > 0 ? `<span class="lh-badge">${eventsSlice.length}</span>` : ''}
-                </div>
-                <div class="lh-events-flat">
-                    ${buildMobileEventsWeekStrip(eventsSlice)}
-                    <div onclick="window.fetchLearnerCalendar ? fetchLearnerCalendar() : null" style="cursor:pointer;">
-                        ${buildMobileEvents(eventsSlice)}
-                    </div>
-                </div>
-            </div>
+function buildDesktopHome(data, manualHtml) {
+    const L = window.LHD, esc = L.esc.bind(L);
+    const todo = data.todo || [], recent = data.recent || [], upcoming = data.upcoming || [];
+    const name = (data.learner && data.learner.first_name) || '';
+    const noClass = !!data.no_class;
+    const welcome = noClass || !(data.has_content || todo.length || recent.length || upcoming.length);
 
-        </div>`;
+    // ── Heading ──
+    const h = new Date().getHours();
+    const cls = (data.myClass && data.myClass.name) || '';
+    const clsLabel = !cls ? 'your class' : (/^class\b/i.test(cls) ? cls : 'Class ' + cls);
+    const title = welcome
+        ? (noClass ? 'Welcome to iSkool' : `Welcome to ${clsLabel}`) + (name ? `, ${name}` : '')
+        : `Good ${h < 12 ? 'morning' : h < 18 ? 'afternoon' : 'evening'}${name ? `, ${name}` : ''}`;
+    const say = it => it.type === 'quiz' ? `${it.title} is open`
+        : it.type === 'assignment' ? `${it.title} is due${it.due_date ? ' on ' + L.short(it.due_date) : ''}`
+        : `${it.title} is waiting for you`;
+    const sub = welcome
+        ? (noClass ? 'Join your class to see quizzes, resources and announcements.' : 'Your teachers haven’t posted anything yet.')
+        : (todo.length ? todo.slice(0, 2).map(say).join(' and ') + '.' : 'You’re all caught up.');
+
+    // ── Featured card ──
+    let hero;
+    if (welcome) {
+        hero = noClass
+            ? L.hero({ aria: 'Getting started', icon: 'guide', label: 'Getting started', title: 'Join your class',
+                       text: 'Pick your class to see quizzes, resources and announcements from your teachers.',
+                       cta: 'Join a class', go: 'openLearnerMyClass()', link: 'Open the guide', linkGo: 'openLearnerGuide()' })
+            : L.hero({ aria: 'Getting started', icon: 'guide', label: 'Getting started', title: 'Start with the guide',
+                       text: 'A short guide covers taking quizzes and viewing results, so you’re ready when your teacher sets the first one.',
+                       cta: 'Open the guide', go: 'openLearnerGuide()', link: 'View my class', linkGo: 'openLearnerMyClass()' });
+    } else if (todo.length) {
+        const it = todo[0], t = it.type, chip = L.chip(it);
+        const nouns = { quiz: ['Quiz', 'Take quiz', 'quizzes'], assignment: ['Assignment', 'Open assignment', 'assignments'], evaluation: ['Evaluation', 'Start evaluation', 'evaluations'] }[t] || ['Quiz', 'Open', 'quizzes'];
+        hero = L.hero({ aria: 'Next up', icon: t, label: nouns[0], chip, chipColor: L.chipColor(chip, t), title: it.title,
+                        text: t === 'assignment' && it.due_date ? `Due ${L.full(it.due_date)}` : (it.meta || ''),
+                        cta: nouns[1], go: L.go(t, it.id), link: `See all ${nouns[2]}`, linkGo: `openLearnerHomeDesktop('${t}',0)` });
+    } else {
+        hero = L.hero({ aria: 'Up to date', icon: 'done', label: 'Up to date', title: 'You’re all caught up',
+                        text: 'Nothing is waiting for you. Look through your resources while you have time.',
+                        cta: 'Open resources', go: "openLearnerHomeDesktop('resource',0)" });
     }
 
-    // ── DESKTOP: existing split layout ──
+    // ── Also to do ──
+    const rest = todo.slice(1);
+    const alsoTodo = (welcome || rest.length) ? L.section('Also to do', rest.length,
+        rest.length
+            ? `<div class="lhd-list">${rest.map(it => { const chip = L.chip(it); return L.row({
+                  go: L.go(it.type, it.id), icon: it.type, color: L.colors[it.type] || L.colors.quiz,
+                  title: it.title, meta: L.meta(it), chip, chipColor: L.chipColor(chip, it.type), chevron: true }); }).join('')}</div>`
+            : L.empty('done', 'Nothing to do yet', 'Quizzes, assignments and evaluations from your teachers will appear here.')) : '';
+
+    // ── What's new ──
+    const whatsNew = L.section('What’s new', recent.length,
+        recent.length
+            ? `<div class="lhd-list">${recent.map(it => L.row({
+                  go: L.go(it.type === 'resource' ? 'resource' : it.type, it.id), icon: it.type, color: L.colors[it.type] || L.colors.quiz,
+                  title: it.title, meta: `${it.type.charAt(0).toUpperCase() + it.type.slice(1)}${it.meta ? ' from ' + it.meta : ''}`,
+                  when: it.time_ago || '' })).join('')}</div>`
+            : L.empty('announcement', welcome ? 'Nothing new yet' : 'Nothing new this week',
+                      welcome ? 'Announcements and resources your teachers post will appear here.' : 'Announcements and resources from the last 7 days will appear here.'));
+
+    // ── Coming up ──
+    const kinds = { quiz: ['Quiz', L.colors.quiz], assignment: ['Assignment', L.colors.assignment] };
+    const comingUp = L.section('Coming up', 0,
+        upcoming.length
+            ? `<div class="lhd-list">${upcoming.map(e => {
+                  const d = L.date(e.date), k = kinds[e.kind] || [e.label || 'School event', L.colors.academic];
+                  return `<div class="lhd-ev">
+                      <div class="lhd-ev-date"><div class="lhd-ev-dow">${d ? L.days[d.getDay()] : ''}</div><div class="lhd-ev-day">${d ? d.getDate() : ''}</div></div>
+                      <div class="lhd-row-text"><span class="lhd-row-title">${esc(e.kind === 'assignment' ? e.title + ' due' : e.title)}</span><span class="lhd-ev-kind" style="color:${k[1]}">${esc(k[0])}</span></div>
+                  </div>`; }).join('')}</div>`
+            : L.empty('calendar', 'No dates yet', 'Due dates, quizzes and school events will show on your calendar.'));
+
     return `
-        <div class="learner-home-wrapper">
-
-            <!-- LEFT COLUMN -->
-            <div class="learner-home-left">
-
-                ${renderLearnerSnapshotPanel(data.snapshot)}
-
-                <!-- CALENDAR (desktop only — populated by loadLearnerCalendar) -->
-                <div class="learner-cal-panel" style="margin-top:20px; display:none;">
-                    <div class="learner-snap-panel-title">
-                        My Calendar
-                    </div>
-                    <div id="learner-cal-container">
-                        <div style="text-align:center;padding:20px;color:#8b949e;font-size:13px;">Loading...</div>
-                    </div>
-                </div>
-
+        <div class="lhd">
+            <header class="lhd-head"><h1>${esc(title)}</h1><p>${esc(sub)}</p></header>
+            <div class="lhd-cols">
+                <div class="lhd-primary">${hero}${alsoTodo}${whatsNew}</div>
+                <aside class="lhd-aside">
+                    <!-- populated by loadLearnerCalendar -->
+                    <section class="learner-cal-panel" aria-label="Calendar"><div id="learner-cal-container"></div></section>
+                    ${comingUp}
+                </aside>
             </div>
-
-            <!-- RIGHT COLUMN: MANUAL -->
-            <div class="learner-home-right">
-                ${manualHtml}
-            </div>
-
+            ${welcome ? '' : `
+            <section class="lhd-strip" aria-label="Guide">
+                <div><div class="lhd-strip-title">New to iSkool?</div><div class="lhd-strip-text">A short guide covers taking quizzes, viewing results and joining a class.</div></div>
+                <button type="button" class="lhd-btn-ghost" onclick="openLearnerGuide()">Open the guide</button>
+            </section>`}
+            <dialog id="lhd-guide" class="lhd-guide" aria-label="iSkool guide" onclick="if(event.target===this)this.close()">
+                <div class="lhd-guide-head"><h2>Guide</h2><button type="button" class="lhd-btn-ghost" onclick="this.closest('dialog').close()">Close</button></div>
+                ${manualHtml || ''}
+            </dialog>
         </div>`;
 }
 
@@ -610,6 +703,211 @@ function buildMobileClassCard(myClass) {
         <div class="lh-class-flat">
             ${myClass.school_name ? `<div class="lh-class-flat-line lh-class-flat-school"><span class="lh-class-dot"></span>${myClass.school_name}</div>` : ''}
             ${myClass.name ? `<div class="lh-class-flat-line">${myClass.name}</div>` : ''}
+        </div>`;
+}
+
+// ─────────────────────────────────────────────
+// MOBILE HOME ("Focus" layout)
+// Greeting, one "next up" hero card, the rest of the to-do list, a Mon–Sun
+// week strip, and what teachers posted. The hero only ever shows something the
+// learner has to act on; announcements and resources take it only when nothing
+// is left to do. Phones only: desktop keeps buildDesktopHome.
+// ─────────────────────────────────────────────
+window.LHM = {
+    labels: { quiz: 'Quiz', assignment: 'Assignment', evaluation: 'Evaluation', announcement: 'Announcement', resource: 'Resource' },
+    arrow: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+
+    time(iso) { const d = window.LHD.date(iso); return d ? d.getTime() : NaN; },
+
+    // Which to-do goes in the hero. Lower rank = more urgent:
+    // 1 quiz in progress, 2 assignment due within 48h, 3 summative quiz, 4 other assignment, 5 practice quiz, 6 evaluation.
+    rank(it) {
+        if (it.in_progress) return 1;
+        if (it.type === 'assignment') {
+            const t = this.time(it.due_date);
+            return !isNaN(t) && t - Date.now() <= 48 * 36e5 ? 2 : 4;
+        }
+        if (it.type === 'quiz') return Number(it.is_summative) === 1 ? 3 : 5;
+        return 6;
+    },
+    // Tie-break inside a rank: assignments by soonest due date, quizzes by newest start, then newest id.
+    key(it) {
+        if (it.type === 'assignment') { const t = this.time(it.due_date); return isNaN(t) ? Infinity : t; }
+        if (it.type === 'quiz') { const t = this.time(it.start_time); return isNaN(t) ? 0 : -t; }
+        return 0;
+    },
+    sortTodo(list) {
+        return list.slice().sort((a, b) => this.rank(a) - this.rank(b) || this.key(a) - this.key(b) || (Number(b.id) || 0) - (Number(a.id) || 0));
+    },
+
+    open(it) {
+        const type  = this.labels[it.type] ? it.type : 'quiz';
+        const scope = String(it.scope || '').replace(/[^a-z_]/gi, '');
+        return `openLearnerHomeItem('${type}', ${Number(it.id) || 0}, '${scope}')`;
+    },
+    initials(name) {
+        const w = String(name || '').trim().split(/\s+/).filter(Boolean);
+        return ((w[0] || '').charAt(0) + (w[1] || '').charAt(0)).toUpperCase();
+    },
+    dayLabel(ymd) {
+        const d = new Date(String(ymd).slice(0, 10) + 'T00:00:00');
+        return isNaN(d) ? '' : `${window.LHD.days[d.getDay()]} ${d.getDate()} ${window.LHD.months[d.getMonth()]}`;
+    },
+
+    heroChip(it) {
+        if (it.in_progress) return 'Quiz · In progress';
+        if (it.type === 'assignment') {
+            const n = window.LHD.daysUntil(it.due_date);
+            return 'Assignment' + (n === null ? '' : ' · ' + (n <= 0 ? 'Due today' : n === 1 ? 'Due tomorrow' : `Due in ${n} days`));
+        }
+        if (it.type === 'quiz') return 'Quiz · Open';
+        return 'Evaluation · Pending';
+    },
+    heroSub(it) {
+        const D = window.LHD, parts = [it.type === 'evaluation' ? it.meta : it.teacher];
+        if (it.in_progress) parts.push('Pick up where you left off');
+        else if (it.type === 'assignment' && it.due_date) parts.push('Due ' + D.short(it.due_date));
+        else if (it.type === 'quiz' && it.start_time) parts.push('Started ' + D.short(it.start_time));
+        return parts.filter(Boolean).join(' · ');
+    },
+
+    hero(it) {
+        const e = window.LHD.esc, sub = this.heroSub(it);
+        return `<button type="button" class="lhx-hero" onclick="${this.open(it)}">
+            <span class="lhx-chip-hero">${e(this.heroChip(it))}</span>
+            <span class="lhx-hero-row">
+                <span class="lhx-hero-text"><span class="lhx-hero-title">${e(it.title)}</span>${sub ? `<span class="lhx-hero-sub">${e(sub)}</span>` : ''}</span>
+                <span class="lhx-go" aria-hidden="true">${this.arrow}</span>
+            </span>
+        </button>`;
+    },
+    // Calm card for when nothing needs doing (or the class is new / empty). Opens `it` when given.
+    calm(chip, title, sub, it) {
+        const e = window.LHD.esc;
+        const inner = `<span class="lhx-chip-hero">${e(chip)}</span>
+            <span class="lhx-hero-row">
+                <span class="lhx-hero-text"><span class="lhx-hero-title">${e(title)}</span>${sub ? `<span class="lhx-hero-sub">${e(sub)}</span>` : ''}</span>
+                ${it ? `<span class="lhx-go" aria-hidden="true">${this.arrow}</span>` : ''}
+            </span>`;
+        return it
+            ? `<button type="button" class="lhx-hero lhx-hero--calm" onclick="${this.open(it)}">${inner}</button>`
+            : `<div class="lhx-hero lhx-hero--calm lhx-hero--static">${inner}</div>`;
+    },
+
+    todoRow(it) {
+        const D = window.LHD, n = it.type === 'assignment' ? D.daysUntil(it.due_date) : null;
+        let chip = 'Pending', cls = '', meta;
+        if (it.in_progress)              { chip = 'Continue'; cls = ' lhx-chip--go'; meta = 'Quiz · In progress'; }
+        else if (it.type === 'quiz')     { chip = 'Open';     cls = ' lhx-chip--go'; meta = 'Quiz · ' + (it.start_time ? 'Started ' + D.short(it.start_time) : (it.teacher || 'Open')); }
+        else if (it.type === 'assignment') {
+            chip = n === null ? 'Due' : n <= 0 ? 'Due today' : n === 1 ? 'Tomorrow' : `In ${n} days`;
+            if (n !== null && n <= 1) cls = ' lhx-chip--soon';
+            meta = 'Assignment · ' + (it.teacher || (it.due_date ? 'Due ' + D.short(it.due_date) : ''));
+        } else                           { meta = 'Evaluation · ' + (it.meta || 'Pending'); }
+        return `<button type="button" class="lhx-row" onclick="${this.open(it)}">
+            <span class="lhx-tile">${D.svg(it.type, 20)}</span>
+            <span class="lhx-rt"><span class="lhx-rt-title">${D.esc(it.title)}</span><span class="lhx-rt-meta">${D.esc(meta)}</span></span>
+            <span class="lhx-chip${cls}">${D.esc(chip)}</span>
+        </button>`;
+    },
+    alsoTodo(rest) {
+        if (!rest.length) return '';
+        const more = rest.length - 3;
+        return `<div class="lhx-st"><span class="lhx-st-title">Also to do</span><span class="lhx-st-meta">${rest.length}</span></div>
+            ${rest.slice(0, 3).map(it => this.todoRow(it)).join('')}
+            ${more > 0 ? `<div class="lhx-more">+${more} more</div>` : ''}`;
+    },
+
+    // Days that get a dot: assignments due, upcoming quizzes and school events.
+    dateKeys(data) {
+        const s = new Set(), add = v => { if (v) s.add(String(v).slice(0, 10)); };
+        (data.todo || []).forEach(t => { if (t.type === 'assignment') add(t.due_date); });
+        (data.upcoming || []).forEach(u => add(u.date));
+        (data.events || []).forEach(ev => add(ev.event_date));
+        return s;
+    },
+    week(data) {
+        const D = window.LHD, pad = n => String(n).padStart(2, '0'), dots = this.dateKeys(data);
+        const today = new Date(); today.setHours(0, 0, 0, 0);
+        const monday = new Date(today); monday.setDate(today.getDate() - ((today.getDay() + 6) % 7));
+        const names = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        let cells = '';
+        for (let i = 0; i < 7; i++) {
+            const d = new Date(monday); d.setDate(monday.getDate() + i);
+            const key = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+            const isToday = d.getTime() === today.getTime();
+            cells += `<span class="lhx-day${isToday ? ' lhx-day--today' : ''}"><span class="lhx-day-label">${names[i]}</span><span class="lhx-day-num">${d.getDate()}</span><span class="lhx-day-dot${dots.has(key) ? ' lhx-day-dot--on' : ''}"></span></span>`;
+        }
+        const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
+        const range = `${monday.getDate()} ${D.months[monday.getMonth()]} – ${sunday.getDate()} ${D.months[sunday.getMonth()]}`;
+        const next = (data.upcoming || []).filter(u => u.kind !== 'assignment').slice(0, 2);
+        const list = next.length
+            ? next.map(u => `<span class="lhx-ev"><span class="lhx-ev-date">${D.esc(this.dayLabel(u.date))}</span><span class="lhx-ev-title">${D.esc(u.title)}</span><span class="lhx-ev-kind">${D.esc(u.label)}</span></span>`).join('')
+            : '<span class="lhx-ev-empty">No tests or events coming up</span>';
+        return `<div class="lhx-st"><span class="lhx-st-title">This week</span><span class="lhx-st-meta">${range}</span></div>
+            <button type="button" class="lhx-week-card" aria-label="Open calendar, ${range}" onclick="window.fetchLearnerCalendar ? fetchLearnerCalendar() : null">
+                <span class="lhx-week">${cells}</span>
+                <span class="lhx-ev-list">${list}</span>
+            </button>`;
+    },
+
+    feed(items) {
+        if (!items.length) return '';
+        const D = window.LHD;
+        const rows = items.slice(0, 3).map(it => {
+            const tile = it.meta
+                ? `<span class="lhx-tile lhx-tile--round">${D.esc(this.initials(it.meta))}</span>`
+                : `<span class="lhx-tile">${D.svg(it.type, 20)}</span>`;
+            const meta = [this.labels[it.type], it.meta, it.time_ago].filter(Boolean).join(' · ');
+            return `<button type="button" class="lhx-row" onclick="${this.open(it)}">${tile}
+                <span class="lhx-rt"><span class="lhx-rt-title">${D.esc(it.title)}</span><span class="lhx-rt-meta">${D.esc(meta)}</span></span>
+            </button>`;
+        }).join('');
+        return `<div class="lhx-st"><span class="lhx-st-title">From your teachers</span></div>${rows}`;
+    }
+};
+
+function buildMobileHomeV2(data) {
+    const M = window.LHM, e = window.LHD.esc;
+    const first = String((data.learner && data.learner.first_name) || '').trim();
+    const h = new Date().getHours();
+    const part = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
+
+    // Quizzes the learner has started come from `resume`; everything else from `todo`.
+    const todo   = M.sortTodo([...(data.resume || []).map(r => ({ ...r, type: 'quiz', in_progress: true })), ...(data.todo || [])]);
+    const recent = data.recent || [];
+
+    let hero, rest = [], feed = recent, showWeek = true;
+    if (data.no_class) {
+        hero = M.calm('Not in a class yet', 'No class yet', 'Ask your school to add you to a class.');
+        feed = []; showWeek = false;
+    } else if (data.has_content === false) {
+        hero = M.calm('Getting started', 'Nothing posted yet', 'Quizzes, assignments and announcements from your teachers will show up here.');
+        feed = [];
+    } else if (todo.length) {
+        hero = M.hero(todo[0]);
+        rest = todo.slice(1);
+    } else if (recent.length) {
+        const r = recent[0];
+        hero = M.calm('All caught up', r.title, [M.labels[r.type], r.time_ago].filter(Boolean).join(' · '), r);
+        feed = recent.slice(1);
+    } else {
+        hero = M.calm('All caught up', 'Nothing needs your attention', 'Quizzes and assignments that need you will show up here.');
+    }
+
+    const cls = data.myClass || {};
+    const classLine = [cls.school_name, cls.name].filter(Boolean).join(' · ');
+
+    return `
+        <div class="lh-mobile-wrapper lhx">
+            ${classLine ? `<div class="lhx-top"><span class="lhx-top-dot"></span><span class="lhx-top-text">${e(classLine)}</span></div>` : ''}
+            <div class="lhx-greet">${first
+                ? `<div class="lhx-hello">${part}</div><div class="lhx-name">${e(first)}</div>`
+                : `<div class="lhx-name">${part}</div>`}</div>
+            ${hero}
+            ${M.alsoTodo(rest)}
+            ${showWeek ? M.week(data) : ''}
+            ${M.feed(feed)}
         </div>`;
 }
 

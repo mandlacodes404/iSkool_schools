@@ -47,6 +47,10 @@ body {
     font-family: 'Nunito', sans-serif;
     display: flex;
     height: 100vh;
+    /* dvh = the height you can actually see. On a phone, 100vh is the height with the browser's address bar
+       tucked away, so while the bar is showing, the bottom of the page sits under it. Browsers that do not
+       know dvh ignore the second line and keep the first. */
+    height: 100dvh;
     background-color: var(--bg-color);
     color: var(--text-color);
     overflow: hidden;
@@ -75,6 +79,7 @@ body {
     top: 0;
     left: 0;
     height: 100vh;
+    height: 100dvh; /* the menu's last items must not sit under the browser's address bar */
     z-index: 5000;
     
     /* FIX STARTS HERE */
@@ -395,12 +400,15 @@ body {
         overflow: visible;
         padding-top: calc(68px + env(safe-area-inset-top, 0));
         min-height: 100vh;
+        min-height: 100dvh;
         height: 100vh;
+        height: 100dvh;
         box-sizing: border-box;
     }
 
     #api-content-area {
         height: calc(100vh - 68px - env(safe-area-inset-top, 0));
+        height: calc(100dvh - 68px - env(safe-area-inset-top, 0));
         overflow-y: auto;
         overflow-x: hidden;
         -webkit-overflow-scrolling: touch;
@@ -936,6 +944,280 @@ iframe {
     }
 }
 
+/* ═══════════════════════════════════════════════════════════════════════
+   MY CLASS — DESKTOP (900px and up)
+   Same look as the learner Assignments / Announcements pages: Geist 400/500,
+   the teacher text ladder, hairlines instead of boxed cards, a 64px header
+   and a details rail. The rules above stay as they are for mobile / tablet.
+   Colour tokens are literal values from teacher_desktop_menu.css.
+   ═══════════════════════════════════════════════════════════════════════ */
+.lmc-d-only { display: none; }      /* desktop-only pieces of markup */
+.lmc-actions { display: contents; } /* mobile: Save sits directly in the form, as before */
+.lmc-cancel-btn { display: none; }
+
+@media (min-width: 900px) {
+    .my-class-content {
+        --lmc-text:   #f0efec;
+        --lmc-soft:   #c2c3b7;
+        --lmc-muted:  #9b9c92;
+        --lmc-faint:  #7a7b73;
+        --lmc-accent: #4fd1c5;
+        --lmc-ok:     #22c55e;
+        --lmc-line:        rgba(255,255,255,0.07);
+        --lmc-line-strong: rgba(255,255,255,0.14);
+        --lmc-hover:  rgba(255,255,255,0.055);
+        --lmc-active: rgba(255,255,255,0.095);
+    }
+    .my-class-content.active {
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        padding: 0;
+        overflow: hidden;
+        font-family: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+        font-weight: 400;
+        -webkit-font-smoothing: antialiased; /* keeps light weights from looking heavy on dark */
+        -moz-osx-font-smoothing: grayscale;
+    }
+    .lmc-m-only { display: none; }
+
+    /* ── Header ── */
+    .lmc-dh {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        height: 64px;
+        box-sizing: border-box;
+        padding: 0 28px;
+        border-bottom: 1px solid var(--lmc-line);
+        flex-shrink: 0;
+    }
+    /* id prefix so a host-level heading rule cannot recolour the title */
+    #myClassContent .lmc-dh-title {
+        margin: 0;
+        font-family: inherit;
+        font-size: 18px;
+        font-weight: 500;
+        line-height: 1.25;
+        color: var(--lmc-text);
+    }
+    .lmc-chip {
+        display: inline-flex;
+        align-items: center;
+        height: 23px;
+        padding: 0 8px;
+        border: 1px solid var(--lmc-line);
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 500;
+        line-height: 1;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        color: var(--lmc-muted);
+    }
+
+    /* ── Body: main column + details rail ── */
+    .lmc-body { flex: 1; min-height: 0; display: flex; container-type: inline-size; }
+    .lmc-wrap {
+        display: block;
+        flex: 1;
+        min-width: 0;
+        max-width: none;
+        margin: 0;
+        padding: 28px;
+        box-sizing: border-box;
+        overflow-y: auto;
+    }
+    .lmc-wrap::-webkit-scrollbar { width: 8px; }
+    .lmc-wrap::-webkit-scrollbar-track { background: transparent; }
+    .lmc-wrap::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+    .lmc-wrap::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
+    .lmc-col { max-width: 760px; }
+    .lmc-col + .lmc-col { margin-top: 32px; padding-top: 28px; border-top: 1px solid var(--lmc-line); }
+    .lmc-col:first-child .lmc-panel-title { display: none; } /* the header already says My Class */
+    .lmc-panel-title {
+        margin: 0 0 10px;
+        padding: 0;
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.6px;
+        color: var(--lmc-muted);
+    }
+
+    /* ── Class: the headline ── */
+    .lmc-class-card {
+        display: block;
+        background: none;
+        border: 0;
+        border-radius: 0;
+        padding: 0;
+    }
+    .lmc-class-card + .lmc-class-card { margin-top: 24px; }
+    .lmc-class-card .lmc-class-icon { display: none; }
+    .lmc-class-card .lmc-class-label {
+        margin: 0;
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.6px;
+        color: var(--lmc-muted);
+    }
+    .lmc-class-card .lmc-class-name {
+        margin-top: 12px;
+        font-size: 72px;
+        font-weight: 300;
+        letter-spacing: -0.03em;
+        line-height: 1;
+        color: var(--lmc-text);
+    }
+    .lmc-class-card .lmc-class-sub {
+        margin-top: 12px;
+        font-size: 14px;
+        color: var(--lmc-muted);
+    }
+    /* several classes, or a long name: a title-sized headline instead */
+    .lmc-class-card--compact .lmc-class-name { font-size: 28px; font-weight: 500; letter-spacing: -0.01em; line-height: 1.2; }
+    .lmc-class-card--compact .lmc-class-sub { margin-top: 6px; }
+    .lmc-class-sub .lmc-d-only,
+    .lmc-toggle-btn .lmc-d-only { display: inline; }
+
+    /* ── Parent link: one quiet bordered row, form opens underneath ── */
+    .lmc-parent-block {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        background: none;
+        border: 1px solid var(--lmc-line);
+        border-radius: 12px;
+        padding: 0;
+    }
+    .lmc-parent-top { grid-column: 1; grid-row: 1; min-width: 0; margin: 0; padding: 16px; }
+    /* status dot: empty ring until a parent is linked, then filled green (like the lists) */
+    .lmc-parent-icon {
+        width: 8px;
+        height: 8px;
+        box-sizing: border-box;
+        border-radius: 50%;
+        background: transparent;
+        border: 1.5px solid var(--lmc-faint);
+    }
+    .lmc-parent-icon svg { display: none; }
+    .lmc-parent-icon--linked { background: var(--lmc-ok); border-color: var(--lmc-ok); }
+    .lmc-parent-block .lmc-class-label { display: none; }
+    .lmc-parent-block .lmc-class-name {
+        font-size: 15px;
+        font-weight: 500;
+        letter-spacing: 0;
+        line-height: 1.3;
+        color: var(--lmc-text);
+    }
+    .lmc-parent-block .lmc-class-sub { margin-top: 2px; font-size: 13px; color: var(--lmc-muted); }
+
+    .lmc-toggle-btn {
+        grid-column: 2;
+        grid-row: 1;
+        width: auto;
+        height: 34px;
+        margin: 0 16px 0 0;
+        padding: 0 14px;
+        border-radius: 8px;
+        border: 1px solid var(--lmc-line-strong);
+        background: rgba(255,255,255,0.05);
+        color: var(--lmc-text);
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 400;
+    }
+    .lmc-toggle-btn:hover { background: var(--lmc-active); }
+    .lmc-toggle-btn:focus-visible { outline: 2px solid var(--lmc-accent); outline-offset: 1px; }
+
+    .lmc-parent-dropdown {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        margin: 0;
+        padding: 16px;
+        border-top: 1px solid var(--lmc-line);
+    }
+    .lmc-parent-form { gap: 0; }
+    .lmc-form-label {
+        margin-bottom: 6px;
+        font-size: 12px;
+        font-weight: 400;
+        letter-spacing: 0;
+        text-transform: none;
+        color: var(--lmc-muted);
+    }
+    .lmc-parent-form select {
+        height: 34px;
+        padding: 0 32px 0 12px;
+        border-radius: 8px;
+        border: 1px solid var(--lmc-line);
+        background: rgba(255,255,255,0.05) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239b9c92' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 12px center / 14px;
+        color: var(--lmc-text);
+        color-scheme: dark;
+        font-family: inherit;
+        font-size: 13px;
+        -webkit-appearance: none;
+        appearance: none;
+    }
+    .lmc-parent-form select:focus { outline: none; border-color: var(--lmc-accent); }
+    .lmc-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+    .lmc-actions .lmc-cancel-btn,
+    .lmc-actions .lmc-save-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        align-self: auto;
+        height: 34px;
+        margin: 0;
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 500;
+        line-height: 1;
+        cursor: pointer;
+    }
+    .lmc-actions .lmc-cancel-btn { padding: 0 16px; border: 1px solid var(--lmc-line); background: none; color: var(--lmc-muted); }
+    .lmc-actions .lmc-cancel-btn:hover { color: var(--lmc-text); background: var(--lmc-hover); }
+    .lmc-actions .lmc-save-btn { padding: 0 20px; border: 0; background: var(--lmc-accent); color: #0d1117; }
+    .lmc-actions .lmc-save-btn:hover { background: #38b2ac; }
+    .lmc-empty-note { color: var(--lmc-faint); }
+
+    /* ── Details rail (hides when the page area is under 900px wide) ── */
+    .lmc-rail {
+        display: block;
+        width: 280px;
+        box-sizing: border-box;
+        flex-shrink: 0;
+        padding: 24px 20px;
+        border-left: 1px solid var(--lmc-line);
+        overflow-y: auto;
+    }
+    .lmc-rail h4 {
+        margin: 0 0 14px;
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.6px;
+        text-transform: uppercase;
+        color: var(--lmc-muted);
+    }
+    .lmc-kv {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--lmc-line);
+        font-size: 13px;
+    }
+    .lmc-kv span { color: var(--lmc-muted); }
+    .lmc-kv b { font-weight: 400; text-align: right; color: var(--lmc-text); overflow-wrap: anywhere; }
+    .lmc-kv b.lmc-ok { color: var(--lmc-ok); }
+    @container (max-width: 899px) { .lmc-rail { display: none; } }
+
+    /* ── Not in a class yet ── */
+    .lmc-empty-wrap { flex: 1; color: var(--lmc-faint); }
+    .lmc-empty-wrap svg { stroke: var(--lmc-faint); }
+}
+
 /* ── SPLASH HANDOFF ──────────────────────────────────────────────────────
    Continuation of the splash screen started on index.php (the login page)
    for logged-in users. Visually identical to #animation-wrapper /
@@ -1232,6 +1514,7 @@ iframe {
         left: 0;
         width: 100%;
         height: 100vh;
+        height: 100dvh;
         transform: translateX(min(79vw, 340px)); /* matches new .sidebar width/max-width */
         filter: blur(2px);
         /* NOTE: the corner-radius + seam previously here got blurred along
@@ -1337,6 +1620,7 @@ iframe {
 
     iframe {
         height: calc(100vh - 60px);
+        height: calc(100dvh - 60px);
     }
 
     .my-class-content {
@@ -1423,20 +1707,19 @@ iframe {
     }
 
     /* Join a Class (not yet joined) and Joined Class (already joined) —
-       mobile menu only, translucent shadow-pill treatment. */
+       mobile menu only. Plain rows like the rest of the menu: no translucent
+       pill behind them (the press / active highlight still comes from the
+       menu's own .dm-item rules in mobile_menu.css). */
     #nav-joinclass-sidebar {
         display: flex;
         width: fit-content;
         padding: 10px 20px;
         border-radius: 999px;
-        background: rgba(0, 0, 0, 0.35);
     }
 
     .sidebar .join-status {
         width: fit-content;
-        padding: 10px 20px;
-        border-radius: 999px;
-        background: rgba(0, 0, 0, 0.35);
+        padding: 10px 12px; /* lines up with the other menu rows now there is no pill around it */
     }
 }
 
@@ -1482,91 +1765,73 @@ iframe {
     opacity: 0;
 }
 
-        /* Mobile Bottom Navigation - Now fully consistent with platform style */
+/* Mobile bottom bar. Same structure as the parent app's bar (parent_app.css .pa-tabs): centred tabs, thin 22px line
+   icons with the parent bar's glyphs, 11px labels, bold bright active tab. It is 85px high plus the phone's safe
+   area (--mbn-h; the old bar was 82px, the parent bar is 64px). The background is the learner's own glass and
+   stays dynamic (see DYNAMIC BOTTOM NAV below). Light phone theme: mobile_light.css. */
+:root { --mbn-h: 85px; }
+
 #mobileBottomNav {
     display: none;
     position: fixed;
-    bottom: 0;
     left: 0;
+    right: 0;
+    bottom: 0;
     width: 100%;
-    height: 82px;                                 /* your preferred height */
-    background: rgba(27, 27, 27, 0.85);           /* ← #1b1b1b with transparency – exact platform charcoal glass */
-    backdrop-filter: blur(20px);                  /* ← premium blur like other glass elements */
-    -webkit-backdrop-filter: blur(20px);
-    border-top: 1px solid rgba(255, 255, 255, 0.05);  /* ← faint platform border */
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);   /* ← soft dark shadow */
-    justify-content: space-around;
-    align-items: flex-start;                      /* content pushed to top */
-    padding-top: 10px;                             /* breathing room at top */
-    padding-bottom: env(safe-area-inset-bottom);
-    padding-bottom: constant(safe-area-inset-bottom);
-    z-index: 4000;
+    height: calc(var(--mbn-h) + env(safe-area-inset-bottom, 0px));
+    padding: 0 0 env(safe-area-inset-bottom, 0px);
     box-sizing: border-box;
-    transition: padding-bottom 0.3s ease, height 0.3s ease;
-   border-top: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(27, 27, 27, 0.55);           /* glass */
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.35);
+    z-index: 4000;
 }
 
-
-        #mobileBottomNav a {
-    color: var(--text-color);                     /* ← #e2e8f0 – clear white/off-white */
-    text-decoration: none;
-    font-size: 11px;
-    text-align: center;
-    flex: 1;
+#mobileBottomNav a {
+    flex: 1 1 0;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
-    padding-top: 0;
-    transition: all 0.2s ease;
+    justify-content: flex-start;   /* icon + label hug the top of the bar (like WhatsApp / GitHub) */
+    padding-top: 10px;
+    gap: 2px;
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 600;
+    color: #9b9c92;
+    -webkit-tap-highlight-color: transparent;
+}
+#mobileBottomNav a span {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+#mobileBottomNav a.active {
+    color: #ecece9;
+    font-weight: 700;
+}
+#mobileBottomNav a.active svg { stroke-width: 2.2; }
+
+/* Mobile Layout - show the bottom bar */
+@media (max-width: 768px) {
+    #mobileBottomNav {
+        display: flex;
+    }
+
+    iframe {
+        height: calc(100vh - 86px);
+        height: calc(100dvh - 86px);
+    }
 }
 
-        #mobileBottomNav a i {
-    font-size: 20px;
-    margin-bottom: 3px;                           /* tighter spacing */
-    color: var(--secondary-text);                 /* muted gray #8b949e by default */
+/* Menu open: the bar slides aside with the page (mobile_menu.css) and can't be tapped. */
+.sidebar.active ~ #mobileBottomNav {
+    pointer-events: none;
 }
-        #mobileBottomNav a.active,
-        #mobileBottomNav a:hover {
-            color: var(--accent-color);
-            transform: translateY(-3px);
-        }
-
-        /* Per-item accent colours on active/hover */
-        #nav-home.active,    #nav-home:hover    { color: #4fd1c5; }
-        #nav-quiz.active,    #nav-quiz:hover    { color: #fdd663; }
-        #nav-assignments.active, #nav-assignments:hover { color: #a78bfa; }
-        #nav-resources.active,   #nav-resources:hover   { color: #f28c38; }
-
-        /* Brighten the icon box when active/hover */
-        #nav-home.active .lh-nav-box,    #nav-home:hover .lh-nav-box    { background: #4fd1c530 !important; }
-        #nav-quiz.active .lh-nav-box,    #nav-quiz:hover .lh-nav-box    { background: #fdd66330 !important; }
-        #nav-assignments.active .lh-nav-box, #nav-assignments:hover .lh-nav-box { background: #a78bfa30 !important; }
-        #nav-resources.active .lh-nav-box,   #nav-resources:hover .lh-nav-box   { background: #f28c3830 !important; }
-
-        /* Mobile Layout - Show bottom nav + safe area support */
-        @media (max-width: 768px) {
-            #mobileBottomNav {
-                display: flex;
-            }
-
-            /* Critical: Lifts the entire bar on iPhone & Android gesture navigation */
-            #mobileBottomNav {
-                padding-bottom: env(safe-area-inset-bottom);
-                padding-bottom: constant(safe-area-inset-bottom); /* older iOS fallback */
-                height: calc(82px + env(safe-area-inset-bottom));
-                height: calc(82px + constant(safe-area-inset-bottom));
-            }
-
-            iframe {
-                height: calc(100vh - 80px);
-            }
-        }
-
-        .sidebar.active ~ #mobileBottomNav {
-            filter: blur(5px);
-            pointer-events: none;
-        }
 
 .learner-name {
     margin-top: 4px;
@@ -1672,13 +1937,19 @@ iframe {
 /* SVG icons – consistent with platform style */
 .sidebar a svg,
 .sidebar button svg,
-#mobileBottomNav a svg,
 .main-header button svg {
     width: 20px;
     height: 20px;
     stroke: currentColor;
     flex-shrink: 0;
     transition: stroke 0.3s ease;
+}
+
+#mobileBottomNav a svg {
+    width: 22px;
+    height: 22px;
+    stroke: currentColor;
+    flex-shrink: 0;
 }
 
 .main-header .avatar-dropdown-item svg {
@@ -1964,11 +2235,11 @@ iframe {
 
     /* Scrolled-up state: glass locks in */
     #mobileBottomNav.nav-scrolled {
-        background: rgba(32, 32, 31, 0.85) !important;
-        border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
-        backdrop-filter: blur(20px) !important;
-        -webkit-backdrop-filter: blur(20px) !important;
-        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4) !important;
+        background: rgba(32, 32, 31, 0.55) !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.14) !important;
+        backdrop-filter: blur(28px) saturate(180%) !important;
+        -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+        box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
     }
 }
 
@@ -2118,4 +2389,114 @@ iframe {
 
 @media (prefers-reduced-motion: reduce) {
     .jcs, .jcs-panel { animation: none !important; transition: none !important; }
+}
+/* ═══ Light mode: learner My Class (desktop) ═══════════════════════════════════════════════════════════════
+   The desktop My Class page is driven by the --lmc-* variables (declared in the MY CLASS - DESKTOP section above),
+   so most of light mode is the variable block below, the same way Home does it with --lhd-*, Quiz with --lqz-*,
+   Assignments with --las-*, Evaluations with --lev-* and Resources with --lrs-*. The rest fixes the colours that
+   are hard-coded: the scrollbar, the "Manage / Link my parent" button, the parent select and the Save button.
+   Between 769px and 899px the page uses the older flat cards (dark #161b22 panels, blue and green tinted
+   buttons), so those get their own small section. Same palette as the Home page, the sidebar and the other pages.
+   Applies only when <html data-learner-theme="light"> on 769px and wider. Dark mode and phones are untouched, and
+   learner_dashboard.php needs no change. To remove it, delete this block. */
+
+/* palette: titles near-black, body text grey, lines the same warm greys as the sidebar and Home */
+@media (min-width: 769px) {
+html[data-learner-theme="light"] .my-class-content {
+    --lmc-text:   #282924;   /* titles, the big class name and values */
+    --lmc-soft:   #53544e;
+    --lmc-muted:  #73746d;
+    --lmc-faint:  #7d7e76;
+    --lmc-accent: #187a72;   /* focus rings and the select focus border */
+    --lmc-ok:     #15803d;   /* the linked dot and "Linked" in the rail */
+    --lmc-line:        #dfded8;
+    --lmc-line-strong: #d0cfc8;
+    --lmc-hover:  rgba(38,39,35,.055);
+    --lmc-active: rgba(38,39,35,.075);
+    /* the page sets no text colour of its own, so anything unstyled would inherit the dark page's white */
+    color: var(--lmc-text);
+    color-scheme: light;
+}
+}
+
+/* ── Desktop (900px and up) ── */
+@media (min-width: 900px) {
+
+/* scrollbar (the dark one is white at 10% and vanishes on a light page) */
+html[data-learner-theme="light"] .lmc-wrap::-webkit-scrollbar-thumb { background: rgba(38,39,35,.16); }
+html[data-learner-theme="light"] .lmc-wrap::-webkit-scrollbar-thumb:hover { background: rgba(38,39,35,.30); }
+
+/* "Manage" / "Link my parent": white, like the other secondary buttons */
+html[data-learner-theme="light"] .lmc-toggle-btn { background: #ffffff; }
+html[data-learner-theme="light"] .lmc-toggle-btn:hover { background: var(--lmc-active); }
+
+/* parent select: white, light dropdown list, and a darker chevron (the dark one is #9b9c92) */
+html[data-learner-theme="light"] .lmc-parent-form select {
+    background-color: #ffffff;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2373746d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    color-scheme: light;
+}
+
+/* Save: dark, like the Home button (the dark-mode one is teal with dark text) */
+html[data-learner-theme="light"] .lmc-actions .lmc-save-btn { background: #252624; color: #ffffff; }
+html[data-learner-theme="light"] .lmc-actions .lmc-save-btn:hover { background: #3a3b37; }
+
+}
+
+/* ── Between 769px and 899px: the flat cards. The desktop header, rail and big class name are hidden here. ── */
+@media (min-width: 769px) and (max-width: 899px) {
+
+html[data-learner-theme="light"] .lmc-panel-title { color: #187a72; }
+
+/* class card and parent-link card: white with a hairline instead of the dark #161b22 panel */
+html[data-learner-theme="light"] .lmc-class-card,
+html[data-learner-theme="light"] .lmc-parent-block { background: #ffffff; border-color: #dfded8; }
+html[data-learner-theme="light"] .lmc-class-label { color: #73746d; }
+html[data-learner-theme="light"] .lmc-class-name { color: #282924; }
+html[data-learner-theme="light"] .lmc-class-sub { color: #73746d; }
+
+/* icon tiles: the blue (#63b3ed) and green (#68d391) strokes are written inline in learner_dashboard.php */
+html[data-learner-theme="light"] .lmc-class-icon { background: rgba(29,111,184,.08); }
+html[data-learner-theme="light"] .lmc-parent-icon--linked { background: rgba(21,128,61,.08); }
+html[data-learner-theme="light"] .my-class-content [stroke="#63b3ed" i] { stroke: #1d6fb8; }
+html[data-learner-theme="light"] .my-class-content [stroke="#68d391" i] { stroke: #15803d; }
+
+/* "Manage Parent Link": blue tint, darker blue */
+html[data-learner-theme="light"] .lmc-toggle-btn { background: rgba(29,111,184,.08); color: #1d6fb8; border-color: rgba(29,111,184,.30); }
+html[data-learner-theme="light"] .lmc-toggle-btn:hover { background: rgba(29,111,184,.14); }
+
+/* parent select and Save */
+html[data-learner-theme="light"] .lmc-form-label { color: #73746d; }
+html[data-learner-theme="light"] .lmc-parent-form select { background-color: #ffffff; border-color: #d0cfc8; color: #282924; color-scheme: light; }
+html[data-learner-theme="light"] .lmc-save-btn { background: rgba(21,128,61,.08); color: #15803d; border-color: rgba(21,128,61,.30); }
+html[data-learner-theme="light"] .lmc-save-btn:hover { background: rgba(21,128,61,.14); }
+
+/* empty notes and the "Not joined any class yet" state */
+html[data-learner-theme="light"] .lmc-empty-note,
+html[data-learner-theme="light"] .lmc-empty-wrap { color: #73746d; }
+
+}
+
+/* ═══ Fraunces titles (desktop only): the title at the top of each detail (main) panel on the learner list
+   pages (Quizzes, Assignments, Announcements, Evaluations, Grades, Resources, Syllabus), and the greeting on
+   the desktop Home ("Good morning, Name"). Unchanged: the list panels on the left, the empty-state headings,
+   the text inside the panels, and phones and narrow windows (768px and below).
+   Fraunces is already loaded by learner_dashboard.php. Every selector starts with `html` or
+   `#api-content-area` so it outranks the id-prefixed `font-family: inherit` rules the pages set, including the
+   styles that quiz.js and syllabus.js inject at runtime.
+   To revert, delete this whole block. ═══ */
+@media (min-width: 769px) {
+    html #lqz-main-panel .lqz-dh-title,
+    html #las-main-panel .las-dh-title,
+    html #lan-main-panel .lan-dh-title,
+    html #lev-main-panel .lev-dh-title,
+    html #grades-dt-panel .gr-dh-title,
+    html #lrs-main-panel .lrs-dh-title,
+    html #syl-main-panel .syl-dh-title {
+        font-family: 'Fraunces', Georgia, serif;
+    }
+    #api-content-area .lhd .lhd-head h1 {
+        font-family: 'Fraunces', Georgia, serif;
+        letter-spacing: -0.02em;
+    }
 }

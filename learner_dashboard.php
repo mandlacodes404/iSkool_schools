@@ -199,39 +199,23 @@ while ($row = $joinedResult->fetch_assoc()) {
 $joinedStmt->close();
 
 //────────────────────────────────────────────────────────────────────────
-//           Parent linking (only if learner is in a class) 
+//           Parent linking: how many parents are linked to this learner.
+//           Parents are added by invite link (api/learner/create_parent_invite.php),
+//           and the My Class panel loads the list from api/learner/get_parent_links.php.
 //────────────────────────────────────────────────────────────────────────
-$parentLink     = null;
-$parentsInClass = [];
-
-if (!empty($joinedClassIds)) {
-    $classId = $joinedClassIds[0]; // learner can only be in one class
-
-    // Check if already linked to a parent
-    $linkStmt = $conn->prepare("SELECT parent_email FROM parent_links WHERE learner_email = ? AND class_id = ?");
-    $linkStmt->bind_param("si", $learnerEmail, $classId);
-    $linkStmt->execute();
-    if ($res = $linkStmt->get_result()->fetch_assoc()) {
-        $parentLink = $res['parent_email'];
-    }
-    $linkStmt->close();
-
-    // Get all parents in this class
-    $parentStmt = $conn->prepare("
-        SELECT u.email, u.name 
-        FROM parent_classes pc 
-        JOIN users u ON pc.parent_email = u.email 
-        WHERE pc.class_id = ? AND u.role = 'parent'
-        ORDER BY u.name
-    ");
-    $parentStmt->bind_param("i", $classId);
-    $parentStmt->execute();
-    $parentsResult = $parentStmt->get_result();
-    while ($row = $parentsResult->fetch_assoc()) {
-        $parentsInClass[] = $row;
-    }
-    $parentStmt->close();
-}
+$parentCount = 0;
+$parentStmt = $conn->prepare("
+    SELECT COUNT(*)
+    FROM parent_links pl
+    JOIN users u ON u.email = pl.parent_email AND u.role = 'parent' AND u.is_deleted = 0
+    WHERE pl.learner_email = ?
+");
+$parentStmt->bind_param("s", $learnerEmail);
+$parentStmt->execute();
+$parentStmt->bind_result($parentCount);
+$parentStmt->fetch();
+$parentStmt->close();
+$parentLink = ((int)$parentCount > 0); // true when at least one parent is linked
 ?>
 <!DOCTYPE html>
 <html>
@@ -241,19 +225,27 @@ if (!empty($joinedClassIds)) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dashboard - <?= htmlspecialchars($schoolName) ?></title>
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
-    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=5.6">
-    <link rel="stylesheet" href="assets/css/learner/manual.css?v=7.6">
-    <link rel="stylesheet" href="assets/css/learner/announcements.css?v=3.3">
-    <link rel="stylesheet" href="assets/css/learner/assignments.css?v=3.1">
+    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=6.7">
+    <link rel="stylesheet" href="assets/css/learner/manual.css?v=8.7">
+    <link rel="stylesheet" href="assets/css/learner/announcements.css?v=4.2">
+    <link rel="stylesheet" href="assets/css/learner/assignments.css?v=4.2">
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
-    <link rel="stylesheet" href="assets/css/learner/grades.css?v=3.4">
-    <link rel="stylesheet" href="assets/css/learner/resources.css?v=2.5">
-     <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=4.6">
-     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=13.4">
-    <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=1.6">
-    <link rel="stylesheet" href="assets/css/learner/mobile_menu.css?v=1.5">
-    <link rel="stylesheet" href="assets/css/learner/mobile_settings.css?v=1.0">
-    <link rel="stylesheet" href="assets/css/learner/desktop_settings.css?v=1.0">   <!-- new -->
+    <link rel="stylesheet" href="assets/css/learner/grades.css?v=4.4">
+    <link rel="stylesheet" href="assets/css/learner/resources.css?v=3.3">
+     <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=5.5">
+     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=14.3">
+    <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=3.1">
+    <link rel="stylesheet" href="assets/css/learner/mobile_menu.css?v=2.0">
+    <link rel="stylesheet" href="assets/css/learner/mobile_settings.css?v=1.7">
+    <link rel="stylesheet" href="assets/css/shared/pwa_prompts.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/shared/back_button.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/learner/mobile_class.css?v=1.1">
+    <link rel="stylesheet" href="assets/css/learner/parent_invite.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/learner/desktop_settings.css?v=1.5S">   <!-- new -->
+    <link rel="stylesheet" href="assets/css/learner/mobile_light.css?v=2.1">
+    <link rel="stylesheet" href="assets/css/learner/desktop_settings.css?v=1.4">   <!-- new -->
+    <link rel="stylesheet" href="assets/css/learner/mobile_light.css?v=2.1">
+    <link rel="stylesheet" href="assets/css/splash_light.css?v=<?= (int) @filemtime(__DIR__ . '/assets/css/splash_light.css') ?>">
     <script>
     // Desktop sidebar: restore the saved collapsed state BEFORE first paint (no flash).
     // With no saved choice, screens narrower than 1100px start as a rail.
@@ -264,13 +256,40 @@ if (!empty($joinedClassIds)) {
         } catch (e) {}
     })();
     </script>
+    <script>
+    // Desktop light mode: apply the saved choice BEFORE first paint, so the splash handoff below (and the page under
+    // it) never starts dark and then flips. desktop_settings.js keeps it up to date from here on.
+    // Also remember the theme last shown on this browser. The login page is shown before anyone signs in, so it
+    // reads this value (includes/login_theme_head.php). Dark is the default.
+    (function () {
+        try {
+            var theme = localStorage.getItem(window.ISKOOL_LEARNER_THEME_KEY || 'iskoolLearnerDesktopTheme');
+            if (theme === 'light' || theme === 'dark') document.documentElement.dataset.learnerTheme = theme;
+            localStorage.setItem('iskoolDesktopThemeLastUsed', theme === 'light' ? 'light' : 'dark');
+        } catch (e) {}
+    })();
+    </script>
+    
     <meta name="theme-color" content="#20201f">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="iSkool">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="msapplication-navbutton-color" content="#20201f">
-    <link rel="manifest" href="/manifest.php?v=1.1">
+    <!-- Phone light / dark: sets <html data-learner-mobile-theme> and the status bar colour before first paint, so the
+         splash below starts in the right theme (see mobile_theme.js). It used to load at the end of <body>. -->
+    <script src="assets/js/learner/mobile_theme.js?v=1.8"></script>
+    <!-- Phone canvas: the colour behind the page, there from the very first frame (when the app opens, and in the
+         instant between two pages) so a white or wrong-coloured edge never shows. Dark phone mode only: in light
+         mode the page colour is decided page by page (mobile_light.css), so <html> is left alone and takes whatever
+         <body> paints, as it always did. Same colour as the phone body in learner_dashboard.css. -->
+    <style>
+        @media (max-width: 768px) {
+            html:not([data-learner-mobile-theme="light"]) { background-color: #20201f; }
+        }
+    </style>
+    <link rel="manifest" href="/manifest.php?v=1.2">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=1.1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Geist:wght@300..600&display=swap" rel="stylesheet">
     
@@ -306,6 +325,14 @@ function getCsrfToken() {
     body { background-color: #0a0a0a !important; }
     @media (max-width: 899px) {
         body { background-color: #20201f !important; }
+    }
+    /* Desktop light mode (769px and up): the splash is light, see assets/css/splash_light.css */
+    @media (min-width: 769px) {
+        html[data-learner-theme="light"] body { background-color: #faf9f5 !important; }
+    }
+    /* Phone light mode (768px and below): the splash is light too, see assets/css/splash_light.css */
+    @media (max-width: 768px) {
+        html[data-learner-mobile-theme="light"] body { background-color: #faf9f5 !important; }
     }
 </style>
 <div id="dash-splash">
@@ -692,13 +719,59 @@ if (!empty($joinedClassIds)) {
             $myClasses = [];
             while ($c = $res->fetch_assoc()) { $myClasses[] = $c; }
             $resStmt->close();
+            // Desktop: several classes, or a long name, shrink the big class name
+            $lmcMulti = count($myClasses) > 1;
+            $lmcNames = implode(', ', array_column($myClasses, 'name'));
             ?>
+            <!-- ═══ MOBILE (phones only, max-width 768px): Settings-style My Class. Styles in mobile_class.css, sheet in mobile_class.js ═══ -->
+            <div class="lmc-m ms">
+                <div class="ms-gt"><?= $lmcMulti ? 'My classes' : 'My class' ?></div>
+                <div class="ms-g">
+                    <?php foreach ($myClasses as $c): ?>
+                    <div class="ms-r ms-r--static">
+                        <svg class="ms-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                        <span class="ms-rt"><b>Class</b><span><?= $lmcMulti ? 'One of your classes' : 'Your current class' ?></span></span>
+                        <span class="ms-rv ms-ok"><?= htmlspecialchars($c['name']) ?></span>
+                    </div>
+                    <?php endforeach; ?>
+                    <?php if ($currentYearId > 0): ?>
+                    <div class="ms-r ms-r--static">
+                        <svg class="ms-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>
+                        <span class="ms-rt"><b>Academic year</b><span>Current school year</span></span>
+                        <span class="ms-rv ms-ok"><?= htmlspecialchars($currentYearName) ?></span>
+                    </div>
+                    <?php endif; ?>
+                </div>
+
+                <div class="ms-gt">Parent link</div>
+                <div class="ms-g lmc-parent" data-linked="<?= $parentLink ? '1' : '0' ?>">
+                    <div class="ms-r ms-r--static">
+                        <svg class="ms-i ms-ok mc-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                        <svg class="ms-i ms-warn mc-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+                        <span class="ms-rt"><b>Parent</b><span class="mc-on">Linked parents can see your progress</span><span class="mc-off">No parent linked to your account yet</span></span>
+                        <span class="ms-rv ms-ok mc-on">Linked</span>
+                        <span class="ms-rv ms-warn mc-off">Not linked</span>
+                    </div>
+                    <button type="button" class="ms-r" data-mc="manage">
+                        <svg class="ms-i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        <span class="ms-rt"><b class="mc-on">Manage parent link</b><b class="mc-off">Link my parent</b><span>Invite a parent or manage who sees your progress</span></span>
+                        <svg class="ms-i ms-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ═══ DESKTOP HEADER (hidden below 900px) ═══ -->
+            <div class="lmc-dh lmc-d-only">
+                <h2 class="lmc-dh-title">My Class</h2>
+                <?php if ($currentYearId > 0): ?><span class="lmc-chip"><?= htmlspecialchars($currentYearName) ?></span><?php endif; ?>
+            </div>
+            <div class="lmc-body">
             <div class="lmc-wrap">
                 <!-- ═══ CLASS ═══ -->
                 <div class="lmc-col">
                     <div class="lmc-panel-title">My Class</div>
                     <?php foreach ($myClasses as $c): ?>
-                        <div class="lmc-class-card">
+                        <div class="lmc-class-card<?= ($lmcMulti || strlen($c['name']) > 10) ? ' lmc-class-card--compact' : '' ?>">
                             <div class="lmc-class-icon">
                                 <svg viewBox="0 0 24 24" width="20" height="20" stroke="#63b3ed" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
@@ -707,7 +780,7 @@ if (!empty($joinedClassIds)) {
                             <div class="lmc-class-body">
                                 <div class="lmc-class-label">Class</div>
                                 <div class="lmc-class-name"><?= htmlspecialchars($c['name']) ?></div>
-                                <div class="lmc-class-sub"><?= htmlspecialchars($currentYearName) ?></div>
+                                <div class="lmc-class-sub"><span class="lmc-d-only"><?= htmlspecialchars($schoolName) ?> &middot; </span><?= htmlspecialchars($currentYearName) ?></div>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -718,7 +791,7 @@ if (!empty($joinedClassIds)) {
                     <div class="lmc-panel-title">Parent Link</div>
                     <div class="parent-link-section lmc-parent-block">
                         <div class="lmc-parent-top">
-                            <div class="lmc-class-icon lmc-parent-icon <?= $parentLink ? 'lmc-parent-icon--linked' : '' ?>">
+                            <div class="lmc-class-icon lmc-parent-icon <?= $parentLink ? 'lmc-parent-icon--linked' : '' ?>" id="lmcParentIcon">
                                 <svg viewBox="0 0 24 24" width="20" height="20" stroke="<?= $parentLink ? '#68d391' : '#63b3ed' ?>" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                                     <?php if ($parentLink): ?>
                                         <path d="M20 6L9 17l-5-5"/>
@@ -729,34 +802,43 @@ if (!empty($joinedClassIds)) {
                             </div>
                             <div class="lmc-class-body">
                                 <div class="lmc-class-label">Parent</div>
-                                <div class="lmc-class-name"><?= $parentLink ? 'Linked' : 'Not linked' ?></div>
-                                <div class="lmc-class-sub"><?= $parentLink ? 'A parent has access to your progress' : 'No parent linked to your account yet' ?></div>
+                                <div class="lmc-class-name" id="lmcParentName"><?= $parentLink ? 'Linked' : 'Not linked' ?></div>
+                                <div class="lmc-class-sub" id="lmcParentSub"><?= !$parentLink ? 'No parent linked to your account yet' : ((int)$parentCount === 1 ? 'A parent can see your progress' : (int)$parentCount . ' parents can see your progress') ?></div>
                             </div>
                         </div>
                         <button type="button" class="toggle-parent-link lmc-toggle-btn" onclick="toggleParentDropdown()">
-                            <?= $parentLink ? 'Manage Parent Link' : 'Link My Parent' ?>
+                            <span class="lmc-m-only" id="lmcParentBtnM"><?= $parentLink ? 'Manage Parent Link' : 'Link My Parent' ?></span><span class="lmc-d-only" id="lmcParentBtnD"><?= $parentLink ? 'Manage' : 'Link my parent' ?></span>
                         </button>
                         <div class="parent-dropdown lmc-parent-dropdown" id="parentDropdown" style="display:none;">
-                            <?php if (!empty($parentsInClass)): ?>
-                                <form id="parentLinkForm" class="lmc-parent-form">
-                                    <label class="lmc-form-label" for="lmcParentSelect">Select parent</label>
-                                    <select name="parent_email" id="lmcParentSelect" required>
-                                        <option value="">-- Select Parent --</option>
-                                        <?php foreach ($parentsInClass as $p): ?>
-                                            <option value="<?= $p['email'] ?>" <?= ($p['email']===$parentLink?'selected':'') ?>>
-                                                <?= htmlspecialchars($p['name']) ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                    <button type="submit" class="join-class-btn lmc-save-btn">Save</button>
-                                </form>
-                            <?php else: ?>
-                                <p class="lmc-empty-note">No parents in class yet.</p>
-                            <?php endif; ?>
+                            <div class="lmc-parent-list" id="lmcParentLinked"></div>
+                            <p class="lmc-empty-note">Create a link and send it to your parent yourself, in any way you like. It works once and expires after 48 hours.</p>
+                            <div class="lmc-invite-result" id="lmcInviteResult" style="display:none;">
+                                <label class="lmc-form-label" for="lmcInviteLink">Invite link</label>
+                                <input type="text" id="lmcInviteLink" class="lmc-invite-input" readonly>
+                                <div class="lmc-actions">
+                                    <button type="button" class="join-class-btn lmc-save-btn" id="lmcCopyBtn">Copy link</button>
+                                </div>
+                                <p class="lmc-parent-msg" id="lmcInviteNote"></p>
+                            </div>
+                            <p class="lmc-parent-msg" id="lmcParentMsg" role="alert"></p>
+                            <div class="lmc-actions">
+                                <button type="button" class="lmc-cancel-btn" onclick="toggleParentDropdown()">Close</button>
+                                <button type="button" class="join-class-btn lmc-save-btn" id="lmcInviteBtn">Create invite link</button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- ═══ DESKTOP DETAILS RAIL (hidden below 900px) ═══ -->
+            <aside class="lmc-rail lmc-d-only">
+                <h4>Details</h4>
+                <div class="lmc-kv"><span>School</span><b><?= htmlspecialchars($schoolName) ?></b></div>
+                <div class="lmc-kv"><span>Class</span><b><?= htmlspecialchars($lmcNames) ?></b></div>
+                <?php if ($currentYearId > 0): ?><div class="lmc-kv"><span>Year</span><b><?= htmlspecialchars($currentYearName) ?></b></div><?php endif; ?>
+                <div class="lmc-kv"><span>Parent</span><b id="lmcRailParent"<?= $parentLink ? ' class="lmc-ok"' : '' ?>><?= $parentLink ? 'Linked' : 'Not linked' ?></b></div>
+            </aside>
+            </div><!-- /.lmc-body -->
         <?php else: ?>
             <div class="lmc-empty-wrap">
                 <svg viewBox="0 0 24 24" width="40" height="40" stroke="#63b3ed" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -1179,7 +1261,7 @@ if (fullPage &&
     if (apiArea) apiArea.style.display = 'block';
 
     sessionStorage.setItem("lastLearnerPage", "learner_settings");
-    window.configureHeader({ title: 'Settings', mode: 'standard' });
+    window.configureHeader({ title: 'Settings', mode: 'standard', color: '#4fd1c5' });
     if (typeof window.setActive === 'function') window.setActive("learner_settings");
 
     // Grab current avatar src or initials
@@ -2334,38 +2416,7 @@ window.toggleSidebar = function (forceClose = false) {
         if (apiArea) apiArea.style.display = "none";
     };
 
-    window.toggleParentDropdown = () => {
-        const drop = document.getElementById("parentDropdown");
-        drop.style.display = drop.style.display === "block" ? "none" : "block";
-    };
-
-    document.getElementById("parentLinkForm")?.addEventListener("submit", function(e) {
-    e.preventDefault();
-    const email = this.querySelector("select").value;
-    // Get the class ID from a hidden input or the PHP variable
-    const classId = "<?= $joinedClassIds[0] ?? 0 ?>"; 
-
-    if (!email || classId == 0) return alert("Select a parent and ensure you are in a class.");
-    
-    loader.style.display = "flex";
-    
-    fetch("link_parent.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" , 'X-CSRF-Token': getCsrfToken() },
-        // Use encodeURIComponent for both to be safe
-        body: "parent_email=" + encodeURIComponent(email) + "&class_id=" + classId
-    })
-    .then(r => r.json())
-    .then(d => { 
-        if (d.success) {
-            location.reload(); 
-        } else {
-            alert("Error: " + d.error); // This will now tell you exactly what's wrong
-        }
-    })
-    .catch(err => alert("Connection error"))
-    .finally(() => loader.style.display = "none");
-});
+    // Parent link (desktop panel and phone sheet): assets/js/learner/parent_invite.js and mobile_class.js
 
     function createMobileOverlay() {
         const div = document.createElement("div");
@@ -3446,12 +3497,16 @@ window.configureHeader = function(config) {
             // Header bottom accent + tinted glass background when scrolled
             if (mainHeader)     mainHeader.style.borderBottom = '2px solid ' + color + '55';
             if (mainHeader)     mainHeader.setAttribute('data-page-color', color);
+            // Light mode paints the scrolled header from this (mobile_light.css can't read the inline
+            // background the scroll handler writes, and its cream rule is !important).
+            if (mainHeader)     mainHeader.style.setProperty('--learner-page-color', color);
         } else {
             // Home or no colour — reset to dark surface/default
             window.learnerCurrentPageColor = '#20201f';
             if (themeColorMeta) themeColorMeta.setAttribute('content', '#20201f');
             if (mainHeader)     mainHeader.style.borderBottom = '';
             if (mainHeader)     mainHeader.removeAttribute('data-page-color');
+            if (mainHeader)     mainHeader.style.removeProperty('--learner-page-color');
         }
     }
     // ──────────────────────────────────────────────────────────────────
@@ -3762,45 +3817,24 @@ window.learnerPageState = {
 <div id="desktopBackdrop" class="desktop-backdrop"></div>
 <div id="mobileOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:1500;"></div>
 
-<nav id="mobileBottomNav">
-
-      <a href="javascript:void(0)" onclick="return handleLearnerMobileBottomNav(event, loadManual)" data-page="partials/manual.html" id="nav-home">
-        <div class="lh-nav-box" style="width:28px;height:28px;border-radius:8px;background:#4fd1c518;border:1px solid #4fd1c530;display:flex;align-items:center;justify-content:center;margin-bottom:3px;transition:background 0.2s;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#4fd1c5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
-            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-            <polyline points="9 22 9 12 15 12 15 22"/>
-          </svg>
-        </div>
-        Home
-      </a>
-
+<!-- Phone bottom bar. Same look as the parent app's bar: 64px high, solid, thin line icons, four tabs. -->
+<nav id="mobileBottomNav" aria-label="Learner app">
+    <a href="javascript:void(0)" onclick="return handleLearnerMobileBottomNav(event, loadManual)" data-page="partials/manual.html" id="nav-home">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>
+        <span>Home</span>
+    </a>
     <a href="javascript:void(0)" onclick="return handleLearnerMobileBottomNav(event, fetchQuizzes)" data-page="quiz_list.php" id="nav-quiz">
-        <div class="lh-nav-box" style="width:28px;height:28px;border-radius:8px;background:#fdd66318;border:1px solid #fdd66330;display:flex;align-items:center;justify-content:center;margin-bottom:3px;transition:background 0.2s;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#fdd663" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
-            <path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
-          </svg>
-        </div>
-        Quiz
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7"/><path d="M12 17h.01"/></svg>
+        <span>Quiz</span>
     </a>
-
     <a href="javascript:void(0)" onclick="return handleLearnerMobileBottomNav(event, fetchAssignments)" data-page="assignment_list.php" id="nav-assignments">
-        <div class="lh-nav-box" style="width:28px;height:28px;border-radius:8px;background:#a78bfa18;border:1px solid #a78bfa30;display:flex;align-items:center;justify-content:center;margin-bottom:3px;transition:background 0.2s;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
-            <path d="M9 12h6"/><path d="M9 16h6"/><rect x="4" y="4" width="16" height="16" rx="2"/>
-          </svg>
-        </div>
-        Assignments
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6"/><path d="M9 17h4"/></svg>
+        <span>Assignments</span>
     </a>
-
     <a href="javascript:void(0)" onclick="return handleLearnerMobileBottomNav(event, fetchResources)" data-page="resource_list.php" id="nav-resources">
-        <div class="lh-nav-box" style="width:28px;height:28px;border-radius:8px;background:#f28c3818;border:1px solid #f28c3830;display:flex;align-items:center;justify-content:center;margin-bottom:3px;transition:background 0.2s;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#f28c38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
-            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-          </svg>
-        </div>
-        Resources
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 5h7a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H2z"/><path d="M22 5h-7a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h8z"/></svg>
+        <span>Resources</span>
     </a>
-
 </nav>
 
 <script>
@@ -3831,11 +3865,10 @@ if ('serviceWorker' in navigator) {
     const learnerHadServiceWorkerController = Boolean(navigator.serviceWorker.controller);
     navigator.serviceWorker.addEventListener('message', event => {
         if (event.data?.type !== 'iskool-update-available') return;
-        if (window.confirm('An iSkool update is available. Refresh now?')) {
-            navigator.serviceWorker.getRegistration('/').then(registration => {
-                registration?.waiting?.postMessage({ type: 'iskool-skip-waiting' });
-            });
-        }
+        // An in-app banner (assets/js/shared/pwa_prompts.js) instead of a browser pop-up. Its Update button waits
+        // while a quiz is open and then asks the waiting worker to take over; the controllerchange handler below
+        // reloads the page. If the banner script has not loaded yet, it picks this flag up when it starts.
+        if (window.iskoolPwa) window.iskoolPwa.offerUpdate(); else window.__iskoolUpdatePending = true;
     });
     navigator.serviceWorker.addEventListener('controllerchange', () => {
         if (!learnerHadServiceWorkerController || learnerUpdateReloading) return;
@@ -3931,20 +3964,25 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 <script src="assets/js/learner/main.js?v=1.2"></script>
-<script src="assets/js/learner/manual.js?v=11.0"></script>
-<script src="assets/js/learner/quiz.js?v=12.3"></script>
-<script src="assets/js/learner/assignments.js?v=10.1"></script>
-<script src="assets/js/learner/resources.js?v=8.7"></script>
-<script src="assets/js/learner/announcements.js?v=9.3"></script>
-<script src="assets/js/learner/grades.js?v=10.2"></script>
-<script src="assets/js/learner/evaluations.js?v=7.1"></script>
+<script src="assets/js/learner/manual.js?v=12.0"></script>
+<script src="assets/js/learner/quiz.js?v=12.7"></script>
+<script src="assets/js/learner/assignments.js?v=10.4"></script>
+<script src="assets/js/learner/resources.js?v=8.9"></script>
+<script src="assets/js/learner/announcements.js?v=9.5"></script>
+<script src="assets/js/learner/grades.js?v=10.6"></script>
+<script src="assets/js/learner/evaluations.js?v=7.5"></script>
 <script src="assets/js/learner/discussions.js?v=11.2"></script>
-<script src="assets/js/learner/syllabus.js?v=3.9"></script>
-<script src="assets/js/learner/learner_calendar.js?v=2.3"></script>
+<script src="assets/js/learner/syllabus.js?v=4.5"></script>
+<script src="assets/js/learner/learner_calendar.js?v=2.5"></script>
 <script src="assets/js/learner/desktop_menu.js?v=1.4"></script>
-<script src="assets/js/learner/mobile_menu.js?v=1.1"></script>
-<script src="assets/js/learner/mobile_settings.js?v=1.2"></script>
-<script src="assets/js/learner/desktop_settings.js?v=1.0"></script>
+<script src="assets/js/learner/mobile_menu.js?v=1.4"></script>
+<script src="assets/js/learner/mobile_settings.js?v=1.7"></script>
+<script src="assets/js/learner/parent_invite.js?v=1.0"></script>
+<script src="assets/js/learner/mobile_class.js?v=1.2"></script>
+<script src="assets/js/learner/desktop_settings.js?v=1.4"></script>
+<script src="assets/js/shared/pwa_prompts.js?v=1.0"></script>
+<script src="assets/js/shared/back_button.js?v=1.0"></script>
+<script src="assets/js/learner/learner_back_button.js?v=1.0"></script>
 <script>window.ISKOOL_SETTINGS = { sendResetUrl: 'auth/password/send_reset_link.php' };</script>
 <?php include 'includes/global_viewer.php'; ?>
 </body>

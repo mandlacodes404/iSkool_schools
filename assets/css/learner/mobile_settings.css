@@ -41,8 +41,9 @@
 /* -- Profile card -- */
 .ms-profile { display: flex; align-items: center; gap: 14px; margin: 4px 0 6px; padding: 12px; border-radius: 16px; background: var(--ms-card); }
 .ms-av { position: relative; width: 60px; height: 60px; flex: none; border-radius: 50%; }
-.ms-av-face { display: grid; place-items: center; width: 100%; height: 100%; border-radius: 50%; overflow: hidden; background: #2a2a29; border: 1px solid var(--ms-line); color: #cfcfcb; font: 600 20px/1 var(--ms-font); text-transform: uppercase; }
-.ms-av-face img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ms-av-face { position: relative; display: grid; place-items: center; width: 100%; height: 100%; border-radius: 50%; overflow: hidden; background: #2a2a29; border: 1px solid var(--ms-line); color: #cfcfcb; font: 600 20px/1 var(--ms-font); text-transform: uppercase; }
+/* The photo fills the circle itself (absolute), so its own size can never stretch the circle's grid row and crop it. */
+.ms-av-face img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
 .ms-cam { position: absolute; right: -3px; bottom: -3px; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: #3a3a39; border: 2px solid #20201f; color: var(--ms-text); }
 .ms-cam .ms-i { width: 13px; height: 13px; }
 .ms-who { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; align-self: stretch; }
@@ -98,7 +99,7 @@
 
 /* -- Save bar -- */
 /* On a short page the save bar sits at the bottom edge instead of floating under the last row */
-.ms-detail { display: flex; flex-direction: column; min-height: calc(100vh - 68px - env(safe-area-inset-top, 0px)); }
+.ms-detail { display: flex; flex-direction: column; min-height: calc(100vh - 68px - env(safe-area-inset-top, 0px)); min-height: calc(100dvh - 68px - env(safe-area-inset-top, 0px)); }
 .ms-detail > #msPwBody { flex: 1; display: flex; flex-direction: column; }
 .ms-spacer { flex: 1 0 22px; }
 .ms-bar { position: sticky; bottom: 0; z-index: 5; margin: 0 -14px; padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px)); background: #20201f; border-top: 1px solid var(--ms-line); }
@@ -181,5 +182,60 @@ html.ms-sheet-open #api-content-area { overflow: hidden !important; }
 @media (prefers-reduced-motion: reduce) {
   .ms *, .ms-sheet, .ms-sheet-bg, .ms-toast { transition: none !important; animation: none !important; }
 }
+
+}
+
+
+/* ── Appearance page, and light mode for the Settings pages ────────────────────────────────────────────
+   Phones only. Light applies when <html data-learner-mobile-theme="light"> (mobile_theme.js); dark is untouched.
+   Same colours as the desktop light mode: page #faf9f5, cards white, lines #dfded8, text #282924. */
+@media (max-width: 768px) {
+
+.ms-note { margin: 0 4px 18px; font-size: 14px; line-height: 1.5; color: var(--ms-muted); }
+.ms-g .ms-r--static:active { background: none; }
+/* theme switch: the same sun / moon pair as the desktop Appearance page (desktop_settings.css), a little bigger for thumbs */
+.ms-toggle { display: inline-flex; gap: 2px; padding: 3px; flex: none; border: 1px solid #2f2f2e; border-radius: 13px; background: #242423; }
+.ms-tb { display: grid; place-items: center; width: 46px; height: 38px; border-radius: 10px; color: var(--ms-muted); transition: background .15s, color .15s, box-shadow .15s; }
+.ms-tb .ms-i { width: 20px; height: 20px; }
+.ms-tb.on { background: #3a3a38; color: var(--ms-text); }
+.ms-tb:focus-visible { outline: 2px solid var(--ms-soft); outline-offset: 2px; }
+
+/* -- Light: colours (the .ms tokens do most of the work) -- */
+html[data-learner-mobile-theme="light"] .ms {
+  --ms-card: #ffffff; --ms-card-2: rgba(38,39,35,.055); --ms-line: #dfded8;
+  --ms-text: #282924; --ms-soft: #53544e; --ms-muted: #73746d; --ms-faint: #8b8b83;
+  --ms-accent: #187a72; --ms-danger: #bd4a43; --ms-warn: #b85f12;
+}
+html[data-learner-mobile-theme="light"] .ms-profile,
+html[data-learner-mobile-theme="light"] .ms-g { border: 1px solid #dfded8; }
+html[data-learner-mobile-theme="light"] .ms-av-face { background: #e9e8e2; color: #555650; }
+html[data-learner-mobile-theme="light"] .ms-cam { background: #e9e8e2; border-color: #faf9f5; }
+html[data-learner-mobile-theme="light"] .ms-f:focus-within { background: rgba(38,39,35,.03); }
+html[data-learner-mobile-theme="light"] .ms-f input,
+html[data-learner-mobile-theme="light"] .ms-f select,
+html[data-learner-mobile-theme="light"] .ms-f textarea { color-scheme: light; }
+html[data-learner-mobile-theme="light"] .ms-f select option { background: #ffffff; color: #282924; }
+html[data-learner-mobile-theme="light"] .ms-bar { background: #faf9f5; }
+html[data-learner-mobile-theme="light"] .ms-toggle { background: #f4f3ee; border-color: #e4e3dc; }
+html[data-learner-mobile-theme="light"] .ms-tb.on { background: #ffffff; color: var(--ms-text); box-shadow: 0 1px 2px rgba(31,32,29,.12), 0 0 0 1px rgba(38,39,35,.06); }
+html[data-learner-mobile-theme="light"] .ms-btn { background: #252624; color: #ffffff; }
+html[data-learner-mobile-theme="light"] .ms-btn:disabled { background: rgba(38,39,35,.06); color: #8b8b83; }
+html[data-learner-mobile-theme="light"] .ms-btn .ms-spin { border-color: rgba(255,255,255,.3); border-top-color: #ffffff; }
+html[data-learner-mobile-theme="light"] .ms-link:active { background: rgba(24,122,114,.1); }
+html[data-learner-mobile-theme="light"] .ms-banner.is-bad { background: rgba(189,74,67,.09); }
+html[data-learner-mobile-theme="light"] .ms-banner.is-ok { background: rgba(24,122,114,.09); }
+html[data-learner-mobile-theme="light"] .ms-checks li.ok .ms-dot { color: #ffffff; }
+html[data-learner-mobile-theme="light"] .ms-done-i { background: rgba(24,122,114,.1); }
+
+/* -- Light: sheets and toast (appended to <body>, outside .ms) -- */
+html[data-learner-mobile-theme="light"] .ms-sheet-wrap { --ms-text: #282924; --ms-soft: #53544e; --ms-muted: #73746d; --ms-line: #dfded8; --ms-danger: #bd4a43; --ms-accent: #187a72; }
+html[data-learner-mobile-theme="light"] .ms-sheet-bg { background: rgba(38,39,35,.3); }
+html[data-learner-mobile-theme="light"] .ms-sheet { background: #ffffff; box-shadow: 0 -10px 40px rgba(31,32,29,.18); }
+html[data-learner-mobile-theme="light"] .ms-sheet::before { background: #d0cfc8; }
+html[data-learner-mobile-theme="light"] .ms-sh-b:active { background: rgba(38,39,35,.06); }
+html[data-learner-mobile-theme="light"] .ms-sh-b.is-primary { background: rgba(24,122,114,.1); }
+html[data-learner-mobile-theme="light"] .ms-sh-b.is-solid { background: rgba(189,74,67,.1); }
+html[data-learner-mobile-theme="light"] .ms-toast { background: #252624; color: #ffffff; box-shadow: 0 6px 24px rgba(31,32,29,.22); }
+html[data-learner-mobile-theme="light"] .ms-toast.is-bad { background: #fbeceb; color: #a8332c; }
 
 }

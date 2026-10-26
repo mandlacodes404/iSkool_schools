@@ -1,0 +1,897 @@
+/* Desktop light-mode rollout. This sheet is loaded last and opts pages in
+   individually. It is inert on mobile and for teacher pages not listed here. */
+@media (min-width: 769px) {
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] #api-content-area,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] #api-content-area,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] #api-content-area {
+        --dm-bg: #f4f3ee;
+        --dm-page: #faf9f5;
+        --dm-card: #ffffff;
+        --dm-raise: #ffffff;
+        --dm-hover: #f2f1ec;
+        --dm-active: #e7e6e0;
+        --dm-line: #dfded8;
+        --dm-line-strong: #d0cfc8;
+        --dm-text: #282924;
+        --dm-soft: #53544e;
+        --dm-muted: #73746d;
+        --dm-faint: #8b8b83;
+        --dm-accent: #187a72;
+        --dm-danger: #bd4a43;
+        background: #faf9f5 !important;
+        color: #282924;
+        color-scheme: light;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] #api-content-area {
+        --q-line: #dfded8;
+        --q-line2: #d0cfc8;
+        --q-hover: #f2f1ec;
+        --q-active: #e7e6e0;
+        --q-text: #282924;
+        --q-soft: #53544e;
+        --q-muted: #73746d;
+        --q-faint: #8b8b83;
+        --q-accent: #187a72;
+        --q-btn: #252624;
+        --q-btn-on: #ffffff;
+        --q-btn-hover: #3a3b37;
+        --q-btn-tint: #e9f3f1;
+        --q-btn-line: #a8d2cd;
+        --q-danger: #bd4a43;
+    }
+
+    /* List panes are warm grey; the detail and create canvas is paper-white. */
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .qz-sidebar,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-sidebar,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-sidebar {
+        background: #f4f3ee !important;
+        border-right: 1px solid #dfded8;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .qz-sidebar-item:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-sidebar-item:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-sidebar-item:hover { background: #ecebe5; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .qz-sidebar-item.active,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-sidebar-item.active,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-sidebar-item.active { background: #e2e1db; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .qz-sidebar-scroll::-webkit-scrollbar-thumb,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-sidebar-scroll::-webkit-scrollbar-thumb,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-sidebar-scroll::-webkit-scrollbar-thumb,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .qz-main-panel::-webkit-scrollbar-thumb,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-main-panel::-webkit-scrollbar-thumb,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-main-panel::-webkit-scrollbar-thumb { background: #d0cfc8; }
+
+    /* Shared modals and create/edit form fields. All three features use these
+       primitives, including delete, integrity and compose flows. */
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .teacher-modal-overlay,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .teacher-modal-overlay,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .teacher-modal-overlay { background: rgba(38, 39, 35, .30) !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .teacher-modal-box,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .teacher-modal-box,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .teacher-modal-box {
+        background: #ffffff !important; border-color: #dfded8 !important; color: #282924 !important;
+        box-shadow: 0 18px 52px rgba(31, 32, 29, .18);
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .teacher-modal-header,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .teacher-modal-header,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .teacher-modal-header,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .teacher-modal-footer,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .teacher-modal-footer,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .teacher-modal-footer { border-color: #ebeae5 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .teacher-modal-input,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .teacher-modal-input,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .teacher-modal-input {
+        background: #ffffff !important; border-color: #d7d6cf !important; color: #282924 !important; color-scheme: light !important;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .teacher-modal-input::placeholder,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .teacher-modal-input::placeholder,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .teacher-modal-input::placeholder { color: #94948c !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .teacher-modal-input:focus,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .teacher-modal-input:focus,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .teacher-modal-input:focus {
+        border-color: #187a72 !important; box-shadow: 0 0 0 3px rgba(24, 122, 114, .13) !important;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .teacher-modal-label,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .teacher-modal-label,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .teacher-modal-label { color: #53544e !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .teacher-modal-cancel,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .teacher-modal-cancel,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .teacher-modal-cancel {
+        background: #ffffff !important; border-color: #d7d6cf !important; color: #454640 !important;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .teacher-modal-submit,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .teacher-modal-submit,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .teacher-modal-submit {
+        background: #252624 !important; border-color: #252624 !important; color: #ffffff !important;
+    }
+
+    /* Assignments: detail, submissions table, and new-assignment form. */
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-dp,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-panel-empty,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-form-wrap--desktop {
+        --as-dp-line: #dfded8;
+        --as-dp-line-strong: #d0cfc8;
+        --as-dp-hover: #f2f1ec;
+        --as-dp-active: #e9e8e2;
+        --as-dp-raise: #ffffff;
+        --as-dp-text: #282924;
+        --as-dp-soft: #53544e;
+        --as-dp-muted: #73746d;
+        --as-dp-faint: #8b8b83;
+        --as-dp-accent: #187a72;
+        --as-dp-danger: #bd4a43;
+        color: #282924;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-dp-table tbody tr:hover td { background: #f6f5f0; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-form-wrap--desktop,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-form-header--desktop { border-color: #dfded8; color: #282924; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-form-title,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-form-close-btn { color: #282924; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-file-input {
+        background: #ffffff; border-color: #d7d6cf; color: #53544e;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-term-banner,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-email-checkbox-label {
+        background: #edf6f4; border-color: #b9ddd8; color: #454640;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-term-banner-title { color: #187a72; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-term-banner-subtitle { color: #73746d; }
+
+    /* Announcement reading, compose and edit panels. */
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-main-panel,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-content,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-empty {
+        background: #faf9f5 !important; color: #282924 !important;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-content,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-form-actions { border-color: #dfded8 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-title,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-form-title,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-message,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-content strong { color: #282924 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-meta,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-empty p,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-edit-hint { color: #73746d !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-note,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-schoolwide-note {
+        background: #f4f3ee !important; border-color: #dfded8 !important; color: #53544e !important;
+    }
+
+    /* Quiz detail tokens are declared in its injected stylesheet. This covers
+       the form surface and notification appended outside the detail root. */
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz {
+        color-scheme: light !important; background: #faf9f5;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .qz2-toast {
+        background: #ffffff !important; border-color: #dfded8 !important; color: #282924 !important;
+        box-shadow: 0 8px 26px rgba(31, 32, 29, .16);
+    }
+    /* Complete the shared dialogs, list chrome, and desktop-only form states. */
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .teacher-modal-header,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .teacher-modal-header,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .teacher-modal-header { color: #282924 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .teacher-modal-close,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .teacher-modal-close,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .teacher-modal-close,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-form-close-btn,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-form-close-btn { color: #73746d !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .teacher-modal-close:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .teacher-modal-close:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .teacher-modal-close:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-form-close-btn:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-form-close-btn:hover { color: #282924 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .teacher-modal-submit:hover:not(:disabled),
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .teacher-modal-submit:hover:not(:disabled),
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .teacher-modal-submit:hover:not(:disabled) { background: #3a3b37 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-delete-confirm-btn,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-delete-confirm-btn { background: #bd4a43 !important; border-color: #bd4a43 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-delete-modal-text,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-delete-modal-text { color: #53544e !important; }
+
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .qz-sidebar-header,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-sidebar-header,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-sidebar-header { border-color: #dfded8; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .qz-sidebar-scroll::-webkit-scrollbar-thumb:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-sidebar-scroll::-webkit-scrollbar-thumb:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-sidebar-scroll::-webkit-scrollbar-thumb:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .qz-main-panel::-webkit-scrollbar-thumb:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-main-panel::-webkit-scrollbar-thumb:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-main-panel::-webkit-scrollbar-thumb:hover { background: #bdbcb4; }
+
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-file-input::file-selector-button,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz input[type="file"]::file-selector-button {
+        background: #f2f1ec; border: 1px solid #d7d6cf; border-radius: 6px; color: #454640; margin-right: 10px; padding: 5px 9px;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-email-checkbox { accent-color: #187a72; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .as-form-error,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-form-error { color: #bd4a43; }
+
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-form-header { border-color: #dfded8; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-email-label { color: #53544e; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-loader { background: rgba(250, 249, 245, .82); color: #53544e; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-loader-spinner { border-color: rgba(24, 122, 114, .2); border-top-color: #187a72; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-loader-text { color: #53544e; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-edit-btn { background: #ffffff; border-color: #d7d6cf; color: #282924; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-edit-btn:hover { background: #f2f1ec; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-delete-btn { border-color: rgba(189, 74, 67, .38); color: #bd4a43; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-panel-delete-btn:hover { background: rgba(189, 74, 67, .08); }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .an-edited-tag { color: #a85d00; background: #fff3df; border-color: #edc77d; }
+
+    /* Quiz creation and editing inject a little CSS of their own.  Use the
+       form root to override those inline dark swatches without touching the
+       mobile form, which deliberately stays on the existing palette. */
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz .cq-section-title,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz .cq-learner-question { color: #282924 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz .cq-section-help,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz .cq-preview-label,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz .cq-learner-meta,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz [style*="color:#8b949e"] { color: #73746d !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz [style*="color:#c9d1d9"],
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz [style*="color:#e2e8f0"] { color: #454640 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz .cq-preview-card,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz .cq-learner-card,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz .cq-mode-card,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz #cqSummaryBar { background: #ffffff !important; border-color: #dfded8 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz .cq-preview-textarea,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz .cq-learner-choice { background: #f7f6f1 !important; border-color: #dfded8 !important; color: #53544e !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz .cq-learner-radio { border-color: #a7a79e; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz #cqSummaryBar { color: #187a72 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz #cqSummaryBar [style*="rgba(255,255,255"] { color: #c7c6be !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz #cqPublishMarksOpenMessage { background: #fff3df !important; border-color: #edc77d !important; color: #805100 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz #cqMultiPageOptions,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz #cqOpenEndedBanner { background: #edf6f4 !important; border-color: #b9ddd8 !important; color: #17655f !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-create-form--quiz #cqError { color: #bd4a43 !important; }
+
+    /* Search, contextual rails, and the class picker appear inside creation
+       flows, so they need their own conversion rather than inheriting the
+       old dark literals from the shared dashboard scripts. */
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-desktop-search-wrap,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .tchr-desktop-search-wrap,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .tchr-desktop-search-wrap { border-color: #dfded8; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-desktop-search,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .tchr-desktop-search,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .tchr-desktop-search {
+        background: #ffffff; border-color: #d7d6cf; color: #282924;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-desktop-search::placeholder,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .tchr-desktop-search::placeholder,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .tchr-desktop-search::placeholder { color: #8b8b83; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-desktop-search:focus,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .tchr-desktop-search:focus,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .tchr-desktop-search:focus { border-color: #187a72; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .teacher-desktop-create.active,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .teacher-desktop-create.active,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .teacher-desktop-create.active {
+        background: #e9f3f1; box-shadow: inset 0 0 0 1px #a8d2cd; color: #17655f;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-info-rail,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .tchr-info-rail,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .tchr-info-rail { border-color: #dfded8; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-info-rail-header,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .tchr-info-rail-header,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .tchr-info-rail-header { border-color: #dfded8; color: #73746d; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-info-rail-body p,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .tchr-info-rail-body p,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .tchr-info-rail-body p { color: #73746d; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-info-rail-body strong,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .tchr-info-rail-body strong,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .tchr-info-rail-body strong { color: #282924; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-info-rail-toggle,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .tchr-info-rail-toggle,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .tchr-info-rail-toggle { color: #73746d; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .tchr-info-rail-toggle:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_assignments"] .tchr-info-rail-toggle:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_announcements"] .tchr-info-rail-toggle:hover { background: #f2f1ec; color: #282924; }
+
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .icp-input {
+        background: #ffffff; border-color: #d7d6cf; color: #282924; color-scheme: light;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .icp-input::placeholder,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .icp-clear-btn,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .icp-empty,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .icp-footer { color: #73746d; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .icp-clear-btn:hover { color: #282924; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .icp-input:focus { background: #ffffff; border-color: #187a72; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .icp-input.icp-has-selection {
+        background: #e9f3f1; border-color: #78bbb3; color: #17655f;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .icp-dropdown {
+        background: #ffffff; border-color: #d7d6cf; box-shadow: 0 12px 32px rgba(31, 32, 29, .16);
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .icp-list::-webkit-scrollbar-thumb { background: #d0cfc8; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .icp-item { color: #454640; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .icp-item:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .icp-item.icp-highlighted { background: #f2f1ec; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .icp-item.icp-item-active,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .icp-item.icp-item-active.icp-highlighted {
+        background: #e9f3f1; border-left-color: #187a72; color: #17655f;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .icp-item mark { background: #d8efeb; color: #17655f; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_quizzes"] .icp-footer { border-color: #ebeae5; }
+
+    /* Resources, Syllabus, and Evaluations use the same desktop split-view
+       contract as the first rollout screens. Keep their tokens local to the
+       active API canvas so unfinished teacher pages retain the dark theme. */
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] #api-content-area,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] #api-content-area,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] #api-content-area {
+        --dm-bg: #f4f3ee;
+        --dm-page: #faf9f5;
+        --dm-card: #ffffff;
+        --dm-raise: #ffffff;
+        --dm-hover: #f2f1ec;
+        --dm-active: #e7e6e0;
+        --dm-line: #dfded8;
+        --dm-line-strong: #d0cfc8;
+        --dm-text: #282924;
+        --dm-soft: #53544e;
+        --dm-muted: #73746d;
+        --dm-faint: #8b8b83;
+        --dm-accent: #187a72;
+        --dm-danger: #bd4a43;
+        background: #faf9f5 !important;
+        color: #282924;
+        color-scheme: light;
+    }
+
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .rs-sidebar,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .sbo-sidebar,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .ev-sidebar {
+        background: #f4f3ee !important;
+        border-right-color: #dfded8 !important;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .rs-sidebar-header,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .sbo-sidebar-header,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .ev-sidebar-header { border-color: #dfded8; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .rs-sidebar-item:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .sbo-sidebar-item:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .ev-sidebar-item:hover { background: #ecebe5; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .rs-sidebar-item.active,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .sbo-sidebar-item.active,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .ev-sidebar-item.active { background: #e2e1db; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .rs-main-panel,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .sbo-main-panel,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .ev-main-panel { background: #faf9f5 !important; color: #282924; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .rs-sidebar-scroll::-webkit-scrollbar-thumb,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .rs-main-panel::-webkit-scrollbar-thumb,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .sbo-sidebar-scroll::-webkit-scrollbar-thumb,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .sbo-main-panel::-webkit-scrollbar-thumb,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .ev-sidebar-scroll::-webkit-scrollbar-thumb,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .ev-main-panel::-webkit-scrollbar-thumb { background: #d0cfc8; }
+
+    /* Resource previews and the complete upload flow. */
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .rs-panel-content,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .rs-panel-empty { color: #282924; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .rs-panel-preview { background: #ffffff; border-color: #dfded8; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .rs-panel-open-btn {
+        background: #ffffff; border-color: #d7d6cf; color: #282924;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .rs-panel-open-btn:hover { background: #f2f1ec; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .rs-panel-delete-btn { border-color: rgba(189, 74, 67, .38); color: #bd4a43; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .rs-panel-delete-btn:hover { background: rgba(189, 74, 67, .08); }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .tchr-create-form--resource {
+        --rs-f-line: #dfded8;
+        --rs-f-line-strong: #d0cfc8;
+        --rs-f-hover: #f2f1ec;
+        --rs-f-active: #e9e8e2;
+        --rs-f-text: #282924;
+        --rs-f-soft: #53544e;
+        --rs-f-muted: #73746d;
+        --rs-f-faint: #8b8b83;
+        --rs-f-accent: #187a72;
+        color-scheme: light;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .tchr-create-form--resource .rs-email-box {
+        background: #edf6f4; border-color: #b9ddd8;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .tchr-create-form--resource .teacher-file-drop.dragover {
+        background: #edf6f4; border-color: #187a72;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .rs-type-toggle-btn.active {
+        background: #e9f3f1; border-color: #a8d2cd; color: #17655f;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .rs-video-warning strong { color: #282924; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .rs-form-error,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .rs-error-message { color: #bd4a43; }
+
+    /* Syllabus and Evaluation detail/release forms are token-based. Their
+       explicit token values also cover dynamic topic, statement, and weight
+       rows created after the page first renders. */
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .sbo-dp,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .sbo-panel-empty {
+        --sbo-dp-line: #dfded8;
+        --sbo-dp-line-strong: #d0cfc8;
+        --sbo-dp-hover: #f2f1ec;
+        --sbo-dp-active: #e9e8e2;
+        --sbo-dp-text: #282924;
+        --sbo-dp-soft: #53544e;
+        --sbo-dp-muted: #73746d;
+        --sbo-dp-faint: #8b8b83;
+        --sbo-dp-accent: #187a72;
+        --sbo-dp-danger: #bd4a43;
+        --sbo-dp-warn: #a85d00;
+        color: #282924;
+        color-scheme: light;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .ev-dp,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .ev-panel-empty {
+        --ev-dp-line: #dfded8;
+        --ev-dp-line-strong: #d0cfc8;
+        --ev-dp-hover: #f2f1ec;
+        --ev-dp-active: #e9e8e2;
+        --ev-dp-raise: #ffffff;
+        --ev-dp-text: #282924;
+        --ev-dp-soft: #53544e;
+        --ev-dp-muted: #73746d;
+        --ev-dp-faint: #8b8b83;
+        --ev-dp-accent: #187a72;
+        --ev-dp-danger: #bd4a43;
+        color: #282924;
+        color-scheme: light;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .sbo-dp-btn--primary,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .ev-dp-btn--primary { color: #ffffff; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .sbo-dp-btn--danger,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .ev-dp-btn--danger { border-color: rgba(189, 74, 67, .38); }
+
+    /* All three pages use the shared dialog foundation for delete actions;
+       Resources also uses it for the tablet upload dialog. */
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .teacher-modal-overlay,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .teacher-modal-overlay,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .teacher-modal-overlay { background: rgba(38, 39, 35, .30) !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .teacher-modal-box,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .teacher-modal-box,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .teacher-modal-box {
+        background: #ffffff !important; border-color: #dfded8 !important; color: #282924 !important;
+        box-shadow: 0 18px 52px rgba(31, 32, 29, .18);
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .teacher-modal-header,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .teacher-modal-header,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .teacher-modal-header { border-color: #ebeae5 !important; color: #282924 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .teacher-modal-footer,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .teacher-modal-footer,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .teacher-modal-footer { border-color: #ebeae5 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .teacher-modal-input,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .teacher-modal-input,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .teacher-modal-input {
+        background: #ffffff !important; border-color: #d7d6cf !important; color: #282924 !important; color-scheme: light !important;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .teacher-modal-label,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .teacher-modal-label,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .teacher-modal-label { color: #53544e !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .teacher-modal-input::placeholder,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .teacher-modal-input::placeholder,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .teacher-modal-input::placeholder { color: #94948c !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .teacher-modal-input:focus,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .teacher-modal-input:focus,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .teacher-modal-input:focus { border-color: #187a72 !important; box-shadow: 0 0 0 3px rgba(24, 122, 114, .13) !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .teacher-modal-close,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .teacher-modal-close,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .teacher-modal-close { color: #73746d !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .teacher-modal-close:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .teacher-modal-close:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .teacher-modal-close:hover { color: #282924 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .teacher-modal-cancel,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .teacher-modal-cancel,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .teacher-modal-cancel { background: #ffffff !important; border-color: #d7d6cf !important; color: #454640 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .teacher-modal-submit,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .teacher-modal-submit,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .teacher-modal-submit { background: #252624 !important; border-color: #252624 !important; color: #ffffff !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .teacher-modal-submit:hover:not(:disabled),
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .teacher-modal-submit:hover:not(:disabled),
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .teacher-modal-submit:hover:not(:disabled) { background: #3a3b37 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .rs-delete-confirm-btn,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .sbo-delete-confirm-btn,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .ev-delete-confirm-btn { background: #bd4a43 !important; border-color: #bd4a43 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .rs-delete-modal-text,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .sbo-delete-modal-text,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .ev-delete-modal-text { color: #53544e !important; }
+
+    /* Search, primary actions, and supporting information rail. */
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .tchr-desktop-search-wrap,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .tchr-desktop-search-wrap,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .tchr-desktop-search-wrap { border-color: #dfded8; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .tchr-desktop-search,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .tchr-desktop-search,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .tchr-desktop-search {
+        background: #ffffff; border-color: #d7d6cf; color: #282924;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .tchr-desktop-search::placeholder,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .tchr-desktop-search::placeholder,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .tchr-desktop-search::placeholder { color: #8b8b83; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .tchr-desktop-search:focus,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .tchr-desktop-search:focus,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .tchr-desktop-search:focus { border-color: #187a72; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .teacher-desktop-create.active,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .teacher-desktop-create.active,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .teacher-desktop-create.active {
+        background: #e9f3f1; box-shadow: inset 0 0 0 1px #a8d2cd; color: #17655f;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .tchr-info-rail,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .tchr-info-rail,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .tchr-info-rail { border-color: #dfded8; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .tchr-info-rail-header,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .tchr-info-rail-header,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .tchr-info-rail-header { border-color: #dfded8; color: #73746d; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .tchr-info-rail-body p,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .tchr-info-rail-body p,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .tchr-info-rail-body p { color: #73746d; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .tchr-info-rail-body strong,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .tchr-info-rail-body strong,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .tchr-info-rail-body strong { color: #282924; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .tchr-info-rail-toggle,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .tchr-info-rail-toggle,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .tchr-info-rail-toggle { color: #73746d; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .tchr-info-rail-toggle:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .tchr-info-rail-toggle:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .tchr-info-rail-toggle:hover { background: #f2f1ec; color: #282924; }
+
+    /* Class selection appears in all three release forms. */
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .icp-input,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .icp-input,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .icp-input { background: #ffffff; border-color: #d7d6cf; color: #282924; color-scheme: light; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .icp-input::placeholder,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .icp-input::placeholder,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .icp-input::placeholder,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .icp-clear-btn,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .icp-clear-btn,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .icp-clear-btn,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .icp-empty,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .icp-empty,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .icp-empty,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .icp-footer,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .icp-footer,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .icp-footer { color: #73746d; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .icp-input:focus,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .icp-input:focus,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .icp-input:focus { background: #ffffff; border-color: #187a72; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .icp-input.icp-has-selection,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .icp-input.icp-has-selection,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .icp-input.icp-has-selection { background: #e9f3f1; border-color: #78bbb3; color: #17655f; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .icp-dropdown,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .icp-dropdown,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .icp-dropdown { background: #ffffff; border-color: #d7d6cf; box-shadow: 0 12px 32px rgba(31, 32, 29, .16); }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .icp-item,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .icp-item,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .icp-item { color: #454640; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .icp-item:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .icp-item.icp-highlighted,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .icp-item:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .icp-item.icp-highlighted,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .icp-item:hover,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .icp-item.icp-highlighted { background: #f2f1ec; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .icp-item.icp-item-active,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .icp-item.icp-item-active,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .icp-item.icp-item-active { background: #e9f3f1; border-left-color: #187a72; color: #17655f; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_resources"] .icp-item mark,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_syllabus"] .icp-item mark,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_evaluations"] .icp-item mark { background: #d8efeb; color: #17655f; }
+
+    /* Grades keeps its rich desktop workflow (distribution, mark entry, and
+       manual response grading) on the same local semantic palette. */
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] #api-content-area {
+        --dm-bg: #f4f3ee;
+        --dm-page: #faf9f5;
+        --dm-card: #ffffff;
+        --dm-raise: #ffffff;
+        --dm-hover: #f2f1ec;
+        --dm-active: #e7e6e0;
+        --dm-line: #dfded8;
+        --dm-line-strong: #d0cfc8;
+        --dm-text: #282924;
+        --dm-soft: #53544e;
+        --dm-muted: #73746d;
+        --dm-faint: #8b8b83;
+        --dm-accent: #187a72;
+        --dm-danger: #bd4a43;
+        background: #faf9f5 !important;
+        color: #282924;
+        color-scheme: light;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-sidebar {
+        background: #f4f3ee !important; border-right-color: #dfded8 !important;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-sidebar-header { border-color: #dfded8; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-sidebar-item:hover { background: #ecebe5; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-sidebar-item.active { background: #e2e1db; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-main-panel { background: #faf9f5 !important; color: #282924; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-sidebar-scroll::-webkit-scrollbar-thumb,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-main-panel::-webkit-scrollbar-thumb { background: #d0cfc8; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-dp,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-dp-empty {
+        --gr-dp-line: #dfded8;
+        --gr-dp-line-strong: #d0cfc8;
+        --gr-dp-hover: #f2f1ec;
+        --gr-dp-active: #e9e8e2;
+        --gr-dp-raise: #ffffff;
+        --gr-dp-text: #282924;
+        --gr-dp-soft: #53544e;
+        --gr-dp-muted: #73746d;
+        --gr-dp-faint: #8b8b83;
+        --gr-dp-accent: #187a72;
+        --gr-dp-danger: #bd4a43;
+        --gr-dp-warn: #a85d00;
+        color: #282924;
+        color-scheme: light;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-dp-btn--primary { color: #ffffff; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-dp-table tbody tr:hover td { background: #f6f5f0; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] select.gr-dp-in option { background: #ffffff; color: #282924; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-oe-learner-card {
+        background: #ffffff; border-color: #dfded8;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-oe-learner-card:hover { border-color: #bdbcb4; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-oe-learner-name,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-oe-question-text { color: #282924; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-oe-learner-score,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-oe-question-points,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-oe-grade-field-label { color: #73746d; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-oe-question-block { border-color: #ebeae5; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-oe-answer-text {
+        background: #f7f6f1; border-color: #dfded8; color: #454640;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-oe-warning-text,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-oe-pending-footer { color: #805100; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-oe-badge--pending { background: #fff3df; border-color: #edc77d; color: #805100; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-oe-badge--graded { background: #eaf7ed; border-color: #aad9b5; color: #176d38; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-oe-release-message.is-success,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .gr-oe-saved-note { color: #176d38; }
+
+    /* Calendar is a standalone canvas rather than a split layout. */
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] #api-content-area {
+        background: #faf9f5 !important; color: #282924; color-scheme: light;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-page-title,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-month-label,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-cell-has-events .full-cal-day-num,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-upcoming-title-text { color: #282924; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-legend-item,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-day-num,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-upcoming-title,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-upcoming-empty { color: #73746d; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-main,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-upcoming-card,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-upcoming-empty {
+        background: #ffffff; border-color: #dfded8;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-nav-row,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-grid { border-color: #dfded8; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-day-header,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-cell { border-color: #ebeae5; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-cell:hover { background: #f7f6f1; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-cell-empty { background: #f4f3ee; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-cell-today,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-cell-today:hover { background: #edf6f4; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-nav-btn {
+        background: #ffffff; border-color: #d7d6cf; color: #53544e;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-nav-btn:hover {
+        background: #e9f3f1; border-color: #a8d2cd; color: #17655f;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-add-btn {
+        background: #252624; color: #ffffff;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-add-btn:hover { background: #3a3b37; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-pill-more { background: #f2f1ec !important; color: #73746d !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-upcoming-card:hover { border-color: #a8d2cd; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-upcoming-meta { color: #8b8b83; }
+
+    /* Calendar’s reminder/academic dialog has its own shell. */
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] #fullCalModal { background: rgba(38, 39, 35, .30); }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-modal-box {
+        background: #ffffff; border-color: #dfded8; box-shadow: 0 18px 52px rgba(31, 32, 29, .18);
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-modal-head span { color: #282924; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-modal-close { color: #73746d; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-modal-close:hover { color: #282924; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-tab-btn { border-color: #d7d6cf; color: #73746d; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-tab-btn--reminder.active { background: #e9f3f1; border-color: #78bbb3; color: #17655f; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-tab-btn--academic.active { background: #fceaf3; border-color: #e8a9c9; color: #a72f69; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .full-cal-modal-error { color: #bd4a43; }
+
+    /* Shared grades modals and the calendar modal form controls. */
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .teacher-modal-overlay { background: rgba(38, 39, 35, .30) !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .teacher-modal-box {
+        background: #ffffff !important; border-color: #dfded8 !important; color: #282924 !important;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .teacher-modal-header,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .teacher-modal-footer { border-color: #ebeae5 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .teacher-modal-header { color: #282924 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .teacher-modal-input,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .teacher-modal-input {
+        background: #ffffff !important; border-color: #d7d6cf !important; color: #282924 !important; color-scheme: light !important;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .teacher-modal-label,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .teacher-modal-label { color: #53544e !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .teacher-modal-cancel,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .teacher-modal-cancel { background: #ffffff !important; border-color: #d7d6cf !important; color: #454640 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .teacher-modal-submit,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .teacher-modal-submit { background: #252624 !important; border-color: #252624 !important; color: #ffffff !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .teacher-modal-close { color: #73746d !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .teacher-modal-close:hover { color: #282924 !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .teacher-modal-input:focus,
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .teacher-modal-input:focus { border-color: #187a72 !important; box-shadow: 0 0 0 3px rgba(24, 122, 114, .13) !important; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .teacher-modal-submit:hover:not(:disabled),
+    html[data-teacher-theme="light"][data-teacher-page="teacher_calendar"] .teacher-modal-submit:hover:not(:disabled) { background: #3a3b37 !important; }
+
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .tchr-desktop-search-wrap { border-color: #dfded8; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .tchr-desktop-search {
+        background: #ffffff; border-color: #d7d6cf; color: #282924;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .tchr-desktop-search::placeholder { color: #8b8b83; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .tchr-desktop-search:focus { border-color: #187a72; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .teacher-desktop-create.active {
+        background: #e9f3f1; box-shadow: inset 0 0 0 1px #a8d2cd; color: #17655f;
+    }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .tchr-info-rail { border-color: #dfded8; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .tchr-info-rail-header { border-color: #dfded8; color: #73746d; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .tchr-info-rail-body p { color: #73746d; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .tchr-info-rail-body strong { color: #282924; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .tchr-info-rail-toggle { color: #73746d; }
+    html[data-teacher-theme="light"][data-teacher-page="teacher_grades"] .tchr-info-rail-toggle:hover { background: #f2f1ec; color: #282924; }
+}
+
+
+/* ═══ Floating layers in light mode: account popover, Settings modal, Home modals ═══
+   (merged from teacher_desktop_light_modals.css; it must stay below teacher_desktop_settings.css in load order, which this sheet already does) ═══ */
+@media (min-width: 769px) {
+
+/* ── 1. Variables: Settings modal, its dialogs and toast, and the account popover ─────────── */
+html[data-teacher-theme="light"] .dsm,
+html[data-teacher-theme="light"] .ds-ov,
+html[data-teacher-theme="light"] .ds-toast,
+html[data-teacher-theme="light"] .dm-pop {
+  --ds-bg: #ffffff;        /* content panel */
+  --ds-rail: #faf9f5;      /* left rail */
+  --ds-raise: #ffffff;     /* search box and inputs */
+  --ds-sel: #ebeae4;       /* selected nav item */
+  --ds-hover: rgba(38,39,35,.055);
+  --ds-line: #ebeae5;      /* row dividers */
+  --ds-edge: #dfded8;      /* modal edge, rail divider */
+  --ds-field: #d7d6cf;     /* input, search and button borders */
+  --ds-text: #282924;
+  --ds-soft: #53544e;
+  --ds-muted: #73746d;
+  --ds-faint: #8b8b83;
+  --ds-btn: #252624;       /* primary button */
+  --ds-btn-text: #ffffff;
+  --ds-danger: #bd4a43;
+  --ds-warn: #a85d00;
+  --lm-focus: #8a8a82;
+  --lm-ring: rgba(38,39,35,.08);
+}
+
+/* ── 2. Account popover (avatar menu) ─────────────────────────────────────────────────────── */
+html[data-teacher-theme="light"] .dm-pop {
+  box-shadow: 0 12px 32px rgba(31,32,29,.12), 0 2px 6px rgba(31,32,29,.05);
+}
+html[data-teacher-theme="light"] .dm-pop-sep { background: rgba(38,39,35,.09); }
+html[data-teacher-theme="light"] .dm-pop-kbd { color: var(--ds-muted); }
+html[data-teacher-theme="light"] .dm-pop-ver { color: var(--ds-faint); }
+html[data-teacher-theme="light"] .dm-pop-item:focus-visible { outline-color: var(--lm-focus); }
+html[data-teacher-theme="light"] .dm-pop-item.is-danger:hover { background: rgba(189,74,67,.08); }
+
+/* ── 3. Quick search and shortcuts: lighter backdrop (the panels already follow the theme) ── */
+html[data-teacher-theme="light"] .dm-palette,
+html[data-teacher-theme="light"] .dm-keys { background: rgba(38,39,35,.30); }
+
+/* ── 4. Settings modal ────────────────────────────────────────────────────────────────────── */
+html[data-teacher-theme="light"] .dsm { background: rgba(38,39,35,.30); }
+html[data-teacher-theme="light"] .ds { box-shadow: 0 18px 52px rgba(31,32,29,.18); }
+html[data-teacher-theme="light"] .ds-panel { scrollbar-color: #d0cfc8 transparent; }
+html[data-teacher-theme="light"] .ds-search:focus-within { border-color: var(--lm-focus); }
+html[data-teacher-theme="light"] .ds .ds-search input { color-scheme: light; }
+html[data-teacher-theme="light"] .ds-av-face { background: #e9e8e2; color: #555650; }
+
+/* buttons */
+html[data-teacher-theme="light"] .ds-b:hover { background: rgba(38,39,35,.05); }
+html[data-teacher-theme="light"] .ds-b.is-p:hover { background: #3a3b37; border-color: #3a3b37; color: #ffffff; }
+html[data-teacher-theme="light"] .ds-b.is-d,
+html[data-teacher-theme="light"] .ds-b.is-d:hover { background: rgba(189,74,67,.10); }
+html[data-teacher-theme="light"] .ds-b.is-d:hover { background: rgba(189,74,67,.16); }
+html[data-teacher-theme="light"] .ds-b.is-t:hover { background: rgba(189,74,67,.08); }
+html[data-teacher-theme="light"] .ds-spin { border-color: rgba(255,255,255,.28); border-top-color: #ffffff; }
+
+/* fields (change password) */
+html[data-teacher-theme="light"] .ds .ds-f input { color-scheme: light; }
+html[data-teacher-theme="light"] .ds .ds-f input:hover { border-color: #bdbcb4; }
+html[data-teacher-theme="light"] .ds .ds-f input:focus { border-color: var(--lm-focus); box-shadow: 0 0 0 3px var(--lm-ring); }
+html[data-teacher-theme="light"] .ds .ds-f.is-bad input,
+html[data-teacher-theme="light"] .ds .ds-f.is-bad input:focus { border-color: var(--ds-danger); }
+html[data-teacher-theme="light"] .ds-banner { background: rgba(189,74,67,.08); }
+
+/* Appearance (sun / moon switch) */
+html[data-teacher-theme="light"] .ds-theme-toggle { background: #f4f3ee; border-color: #e4e3dc; }
+html[data-teacher-theme="light"] .ds-theme-btn.on { background: #ffffff; color: var(--ds-text); box-shadow: 0 1px 2px rgba(31,32,29,.12), 0 0 0 1px rgba(38,39,35,.06); }
+
+/* confirm dialogs and toast */
+html[data-teacher-theme="light"] .ds-ov { background: rgba(38,39,35,.30); }
+html[data-teacher-theme="light"] .ds-dl { box-shadow: 0 18px 52px rgba(31,32,29,.18); }
+html[data-teacher-theme="light"] .ds-toast { background: #252624; border-color: transparent; color: #faf9f5; box-shadow: 0 8px 26px rgba(31,32,29,.22); }
+html[data-teacher-theme="light"] .ds-toast.is-bad { background: #fbeceb; border-color: #f0c7c4; color: #a53c36; }
+
+/* ── 5. Home modals: Add to Calendar (#reminderModal), Add a class / subject (#teacherSubjectModal) ── */
+html[data-teacher-theme="light"] .mini-cal-modal {
+  --lm-focus: #8a8a82;
+  --lm-ring: rgba(38,39,35,.08);
+  background: rgba(38,39,35,.30);
+}
+html[data-teacher-theme="light"] .mini-cal-modal button:focus-visible,
+html[data-teacher-theme="light"] .mini-cal-modal .teacher-modal-input:focus-visible { outline-color: var(--lm-focus); }
+html[data-teacher-theme="light"] .mini-cal-modal .mini-cal-modal-box {
+  background: #ffffff; border-color: #dfded8; color: #53544e;
+  box-shadow: 0 18px 52px rgba(31,32,29,.18);
+}
+html[data-teacher-theme="light"] .mini-cal-modal .mini-cal-modal-title { color: #282924; }
+html[data-teacher-theme="light"] .mini-cal-modal .mini-cal-modal-close { color: #73746d; }
+html[data-teacher-theme="light"] .mini-cal-modal .mini-cal-modal-close:hover { background: rgba(38,39,35,.055); color: #282924; }
+
+/* tabs: grey track, the active tab is a white chip */
+html[data-teacher-theme="light"] .mini-cal-modal .mini-cal-tab-row { background: #f4f3ee; border-color: #dfded8; }
+html[data-teacher-theme="light"] .mini-cal-modal .mini-cal-tab-btn { color: #73746d; }
+html[data-teacher-theme="light"] .mini-cal-modal .mini-cal-tab-btn:hover { color: #282924; }
+html[data-teacher-theme="light"] .mini-cal-modal .mini-cal-tab-btn--reminder.active,
+html[data-teacher-theme="light"] .mini-cal-modal .mini-cal-tab-btn--academic.active {
+  background: #ffffff; color: #282924; box-shadow: 0 0 0 1px #dfded8, 0 1px 2px rgba(31,32,29,.06);
+}
+
+/* fields */
+html[data-teacher-theme="light"] .mini-cal-modal .teacher-modal-label { color: #53544e; }
+html[data-teacher-theme="light"] .mini-cal-modal .teacher-modal-input {
+  background-color: #ffffff; border-color: #d7d6cf; color: #282924; color-scheme: light;
+}
+html[data-teacher-theme="light"] .mini-cal-modal .teacher-modal-input:hover { border-color: #bdbcb4; }
+html[data-teacher-theme="light"] .mini-cal-modal .teacher-modal-input:focus { border-color: var(--lm-focus); box-shadow: 0 0 0 3px var(--lm-ring); }
+html[data-teacher-theme="light"] .mini-cal-modal .teacher-modal-input::placeholder { color: #94948c; }
+html[data-teacher-theme="light"] .mini-cal-modal select.teacher-modal-input option { background: #ffffff; color: #282924; }
+
+/* error and actions */
+html[data-teacher-theme="light"] .mini-cal-modal .mini-cal-form-error { color: #bd4a43; }
+html[data-teacher-theme="light"] .mini-cal-modal .teacher-modal-cancel { background: #ffffff; border-color: #d7d6cf; color: #454640; }
+html[data-teacher-theme="light"] .mini-cal-modal .teacher-modal-cancel:hover { background: #f2f1ec; color: #282924; }
+html[data-teacher-theme="light"] .mini-cal-modal .teacher-modal-submit { background: #252624; color: #ffffff; }
+html[data-teacher-theme="light"] .mini-cal-modal .teacher-modal-submit:hover { background: #3a3b37; }
+
+}
+
+/* ═══ Fraunces titles: detail-panel headings on Assignments, Quizzes, Announcements,
+   Evaluations, Grades, Resources and Syllabus (desktop, light and dark). Trial:
+   delete this whole block to revert. ═══ */
+@media (min-width: 769px) {
+  html[data-teacher-page="teacher_assignments"] .as-dp-title,
+  html[data-teacher-page="teacher_quizzes"] #qz-main-panel .qz2 h1,
+  html[data-teacher-page="teacher_announcements"] .an-panel-title,
+  html[data-teacher-page="teacher_evaluations"] .ev-dp-title,
+  html[data-teacher-page="teacher_grades"] .gr-dp-title,
+  html[data-teacher-page="teacher_resources"] .rs-panel-title,
+  html[data-teacher-page="teacher_syllabus"] .sbo-dp-title {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 30px;
+    line-height: 1.2;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+  html[data-teacher-page="teacher_assignments"] .as-panel-empty-title,
+  html[data-teacher-page="teacher_quizzes"] #qz-main-panel .qz2-empty h1,
+  html[data-teacher-page="teacher_evaluations"] .ev-panel-empty-title,
+  html[data-teacher-page="teacher_grades"] .gr-dp-empty-title,
+  html[data-teacher-page="teacher_syllabus"] .sbo-panel-empty-title {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: 22px;
+    line-height: 1.2;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+}
+
+/* ═══ Fraunces greeting on the desktop Home (teacher): "Good morning, Mrs Dlamini" or "Welcome to iSkool, ...".
+   The line under it and everything else on Home are unchanged, and so are phones and narrow windows
+   (768px and below). Fraunces is already loaded by teacher_dashboard.php. The selector is id-prefixed to
+   outrank `#api-content-area .tdh h1 { font-family: inherit }` in dashboard.css.
+   To revert, delete this block. ═══ */
+@media (min-width: 769px) {
+  #api-content-area .tdh .tdh-head h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    letter-spacing: -0.02em;
+  }
+}

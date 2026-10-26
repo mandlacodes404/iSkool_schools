@@ -26,14 +26,15 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    font-family: var(--dm-font, 'Geist', 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif);
 }
 .as-sidebar-header {
     padding: 16px;
     border-bottom: 1px solid rgba(255,255,255,0.07);
     font-size: 11px;
-    font-weight: 800;
+    font-weight: 500;
     letter-spacing: 1.5px;
-    color: #ffffff;
+    color: var(--dm-muted, #9b9c92);
     text-transform: uppercase;
     flex-shrink: 0;
     display: flex;
@@ -56,8 +57,8 @@
 .as-sidebar-class-label {
     padding: 8px 16px 4px;
     font-size: 10px;
-    font-weight: 700;
-    color: #8b949e;
+    font-weight: 500;
+    color: var(--dm-muted, #9b9c92);
     text-transform: uppercase;
     letter-spacing: 0.8px;
 }
@@ -65,39 +66,41 @@
     padding-top: 8px;
     padding-bottom: 6px;
 }
+.as-sidebar-class-label.tchr-sidebar-class-label--toggle:hover { color: var(--dm-soft, #c2c3b7); }
 
 .as-sidebar-item {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 10px 16px 10px 32px;
+    margin: 0 8px;
+    padding: 10px 8px 10px 24px;
+    border-radius: 8px;
     cursor: pointer;
     border-left: 3px solid transparent;
     transition: all 0.15s ease;
 }
 .as-sidebar-item:hover { background: rgba(255,255,255,0.04); }
-.as-sidebar-item.active {
-    background: rgba(79,209,197,0.08);
-    border-left-color: #4fd1c5;
+.as-sidebar-item.active { background: #383838; }
+.as-sidebar-dot {
+    flex: none;
+    box-sizing: border-box;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    border: 1.5px solid var(--dm-faint, #7a7b73);
 }
-.as-sidebar-item-icon { flex-shrink: 0; opacity: 0.7; }
+.as-sidebar-dot.is-done { background: #22c55e; border-color: #22c55e; }
 .as-sidebar-item-info { flex: 1; min-width: 0; }
 .as-sidebar-item-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: #c9d1d9;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--dm-soft, #c2c3b7);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
-.as-sidebar-item.active .as-sidebar-item-title { color: #e2e8f0; }
-.as-sidebar-item-meta { font-size: 11px; color: #555e6a; margin-top: 2px; }
-.as-sidebar-status-dot {
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    flex-shrink: 0;
-    background: var(--as-dot-color, #4fd1c5);
-}
+.as-sidebar-item.active .as-sidebar-item-title { color: var(--dm-text, #f0efec); }
+.as-sidebar-item-meta { font-size: 11px; color: var(--dm-faint, #7a7b73); margin-top: 2px; }
 
 /* Right panel */
 .as-main-panel {
@@ -125,10 +128,10 @@
     --as-dp-hover:       var(--dm-hover, rgba(255,255,255,0.055));
     --as-dp-active:      var(--dm-active, rgba(255,255,255,0.095));
     --as-dp-raise:       var(--dm-raise, #151a21);
-    --as-dp-text:        var(--dm-text, #e8eaed);
-    --as-dp-soft:        var(--dm-soft, #b6bbc3);
-    --as-dp-muted:       var(--dm-muted, #8a9099);
-    --as-dp-faint:       var(--dm-faint, #5f656e);
+    --as-dp-text:        var(--dm-text, #f0efec);
+    --as-dp-soft:        var(--dm-soft, #c2c3b7);
+    --as-dp-muted:       var(--dm-muted, #9b9c92);
+    --as-dp-faint:       var(--dm-faint, #7a7b73);
     --as-dp-accent:      var(--dm-accent, #4fd1c5);
     --as-dp-danger:      var(--dm-danger, #f4776f);
     --as-dp-ok:          #22c55e;
@@ -152,7 +155,7 @@
 .as-panel-empty-title {
     margin: 0;
     font-size: 20px;
-    font-weight: 500;
+    font-weight: 400;
     letter-spacing: -0.015em;
     color: var(--as-dp-text);
 }
@@ -204,7 +207,7 @@
     margin: 0;
     font-size: 28px;
     line-height: 1.15;
-    font-weight: 500;
+    font-weight: 400;
     letter-spacing: -0.025em;
     color: var(--as-dp-text);
     overflow-wrap: anywhere;
@@ -229,7 +232,7 @@
     padding: 2px 11px;
     border: 1px solid var(--as-dp-line-strong);
     border-radius: 999px;
-    font-weight: 500;
+    font-weight: 400;
     color: var(--as-dp-soft);
 }
 
@@ -268,7 +271,7 @@
 }
 .as-dp-prog-num {
     font-size: 22px;
-    font-weight: 500;
+    font-weight: 400;
     letter-spacing: -0.02em;
     font-variant-numeric: tabular-nums;
 }
@@ -339,7 +342,7 @@
     text-align: left;
     font-size: 12px;
     font-weight: 400;
-    color: var(--as-dp-faint);
+    color: var(--as-dp-muted);
 }
 .as-dp-table td {
     padding: 12px 20px 12px 0;
@@ -353,8 +356,8 @@
     padding: 16px 0;
     color: var(--as-dp-muted);
 }
-.as-dp-name { font-weight: 500; overflow-wrap: anywhere; }
-.is-missing .as-dp-name { color: var(--as-dp-soft); }
+.as-dp-name { font-weight: 400; overflow-wrap: anywhere; color: var(--as-dp-soft); }
+.is-missing .as-dp-name { color: var(--as-dp-muted); }
 .as-dp-status { display: flex; flex-direction: column; gap: 1px; color: var(--as-dp-soft); }
 .as-dp-status-main { display: flex; align-items: center; gap: 8px; }
 .as-dp-status small { padding-left: 15px; font-size: 12px; color: var(--as-dp-faint); }
@@ -374,7 +377,7 @@
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    font-weight: 500;
+    font-weight: 400;
     color: var(--as-dp-accent);
     text-decoration: none;
 }
@@ -521,6 +524,11 @@
 @media (max-width: 899px) {
     .as-desktop-only-btn { display: none !important; }
 }
+@media (min-width: 900px) {
+    .as-sidebar-header .as-new-btn { font-weight: 500; }
+    /* "Search assignments..." text in the search pill (desktop list pane only) */
+    .as-sidebar input::placeholder { color: #c2c3b7; opacity: 1; }
+}
 
 /* ═══════════════════════════════════════════
    MOBILE LIST — class folders + row + detail page
@@ -604,7 +612,7 @@
     order: 2;
     margin-left: auto;
     flex-shrink: 0;
-    color: #555e6a;
+    color: #73746d;
 }
 /* The wrapper span becomes the real flex row for icon + name + count. */
 .as-mobile-folder-label > span {
@@ -696,7 +704,7 @@
 }
 .as-mobile-row-chevron {
     flex-shrink: 0;
-    color: #555e6a;
+    color: #73746d;
 }
 
 .as-mobile-empty {
@@ -840,6 +848,7 @@
 /* ── Formerly inline styles ── */
 
 .as-new-btn {
+    font-family: inherit;
     text-transform: none;
     letter-spacing: normal;
     font-size: 12px;
@@ -919,6 +928,7 @@
 }
 .as-form-title--desktop {
     font-size: 18px;
+    font-weight: 500;
 }
 
 .as-form-close-btn {

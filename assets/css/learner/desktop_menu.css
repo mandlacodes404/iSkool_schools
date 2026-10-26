@@ -7,9 +7,11 @@
    Load it AFTER learner_dashboard.css. Every layout rule sits inside
    min-width: 769px, so the mobile menu is not affected.
 
-   The sidebar and top bar are one frame; the page is a rounded panel inset
-   into it (see "Inset page"), and the surfaces step up frame < page < card
-   (see "Re-tone" near the end).
+   The page fills the whole area to the right of the sidebar, flush to the
+   window edges (see "Full-bleed page"). The top bar is hidden, except on
+   detail pages where it keeps the back button (see "Header"). The surfaces
+   step up sidebar < page < card (see "Re-tone" near the end). Teal is gone on
+   desktop: one neutral accent (--dm-ac) and a few flat tints (see "Tokens").
 
    Once you are happy with it, the old desktop-only sidebar rules in
    learner_dashboard.css (the min-width: 769px blocks, .desktop-backdrop,
@@ -28,10 +30,10 @@
 html {
   --dm-w: 268px;
   --dm-pad: 10px;
-  --dm-head: 62px; /* brand row and .main-header share this height so their contents line up */
-  --dm-gap: 10px; /* space between the page panel and the window edge */
-  --dm-panel-r: 14px; /* page panel corner radius */
-  --dm-chrome: calc(var(--dm-head) + var(--dm-gap) + 2px); /* top bar + panel margin + panel border: what a page's own "100vh minus header" sum must subtract */
+  --dm-head: 62px; /* brand row height (and the detail-page top bar) */
+  --dm-chrome: 0px; /* space the desktop chrome takes above the page: none now (no top bar, no inset). Kept so a page's own "100vh minus chrome" sum still works */
+  --dm-gap: 0px; /* the old inset margin and corner radius, now 0. Kept only so */
+  --dm-panel-r: 0px; /* anything that still reads them keeps working; delete once nothing does */
   --dm-bg: #0d1117;
   --dm-page: #000000;
   --dm-card: #0d1117;
@@ -44,7 +46,20 @@ html {
   --dm-soft: #b6bbc3;
   --dm-muted: #8a9099;
   --dm-faint: #5f656e;
-  --dm-accent: #4fd1c5;
+  /* Neutral palette. Teal is gone on desktop. Page scripts and stylesheets read these with a teal
+     fallback, e.g. var(--dm-ac, #4fd1c5), so below 769px, where they are not defined, nothing
+     changes. To bring an accent back, change --dm-ac and the tints; nothing else needs touching. */
+  --dm-ac: #d4d1c8; /* warm light grey: text, icons, borders and fills that used to be teal */
+  --dm-ac-on: #1a1814; /* text on a solid --dm-ac fill */
+  --dm-ac-text: var(--dm-soft); /* the light-teal body text */
+  --dm-ac-sel: rgba(255,255,255,.085); /* selected row: a surface step */
+  --dm-ac-bg: rgba(255,255,255,.07); /* tint (was teal .1 to .2) */
+  --dm-ac-bg-soft: rgba(255,255,255,.04); /* faint tint (was teal .04 to .08) */
+  --dm-ac-line: rgba(255,255,255,.09); /* hairline (was teal .15 to .25) */
+  --dm-ac-line-strong: rgba(255,255,255,.16); /* stronger hairline (was teal .28 to .4) */
+  --dm-ac-bar: transparent; /* coloured left bars: none, selection is a surface step instead */
+  --dm-ac-dash: solid; /* dashed borders become plain hairlines */
+  --dm-accent: var(--dm-ac);
   --dm-danger: #f4776f;
   --dm-font: 'Geist', 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --dm-ease: cubic-bezier(.2,.8,.2,1);
@@ -76,22 +91,21 @@ html.dm-ready body .main-content { transition: margin-left .22s var(--dm-ease) !
 html body #desktopMenuToggle,
 html body .desktop-backdrop { display: none !important; }
 
-/* ── Inset page: sidebar and top bar are one frame, the page is a panel set inside it ──
-   All three page panes get the same panel: #api-content-area (API pages), #mainFrame (iframe pages)
-   and .my-class-content (My class). Their scroll rules elsewhere are left alone; the panel only sets
-   size, edge and corners. flex-basis 0 makes the panel fill what the top bar leaves, so a fixed
-   height set on a pane elsewhere is ignored. */
+/* ── Full-bleed page: sidebar on the left, the page filling everything else ──
+   All three page panes get the same treatment: #api-content-area (API pages), #mainFrame (iframe
+   pages) and .my-class-content (My class). Their scroll rules elsewhere are left alone; this only
+   sets size and the one divider next to the sidebar. flex-basis 0 makes the pane fill the full
+   height, so a fixed height set on a pane elsewhere is ignored. */
 html body { background-color: var(--dm-bg); }
-html body .main-content { background-color: var(--dm-bg); }
+html body .main-content { background-color: var(--dm-page); }
 html body #api-content-area,
 html body #mainFrame,
 html body .my-class-content.active {
   flex: 1 1 0; min-height: 0; box-sizing: border-box;
-  margin: 0 var(--dm-gap) var(--dm-gap) 0;
-  border: 1px solid rgba(255,255,255,.08); border-radius: var(--dm-panel-r);
+  margin: 0; border: 0; border-left: 1px solid var(--dm-line); border-radius: 0;
   background: var(--dm-page);
 }
-html body #mainFrame { width: calc(100% - var(--dm-gap)); }
+html body #mainFrame { width: 100%; }
 
 /* ── Sidebar shell ──────────────────────────────────────────────────────── */
 html body .sidebar.dm-menu {
@@ -127,7 +141,7 @@ html body .sidebar.dm-menu .dm-mark { box-sizing: border-box; width: 40px; heigh
 html body .sidebar.dm-menu .dm-mark--initials {
   display: grid; place-items: center;
   background: #20201f; border: 1px solid var(--dm-line);
-  color: #b9bcc1; font: 600 15px/1 var(--dm-font); text-transform: uppercase;
+  color: #c2c3b7; font: 600 15px/1 var(--dm-font); text-transform: uppercase;
 }
 html body .sidebar.dm-menu .dm-brand-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 html body .sidebar.dm-menu .dm-brand-name {
@@ -178,6 +192,8 @@ html body .sidebar.dm-menu .sidebar-links::-webkit-scrollbar { display: none; }
 
 html body .sidebar.dm-menu .dm-item, html body .sidebar.dm-menu .dm-search {
   position: relative; display: flex; align-items: center; gap: 12px;
+  box-sizing: border-box; /* links are anchors (content-box by default): without this, 100% wide plus the side padding overflows
+                             the list and its edge clips the right side of the highlight, so the right corners looked square */
   width: 100%; height: 36px; padding: 0 10px;
   border: 0; border-radius: 8px; background: transparent; box-shadow: none;
   color: var(--dm-soft); font: 450 14px/1 var(--dm-font); letter-spacing: 0;
@@ -191,11 +207,8 @@ html body .sidebar.dm-menu .dm-item > svg { display: none; }
 html body .sidebar.dm-menu .dm-item::before, html body .sidebar.dm-menu .dm-search::before { width: 18px; height: 18px; }
 html body .sidebar.dm-menu .dm-item:hover, html body .sidebar.dm-menu .dm-search:hover { background: var(--dm-hover); color: var(--dm-text); transform: none; }
 html body .sidebar.dm-menu .dm-item.active { background: var(--dm-active); color: var(--dm-text); box-shadow: none; }
-html body .sidebar.dm-menu .dm-item.active::before { background: var(--dm-accent); }
-html body .sidebar.dm-menu .dm-item.active::after {
-  content: ''; position: absolute; left: 0; top: 10px; bottom: 10px; width: 2px;
-  border-radius: 2px; background: var(--dm-accent);
-}
+/* The selected link is a plain surface step: no accent bar on the left and no coloured icon (the icon follows the
+   text colour like every other link). Its colour is set in the Re-tone block near the end. */
 html body .sidebar.dm-menu .dm-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 html body .sidebar.dm-menu .dm-meta {
   display: block; flex: none; max-width: 84px; overflow: hidden; text-overflow: ellipsis;
@@ -203,6 +216,8 @@ html body .sidebar.dm-menu .dm-meta {
 }
 html body .sidebar.dm-menu .dm-sep { display: block; flex: none; height: 1px; margin: 8px 6px; background: var(--dm-line); }
 html body .sidebar.dm-menu .dm-sep--c { order: 8; margin: 8px 6px 6px; }
+
+html body .sidebar.dm-menu .dm-label { font-weight: inherit; }
 
 /* Group headings are pure CSS, so nothing shifts when the script loads.
    To rename one, change its content string below. */
@@ -273,7 +288,7 @@ html body .sidebar.dm-menu .dm-account-root::after {
   -webkit-mask-size: contain; mask-size: contain;
 }
 html body .sidebar.dm-menu .dm-account-root .sidebar-header { grid-area: av; display: block !important; margin: 0 !important; }
-html body .sidebar.dm-menu .dm-account-root .profile-picture-wrapper { display: block !important; }
+html body .sidebar.dm-menu .dm-account-root .profile-picture-wrapper { display: block !important; width: 32px !important; height: 32px !important; }
 html body .sidebar.dm-menu .dm-account-root .desktop-close-btn { display: none !important; }
 html body .sidebar.dm-menu .dm-account-root .initials-avatar { width: 32px !important; height: 32px !important; font-size: 12px !important; letter-spacing: 0; }
 html body .sidebar.dm-menu .dm-account-root img.learner-avatar { width: 32px !important; height: 32px !important; }
@@ -484,13 +499,19 @@ html.dm-collapsed body .sidebar.dm-menu .dm-account-root::after, html.dm-collaps
 .dm-join-actions { display: flex; gap: 8px; margin-top: 16px; }
 .dm-join-actions .dm-join-btn { flex: 1 1 0; margin: 0; }
 
-/* ── Header (companion changes: brand and account now live in the sidebar) ── */
+/* ── Header: hidden on desktop, except on detail pages ──────────────────────
+   The brand and the account live in the sidebar, search is the palette, and the active menu item
+   names the page, so the top bar goes and the page starts at the very top of the window.
+   One exception: configureHeader({ mode: 'detail' }) shows #headerBackBtn here, and that button is
+   the way back from a detail page. desktop_menu.js mirrors it onto <html> as .dm-detail, and while
+   that class is on, the slim bar below stays. The element is never removed, only not shown. */
+html:not(.dm-detail) body .main-header { display: none !important; }
 html body .main-header {
   /* Same surface as the sidebar. !important so a colour left inline by the mobile
      scroll handler (window resized across the breakpoint) can never show on desktop. */
   background: var(--dm-bg) !important; padding: 0 24px; min-height: 62px;
   box-sizing: border-box; gap: 12px;
-  /* No divider: the page panel below has its own edge. !important for the same reason as the background. */
+  /* No divider: the page below has its own edge. !important for the same reason as the background. */
   border-bottom: 0 !important;
 }
 html body .main-header #headerLeft,
@@ -504,14 +525,57 @@ html body .main-header .school-name {
   display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   color: var(--dm-text); font: 600 15px/1.2 var(--dm-font); letter-spacing: -.005em;
 }
+/* Detail pages: the bar is showing, so the page below it gets a top edge as well. */
+html.dm-detail body #api-content-area,
+html.dm-detail body #mainFrame,
+html.dm-detail body .my-class-content.active { border-top: 1px solid var(--dm-line); }
 
-/* ── Re-tone: frame < page < card ───────────────────────────────────────────
-   The frame (sidebar + top bar) is the darkest step, the page panel sits one step above it and
-   cards one step above that. Delete this whole block to fall back to the plain inset look (black
-   page, #0d1117 frame and cards). --card-bg is the token learner_dashboard.css already uses for
+/* ── Re-tone: sidebar < page < card ───────────────────────────────────────────
+   The sidebar is the darkest step, the page sits one step above it and cards one step above
+   that. Delete this whole block to fall back to the plain look (black page, #0d1117 sidebar and
+   cards). --card-bg is the token learner_dashboard.css already uses for
    cards, so anything built on it follows. Colours hardcoded in other stylesheets do not follow. */
-html { --dm-bg: #0a0d12; --dm-page: #10151c; --dm-card: #181e27; }
+/* Neutral greys, in step with the Settings modal: sidebar #111111, page and panes #151515, cards and floating
+   panels (--dm-card, --dm-raise: quick search, shortcuts sheet, Join a class dialog) #1a1a19, the modal panel colour. */
+html { --dm-bg: #111111; --dm-page: #151515; --dm-card: #1a1a19; --dm-raise: #1a1a19; }
+/* Text scale (warm): titles #f0efec, body #c2c3b7, meta lines #9b9c92, faint #7a7b73. */
+html { --dm-text: #f0efec; --dm-soft: #c2c3b7; --dm-muted: #9b9c92; --dm-faint: #7a7b73; }
+/* Sidebar, in step with the Settings modal: the selected link uses the modal's selected-item grey (#383838) and the
+   initials avatar uses the modal's avatar (#2d2d2c, soft letters, medium weight) instead of the old maroon. */
+/* Menu link text: #c2c3b7 normally, #f0efec when selected (hover keeps its own colour). */
+html body .sidebar.dm-menu .dm-item { color: #c2c3b7; }
+html body .sidebar.dm-menu .dm-item.active { background: #383838; color: #f0efec; }
+/* Search button (text and icon), its shortcut pill text, the drawer icon, the avatar initials and the account up/down arrows: #c2c3b7. Hover keeps its own colour. */
+html body .sidebar.dm-menu .dm-search { color: #c2c3b7; }
+html body .sidebar.dm-menu .dm-kbd { color: #c2c3b7; }
+html body .sidebar.dm-menu .dm-toggle,
+html.dm-collapsed body .sidebar.dm-menu .dm-toggle { color: #c2c3b7; }
+html body .sidebar.dm-menu .dm-account-root::after { background: #c2c3b7; }
+/* Group headings: #c2c3b7. */
+html body .sidebar.dm-menu .sidebar-links::before,
+html body .sidebar.dm-menu .dm-sep--a { color: #c2c3b7; }
+html body .sidebar.dm-menu .dm-account-root .initials-avatar { background-color: #2d2d2c; color: #c2c3b7; font-weight: 500; }
 html body { --card-bg: var(--dm-card); }
+
+/* Selector panel: the left column of the API pages is the same colour as the main panel (both are --dm-page).
+   Each page paints its own list column with a hard-coded #12161c (.lan-sidebar in announcements.css, .las-sidebar in
+   assignments.css) and the sticky group heading ("Earlier", "Due soon" ...) with the same colour, so the heading
+   follows too or it would show as a band. manual.js also injects .lqz-flat-sidebar with #12161c !important for pages
+   that use it. The extra "html body" makes these win on specificity. */
+html body .lqz-flat-sidebar,
+html body .lan-sidebar,
+html body .las-sidebar,
+html body .lan-gh,
+html body .las-gh { background: var(--dm-page) !important; }
+/* Safety net for the pages whose own CSS has not been checked yet (Quiz, Resources, Evaluations, Gradebook,
+   Syllabus): the column inside the flat layout that holds the scrolling list. Kept as its own rule so a browser
+   without :has() ignores only this one. */
+html body .lqz-flat-layout > :has(.lqz-sidebar-scroll, .lrs-sidebar-scroll, .lev-sidebar-scroll, .syl-dt-sidebar-scroll, .grades-dt-sidebar-scroll) { background: var(--dm-page) !important; }
+
+/* Teal icons drawn with stroke="#4fd1c5" or fill="#4fd1c5" attributes in the page scripts: an attribute
+   cannot hold var(), so they follow the neutral accent here instead. */
+[stroke="#4fd1c5" i] { stroke: var(--dm-ac); }
+[fill="#4fd1c5" i] { fill: var(--dm-ac); }
 
 @keyframes dm-pop { from { opacity: 0; transform: translateY(4px) scale(.98); } to { opacity: 1; transform: none; } }
 @keyframes dm-fade { from { opacity: 0; } to { opacity: 1; } }
@@ -522,4 +586,78 @@ html body { --card-bg: var(--dm-card); }
   html body .sidebar.dm-menu, html body .main-content, .dm-item, .dm-pop, .dm-palette, .dm-palette-panel, .dm-keys, .dm-keys-panel, .dm-join, .dm-join-panel, .dm-tip {
     transition: none !important; animation: none !important;
   }
+}
+
+/* ═══ Light mode: sidebar, quick search, shortcuts, rail tooltips and the Join a class dialog ═══════════════
+   Applies only when <html data-learner-theme="light"> (set from Settings > Appearance) and the window is 769px or
+   wider. Same palette as the teacher light mode. The Settings modal and the account popover are in
+   desktop_settings.css. Dark mode and phones are untouched. To remove it, delete this block. */
+@media (min-width: 769px) {
+
+html[data-learner-theme="light"] {
+  --dm-bg: #f4f3ee;        /* sidebar */
+  --dm-page: #faf9f5;      /* page and panes */
+  --dm-card: #ffffff;
+  --dm-raise: #ffffff;     /* quick search, shortcuts sheet, Join a class dialog */
+  --dm-hover: rgba(38,39,35,.055);
+  --dm-active: rgba(38,39,35,.075);
+  --dm-line: #dfded8;
+  --dm-line-strong: #d0cfc8;
+  --dm-text: #282924;
+  --dm-soft: #53544e;
+  --dm-muted: #73746d;
+  --dm-faint: #8b8b83;
+  --dm-ac: #5e5d59;
+  --dm-ac-on: #ffffff;
+  --dm-ac-text: var(--dm-soft);
+  --dm-ac-sel: rgba(38,39,35,.075);
+  --dm-ac-bg: rgba(38,39,35,.06);
+  --dm-ac-bg-soft: rgba(38,39,35,.035);
+  --dm-ac-line: rgba(38,39,35,.10);
+  --dm-ac-line-strong: rgba(38,39,35,.18);
+  --dm-accent: var(--dm-ac);
+  --dm-danger: #bd4a43;
+  color-scheme: light;
+}
+
+/* sidebar: the dark re-tone block hard-codes these, so each one is set again here */
+html[data-learner-theme="light"] body .sidebar.dm-menu .dm-item { color: var(--dm-soft); }
+html[data-learner-theme="light"] body .sidebar.dm-menu .dm-item.active { background: var(--dm-active); color: var(--dm-text); }
+html[data-learner-theme="light"] body .sidebar.dm-menu .dm-search { color: var(--dm-soft); background: #ffffff; }
+html[data-learner-theme="light"] body .sidebar.dm-menu .dm-kbd { color: var(--dm-muted); }
+html[data-learner-theme="light"] body .sidebar.dm-menu .dm-toggle,
+html[data-learner-theme="light"].dm-collapsed body .sidebar.dm-menu .dm-toggle { color: var(--dm-muted); }
+html[data-learner-theme="light"] body .sidebar.dm-menu .dm-account-root::after { background: var(--dm-soft); }
+html[data-learner-theme="light"] body .sidebar.dm-menu .sidebar-links::before,
+html[data-learner-theme="light"] body .sidebar.dm-menu .dm-sep--a { color: var(--dm-muted); }
+html[data-learner-theme="light"] body .sidebar.dm-menu .dm-account-root .initials-avatar { background-color: #e9e8e2; color: #555650; }
+html[data-learner-theme="light"] body .sidebar.dm-menu .dm-mark--initials { background: #ffffff; color: var(--dm-soft); }
+
+html[data-learner-theme="light"] body .sidebar.dm-menu .dm-item:hover,
+html[data-learner-theme="light"] body .sidebar.dm-menu .dm-search:hover,
+html[data-learner-theme="light"] body .sidebar.dm-menu .dm-toggle:hover { color: var(--dm-text); }
+
+/* Join a class form in the sidebar */
+html[data-learner-theme="light"] body .sidebar.dm-menu .join-class-form { background: #ffffff; }
+html[data-learner-theme="light"] body .sidebar.dm-menu .join-class-form select { background: #ffffff; color-scheme: light; }
+html[data-learner-theme="light"] body .sidebar.dm-menu .join-class-form select:hover { border-color: #bdbcb4; }
+html[data-learner-theme="light"] body .sidebar.dm-menu .join-class-form .join-class-btn:hover { background: #3a3b37; color: #ffffff; }
+
+/* rail tooltip: a dark pill, like Claude's */
+html[data-learner-theme="light"] .dm-tip { background: #252624; border-color: transparent; color: #faf9f5; box-shadow: 0 6px 18px rgba(31,32,29,.22); }
+html[data-learner-theme="light"] .dm-tip kbd { color: #b9b9b1; }
+
+/* quick search, shortcuts sheet and Join a class dialog: lighter backdrop and shadow */
+html[data-learner-theme="light"] .dm-palette,
+html[data-learner-theme="light"] .dm-keys,
+html[data-learner-theme="light"] .dm-join { background: rgba(38,39,35,.30); }
+html[data-learner-theme="light"] .dm-palette-panel,
+html[data-learner-theme="light"] .dm-keys-panel,
+html[data-learner-theme="light"] .dm-join-panel { box-shadow: 0 18px 52px rgba(31,32,29,.18); }
+html[data-learner-theme="light"] .dm-join-body .dm-note { border-color: rgba(189,74,67,.28); background: rgba(189,74,67,.08); }
+html[data-learner-theme="light"] .dm-join-body select { background: #ffffff; color-scheme: light; }
+html[data-learner-theme="light"] .dm-join-body select:hover { border-color: #bdbcb4; }
+html[data-learner-theme="light"] .dm-join-body .join-class-btn:hover,
+html[data-learner-theme="light"] .dm-join-btn--go:hover { background: #3a3b37; color: #ffffff; }
+
 }

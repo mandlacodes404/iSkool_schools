@@ -107,34 +107,36 @@ function renderTeacherGrades(data) {
     if (!data || data.length === 0) {
         sidebarHtml = `<p class="gr-empty-state-inline">No assessments found.</p>`;
     } else {
+        // One group per class (terms are merged into the same class folder)
+        const classGroups = new Map();
         data.forEach(termData => {
-            sidebarHtml += `<div class="gr-sidebar-term-label">TERM ${termData.term}</div>`;
-            termData.classes.forEach((cls, clsIdx) => {
-                const classGroupId = `gr-class-group-${termData.term}-${clsIdx}`;
-                let itemsHtml = '';
-                cls.quizzes.forEach(quiz => {
-                    itemsHtml += `
-                        <div class="gr-sidebar-item" id="gr-sidebar-${quiz.id}"
-                            onclick="selectDesktopGradeQuiz(${quiz.id})">
-                            <div class="gr-sidebar-item-icon">
-                                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
-                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                    <polyline points="14 2 14 8 20 8"></polyline>
-                                </svg>
-                            </div>
-                            <div class="gr-sidebar-item-info">
-                                <div class="gr-sidebar-item-title">${escapeHtml(quiz.title)}</div>
-                                <div class="gr-sidebar-item-meta">${escapeHtml(quiz.created_at)}</div>
-                            </div>
-                        </div>`;
-                });
-                sidebarHtml += window.buildCollapsibleClassGroup(
-                    classGroupId,
-                    'gr-sidebar-class-label',
-                    escapeHtml(cls.class_name),
-                    itemsHtml
-                );
+            termData.classes.forEach(cls => {
+                if (!classGroups.has(cls.class_name)) classGroups.set(cls.class_name, []);
+                classGroups.get(cls.class_name).push(...cls.quizzes);
             });
+        });
+
+        let clsIdx = 0;
+        classGroups.forEach((quizzes, className) => {
+            const classGroupId = `gr-class-group-${clsIdx++}`;
+            let itemsHtml = '';
+            quizzes.forEach(quiz => {
+                itemsHtml += `
+                    <div class="gr-sidebar-item" id="gr-sidebar-${quiz.id}"
+                        onclick="selectDesktopGradeQuiz(${quiz.id})">
+                        <span class="gr-sidebar-dot" aria-hidden="true"></span>
+                        <div class="gr-sidebar-item-info">
+                            <div class="gr-sidebar-item-title">${escapeHtml(quiz.title)}</div>
+                            <div class="gr-sidebar-item-meta">${escapeHtml(quiz.created_at)}</div>
+                        </div>
+                    </div>`;
+            });
+            sidebarHtml += window.buildCollapsibleClassGroup(
+                classGroupId,
+                'gr-sidebar-class-label',
+                escapeHtml(className),
+                itemsHtml
+            );
         });
     }
 
@@ -203,7 +205,7 @@ function renderTeacherGrades(data) {
                             onclick="openMobileTeacherGradeQuiz(${quiz.id})"
                             onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMobileTeacherGradeQuiz(${quiz.id});}">
                             <div class="gr-mobile-row-icon">
-                                <svg viewBox="0 0 24 24" width="20" height="20" stroke="#22c55e" stroke-width="1.2" fill="none">
+                                <svg viewBox="0 0 24 24" width="20" height="20" stroke="#73746d" stroke-width="1.2" fill="none">
                                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                                     <polyline points="14 2 14 8 20 8"></polyline>
                                     <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -223,7 +225,7 @@ function renderTeacherGrades(data) {
                 });
 
                 const folderIcon = `
-                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="#22c55e" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="gr-mobile-folder-icon">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="#73746d" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="gr-mobile-folder-icon">
                         <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
                     </svg>`;
 
@@ -290,6 +292,49 @@ function grPlural(n, word) {
 
 function grToast(message) {
     if (typeof window.showToast === 'function') window.showToast(message);
+}
+
+// ─────────────────────────────────────────────
+// SAVING MARKS WITHOUT SIGNAL
+// With no connection, service-worker.js keeps the save on the phone and sends it when the phone is back online. The
+// save then answers 202 { queued: true } instead of { success: true }. Whether the marks were applied is reported
+// later by the connection strip (assets/js/shared/net_status.js), not here.
+// ─────────────────────────────────────────────
+const GR_SAVED_ON_PHONE = 'Saved on this phone. It will send when you are back online.';
+
+/** Headers for a marks save: the CSRF token, and who is saving, so the saved copy can only be sent as this teacher. */
+function grSaveHeaders() {
+    const headers = { 'X-CSRF-Token': getCsrfToken() };
+    const me = window.ISKOOL_TEACHER && window.ISKOOL_TEACHER.email;
+    if (me) headers['X-iSkool-Queue-User'] = me;
+    return headers;
+}
+
+/** Adds the marks the teacher is looking at to a save. If the save has to wait for signal, the server applies it later
+ * only if the marks are still those (includes/marks_guard.php); an ordinary online save ignores these fields. */
+function grAddBaseline(fd, quizId, email) {
+    const data = window.currentQuizData;
+    if (!data || (data.quiz_id != null && String(data.quiz_id) !== String(quizId))) return;
+    const learner = (data.learners || []).find(l => String(l.email) === String(email));
+    if (!learner) return;
+    const has = learner.score !== null && learner.score !== undefined && learner.score !== '';
+    fd.append('expected_known', '1');
+    fd.append('expected_score', has ? learner.score : '');
+    fd.append('expected_total', has && learner.total !== null && learner.total !== undefined ? learner.total : '');
+}
+
+/** Shows the marks the teacher typed in the loaded table while their save waits (the real marks are read again once
+ * the save has been sent or refused). Kept in the per-quiz cache so leaving this quiz and coming back, still offline,
+ * shows the same marks instead of failing to load. */
+function grApplyQueuedMarks(data, quizId, email, score, total) {
+    if (!data) return;
+    const learner = (data.learners || []).find(l => String(l.email) === String(email));
+    if (learner) {
+        learner.score = parseFloat(score);
+        learner.total = parseFloat(total);
+        learner.percentage = null;
+    }
+    window._teacherGradeQuizCache[quizId] = { type: 'standard', data };
 }
 
 // Same bands as getGradeBadgeClass: 75+ / 50-74 / below 50.
@@ -678,21 +723,25 @@ async function grSaveRow(email) {
     fd.append('user_email', email);
     fd.append('score',      score);
     fd.append('total',      total);
+    grAddBaseline(fd, quizId, email);
 
     const saveBtn = document.querySelector('#gr-std-rows [data-gr="save"]');
     const hideLoader = window.showTeacherButtonLoader(saveBtn);
     try {
-        const res = await fetch('api/teacher/save_marks.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd });
+        const res = await fetch('api/teacher/save_marks.php', { method: 'POST', headers: grSaveHeaders(), body: fd });
         const result = await res.json();
-        if (!result.success) { fail(result.error || 'Failed to save marks.'); return; }
+        const queued = result.queued === true;
+        if (!queued && !result.success) { fail(result.error || 'Failed to save marks.'); return; }
 
-        // Re-read the grades so the percentage matches what learners will see.
+        // Re-read the grades so the percentage matches what learners will see (not possible while the save waits).
         let fresh = null;
-        try {
-            const r2 = await fetch(`api/teacher/get_quiz_grades.php?quiz_id=${quizId}`);
-            const f = await r2.json();
-            if (f && !f.error && Array.isArray(f.learners)) fresh = f;
-        } catch (_) { /* fall back to the local update below */ }
+        if (!queued) {
+            try {
+                const r2 = await fetch(`api/teacher/get_quiz_grades.php?quiz_id=${quizId}`);
+                const f = await r2.json();
+                if (f && !f.error && Array.isArray(f.learners)) fresh = f;
+            } catch (_) { /* fall back to the local update below */ }
+        }
 
         const idx = (data.learners || []).findIndex(l => String(l.email) === String(email));
         if (fresh) {
@@ -702,14 +751,15 @@ async function grSaveRow(email) {
             data.learners[idx].score = parseFloat(score);
             data.learners[idx].total = parseFloat(total);
             data.learners[idx].percentage = null;
-            delete window._teacherGradeQuizCache[quizId];   // so the next visit re-reads it
+            if (queued) window._teacherGradeQuizCache[quizId] = { type: 'standard', data };   // see grApplyQueuedMarks
+            else delete window._teacherGradeQuizCache[quizId];   // so the next visit re-reads it
         }
 
         window._grEdit = null;
         window._grFlash = email;
         grRefreshStandard();
         setTimeout(() => { window._grFlash = null; }, 1500);
-        grToast('Marks saved');
+        grToast(queued ? GR_SAVED_ON_PHONE : 'Marks saved');
 
         // Fast data entry: land on the next learner who still has no mark.
         const learners = (window.currentQuizData.learners || []);
@@ -793,7 +843,7 @@ window.openMobileTeacherGradeQuiz = async function(quizId) {
     window.persistTeacherSectionState();
 
     apiArea.innerHTML = `
-        <div class="gr-panel-empty">
+        <div class="gr-panel-empty gr-mobile-detail">
             <svg viewBox="0 0 24 24" width="30" height="30" stroke="#4fd1c5" stroke-width="2" fill="none"
                 class="gr-panel-loading-spinner">
                 <circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="12"></circle>
@@ -828,7 +878,7 @@ window.openMobileTeacherGradeQuiz = async function(quizId) {
             renderMobileGradeDetail('standard', data, apiArea);
         }
     } catch (e) {
-        apiArea.innerHTML = `<div class="gr-panel-empty"><p class="gr-panel-error-text">Error loading grades.</p></div>`;
+        apiArea.innerHTML = `<div class="gr-panel-empty gr-mobile-detail"><p class="gr-panel-error-text">Error loading grades.</p></div>`;
     }
 };
 
@@ -853,7 +903,7 @@ function renderMobileGradeDetail(type, data, apiArea) {
 // calls openEditMarksFromElement at all).
 function renderMobileStandardGrades(data, apiArea) {
     let html = `
-        <div class="gr-panel-content">
+        <div class="gr-panel-content gr-mobile-detail">
             <div class="gr-panel-header">
                 <div class="gr-panel-title">${escapeHtml(data.quiz_title)}</div>
                 <div class="gr-panel-meta">${data.learners.length} learner${data.learners.length !== 1 ? 's' : ''}</div>
@@ -904,7 +954,7 @@ function renderMobileOpenEndedGrades(data, apiArea) {
     const fullyGraded = data.quiz_fully_graded === true || data.quiz_fully_graded === 1;
 
     let html = `
-        <div class="gr-panel-content">
+        <div class="gr-panel-content gr-mobile-detail">
             <div class="gr-panel-header">
                 <div>
                     <div class="gr-panel-title">${escapeHtml(data.quiz_title || 'Assessment Results')}</div>
@@ -1587,12 +1637,28 @@ window.saveMarks = async function(email, quizId) {
     fd.append('user_email', email);
     fd.append('score',      score);
     fd.append('total',      total);
+    grAddBaseline(fd, quizId, email);
 
     const hideSubmitLoader = window.showTeacherButtonLoader(saveBtn);
 
     try {
-        const res  = await fetch('api/teacher/save_marks.php', { method: 'POST', headers: { 'X-CSRF-Token': getCsrfToken() }, body: fd });
+        const res  = await fetch('api/teacher/save_marks.php', { method: 'POST', headers: grSaveHeaders(), body: fd });
         const data = await res.json();
+
+        if (data.queued === true) {
+            // No signal: the save waits on the phone. Show the teacher's marks and go back to the list, which can't be re-read now.
+            grApplyQueuedMarks(window.currentQuizData, quizId, email, score, total);
+            successDiv.textContent = GR_SAVED_ON_PHONE;
+            successDiv.style.display = 'block';
+            setTimeout(() => {
+                const current = window.currentQuizData;
+                if (!current) return;
+                const panelNow = document.getElementById('gr-main-panel');
+                if (panelNow) renderGradesInPanel(current, panelNow);
+                else renderQuizGrades(current);
+            }, 800);
+            return;
+        }
 
         if (data.success) {
             successDiv.textContent = 'Marks saved successfully!';

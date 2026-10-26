@@ -138,6 +138,7 @@ foreach ($evaluations as $eval) {
         'title'          => $eval['title'],
         'description'    => $eval['description'],
         'response_count' => (int)$eval['response_count'],
+        'display_date'   => !empty($eval['created_at']) ? date('j M Y', strtotime($eval['created_at'])) : '',
         'statements'     => $statements,
         'comments'       => $comments
     ];
