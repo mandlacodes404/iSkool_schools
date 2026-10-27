@@ -109,6 +109,23 @@ final class ParentRefreshAndOfflineTest extends TestCase
         $this->assertStringContainsString('var(--pa-tabs-h)', $rule);
     }
 
+    public function test_on_phones_the_page_itself_is_locked_to_one_screen_like_the_learner_app(): void
+    {
+        $css = $this->source('assets/css/parent/parent_app.css');
+        $phone = substr($css, strpos($css, '/* ── Phones'));
+
+        // learner_dashboard.css locks body the same way: the document must not be draggable at all
+        $this->assertStringContainsString('body { height: 100vh; height: 100dvh; overflow: hidden; overscroll-behavior: none; }', $phone);
+        $this->assertStringContainsString('html { overscroll-behavior: none; touch-action: manipulation; }', $phone);
+        // .pa has "min-height: 100vh" for desktop. 100vh is taller than what a phone shows while its address bar is up,
+        // so left alone the document was a little taller than the screen and a drag on the header moved the whole page.
+        $this->assertStringContainsString('.pa { display: block; min-height: 0; height: 100vh; height: 100dvh; }', $phone);
+        // and nothing else on the phone layout may size the page with the taller unit on its own
+        $this->assertSame(0, preg_match('/min-height:\s*(calc\()?100vh/', $phone), 'a 100vh minimum on a phone makes the page taller than the screen');
+        // desktop keeps scrolling as a page
+        $this->assertStringContainsString('.pa { min-height: 100vh; display: flex; }', substr($css, 0, strpos($css, '/* ── Phones')));
+    }
+
     public function test_going_to_another_screen_scrolls_the_content_area_back_to_the_top(): void
     {
         $js = $this->source('assets/js/parent/parent_app.js');
@@ -133,7 +150,7 @@ final class ParentRefreshAndOfflineTest extends TestCase
     {
         // The service worker caches /assets/ by full URL, so the numbers in the page must move with the files
         $page = $this->source('parent_dashboard.php');
-        $this->assertStringContainsString('parent_app.css?v=1.10', $page);
-        $this->assertStringContainsString('parent_app.js?v=1.10', $page);
+        $this->assertStringContainsString('parent_app.css?v=1.11', $page);
+        $this->assertStringContainsString('parent_app.js?v=1.11', $page);
     }
 }
