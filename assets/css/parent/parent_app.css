@@ -209,6 +209,37 @@ html[data-theme="dark"] .pa-chip[aria-pressed="true"] .pa-chip-av { background: 
 }
 .pa-loading { padding: 8px 2px; }
 
+/* ── "No connection" note: the page on show is the last copy this phone saw ─────────────────────────────── */
+.pa-offline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding: 10px 12px 10px 14px;
+    border: 1px solid var(--pa-line);
+    border-radius: 14px;
+    background: var(--pa-card);
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--pa-soft);
+}
+.pa-offline[hidden] { display: none; }
+.pa-offline::before { content: ''; flex: none; width: 9px; height: 9px; border-radius: 50%; background: #d9922b; }
+.pa-offline-text { flex: 1 1 auto; min-width: 0; }
+.pa-offline-btn {
+    flex: none;
+    min-height: 36px;
+    padding: 0 14px;
+    border: 1px solid var(--pa-line-strong);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--pa-text);
+    font: inherit;
+    font-weight: var(--pa-w-bold);
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
 /* ── Add a child ────────────────────────────────────────────────────────────────────────────────────────── */
 .pa-add-form { display: flex; flex-direction: column; align-items: flex-start; max-width: 520px; margin-top: 18px; }
 .pa-add-label { font-size: 13px; font-weight: var(--pa-w-mid); color: var(--pa-muted); }
@@ -564,8 +595,13 @@ html[data-theme="dark"] .pa-chip[aria-pressed="true"] .pa-chip-av { background: 
     }
     .pa-avatar-btn .pa-avatar { width: 36px; height: 36px; font-size: 13px; font-weight: 800; }
 
-    .pa-content { max-width: none; padding: 20px 0 calc(var(--pa-tabs-h) + env(safe-area-inset-bottom, 0px) + 28px); }
+    /* Pull to refresh (pull_to_refresh.js) is on .pa-content. The browser's own pull-to-refresh, which reloads the
+       whole app, would also fire on the page at the top, so it is kept inside the page. min-height: a short page
+       (a syllabus with two subjects) can still be pulled from anywhere below the header. */
+    html { overscroll-behavior-y: contain; }
+    .pa-content { max-width: none; min-height: calc(100vh - 57px); padding: 20px 0 calc(var(--pa-tabs-h) + env(safe-area-inset-bottom, 0px) + 28px); }
     .pa-switcher { padding: 0 16px; margin-bottom: 8px; }
+    .pa-offline { margin: 0 16px 12px; }
 
     /* Flat, edge-to-edge sections like the learner phone pages */
     .pa-card { background: transparent; border: 0; border-radius: 0; }

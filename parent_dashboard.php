@@ -117,8 +117,9 @@ function pa_account_row(string $initials, string $name): string
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Geist:wght@400;500;600&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/parent/parent_app.css?v=1.8">
+    <link rel="stylesheet" href="assets/css/parent/parent_app.css?v=1.9">
     <link rel="stylesheet" href="assets/css/parent/parent_menu.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/shared/pull_to_refresh.css?v=1.0">
 </head>
 <body>
 <div class="pa" id="parentApp" data-email="<?= pa_e($parent_email) ?>" data-version="<?= pa_e(iskool_app_version_label()) ?>">
@@ -169,6 +170,8 @@ function pa_account_row(string $initials, string $name): string
         </header>
 
         <div class="pa-content">
+            <!-- Shown by parent_app.js when the page on screen is the last copy this phone saw (no connection) -->
+            <div class="pa-offline" id="paOffline" role="status" hidden></div>
             <div class="pa-switcher" id="paSwitcher" hidden></div>
             <main class="pa-view" id="paView" tabindex="-1" aria-busy="true">
                 <p class="pa-muted pa-loading">Loading…</p>
@@ -210,6 +213,7 @@ function pa_account_row(string $initials, string $name): string
 </div>
 
 <script src="assets/js/parent/parent_menu.js?v=1.0"></script>
-<script src="assets/js/parent/parent_app.js?v=1.8"></script>
+<script src="assets/js/shared/pull_to_refresh.js?v=1.0"></script>
+<script src="assets/js/parent/parent_app.js?v=1.9"></script>
 </body>
 </html>
