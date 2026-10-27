@@ -95,3 +95,16 @@ The tile bug and the tap target are small and safe to fix first; the rest grow i
 | E | Trend across terms per subject (item 5) | Largest | Needs an API change and new UI. A product decision, so it can wait. |
 
 Suggested order: A first, then B and C together, then D. E is for later.
+
+## Status
+
+| Item | Status |
+| --- | --- |
+| 1. Subject tiles run off the screen | Fixed in PR #49. |
+| 2. Pull to refresh | Done in PR #50. |
+| 2. Offline copy | Done in PR #50, in a smaller form than step D above. |
+| 3. Back button, 4. Tap targets and small text, 5. Trend across terms | Not started. |
+
+**Offline copy: what changed from the plan.** Step D assumed the service worker would hold the copy. It cannot, because `service-worker.js` clears its data caches whenever `dashboard.php` or `index.php` is requested, and the parent page is served from `dashboard.php`. So the copy lives in the page instead: the last answer for each screen is kept while the app stays open, and shown with a note ("You are offline. Showing what you last saw today at 07:30.") when the server cannot be reached. The service worker is not changed. The limit is that it does not survive closing or reloading the app, and a cold start with no signal still needs the network.
+
+**Also noticed, not changed:** the parent page does not load `pwa_prompts.js`, so an installed parent app never shows the "update available" prompt that learners and teachers get.
