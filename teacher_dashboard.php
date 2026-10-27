@@ -76,6 +76,14 @@ foreach (array_slice($schoolNameWords, 0, 2) as $word) {
     $schoolInitials .= strtoupper(substr($word, 0, 1));
 }
 if ($schoolInitials === '') { $schoolInitials = '??'; }
+
+// The current academic year, shown under the school name in the menu (same query as learner_dashboard.php).
+// Empty when no year is marked as current: then the line is left out.
+$teacherYearName = '';
+$teacherYearResult = $conn->query("SELECT name FROM academic_years WHERE is_current = 1 LIMIT 1");
+if ($teacherYearResult && ($teacherYearRow = $teacherYearResult->fetch_assoc())) {
+    $teacherYearName = trim((string)($teacherYearRow['name'] ?? ''));
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -115,8 +123,8 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Geist:wght@400..600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=14.1">
-    <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_menu.css?v=2.4">
-    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_menu.css?v=1.5">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_menu.css?v=2.5">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_menu.css?v=1.6">
     <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_settings.css?v=1.3">
     <link rel="stylesheet" href="assets/css/shared/pwa_prompts.css?v=1.0">
     <link rel="stylesheet" href="assets/css/shared/pull_to_refresh.css?v=1.0">
@@ -293,7 +301,7 @@ if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.wasLockedAtLoad
         <?php endif; ?>
         <div class="dm-brand-text">
             <span class="dm-brand-name" title="<?= htmlspecialchars($schoolName) ?>"><?= htmlspecialchars($schoolName) ?></span>
-            <span class="dm-brand-sub">Teacher</span>
+            <?php if ($teacherYearName !== ''): ?><span class="dm-brand-sub"><?= htmlspecialchars($teacherYearName) ?></span><?php endif; ?>
         </div>
         <button type="button" class="dm-toggle" id="dmToggle" aria-controls="dmSidebar" aria-expanded="true" aria-label="Collapse sidebar"></button>
     </div>
@@ -326,6 +334,7 @@ if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.wasLockedAtLoad
     </div>
 
     <div class="teacher-name"><?= htmlspecialchars($teacherFullName) ?></div>
+    <div class="teacher-role">Teacher</div>
     <div class="teacher-email"><?= htmlspecialchars($teacherEmail) ?></div>
     </div>
 

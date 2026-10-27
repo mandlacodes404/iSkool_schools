@@ -265,7 +265,7 @@ html body .sidebar.dm-menu a[data-page="teacher_settings"]      { order: 110; --
 html body .sidebar.dm-menu .dm-account-root {
   order: 9; flex: none;
   display: grid; grid-template-columns: 32px minmax(0, 1fr) 16px;
-  grid-template-areas: "av name chev";
+  grid-template-areas: "av name chev" "av role chev"; align-content: center;
   column-gap: 10px; align-items: center;
   padding: 8px; border-radius: 10px; cursor: pointer;
   transition: background .12s ease;
@@ -288,7 +288,12 @@ html body .sidebar.dm-menu .teacher-name {
   color: var(--dm-text); font: 500 14px/1.25 var(--dm-font);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-/* The account block shows the name only. The email is still in the account menu. */
+/* The account block shows the name with the role ("Teacher") under it, like the parent app. The email is still in the account menu. */
+html body .sidebar.dm-menu .teacher-role {
+  grid-area: role; margin: 1px 0 0;
+  color: var(--dm-muted); font: 400 12px/1.25 var(--dm-font);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 html body .sidebar.dm-menu .teacher-email { display: none; }
 
 /* ── Focus ──────────────────────────────────────────────────────────────── */
@@ -319,7 +324,7 @@ html.dm-collapsed body .sidebar.dm-menu .dm-account-root {
   grid-template-columns: 32px; grid-template-areas: "av";
   justify-content: center; padding: 6px 0;
 }
-html.dm-collapsed body .sidebar.dm-menu .dm-account-root::after, html.dm-collapsed body .sidebar.dm-menu .teacher-name { display: none; }
+html.dm-collapsed body .sidebar.dm-menu .dm-account-root::after, html.dm-collapsed body .sidebar.dm-menu .teacher-name, html.dm-collapsed body .sidebar.dm-menu .teacher-role { display: none; }
 
 /* ── Tooltip (rail + toggle) ────────────────────────────────────────────── */
 .dm-tip {

@@ -234,8 +234,8 @@ $parentLink = ((int)$parentCount > 0); // true when at least one parent is linke
     <link rel="stylesheet" href="assets/css/learner/resources.css?v=3.3">
      <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=5.5">
      <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=14.4">
-    <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=3.1">
-    <link rel="stylesheet" href="assets/css/learner/mobile_menu.css?v=2.0">
+    <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=3.2">
+    <link rel="stylesheet" href="assets/css/learner/mobile_menu.css?v=2.1">
     <link rel="stylesheet" href="assets/css/learner/mobile_settings.css?v=1.7">
     <link rel="stylesheet" href="assets/css/shared/pwa_prompts.css?v=1.0">
     <link rel="stylesheet" href="assets/css/shared/back_button.css?v=1.0">
@@ -480,6 +480,7 @@ if (!empty($joinedClassIds)) {
     </div>
 
     <div class="learner-name"><?= htmlspecialchars($learnerFullName) ?></div>  
+    <div class="learner-role">Learner</div>
     <div class="learner-email"><?= htmlspecialchars($learnerEmail ?: '') ?></div>
     </div>
 

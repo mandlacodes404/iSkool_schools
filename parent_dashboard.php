@@ -118,7 +118,7 @@ function pa_account_row(string $initials, string $name): string
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Geist:wght@400;500;600&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/parent/parent_app.css?v=1.11">
-    <link rel="stylesheet" href="assets/css/parent/parent_menu.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/parent/parent_menu.css?v=1.1">
     <link rel="stylesheet" href="assets/css/shared/pull_to_refresh.css?v=1.0">
 </head>
 <body>
@@ -130,6 +130,7 @@ function pa_account_row(string $initials, string $name): string
             <?= pa_school_mark($school) ?>
             <div class="pa-brand-text">
                 <span class="pa-brand-name" title="<?= pa_e($school['name']) ?>"><?= pa_e($school['name']) ?></span>
+                <?php if ($school['year'] !== ''): ?><span class="pa-brand-sub"><?= pa_e($school['year']) ?></span><?php endif; ?>
             </div>
             <button type="button" class="pa-toggle" id="paToggle" aria-controls="paSide" aria-expanded="true" aria-label="Collapse sidebar"></button>
         </div>
@@ -193,6 +194,7 @@ function pa_account_row(string $initials, string $name): string
             <?= pa_school_mark($school) ?>
             <div class="pa-brand-text">
                 <span class="pa-brand-name"><?= pa_e($school['name']) ?></span>
+                <?php if ($school['year'] !== ''): ?><span class="pa-brand-sub"><?= pa_e($school['year']) ?></span><?php endif; ?>
             </div>
         </div>
         <button type="button" class="pa-search" id="paDrawerSearch" aria-label="Search pages and actions">
