@@ -474,7 +474,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 14px;
+            gap: 3px;
             transform: translateX(-20px);
         }
 
@@ -502,13 +502,13 @@
         }
 
         @media (max-width: 480px) {
-            #dash-splash-logo { gap: 10px; }
+            #dash-splash-logo { gap: 2px; }
             #dash-splash-logo img { width: 68px; height: 68px; }
             #dash-splash-wordmark { font-size: 30px; }
         }
 
         @media (max-width: 360px) {
-            #dash-splash-logo { gap: 8px; }
+            #dash-splash-logo { gap: 2px; }
             #dash-splash-logo img { width: 60px; height: 60px; }
             #dash-splash-wordmark { font-size: 26px; }
         }
