@@ -12,6 +12,8 @@
 
     var root = document.getElementById('parentApp');
     var view = document.getElementById('paView');
+    // On phones this is the area that scrolls (the header and the bottom tabs stay still); on desktop the page scrolls
+    var content = document.querySelector('.pa-content');
     var switcher = document.getElementById('paSwitcher');
 
     var ROUTES = {
@@ -369,6 +371,7 @@
 
         if (afterNavigation) {
             window.scrollTo(0, 0);
+            if (content) content.scrollTop = 0;
             try { view.focus({ preventScroll: true }); } catch (e) { view.focus(); }
         }
         return done;
@@ -1472,8 +1475,7 @@
     function pullAllowed() {
         var route = currentRoute();
         if (!ROUTES[route] || route === 'add-child') return false;                 // the form would lose what was typed
-        // The page scrolls as a whole (not inside the content box), so only pull when it is at the very top
-        if ((window.pageYOffset || document.documentElement.scrollTop || 0) > 0) return false;
+        if (content && content.scrollTop > 0) return false;                        // only from the very top
         if (root.classList.contains('pa-menu-open')) return false;                 // the phone menu is open
         if (document.querySelector('[data-pa-menu]:not(.pa-sheet):not([hidden]), .pa-sheet.is-open')) return false;   // an account menu is open
         return true;

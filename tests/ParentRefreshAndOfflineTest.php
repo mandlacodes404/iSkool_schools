@@ -82,7 +82,7 @@ final class ParentRefreshAndOfflineTest extends TestCase
     {
         $js = $this->source('assets/js/parent/parent_app.js');
         $this->assertStringContainsString("route === 'add-child') return false", $js);
-        $this->assertStringContainsString('window.pageYOffset', $js);
+        $this->assertStringContainsString('content.scrollTop > 0', $js, 'pull only from the very top of the scrolling area');
         $this->assertStringContainsString("root.classList.contains('pa-menu-open')", $js);
         // the account sheet is always in the page (it opens with a class, not "hidden"), so it must be left out of the
         // "a menu is open" check or no pull would ever start
@@ -90,11 +90,32 @@ final class ParentRefreshAndOfflineTest extends TestCase
         $this->assertStringContainsString("scroller: '.pa-content'", $js);
     }
 
-    public function test_the_browsers_own_pull_to_refresh_is_kept_off_the_phone_page(): void
+    public function test_on_phones_only_the_content_area_scrolls_so_the_header_and_tabs_never_move(): void
     {
         $css = $this->source('assets/css/parent/parent_app.css');
-        // the parent page scrolls as a whole, so the rule must be on the root element, not on the content box
-        $this->assertMatchesRegularExpression('/@media \(max-width: 768px\) \{.*html \{ overscroll-behavior-y: contain; \}/s', $css);
+        // the page is exactly one screen high; the area under the header scrolls inside it (like #api-content-area in
+        // the learner and teacher phone apps), so a pull moves only that area
+        $this->assertStringContainsString('.pa-body { height: 100vh; height: 100dvh; min-height: 0; }', $css);
+        $this->assertStringNotContainsString('position: sticky', $css, 'a sticky header scrolls with the page and follows a pull');
+        $start = strpos($css, '.pa-content {', strpos($css, '.pa-body { height: 100vh; height: 100dvh;'));
+        $this->assertNotFalse($start);
+        $rule = substr($css, $start, strpos($css, '}', $start) - $start);
+        $this->assertStringContainsString('flex: 1 1 auto', $rule);
+        $this->assertStringContainsString('min-height: 0', $rule);
+        $this->assertStringContainsString('overflow-y: auto', $rule);
+        // the browser's own pull to refresh, which reloads the whole app, must not also fire at the top
+        $this->assertStringContainsString('overscroll-behavior-y: contain', $rule);
+        // room for the last row above the fixed bottom tabs
+        $this->assertStringContainsString('var(--pa-tabs-h)', $rule);
+    }
+
+    public function test_going_to_another_screen_scrolls_the_content_area_back_to_the_top(): void
+    {
+        $js = $this->source('assets/js/parent/parent_app.js');
+        $this->assertStringContainsString("var content = document.querySelector('.pa-content');", $js);
+        $this->assertStringContainsString('if (content) content.scrollTop = 0;', $js);
+        // desktop still scrolls the page
+        $this->assertStringContainsString('window.scrollTo(0, 0);', $js);
     }
 
     public function test_the_note_has_light_and_dark_styles_through_the_theme_variables(): void
@@ -112,7 +133,7 @@ final class ParentRefreshAndOfflineTest extends TestCase
     {
         // The service worker caches /assets/ by full URL, so the numbers in the page must move with the files
         $page = $this->source('parent_dashboard.php');
-        $this->assertStringContainsString('parent_app.css?v=1.9', $page);
-        $this->assertStringContainsString('parent_app.js?v=1.9', $page);
+        $this->assertStringContainsString('parent_app.css?v=1.10', $page);
+        $this->assertStringContainsString('parent_app.js?v=1.10', $page);
     }
 }
