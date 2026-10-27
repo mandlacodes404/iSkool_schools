@@ -714,10 +714,13 @@ html[data-theme="dark"] .pa-chip[aria-pressed="true"] .pa-chip-av { background: 
     .pax .pa-empty-row { padding: 14px 16px; border: 1px solid var(--pa-line); border-radius: 18px; background: var(--pa-card); font-size: 14px; color: var(--pa-muted); }
 
     /* subjects: two tiles per row */
-    .pax-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .pax-tile { display: block; padding: 12px 14px 14px; border-radius: 18px; border: 1px solid var(--pa-line); background: var(--pa-card); color: inherit; text-decoration: none; }
-    .pax-tile-name { display: block; font-size: 13px; font-weight: 600; color: var(--pa-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .pax-tile-mark { display: flex; align-items: baseline; gap: 8px; margin-top: 4px; }
+    /* minmax(0, 1fr): a plain 1fr cannot shrink below its longest word, so a long subject name (Afrikaans First
+       Additional Language, Computer Applications Technology) used to push a column off the screen. */
+    .pax-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .pax-tile { display: flex; flex-direction: column; min-width: 0; padding: 12px 14px 14px; border-radius: 18px; border: 1px solid var(--pa-line); background: var(--pa-card); color: inherit; text-decoration: none; }
+    /* A long name takes up to two lines; the mark and bar sit at the bottom so tiles in one row line up. */
+    .pax-tile-name { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; font-size: 13px; font-weight: 600; line-height: 1.3; color: var(--pa-muted); }
+    .pax-tile-mark { display: flex; align-items: baseline; gap: 8px; margin-top: auto; padding-top: 4px; }
     .pax-tile-mark b { font-size: 22px; font-weight: 800; line-height: 1.2; }
     .pax-tile-mark span { font-size: 13px; font-weight: 700; }
     .pax-bar { display: block; height: 4px; margin-top: 10px; border-radius: 2px; background: var(--pa-bar-bg); }

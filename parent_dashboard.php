@@ -117,7 +117,7 @@ function pa_account_row(string $initials, string $name): string
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Geist:wght@400;500;600&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/parent/parent_app.css?v=1.7">
+    <link rel="stylesheet" href="assets/css/parent/parent_app.css?v=1.8">
     <link rel="stylesheet" href="assets/css/parent/parent_menu.css?v=1.0">
 </head>
 <body>
