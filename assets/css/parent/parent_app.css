@@ -532,12 +532,18 @@ html[data-theme="dark"] .pa-chip[aria-pressed="true"] .pa-chip-av { background: 
         --pa-w-bold: 700;
     }
 
-    .pa { display: block; }
+    /* The page itself is locked to one screen, exactly like the learner phone app (body in learner_dashboard.css):
+       height 100dvh and overflow hidden, so the document cannot be scrolled or dragged at all. Only .pa-content scrolls.
+       Why it matters: 100vh is the height with the browser's address bar tucked away, which is taller than what you can
+       see while the bar is showing. A min-height of 100vh made the document a little taller than the screen, so a drag
+       on the header (or a bounce at the top) moved the whole page, header included. dvh is the visible height. */
+    html { overscroll-behavior: none; touch-action: manipulation; }
+    body { height: 100vh; height: 100dvh; overflow: hidden; overscroll-behavior: none; }
+    .pa { display: block; min-height: 0; height: 100vh; height: 100dvh; }
     .pa-side { display: none; }
-    /* The page does not scroll as a whole. The header and the bottom tabs stay where they are and only .pa-content (the
-       area under the header) scrolls, like the learner and teacher phone apps (#api-content-area). That is what lets pull
-       to refresh move only the content: the header never follows the finger. 100dvh is the visible height, so the area
-       ends exactly at the bottom of the screen; the padding at the bottom of .pa-content keeps the last row above the tabs. */
+    /* The header and the bottom tabs stay where they are and only .pa-content (the area under the header) scrolls, like
+       #api-content-area in the learner and teacher phone apps. That is what lets pull to refresh move only the content.
+       The padding at the bottom of .pa-content keeps the last row above the tabs. */
     .pa-body { height: 100vh; height: 100dvh; min-height: 0; }
 
     /* Header: menu, school logo, profile (same structure as the learner app) */
