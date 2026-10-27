@@ -41,7 +41,13 @@
     // Screens that cover all the children at once (or none in particular), so the child switcher is hidden on them
     var ALL_CHILDREN = { news: true, events: true, 'add-child': true };
     var cache = {};
+    // The last answer the server gave for each screen. Unlike `cache` (a minute, so a quick tap back does not ask
+    // again) it is kept for as long as the app stays open, and is used only when the server cannot be reached.
+    var lastSeen = {};
     var renderId = 0;
+    // When the screen on show was drawn from lastSeen (no connection), the time that copy was fetched; otherwise null
+    var viewCopy = null;
+    var errorOnScreen = false;
 
     // ── Small helpers ──────────────────────────────────────────────────────────────────────────────────────
 
@@ -188,11 +194,57 @@
     function cached(path, params) {
         var key = path + '?' + JSON.stringify(params || {});
         var hit = cache[key];
+        var drawing = renderId;     // the screen being drawn now; a late answer must not label a newer screen
         if (hit && Date.now() - hit.at < CACHE_MS) return Promise.resolve(hit.data);
         return api(path, params).then(function (data) {
-            cache[key] = { at: Date.now(), data: data };
+            var entry = { at: Date.now(), data: data };
+            cache[key] = entry;
+            lastSeen[key] = entry;
             return data;
+        }, function (err) {
+            // No connection, or the server is having a bad moment: show what this phone last saw, and say so (the
+            // note above the page). Anything else (signed out, child no longer linked, no school year) is not that.
+            var seen = lastSeen[key];
+            if (seen && err && (err.code === 'network' || err.code === 'server')) {
+                if (drawing === renderId) viewCopy = seen.at;
+                return seen.data;
+            }
+            throw err;
         });
+    }
+
+    // ── "No connection" note ───────────────────────────────────────────────────────────────────────────────
+
+    function pad2(n) { return (n < 10 ? '0' : '') + n; }
+
+    /** "today at 07:30", "yesterday at 07:30" or "27 Oct at 07:30". */
+    function savedAtText(ms) {
+        var d = new Date(ms);
+        var now = new Date();
+        var time = pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+        var sameDay = function (a, b) { return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); };
+        if (sameDay(d, now)) return 'today at ' + time;
+        var yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+        if (sameDay(d, yesterday)) return 'yesterday at ' + time;
+        var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        return d.getDate() + ' ' + months[d.getMonth()] + ' at ' + time;
+    }
+
+    /** Shows or hides the note that tells a parent the page is the last copy this phone saw, not live. */
+    function syncOfflineNote() {
+        var box = document.getElementById('paOffline');
+        if (!box) return;
+        clear(box);
+        if (viewCopy === null) {
+            box.hidden = true;
+            return;
+        }
+        var lead = navigator.onLine === false ? 'You are offline. ' : 'We could not update this page just now. ';
+        var retry = el('button', 'pa-offline-btn', 'Try again');
+        retry.type = 'button';
+        retry.addEventListener('click', function () { refreshPage(); });
+        append(box, el('span', 'pa-offline-text', lead + 'Showing what you last saw ' + savedAtText(viewCopy) + '.'), retry);
+        box.hidden = false;
     }
 
     // ── Child switcher ─────────────────────────────────────────────────────────────────────────────────────
@@ -253,17 +305,27 @@
         clear(view);
         view.appendChild(node);
         view.removeAttribute('aria-busy');
+        syncOfflineNote();
     }
 
     function showLoading() {
         clear(view);
         view.appendChild(el('p', 'pa-muted pa-loading', 'Loading…'));
         view.setAttribute('aria-busy', 'true');
+        viewCopy = null;
+        syncOfflineNote();
     }
 
-    function render(afterNavigation) {
+    /**
+     * Draws the current screen. `quiet` keeps what is on screen until the new data arrives (a refresh), instead of
+     * clearing it to "Loading…". Returns a promise that settles once the screen has been drawn.
+     */
+    function render(afterNavigation, quiet) {
         var route = currentRoute();
         var id = ++renderId;
+        var done = Promise.resolve();
+        viewCopy = null;
+        errorOnScreen = false;
         markActiveLinks(route);
         syncSwitcher(route);
 
@@ -282,21 +344,21 @@
             var build = ROUTES[route];
             var result = build(id);
             if (result && typeof result.then === 'function') {
-                showLoading();
-                result.then(function (built) {
+                if (!quiet) showLoading();
+                done = result.then(function (built) {
                     if (id === renderId && built) show(built);
                 }, function (err) {
                     if (id !== renderId) return;
                     if (err && err.code === 'notfound') {
                         // The child is no longer linked: refresh the list once and draw again
                         cache = {};
-                        loadChildren().then(function () {
+                        lastSeen = {};
+                        return loadChildren().then(function () {
                             renderSwitcher();
-                            if (id === renderId) render();
+                            if (id === renderId) return render();
                         }, function () {
                             if (id === renderId) show(renderError());
                         });
-                        return;
                     }
                     show(err && err.code === 'noyear' ? renderNoYear() : renderError());
                 });
@@ -309,6 +371,7 @@
             window.scrollTo(0, 0);
             try { view.focus({ preventScroll: true }); } catch (e) { view.focus(); }
         }
+        return done;
     }
 
     // (parent_menu.js listens for the same change and puts the menus away)
@@ -348,9 +411,11 @@
     }
 
     function renderError() {
+        errorOnScreen = true;
+        var offline = navigator.onLine === false;
         return stateCard(
-            'We could not load this page',
-            'Please check your connection and try again.',
+            offline ? 'You are offline' : 'We could not load this page',
+            offline ? 'This page could not be loaded without a connection. It will load when you are back online.' : 'Please check your connection and try again.',
             'Try again',
             function () {
                 cache = {};
@@ -1300,6 +1365,7 @@
     function finishAddChild(root, result) {
         var before = state.children.map(function (c) { return c.id; });
         cache = {};
+        lastSeen = {};     // the screens that cover every child must not come back from a copy that lacks the new one
         return loadChildren().then(function () {
             var added = state.children.filter(function (c) { return before.indexOf(c.id) === -1; })[0];
             if (added) {
@@ -1358,13 +1424,67 @@
         state.childrenStatus = 'loading';
         showLoading();
 
-        loadChildren().then(function () {
+        return loadChildren().then(function () {
             renderSwitcher();
-            render();
+            return render();
         }, function (err) {
             if (err && err.code === 'auth') return;
             state.childrenStatus = 'failed';
-            render(); // Home and Report show the error card, the "coming soon" pages still open
+            return render(); // Home and Report show the error card, the "coming soon" pages still open
+        });
+    }
+
+    // ── Refresh ────────────────────────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Asks the server again for the screen on show and draws it in place (nothing flashes to "Loading…", and the
+     * parent stays where they were on the page). The list of children is fetched again too: a child linked since
+     * the page opened appears, one that was unlinked goes away. With no connection the last copy stays on screen.
+     * Used by pull to refresh, the "Try again" in the note, and when the phone comes back online.
+     */
+    function refreshPage() {
+        var route = currentRoute();
+        if (!ROUTES[route] || route === 'add-child') return Promise.resolve();
+        if (state.childrenStatus === 'loading') return Promise.resolve();     // the first load is still on its way
+        cache = {};
+        if (state.childrenStatus !== 'ready') return start();                 // the first load failed: all of it again
+        return loadChildren().then(function () {
+            renderSwitcher();
+            return render(false, true);
+        }, function (err) {
+            if (err && err.code === 'auth') return;
+            return render(false, true);                              // no signal: redraw from the last copy
+        });
+    }
+
+    // Back online (or back in the app with a connection) while the page shows an old copy or an error: update it
+    function updateIfStale() {
+        if (navigator.onLine === false) return;
+        if (viewCopy !== null || errorOnScreen) refreshPage();
+    }
+    window.addEventListener('online', updateIfStale);
+    document.addEventListener('visibilitychange', function () {
+        if (document.visibilityState === 'visible') updateIfStale();
+    });
+
+    // ── Pull to refresh (phones) ───────────────────────────────────────────────────────────────────────────
+
+    function pullAllowed() {
+        var route = currentRoute();
+        if (!ROUTES[route] || route === 'add-child') return false;                 // the form would lose what was typed
+        // The page scrolls as a whole (not inside the content box), so only pull when it is at the very top
+        if ((window.pageYOffset || document.documentElement.scrollTop || 0) > 0) return false;
+        if (root.classList.contains('pa-menu-open')) return false;                 // the phone menu is open
+        if (document.querySelector('[data-pa-menu]:not(.pa-sheet):not([hidden]), .pa-sheet.is-open')) return false;   // an account menu is open
+        return true;
+    }
+
+    if (window.iskoolPullToRefresh) {
+        window.iskoolPullToRefresh.init({
+            scroller: '.pa-content',
+            ignoreSelector: 'input, textarea, select, [contenteditable="true"], [role="dialog"], [role="menu"]',
+            canPull: pullAllowed,
+            refresh: refreshPage
         });
     }
 
