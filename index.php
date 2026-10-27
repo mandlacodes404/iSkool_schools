@@ -90,7 +90,7 @@ if ($result && $row = $result->fetch_assoc()) {
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/index.css?v=9.4">
+    <link rel="stylesheet" href="assets/css/index.css?v=9.5">
     <?php require __DIR__ . '/includes/login_theme_head.php'; ?>
     <script>
     // Phone light mode (768px and below): apply the phone theme saved by the learner dashboard BEFORE first paint, so the

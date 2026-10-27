@@ -35,7 +35,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 14px;
+    gap: 3px;
     transform: translateX(-20px);
 }
 
@@ -118,7 +118,7 @@ body {
     @media (max-width: 480px) {
         #loader-logo {
             font-size: 4rem;
-            gap: 10px;
+            gap: 2px;
         }
         #loader-logo svg,
         #loader-logo img {
@@ -148,7 +148,7 @@ body {
     @media (max-width: 360px) {
         #loader-logo {
             font-size: 3rem;
-            gap: 8px;
+            gap: 2px;
         }
         #loader-logo svg,
         #loader-logo img {
@@ -219,7 +219,7 @@ body {
 .bp-intro-eyebrow {
     display: flex;
     align-items: center;
-    gap: 7px;
+    gap: 2px;
     font-size: 11px;
     color: #555;
     letter-spacing: 0.06em;
@@ -839,7 +839,7 @@ body {
 
     /* Logo next to the "iSkool" wordmark on the left brand panel — static, no spin */
     .bp-intro-eyebrow {
-        gap: 6px;
+        gap: 2px;
     }
 
     .bp-brand-name {
@@ -926,7 +926,7 @@ body {
     #iskool-brand,
     #register-iskool-brand {
         display: flex;
-        gap: 6px;
+        gap: 1px;
         margin-bottom: 25px;
         max-width: 95vw;
         transform: translateX(-8px);
@@ -957,7 +957,7 @@ body {
 @media (max-width: 360px) {
     #iskool-brand,
     #register-iskool-brand {
-        gap: 5px;
+        gap: 1px;
         transform: translateX(-6px);
     }
     #iskool-brand svg,
@@ -1332,7 +1332,7 @@ button#login-btn.is-loading .btn-spinner {
     #login-form.active, #register-form.active { display: flex; flex-direction: column; flex: 1 0 auto; }
     #login-form-el, #register-form-el { flex: 1 0 auto; }
     /* Header row: your existing logo + wordmark (left), school (right) */
-    .form-panel #iskool-brand, .form-panel #register-iskool-brand { display: flex; justify-content: flex-start; align-items: center; gap: 8px; width: auto; height: 44px; margin: 0; padding: 0; transform: none; max-width: none; }
+    .form-panel #iskool-brand, .form-panel #register-iskool-brand { display: flex; justify-content: flex-start; align-items: center; gap: 2px; width: auto; height: 44px; margin: 0; padding: 0; transform: none; max-width: none; }
     .form-panel #iskool-brand img, .form-panel #register-iskool-brand img { width: 32px; height: 32px; }
     .form-panel .iskool-brand-wordmark, .form-panel #iskool-brand-wordmark { display: block; font-size: 20px; }
     .form-panel #form-top-brand { display: flex; position: absolute; top: calc(20px + env(safe-area-inset-top, 0px)); right: 24px; height: 44px; margin: 0; width: auto; max-width: calc(100% - 160px); }

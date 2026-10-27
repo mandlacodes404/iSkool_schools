@@ -1260,7 +1260,7 @@ iframe {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 14px;
+    gap: 3px;
     transform: translateX(-20px);
 }
 
@@ -1292,7 +1292,7 @@ iframe {
    shrink at this breakpoint (unlike the footer wordmark/background above). */
 @media (max-width: 480px) {
     #dash-splash-logo {
-        gap: 10px;
+        gap: 2px;
     }
     #dash-splash-logo img {
         width: 68px;
@@ -1305,7 +1305,7 @@ iframe {
 
 @media (max-width: 360px) {
     #dash-splash-logo {
-        gap: 8px;
+        gap: 2px;
     }
     #dash-splash-logo img {
         width: 60px;
