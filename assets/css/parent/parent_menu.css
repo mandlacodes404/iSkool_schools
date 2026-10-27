@@ -521,7 +521,12 @@ html[data-theme="dark"] .pa-menu-item[data-ico="theme"] { --pa-ico: var(--pa-i-s
 
     /* The page, the header and the bottom tabs are pushed aside together with the menu. They only move while it is open;
        at rest nothing about them changes. */
-    .pa-top, .pa-content, .pa-tabs { transition: transform var(--pa-dur) var(--pa-ease); }
+    .pa-top, .pa-content { transition: transform var(--pa-dur) var(--pa-ease); }
+    /* The bottom tabs also fade between clear and glass (DYNAMIC BOTTOM TABS in parent_app.css), so they list those too */
+    .pa-tabs {
+        transition: transform var(--pa-dur) var(--pa-ease), background .28s ease, border-color .28s ease, box-shadow .28s ease,
+                    backdrop-filter .28s ease, -webkit-backdrop-filter .28s ease;
+    }
     html.pa-menu-open .pa-top, html.pa-menu-open .pa-content, html.pa-menu-open .pa-tabs { transform: translate3d(var(--pa-dw), 0, 0); }
     html.pa-menu-open .pa-tabs { pointer-events: none; }
     html.pa-menu-open, html.pa-drag { overflow: hidden; }
@@ -562,6 +567,8 @@ html[data-theme="dark"] .pa-menu-item[data-ico="theme"] { --pa-ico: var(--pa-i-s
     /* While a finger is dragging (parent_menu.js): no transitions, and everything is lifted out exactly as when it is open */
     html.pa-drag .pa-drawer { visibility: visible; transition: none; will-change: transform; }
     html.pa-drag .pa-top, html.pa-drag .pa-content, html.pa-drag .pa-tabs { transition: none; will-change: transform; }
+    /* A page change snaps the bar to its final look instead of fading through the wrong one (set by parent_bottom_nav.js) */
+    html.pa-tabs-snap .pa-tabs { transition: transform var(--pa-dur) var(--pa-ease); }
     html.pa-drag .pa-tabs { pointer-events: none; }
     html.pa-drag .pa-overlay { transition: none; will-change: transform, opacity; pointer-events: none; visibility: visible; }
 
@@ -739,6 +746,7 @@ html[data-theme="dark"] .pa-menu-item[data-ico="theme"] { --pa-ico: var(--pa-i-s
 
 @media (prefers-reduced-motion: reduce) {
     :root { --pa-dur: .01s; }
-    .pa-side, .pa-drawer, .pa-overlay, .pa-sheet, .pa-sheet-bg, .pa-s, .pa-top, .pa-content, .pa-tabs, .pa-tip, .pa-nav-link { transition-duration: .01s !important; }
+    .pa-side, .pa-drawer, .pa-overlay, .pa-sheet, .pa-sheet-bg, .pa-s, .pa-top, .pa-content, .pa-tip, .pa-nav-link { transition-duration: .01s !important; }
+    .pa-tabs { transition-duration: .01s !important; }
     .pa-menu, .pa-palette, .pa-palette-panel, .pa-keys, .pa-keys-panel { animation: none !important; }
 }

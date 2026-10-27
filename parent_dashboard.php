@@ -117,8 +117,8 @@ function pa_account_row(string $initials, string $name): string
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Geist:wght@400;500;600&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/parent/parent_app.css?v=1.11">
-    <link rel="stylesheet" href="assets/css/parent/parent_menu.css?v=1.1">
+    <link rel="stylesheet" href="assets/css/parent/parent_app.css?v=1.12">
+    <link rel="stylesheet" href="assets/css/parent/parent_menu.css?v=1.2">
     <link rel="stylesheet" href="assets/css/shared/pull_to_refresh.css?v=1.0">
 </head>
 <body>
@@ -179,7 +179,7 @@ function pa_account_row(string $initials, string $name): string
             </main>
         </div>
 
-        <!-- Phone: bottom tabs -->
+        <!-- Phone: bottom tabs. Dynamic like the learner bar: clear near the bottom of the page, glass once it is scrolled up (parent_bottom_nav.js) -->
         <nav class="pa-tabs" aria-label="Parent app">
             <?php foreach ($nav as [$id, $label, $icon]): ?>
                 <a class="pa-tab" href="#/<?= $id ?>" data-route="<?= $id ?>"><?= pa_icon($icon, 22) ?><span><?= pa_e($label) ?></span></a>
@@ -217,5 +217,6 @@ function pa_account_row(string $initials, string $name): string
 <script src="assets/js/parent/parent_menu.js?v=1.0"></script>
 <script src="assets/js/shared/pull_to_refresh.js?v=1.0"></script>
 <script src="assets/js/parent/parent_app.js?v=1.11"></script>
+<script src="assets/js/parent/parent_bottom_nav.js?v=1.0"></script>
 </body>
 </html>
