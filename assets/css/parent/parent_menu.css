@@ -87,6 +87,16 @@ html[data-theme="dark"] {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+/* The academic year under the school name, as in the learner menu */
+.pa-brand-sub {
+    margin-top: 1px;
+    font-size: 12px;
+    line-height: 1.2;
+    color: var(--pa-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
 /* Mask icons: the colour follows the text colour */
 .pa-search::before, .pa-toggle::before, .pa-menu-item::before, .pa-pico, .pa-palette-field::before, .pa-s-field::before,
@@ -561,6 +571,7 @@ html[data-theme="dark"] .pa-menu-item[data-ico="theme"] { --pa-ico: var(--pa-i-s
     .pa-drawer .pa-mark--initials { font-size: 17px; }
     .pa-drawer .pa-brand-text { gap: 2px; }
     .pa-drawer .pa-brand-name { font-size: 17px; line-height: 1.15; }
+    .pa-drawer .pa-brand-sub { font-size: 12.5px; }
 
     /* Search */
     .pa-drawer .pa-search {

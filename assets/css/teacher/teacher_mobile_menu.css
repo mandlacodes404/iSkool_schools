@@ -230,7 +230,7 @@ html body .sidebar.dm-menu .dm-sep--c, html body .sidebar.dm-menu .dm-sep--d, ht
 /* -- Account row at the bottom (opens the sheet) --------------------------- */
 html body .sidebar.dm-menu .dm-account-root {
   order: 99; flex: none; box-sizing: border-box;
-  display: grid; grid-template-columns: 36px minmax(0, 1fr) 20px; grid-template-areas: "av name chev";
+  display: grid; grid-template-columns: 36px minmax(0, 1fr) 20px; grid-template-areas: "av name chev" "av role chev"; align-content: center;
   column-gap: 12px; align-items: center; height: 56px;
   margin: 0 10px calc(34px + env(safe-area-inset-bottom, 0px)); padding: 0 12px 0 10px;
   border-radius: 14px; background: rgba(255,255,255,.045); cursor: pointer; -webkit-tap-highlight-color: transparent;
@@ -257,6 +257,12 @@ html body .sidebar.dm-menu .dm-account-root img.teacher-avatar { display: block;
 html body .sidebar.dm-menu .teacher-name {
   grid-area: name; margin: 0 !important; max-height: none !important; opacity: 1;
   color: var(--dm-text); font: 500 16px/1.25 var(--dm-font); font-size: 16px !important; font-weight: 500 !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+/* The name with the role ("Teacher") under it, like the parent app */
+html body .sidebar.dm-menu .teacher-role {
+  grid-area: role; margin: 1px 0 0;
+  color: var(--dm-muted); font: 400 13px/1.25 var(--dm-font);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 html body .sidebar.dm-menu .teacher-email { display: none; }
 

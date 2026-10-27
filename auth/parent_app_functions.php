@@ -513,8 +513,8 @@ function parent_current_term(mysqli $conn): int
 }
 
 /**
- * School name, logo (null when none was uploaded or the file is gone) and two-letter initials.
- * Same rules as the learner dashboard's header.
+ * School name, logo (null when none was uploaded or the file is gone), two-letter initials and the name of the
+ * current academic year ('' when none is set). Same rules as the learner dashboard's header and menu.
  *
  * @param string $base_dir the web root, used to check the logo file exists
  */
@@ -536,7 +536,14 @@ function parent_school_info(mysqli $conn, string $base_dir): array
         }
     }
 
-    return ['name' => $name, 'logo' => $logo, 'initials' => parent_initials($name)];
+    // Shown under the school name in the menu, like the learner menu. Nothing is shown when no year is current.
+    $year = '';
+    $year_res = $conn->query('SELECT name FROM academic_years WHERE is_current = 1 LIMIT 1');
+    if ($year_res && ($year_row = $year_res->fetch_assoc())) {
+        $year = trim((string) ($year_row['name'] ?? ''));
+    }
+
+    return ['name' => $name, 'logo' => $logo, 'initials' => parent_initials($name), 'year' => $year];
 }
 
 /**

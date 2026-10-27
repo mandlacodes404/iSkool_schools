@@ -168,10 +168,10 @@ final class BottomNavTest extends TestCase
         $teacher = $this->source('teacher_dashboard.php');
 
         $this->assertStringContainsString('learner_dashboard.css?v=14.4', $learner);
-        $this->assertStringContainsString('learner/mobile_menu.css?v=2.0', $learner);
+        $this->assertStringContainsString('learner/mobile_menu.css?v=2.1', $learner);
         $this->assertStringContainsString('mobile_light.css?v=2.1', $learner);
         $this->assertStringContainsString('learner/quiz.css?v=6.3', $learner);
         $this->assertStringContainsString('teacher_dashboard.css?v=14.1', $teacher);
-        $this->assertStringContainsString('teacher_mobile_menu.css?v=1.5', $teacher);
+        $this->assertStringContainsString('teacher_mobile_menu.css?v=1.6', $teacher);
     }
 }
