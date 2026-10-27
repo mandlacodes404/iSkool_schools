@@ -534,15 +534,19 @@ html[data-theme="dark"] .pa-chip[aria-pressed="true"] .pa-chip-av { background: 
 
     .pa { display: block; }
     .pa-side { display: none; }
-    .pa-body { min-height: 100vh; }
+    /* The page does not scroll as a whole. The header and the bottom tabs stay where they are and only .pa-content (the
+       area under the header) scrolls, like the learner and teacher phone apps (#api-content-area). That is what lets pull
+       to refresh move only the content: the header never follows the finger. 100dvh is the visible height, so the area
+       ends exactly at the bottom of the screen; the padding at the bottom of .pa-content keeps the last row above the tabs. */
+    .pa-body { height: 100vh; height: 100dvh; min-height: 0; }
 
     /* Header: menu, school logo, profile (same structure as the learner app) */
     .pa-top {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        position: sticky;
-        top: 0;
+        position: relative;
+        flex: none;
         z-index: 40;
         min-height: calc(56px + env(safe-area-inset-top, 0px));
         padding: calc(8px + env(safe-area-inset-top, 0px)) calc(10px + env(safe-area-inset-right, 0px)) 8px calc(10px + env(safe-area-inset-left, 0px));
@@ -595,11 +599,21 @@ html[data-theme="dark"] .pa-chip[aria-pressed="true"] .pa-chip-av { background: 
     }
     .pa-avatar-btn .pa-avatar { width: 36px; height: 36px; font-size: 13px; font-weight: 800; }
 
-    /* Pull to refresh (pull_to_refresh.js) is on .pa-content. The browser's own pull-to-refresh, which reloads the
-       whole app, would also fire on the page at the top, so it is kept inside the page. min-height: a short page
-       (a syllabus with two subjects) can still be pulled from anywhere below the header. */
-    html { overscroll-behavior-y: contain; }
-    .pa-content { max-width: none; min-height: calc(100vh - 57px); padding: 20px 0 calc(var(--pa-tabs-h) + env(safe-area-inset-bottom, 0px) + 28px); }
+    /* The scrolling area. Pull to refresh (pull_to_refresh.js) moves this element. "contain" keeps the browser's own
+       pull-to-refresh, which would reload the whole app, from also firing when it is pulled at the top. */
+    .pa-content {
+        flex: 1 1 auto;
+        min-height: 0;
+        max-width: none;
+        overflow-x: hidden;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-x: none;
+        overscroll-behavior-y: contain;
+        scrollbar-width: none;
+        padding: 20px 0 calc(var(--pa-tabs-h) + env(safe-area-inset-bottom, 0px) + 28px);
+    }
+    .pa-content::-webkit-scrollbar { display: none; }
     .pa-switcher { padding: 0 16px; margin-bottom: 8px; }
     .pa-offline { margin: 0 16px 12px; }
 
