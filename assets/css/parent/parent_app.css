@@ -41,6 +41,10 @@ html[data-theme="light"] {
     --pa-pop-shadow: 0 12px 32px rgba(31, 32, 29, .12), 0 2px 6px rgba(31, 32, 29, .05);
     --pa-sheet-shadow: 0 -10px 40px rgba(31, 32, 29, .18);
     --pa-dim: rgba(20, 20, 19, .35);
+    /* Phone bottom tabs, glass state (see DYNAMIC BOTTOM TABS below) */
+    --pa-tabs-glass: rgba(250, 249, 245, .62);
+    --pa-tabs-glass-line: rgba(223, 222, 216, .9);
+    --pa-tabs-glass-shadow: 0 -4px 24px rgba(31, 32, 29, .10), inset 0 1px 0 rgba(255, 255, 255, .55);
     --pa-c1: #187a72;
     --pa-c2: #6b4fc7;
     --pa-c3: #d97706;
@@ -82,6 +86,9 @@ html[data-theme="dark"] {
     --pa-pop-shadow: 0 16px 40px rgba(0, 0, 0, .55);
     --pa-sheet-shadow: 0 -10px 40px rgba(0, 0, 0, .5);
     --pa-dim: rgba(0, 0, 0, .5);
+    --pa-tabs-glass: rgba(32, 32, 31, .55);
+    --pa-tabs-glass-line: rgba(255, 255, 255, .14);
+    --pa-tabs-glass-shadow: 0 -4px 24px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .05);
     --pa-c1: #4fd1c5;
     --pa-c2: #a78bfa;
     --pa-c3: #f28c38;
@@ -705,7 +712,7 @@ html[data-theme="dark"] .pa-chip[aria-pressed="true"] .pa-chip-av { background: 
     .pa-ev-list .pa-section + .pa-section { margin-top: 0; }
     .pa-ev-row { min-height: 64px; padding: 10px 16px; }
 
-    /* Bottom tabs */
+    /* Bottom tabs. Glass by default; with parent_bottom_nav.js running they are dynamic (next block). */
     .pa-tabs {
         display: flex;
         position: fixed;
@@ -715,8 +722,25 @@ html[data-theme="dark"] .pa-chip[aria-pressed="true"] .pa-chip-av { background: 
         z-index: 40;
         height: calc(var(--pa-tabs-h) + env(safe-area-inset-bottom, 0px));
         padding-bottom: env(safe-area-inset-bottom, 0px);
-        background: var(--pa-side);
-        border-top: 1px solid var(--pa-line);
+        background: var(--pa-tabs-glass);
+        border-top: 1px solid var(--pa-tabs-glass-line);
+        box-shadow: var(--pa-tabs-glass-shadow);
+        -webkit-backdrop-filter: blur(28px) saturate(180%);
+        backdrop-filter: blur(28px) saturate(180%);
+    }
+
+    /* ── DYNAMIC BOTTOM TABS ────────────────────────────────────────────────────────────────────────────────
+       Same behaviour as the learner's bottom bar. At rest (the page scrolled to the bottom, or too short to scroll)
+       the bar is clear and the page shows through. Once the page is scrolled up, away from the bottom, the bar turns
+       to glass. parent_bottom_nav.js sets html.pa-dynamic-tabs when it is running and toggles .nav-scrolled on the
+       bar (the same class name the learner bar uses). Without the script the bar simply stays glass.
+       The transition list lives in parent_menu.css, next to the transform the bar needs to slide with the page. */
+    html.pa-dynamic-tabs .pa-tabs:not(.nav-scrolled) {
+        background: transparent;
+        border-top-color: transparent;
+        box-shadow: none;
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
     }
     .pa-tab {
         flex: 1 1 0;
