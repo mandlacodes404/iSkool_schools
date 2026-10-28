@@ -270,8 +270,22 @@ function restoreQuizPageState() {
     } catch (e) { /* ignore bad state */ }
 }
 
+// One row of the "Before you start" panel on the instructions screen (thin line icon, a title, one line of detail).
+// Icons are the same Lucide line icons the learner menus use. `warn` colours the row orange (an unfinished attempt).
+const INSTRUCTION_ICONS = {
+    clock:  '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+    shield: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
+    resume: '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>'
+};
+function instructionRule(icon, title, text, warn = false) {
+    return `<div class="inst-rule${warn ? ' inst-rule--warn' : ''}">`
+        + `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${INSTRUCTION_ICONS[icon] || ''}</svg>`
+        + `<div><b>${title}</b><span>${text}</span></div></div>`;
+}
+
 window.loadQuizInstructions = async function(quizId) {
     const apiArea = document.getElementById('api-content-area');
+    lqzEnsureFont();   // Nunito 400/600 for this screen, in case it is opened without the list having drawn first
     const loader = document.getElementById("loaderOverlay");
 
   // Check cache FIRST before showing loader
@@ -300,66 +314,37 @@ if (!window.suppressInitialLoader && loader) loader.style.display = 'flex';
         if (payload.error) throw new Error(payload.error);
         const data = payload.data ?? payload;
 
-        // 2. Inject your EXACT HTML and Styles
+        // 2. Draw the instructions. The look lives in quiz.css (.inst-*), so the markup carries no inline colours.
+        // The title and the section label are not <h2>/<h3> on purpose: "#api-content-area h2/h3" in quiz.css styles
+        // every heading on the page (teal, uppercase, a rule underneath), which this screen does not want.
+        const continuing = !!data.isContinuing;
+        const monitoringRule = data.layout_mode === 'multi_page'
+            ? instructionRule('shield', 'AI invigilator is on', 'Switching tabs or leaving the quiz is logged for each question.')
+            : instructionRule('shield', 'Session monitoring is on', 'Your session integrity is being tracked.');
+
         apiArea.innerHTML = `
-            <style>
-                .inst-container { max-width: 700px; margin: auto; background-color: #1b1b1b; padding: 30px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05); }
-                .quiz-info-box { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); padding: 18px; border-radius: 10px; margin-bottom: 25px; color: #8b949e; }
-                .inst-list { list-style: none; padding: 0; }
-                .inst-list li { margin-bottom: 12px; color: #8b949e; position: relative; padding-left: 24px; }
-                .inst-list li::before { content: "•"; color: #4fd1c5; position: absolute; left: 0; font-weight: bold; }
-                .ai-box { background: rgba(79, 209, 197, 0.05); border: 1px solid rgba(79, 209, 197, 0.3); border-radius: 10px; padding: 15px; margin-top: 25px; }
-                .start-btn { background: rgba(79, 209, 197, 0.1); color: #e2e8f0; padding: 14px 30px; border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%; max-width: 320px; display: block; margin: 35px auto 0; transition: 0.3s; }
-                .start-btn:hover { border-color: #4fd1c5; background: rgba(79, 209, 197, 0.2); }
-                @media (max-width: 899px) {
-                    .inst-container {
-                        background-color: transparent;
-                        border: 0;
-                        border-radius: 0;
-                        padding: 18px 16px 110px;
-                    }
-                }
-            </style>
-            
             <div class="inst-container">
-                <h2 style="text-align:center; color:#e2e8f0; margin-bottom:25px;">Quiz Instructions</h2>
-                
-                <div class="quiz-info-box">
-                    <p><strong>Quiz Title:</strong> ${escapeHtml(data.title)}</p>
-                    <p><strong>Duration:</strong> ${escapeHtml(data.duration)} minutes</p>
-                    <p><strong>Attempts Allowed:</strong> ${escapeHtml(data.attemptLimit)}</p>
+                <div class="inst-top">
+                    <span class="inst-eyebrow">Quiz instructions</span>
+                    <span class="inst-pill ${continuing ? 'inst-pill--progress' : 'inst-pill--ready'}">${continuing ? 'In progress' : 'Available now'}</span>
+                </div>
+                <div class="inst-title" role="heading" aria-level="2">${escapeHtml(data.title)}</div>
+
+                <dl class="inst-facts">
+                    <div class="inst-fact"><dt>Time allowed</dt><dd>${escapeHtml(data.duration)}<small>min</small></dd></div>
+                    <div class="inst-fact"><dt>Attempts allowed</dt><dd>${escapeHtml(data.attemptLimit)}</dd></div>
+                </dl>
+
+                <div class="inst-gt" role="heading" aria-level="3">Before you start</div>
+                <div class="inst-rules">
+                    ${continuing ? instructionRule('resume', 'You have an unfinished attempt', 'Tap Continue to pick up where you left off.', true) : ''}
+                    ${instructionRule('clock', 'The timer can’t be paused', 'It starts as soon as you begin.')}
+                    ${monitoringRule}
                 </div>
 
-                <h3 style="color:#c9d1d9;">⚠️ Please read carefully:</h3>
-                <ul class="inst-list">
-                    ${data.isContinuing ? `<li style="color: #e67e22;"><strong>Note:</strong> You have an unfinished attempt. You will resume.</li>` : ''}
-                    <li>You can only attempt this quiz <strong>${escapeHtml(data.attemptLimit)}</strong> time(s).</li>
-                    <li>The timer starts immediately and cannot be paused.</li>
-                </ul>
-
-                ${data.layout_mode === 'multi_page' ? `
-<div class="ai-box">
-    <h4 style="color: #4fd1c5; margin-top: 0;">
-        <i class="fas fa-robot"></i> AI Invigilator Active
-    </h4>
-    <p style="font-size: 13px; color: #8b949e; margin: 0;">
-        Tab switching and quiz exits are monitored and logged per question.
-    </p>
-</div>` : `
-<div class="ai-box" style="border-color: rgba(139,148,158,0.3);">
-    <h4 style="color: #8b949e; margin-top: 0;">
-        <i class="fas fa-robot"></i> Session Monitoring Active
-    </h4>
-    <p style="font-size: 13px; color: #8b949e; margin: 0;">
-        Your session integrity is being tracked.
-    </p>
-</div>`}
-
-                <form action="take_quiz.php" method="GET" style="margin-top: 35px; text-align:center;">
+                <form action="take_quiz.php" method="GET" class="inst-form">
                     <input type="hidden" name="quiz_id" value="${quizId}">
-                    <button type="submit" class="start-btn" style="${data.isContinuing ? 'background-color: #e67e22;' : ''}">
-                        ${data.isContinuing ? 'Continue Quiz' : 'Start Quiz'}
-                    </button>
+                    <button type="submit" class="start-btn${continuing ? ' start-btn--continue' : ''}">${continuing ? 'Continue quiz' : 'Start quiz'}</button>
                 </form>
             </div>
         `;
