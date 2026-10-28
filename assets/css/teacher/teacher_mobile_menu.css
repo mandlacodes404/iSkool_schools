@@ -250,8 +250,9 @@ html body .sidebar.dm-menu .dm-account-root .profile-picture-wrapper {
 html body .sidebar.dm-menu .dm-account-root .round-toggle { display: none !important; }
 html body .sidebar.dm-menu .dm-account-root .initials-avatar {
   width: 36px !important; height: 36px !important; box-sizing: border-box; border-radius: 50%;
-  background: #1c2128; border: 1px solid var(--dm-line); color: #c9d1d9;
-  font: 600 13px/1 var(--dm-font) !important; letter-spacing: 0; text-transform: uppercase;
+  /* Same as the learner phone menu, in light and dark: a translucent dark circle with pale bold initials */
+  background: rgba(0,0,0,.35); border: 0; color: #f4e4e4;
+  font-size: 13px !important; font-weight: 800; line-height: 1; letter-spacing: 0; text-transform: uppercase;
 }
 html body .sidebar.dm-menu .dm-account-root img.teacher-avatar { display: block; width: 36px !important; height: 36px !important; margin: 0 !important; object-fit: cover; }
 html body .sidebar.dm-menu .teacher-name {
@@ -367,7 +368,6 @@ html[data-teacher-mobile-theme="light"] body .sidebar.dm-menu .dm-search { backg
 html[data-teacher-mobile-theme="light"] body .sidebar.dm-menu .dm-search:active { background: rgba(38,39,35,.06); }
 html[data-teacher-mobile-theme="light"] body .sidebar.dm-menu .dm-account-root { background: rgba(38,39,35,.045); }
 html[data-teacher-mobile-theme="light"] body .sidebar.dm-menu .dm-account-root:active { background: rgba(38,39,35,.075); }
-html[data-teacher-mobile-theme="light"] body .sidebar.dm-menu .dm-account-root .initials-avatar { background: #e9e8e2; color: #555650; }
 
 /* account sheet and search sheet */
 html[data-teacher-mobile-theme="light"] .dmm-sheet-bg { background: rgba(38,39,35,.3); }

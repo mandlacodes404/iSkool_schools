@@ -45,6 +45,6 @@ final class ParentPhoneHomeTest extends TestCase
     public function test_the_changed_stylesheet_has_a_new_cache_version(): void
     {
         // The service worker caches /assets/ by full URL, so the number in the page must move with the file
-        $this->assertStringContainsString('parent_app.css?v=1.12', $this->source('parent_dashboard.php'));
+        $this->assertStringContainsString('parent_app.css?v=1.13', $this->source('parent_dashboard.php'));
     }
 }

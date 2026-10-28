@@ -417,7 +417,7 @@ html[data-theme="dark"] .pa-menu-item[data-ico="theme"] { --pa-ico: var(--pa-i-s
         cursor: pointer;
     }
     #paPaletteList li[role="option"][aria-selected="true"] { background: var(--pa-active); color: var(--pa-text); }
-    #paPaletteList li[aria-selected="true"] .pa-pico { background: var(--pa-accent); }
+    #paPaletteList li[aria-selected="true"] .pa-pico { background: var(--pa-ac); }
     .pa-pico { width: 18px; height: 18px; }
     .pa-plabel { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .pa-ptag { color: var(--pa-muted); font-size: 12px; }
@@ -605,7 +605,7 @@ html[data-theme="dark"] .pa-menu-item[data-ico="theme"] { --pa-ico: var(--pa-i-s
     .pa-drawer .pa-nav-link:hover { background: none; color: var(--pa-soft); }
     .pa-drawer .pa-nav-link:active { background: var(--pa-hover); }
     .pa-drawer .pa-nav-link[aria-current="page"] { background: var(--pa-active); color: var(--pa-text); font-weight: 500; }
-    .pa-drawer .pa-nav-link[aria-current="page"] svg { color: var(--pa-accent); }
+    .pa-drawer .pa-nav-link[aria-current="page"] svg { color: var(--pa-ac); }
 
     /* Bottom: the account row, a tinted rounded row. Tapping it opens the account sheet. */
     .pa-drawer-account {
@@ -622,7 +622,8 @@ html[data-theme="dark"] .pa-menu-item[data-ico="theme"] { --pa-ico: var(--pa-i-s
     }
     .pa-drawer-account:hover { background: var(--pa-row); }
     .pa-drawer-account:active, .pa-drawer-account[aria-expanded="true"] { background: var(--pa-active); }
-    .pa-drawer-account .pa-avatar { width: 36px; height: 36px; font-size: 13px; }
+    /* Same avatar as the learner and teacher phone menus, in light and dark: a translucent dark circle, pale bold initials */
+    .pa-drawer-account .pa-avatar { width: 36px; height: 36px; font-family: 'Nunito', system-ui, sans-serif; font-size: 13px; font-weight: 800; background: rgba(0, 0, 0, .35); color: #f4e4e4; }
     .pa-drawer-account .pa-account-name { font-size: 16px; }
     .pa-drawer-account .pa-account-role { font-size: 13px; }
     .pa-drawer-account .pa-account-chev { width: 20px; height: 20px; background: var(--pa-muted); }

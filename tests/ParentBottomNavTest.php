@@ -26,8 +26,8 @@ final class ParentBottomNavTest extends TestCase
     {
         $page = $this->source('parent_dashboard.php');
 
-        $this->assertStringContainsString('parent_app.css?v=1.12', $page);
-        $this->assertStringContainsString('parent_menu.css?v=1.2', $page);
+        $this->assertStringContainsString('parent_app.css?v=1.13', $page);
+        $this->assertStringContainsString('parent_menu.css?v=1.3', $page);
     }
 
     public function test_tabs_are_glass_with_theme_aware_colours(): void

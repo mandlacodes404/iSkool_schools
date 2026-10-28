@@ -124,8 +124,8 @@ if ($teacherYearResult && ($teacherYearRow = $teacherYearResult->fetch_assoc()))
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=14.1">
     <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_menu.css?v=2.5">
-    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_menu.css?v=1.6">
-    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_settings.css?v=1.3">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_menu.css?v=1.7">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_settings.css?v=1.4">
     <link rel="stylesheet" href="assets/css/shared/pwa_prompts.css?v=1.0">
     <link rel="stylesheet" href="assets/css/shared/pull_to_refresh.css?v=1.0">
     <link rel="stylesheet" href="assets/css/shared/net_status.css?v=1.0">

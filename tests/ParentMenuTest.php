@@ -213,8 +213,8 @@ final class ParentMenuTest extends TestCase
     {
         // The service worker caches /assets/ by full URL, so the numbers in the page must move with the files
         $page = $this->source('parent_dashboard.php');
-        $this->assertStringContainsString('parent_app.css?v=1.12', $page);
-        $this->assertStringContainsString('parent_menu.css?v=1.2', $page);
+        $this->assertStringContainsString('parent_app.css?v=1.13', $page);
+        $this->assertStringContainsString('parent_menu.css?v=1.3', $page);
         $this->assertStringContainsString('parent_menu.js?v=1.0', $page);
         $this->assertStringContainsString('parent_app.js?v=1.11', $page);
     }
