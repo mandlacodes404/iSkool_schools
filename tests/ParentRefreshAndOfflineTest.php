@@ -59,8 +59,13 @@ final class ParentRefreshAndOfflineTest extends TestCase
     public function test_the_copies_are_forgotten_when_the_list_of_children_changes(): void
     {
         $js = $this->source('assets/js/parent/parent_app.js');
-        // a child linked just now, or one that is no longer linked: an old copy would show the wrong children
-        $this->assertSame(2, preg_match_all('/^\s+lastSeen = \{\};/m', $js), 'finishAddChild() and the "child no longer linked" path');
+        // a child linked just now, or one that is no longer linked: an old copy would show the wrong children.
+        // One place throws the copies away (and stops answers that were already on their way from putting an old one back)...
+        $this->assertSame(1, preg_match_all('/^\s+lastSeen = \{\};/m', $js), 'only forgetCopies() empties lastSeen');
+        $this->assertStringContainsString('function forgetCopies() {', $js);
+        $this->assertStringContainsString('if (mine === generation) {', $js);
+        // ...and it is used by finishAddChild() and by the "child no longer linked" path
+        $this->assertSame(2, preg_match_all('/^\s+forgetCopies\(\);/m', $js), 'finishAddChild() and childGone()');
     }
 
     public function test_coming_back_online_updates_a_screen_that_shows_a_copy_or_an_error(): void
@@ -73,9 +78,13 @@ final class ParentRefreshAndOfflineTest extends TestCase
     public function test_a_refresh_redraws_in_place_and_asks_for_the_children_again(): void
     {
         $js = $this->source('assets/js/parent/parent_app.js');
-        $this->assertStringContainsString('if (!quiet) showLoading();', $js, 'a refresh must not blank the page to "Loading…"');
+        // only a screen with nothing to draw yet shows a loader: a refresh, and a screen with a copy, never blank to "Loading…"
+        $this->assertStringContainsString('if (!quiet && waiting) showLoading();', $js, 'a refresh must not blank the page to "Loading…"');
         $this->assertStringContainsString('return render(false, true);', $js);
-        $this->assertStringContainsString("loadChildren().then(function () {\n            renderSwitcher();\n            return render(false, true);", $js);
+        $this->assertStringContainsString("loadChildren().then(function () {\n            renderSwitcher();\n            return renderFresh();", $js);
+        // a refresh asks the server instead of drawing the copy first
+        $this->assertStringContainsString('forcing = true;', $js);
+        $this->assertStringContainsString('if (older && !forcing) {', $js);
     }
 
     public function test_pull_to_refresh_is_off_on_add_a_child_when_scrolled_and_with_a_menu_open(): void
@@ -150,7 +159,7 @@ final class ParentRefreshAndOfflineTest extends TestCase
     {
         // The service worker caches /assets/ by full URL, so the numbers in the page must move with the files
         $page = $this->source('parent_dashboard.php');
-        $this->assertStringContainsString('parent_app.css?v=1.13', $page);
-        $this->assertStringContainsString('parent_app.js?v=1.11', $page);
+        $this->assertStringContainsString('parent_app.css?v=1.14', $page);
+        $this->assertStringContainsString('parent_app.js?v=1.12', $page);
     }
 }

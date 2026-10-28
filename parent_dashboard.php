@@ -102,6 +102,16 @@ function pa_account_row(string $initials, string $name): string
     <title>iSkool Parent</title>
     <meta name="csrf-token" content="<?= pa_e($_SESSION['csrf_token'] ?? '') ?>">
     <link rel="icon" href="icon.svg?v=1.4" type="image/svg+xml">
+    <!-- Installed app: the same tags as the learner dashboard. The status bar colour (theme-color) follows the page's
+         theme and is dark while the splash is up (paSyncBar below). -->
+    <meta name="theme-color" content="#20201f">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="iSkool">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="msapplication-navbutton-color" content="#20201f">
+    <link rel="manifest" href="/manifest.php?v=1.2">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=1.1">
     <script>
         // Set the saved theme and the sidebar's collapsed state before anything paints, so there is no flash.
         // Light is the default. With no saved choice the sidebar is a narrow rail on windows under 1100px.
@@ -113,15 +123,88 @@ function pa_account_row(string $initials, string $name): string
                 if (c === '1' || (c === null && window.innerWidth < 1100)) document.documentElement.classList.add('pa-collapsed');
             } catch (e) {}
         })();
+
+        // The browser's / installed app's status bar colour: the page's own colour, except while the splash is up
+        // (dark, like the login page's splash before it). Called again when the theme is switched (parent_menu.js)
+        // and when the splash goes away.
+        (function () {
+            var DARK = '#20201f', LIGHT = '#faf9f5';
+            function splashOn() {
+                var splash = document.getElementById('pa-splash');
+                if (splash) return splash.style.display !== 'none' && !splash.classList.contains('pa-splash-hidden');
+                try { return !!sessionStorage.getItem('splashStartedAt'); } catch (e) { return false; }
+            }
+            window.paSyncBar = function () {
+                var meta = document.querySelector('meta[name="theme-color"]');
+                if (!meta) return;
+                var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+                meta.setAttribute('content', dark || splashOn() ? DARK : LIGHT);
+            };
+            window.paSyncBar();
+            document.addEventListener('DOMContentLoaded', window.paSyncBar);
+        })();
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Geist:wght@400;500;600&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/parent/parent_app.css?v=1.13">
+    <link rel="stylesheet" href="assets/css/parent/parent_app.css?v=1.14">
     <link rel="stylesheet" href="assets/css/parent/parent_menu.css?v=1.3">
+    <link rel="stylesheet" href="assets/css/parent/parent_splash.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
     <link rel="stylesheet" href="assets/css/shared/pull_to_refresh.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/shared/pwa_prompts.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/shared/back_button.css?v=1.0">
 </head>
 <body>
+
+<!-- ──────── SPLASH HANDOFF ────────
+     Continues the splash that index.php shows while it signs a parent in, so the app does not open on a blank page
+     (the same hand-off the learner dashboard has). It is hidden once the first screen has been drawn (parent_app.js
+     says so with the 'iskool:home-ready' event) and the 1300ms the login page started has run out, and at the latest
+     after 6 seconds. Opened directly (a plain refresh, no splash started by index.php) it hides at once. -->
+<div id="pa-splash">
+    <div id="pa-splash-logo">
+        <img src="/icon.svg?v=1.4" width="180" height="180" alt="iSkool logo">
+        <span id="pa-splash-wordmark">iSkool</span>
+    </div>
+    <img src="enthropy/wiggle_colored.svg" alt="ENTHROPY" id="pa-splash-brand-wordmark">
+</div>
+<script>
+(function () {
+    var splash = document.getElementById('pa-splash');
+    if (!splash) return;
+
+    var startedAtRaw = null;
+    try { startedAtRaw = sessionStorage.getItem('splashStartedAt'); } catch (e) {}
+
+    // Not here through the login splash (a plain refresh): no splash of our own
+    if (!startedAtRaw) {
+        splash.style.display = 'none';
+        return;
+    }
+    try { sessionStorage.removeItem('splashStartedAt'); } catch (e) {}
+
+    var MIN_SPLASH_MS = 1300;   // the budget index.php started: the time still left is waited out, not a new 1300ms
+    var MAX_SPLASH_MS = 6000;   // never stuck up for ever
+    var remaining = Math.max(0, MIN_SPLASH_MS - (Date.now() - parseInt(startedAtRaw, 10)));
+
+    var hidden = false;
+    function hideSplash() {
+        if (hidden) return;
+        hidden = true;
+        splash.classList.add('pa-splash-hidden');
+        if (window.paSyncBar) window.paSyncBar();
+        setTimeout(function () { splash.style.display = 'none'; }, 400);
+    }
+
+    var minFloor = new Promise(function (resolve) { setTimeout(resolve, remaining); });
+    var homeReady = new Promise(function (resolve) {
+        window.addEventListener('iskool:home-ready', resolve, { once: true });
+    });
+    Promise.all([minFloor, homeReady]).then(hideSplash);
+    setTimeout(hideSplash, MAX_SPLASH_MS);
+})();
+</script>
 <div class="pa" id="parentApp" data-email="<?= pa_e($parent_email) ?>" data-version="<?= pa_e(iskool_app_version_label()) ?>">
 
     <!-- Desktop: sidebar. Same structure as the learner menu: school logo and name, the pages, the account row at the bottom. -->
@@ -180,7 +263,7 @@ function pa_account_row(string $initials, string $name): string
         </div>
 
         <!-- Phone: bottom tabs. Dynamic like the learner bar: clear near the bottom of the page, glass once it is scrolled up (parent_bottom_nav.js) -->
-        <nav class="pa-tabs" aria-label="Parent app">
+        <nav class="pa-tabs" id="mobileBottomNav" aria-label="Parent app">
             <?php foreach ($nav as [$id, $label, $icon]): ?>
                 <a class="pa-tab" href="#/<?= $id ?>" data-route="<?= $id ?>"><?= pa_icon($icon, 22) ?><span><?= pa_e($label) ?></span></a>
             <?php endforeach; ?>
@@ -214,9 +297,17 @@ function pa_account_row(string $initials, string $name): string
     <div class="pa-menu pa-sheet" id="paMenuSheet" data-pa-menu role="menu" aria-label="Account"></div>
 </div>
 
-<script src="assets/js/parent/parent_menu.js?v=1.0"></script>
+<!-- Phone: the blue arc over the page while a screen with nothing to show yet waits for the server (the learner
+     app's loader; parent_app.js shows it after a short moment and never while the splash is up) -->
+<div class="pa-loader" id="paLoader" aria-hidden="true"><div class="pa-loader-ring"></div></div>
+
+<script src="assets/js/parent/parent_menu.js?v=1.1"></script>
 <script src="assets/js/shared/pull_to_refresh.js?v=1.0"></script>
-<script src="assets/js/parent/parent_app.js?v=1.11"></script>
+<script src="assets/js/parent/parent_app.js?v=1.12"></script>
 <script src="assets/js/parent/parent_bottom_nav.js?v=1.0"></script>
+<script src="assets/js/parent/parent_pwa.js?v=1.0"></script>
+<script src="assets/js/shared/pwa_prompts.js?v=1.0"></script>
+<script src="assets/js/shared/back_button.js?v=1.0"></script>
+<script src="assets/js/parent/parent_back_button.js?v=1.0"></script>
 </body>
 </html>

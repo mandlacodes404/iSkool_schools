@@ -135,7 +135,7 @@ final class AvatarAndSelectedIconTest extends TestCase
     {
         // The service worker caches /assets/ by full URL, so the numbers in the pages must move with the files
         $parent = $this->source('parent_dashboard.php');
-        $this->assertStringContainsString('parent_app.css?v=1.13', $parent);
+        $this->assertStringContainsString('parent_app.css?v=1.14', $parent);
         $this->assertStringContainsString('parent_menu.css?v=1.3', $parent);
 
         $teacher = $this->source('teacher_dashboard.php');
