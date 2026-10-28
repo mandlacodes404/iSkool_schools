@@ -26,6 +26,7 @@ html[data-theme="light"] {
     --pa-bar: #5e5d59;
     --pa-bar-bg: #ebeae5;
     --pa-accent: #187a72;
+    --pa-ac: #5e5d59;           /* the dull warm grey of a selected icon; same value as --dm-ac in the learner menu */
     --pa-up: #15803d;
     --pa-down: #a63f38;
     --pa-flat: #6a6b64;
@@ -71,6 +72,7 @@ html[data-theme="dark"] {
     --pa-bar: #c2c3b7;
     --pa-bar-bg: rgba(255, 255, 255, .10);
     --pa-accent: #4fd1c5;
+    --pa-ac: #d4d1c8;           /* the dull warm grey of a selected icon; same value as --dm-ac in the learner menu */
     --pa-up: #4ade80;
     --pa-down: #f28b82;
     --pa-flat: #9b9c92;
@@ -611,6 +613,9 @@ html[data-theme="dark"] .pa-chip[aria-pressed="true"] .pa-chip-av { background: 
         cursor: pointer;
     }
     .pa-avatar-btn .pa-avatar { width: 36px; height: 36px; font-size: 13px; font-weight: 800; }
+    /* Same as the learner and teacher top bars: a translucent dark circle with pale initials in dark mode. Light mode
+       keeps the cream circle, which is already the same colour as theirs. */
+    html[data-theme="dark"] .pa-avatar-btn .pa-avatar { background: rgba(0, 0, 0, .35); color: #f4e4e4; }
 
     /* The scrolling area. Pull to refresh (pull_to_refresh.js) moves this element. "contain" keeps the browser's own
        pull-to-refresh, which would reload the whole app, from also firing when it is pulled at the top. */
