@@ -218,6 +218,58 @@ html[data-theme="dark"] .pa-chip[aria-pressed="true"] .pa-chip-av { background: 
 }
 .pa-loading { padding: 8px 2px; }
 
+/* ── Loaders (phones): the learner app's ───────────────────────────────────────────────────────────────────
+   The blue arc over the page while a screen with nothing to show yet waits for the server (#loaderOverlay and .loader
+   in learner_dashboard.css: same scrim, same 36px arc). Unlike the learner's it lets taps through, so a slow
+   connection never leaves the parent stuck behind it. parent_app.js adds .is-on after a short moment. */
+.pa-loader { display: none; }
+@media (max-width: 768px) {
+    .pa-loader {
+        position: fixed;
+        top: 0; right: 0; bottom: 0; left: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.55);
+        -webkit-backdrop-filter: blur(3px);
+        backdrop-filter: blur(3px);
+        z-index: 8000;
+        pointer-events: none;
+    }
+    .pa-loader.is-on { display: flex; }
+    .pa-loader-ring {
+        width: 36px;
+        height: 36px;
+        box-sizing: border-box;
+        border-radius: 50%;
+        border: 3.5px solid rgba(255, 255, 255, 0.15);
+        border-top-color: #4c8bf5;
+        animation: pa-loader-spin 0.75s linear infinite;
+    }
+}
+@keyframes pa-loader-spin { to { transform: rotate(360deg); } }
+
+/* Home while it loads: grey blocks where the page will be (the learner's Home placeholder) */
+.pa-sk-home { padding: 10px 2px 120px; }
+.pa-sk { background: var(--pa-chip); border-radius: 8px; animation: pa-sk-pulse 1.5s ease-in-out infinite; }
+.pa-sk-chip { height: 24px; width: 120px; border-radius: 999px; margin: 4px 0 14px; }
+.pa-sk-title { height: 34px; width: 78%; margin-bottom: 10px; }
+.pa-sk-line { height: 14px; width: 92%; margin-bottom: 20px; }
+.pa-sk-hero { height: 96px; border-radius: 16px; margin-bottom: 26px; background: var(--pa-row); }
+.pa-sk-label { height: 16px; width: 92px; margin-bottom: 12px; }
+.pa-sk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 26px; background: none; animation: none; }
+.pa-sk-grid .pa-sk { height: 70px; border-radius: 14px; background: var(--pa-row); }
+.pa-sk-row { height: 60px; border-radius: 16px; margin-bottom: 8px; background: var(--pa-row); }
+@keyframes pa-sk-pulse { 50% { opacity: .55; } }
+@media (prefers-reduced-motion: reduce) {
+    .pa-sk { animation: none; }
+    .pa-loader-ring { animation-duration: 1.6s; }
+}
+
+/* The button with the learner's pill spinner (assets/css/pill-loader.css) */
+.pa-btn.btn-loadable { display: inline-flex; }
+.pa-btn .btn-spinner span { background: var(--pa-on-ink); }
+
 /* ── "No connection" note: the page on show is the last copy this phone saw ─────────────────────────────── */
 .pa-offline {
     display: flex;
@@ -547,6 +599,8 @@ html[data-theme="dark"] .pa-chip[aria-pressed="true"] .pa-chip-av { background: 
        see while the bar is showing. A min-height of 100vh made the document a little taller than the screen, so a drag
        on the header (or a bounce at the top) moved the whole page, header included. dvh is the visible height. */
     html { overscroll-behavior: none; touch-action: manipulation; }
+    /* the colour behind the page from the very first frame, and in the moment between two pages, so no white edge shows (the learner's phone canvas) */
+    html { background-color: var(--pa-page); }
     body { height: 100vh; height: 100dvh; overflow: hidden; overscroll-behavior: none; }
     .pa { display: block; min-height: 0; height: 100vh; height: 100dvh; }
     .pa-side { display: none; }

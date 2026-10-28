@@ -26,7 +26,7 @@ final class ParentBottomNavTest extends TestCase
     {
         $page = $this->source('parent_dashboard.php');
 
-        $this->assertStringContainsString('parent_app.css?v=1.13', $page);
+        $this->assertStringContainsString('parent_app.css?v=1.14', $page);
         $this->assertStringContainsString('parent_menu.css?v=1.3', $page);
     }
 

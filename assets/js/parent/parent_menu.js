@@ -77,9 +77,62 @@
         var l = link.querySelector('.pa-nav-label');
         return (l ? l.textContent : link.textContent).trim();
     }
-    function navigate(route) {
+    // Opens a page. On phones the address of the current history entry is rewritten (history.replaceState) instead of a
+    // new entry being added: the pages are not places to walk back through, so the phone's Back button
+    // (parent_back_button.js) can close what is open, then go Home, then leave the app, as it does in the learner app.
+    // replaceState does not announce itself, so the hashchange that parent_app.js and the others listen for is sent
+    // here. Wider screens keep the browser's usual history. window.paRoute is the page parent_app.js has drawn.
+    function go(route) {
         var target = '#/' + route;
-        if (window.location.hash !== target) window.location.hash = target;
+        if (!phone.matches) {
+            if (window.location.hash !== target) window.location.hash = target;
+            return;
+        }
+        if (window.location.hash === target && window.paRoute === route) return;
+        try {
+            window.history.replaceState(window.history.state, '', target);
+        } catch (e) {
+            window.location.replace(target);      // history locked down: the browser announces it itself
+            return;
+        }
+        var announce = new Event('hashchange');
+        announce.paSynthetic = true;       // told apart from the browser's own (see below)
+        window.dispatchEvent(announce);
+    }
+    window.paGo = go;
+
+    // Going back pops the Back guard (shared/back_button.js), which can leave an OLDER address in the bar than the page
+    // on show (the entry underneath keeps the address the app was opened on). The browser then announces that address
+    // with a hashchange and the page would jump to it: Back with the menu open would close the menu and also change the
+    // page. The page on show is what counts, so that one announcement is stopped here, before parent_app.js and the
+    // other listeners (this file is the first script to load, so its listener is the first to run) and the address is put
+    // back to match. The ones go() sends itself are marked and left alone. Only a popstate that leaves the guard counts:
+    // the guard is what a Back press pops, so it is looked at after every tap and key press (the engine adds it then).
+    var olderAddress = false;
+    var guardOnTop = false;
+    function routeOf(hash) { return String(hash || '').replace(/^#\/?/, '').split(/[/?]/)[0]; }
+    function sampleGuard() {
+        var st = window.history.state;
+        guardOnTop = !!(st && st.iskoolBack === 1);
+    }
+    ['pointerup', 'click', 'keydown'].forEach(function (name) {
+        document.addEventListener(name, function () { setTimeout(sampleGuard, 0); }, true);
+    });
+    sampleGuard();
+    window.addEventListener('popstate', function () {
+        var leftGuard = guardOnTop;
+        sampleGuard();
+        setTimeout(sampleGuard, 0);          // the engine may put the guard back during this very popstate
+        olderAddress = phone.matches && leftGuard && !!window.paRoute && routeOf(window.location.hash) !== window.paRoute;
+    });
+    window.addEventListener('hashchange', function (ev) {
+        if (!olderAddress || ev.paSynthetic) return;
+        olderAddress = false;
+        ev.stopImmediatePropagation();
+        try { window.history.replaceState(window.history.state, '', '#/' + window.paRoute); } catch (e) { /* keep the address as it is */ }
+    });
+    function navigate(route) {
+        go(route);
         closeDrawer(false); // linking to the page you are already on does not change the hash
     }
 
@@ -95,10 +148,14 @@
         root.setAttribute('data-theme', next);
         storeSet(THEME_KEY, next);
         syncThemeButtons();
+        if (window.paSyncBar) window.paSyncBar();     // the phone's status bar follows the page (parent_dashboard.php)
     }
 
     // ── Actions shared by the account card and quick search ───────────────────────────────────────────────
-    function signOut() { window.location.href = 'logout.php'; }
+    function signOut() {
+        if (window.paData) window.paData.forget();   // the copy of the screens kept on this phone goes with the session
+        window.location.href = 'logout.php';
+    }
     function addChild() { navigate('add-child'); }
     var ACTIONS = { add: addChild, theme: toggleTheme, keys: function () { openKeys(); }, signout: signOut };
 
@@ -999,6 +1056,16 @@
             closeSheet(false);
             closeSearch(false);
             closeCards();
+        },
+        // For the phone's Back button (parent_back_button.js): closes the top-most thing that is open and says whether
+        // there was one: the search, the account sheet, the account card, then the menu itself
+        closeTop: function () {
+            if (!phone.matches) return false;
+            if (searchIsOpen()) { closeSearch(true); return true; }
+            if (sheetOpen()) { closeSheet(true); return true; }
+            if (cardOpen()) { closeCards(); return true; }
+            if (menuOpen()) { closeDrawer(true); return true; }
+            return false;
         }
     };
 }());
