@@ -261,7 +261,19 @@
     .lev-mobile-detail {
         display: block;
         min-height: calc(100vh - 74px);
-        padding: 18px 16px 96px;
+        /* Same inset as .lev-mobile-row: cancel the container's 18px, then pad 18px at the sides.
+           Without the negative margins the detail sat 34px from the screen edge. */
+        margin-left: -18px;
+        margin-right: -18px;
+        padding: 18px 18px 96px;
+    }
+
+    /* The submit button used to carry its own 16px side margins; inside the padded detail it
+       should run the full width of the content, like the other detail screens' action buttons */
+    .lev-mobile-detail .eval-submit-btn {
+        width: 100%;
+        max-width: none;
+        margin: 20px 0 0;
     }
 
     .lev-mobile-detail-badge {
@@ -357,6 +369,12 @@
 
     .lev-comments-field textarea {
         border-radius: 10px;
+    }
+
+    /* width:100% plus padding and border is wider than its box unless it is border-box, and nothing on
+       this page resets that. Inside the padded detail it would run past the screen edge. */
+    .lev-mobile-detail .lev-comments-field textarea {
+        box-sizing: border-box;
     }
 }
 /* ══════════════════════════════════════════════════════ */
