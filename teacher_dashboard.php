@@ -110,12 +110,13 @@ if ($teacherYearResult && ($teacherYearRow = $teacherYearResult->fetch_assoc()))
     </style>
     <link rel="stylesheet" href="assets/css/teacher/dashboard.css?v=5.3">
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
-    <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=7.3">
+    <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=7.4">
     <link rel="stylesheet" href="assets/css/teacher/assignments.css?v=3.4">
     <link rel="stylesheet" href="assets/css/teacher/resources.css?v=2.5">
-    <link rel="stylesheet" href="assets/css/teacher/sbo.css?v=2.3">
-    <link rel="stylesheet" href="assets/css/teacher/evaluations.css?v=3.1">
+    <link rel="stylesheet" href="assets/css/teacher/sbo.css?v=2.4">
+    <link rel="stylesheet" href="assets/css/teacher/evaluations.css?v=3.2">
     <link rel="stylesheet" href="assets/css/teacher/grades.css?v=3.2">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_detail.css?v=1.0">
     <link rel="stylesheet" href="assets/css/teacher/teacher_calendar.css?v=1.3">
     <title>Dashboard - <?= htmlspecialchars($schoolName) ?></title>
     <link rel="manifest" href="/manifest.php?v=1.2">
@@ -132,7 +133,7 @@ if ($teacherYearResult && ($teacherYearRow = $teacherYearResult->fetch_assoc()))
     <link rel="stylesheet" href="assets/css/shared/back_button.css?v=1.0">
     <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_settings.css?v=1.4">
     <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_light_mode.css?v=1.8">
-    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_light.css?v=1.5">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_light.css?v=1.6">
     <link rel="stylesheet" href="assets/css/splash_light.css?v=<?= (int) @filemtime(__DIR__ . '/assets/css/splash_light.css') ?>">
     <script>
     // Desktop sidebar: restore the saved collapsed state BEFORE first paint (no flash).
@@ -1609,13 +1610,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
 <script src="assets/js/teacher/dashboard.js?v=13.8"></script>
 <script src="assets/js/teacher/class-picker.js?v=1.1"></script>
-<script src="assets/js/teacher/quizzes.js?v=8.6"></script>
+<script src="assets/js/teacher/teacher_detail.js?v=1.0"></script>
+<script src="assets/js/teacher/quizzes.js?v=8.7"></script>
 <script src="assets/js/teacher/announcements.js?v=6.2"></script>
-<script src="assets/js/teacher/evaluations.js?v=5.3"></script>
+<script src="assets/js/teacher/evaluations.js?v=5.4"></script>
 <script src="assets/js/teacher/resources.js?v=4.9"></script>
-<script src="assets/js/teacher/grades.js?v=5.4"></script>
+<script src="assets/js/teacher/grades.js?v=5.5"></script>
 <script src="assets/js/teacher/assignments.js?v=5.5"></script>
-<script src="assets/js/teacher/sbo.js?v=5.1"></script>
+<script src="assets/js/teacher/sbo.js?v=5.2"></script>
 <script src="assets/js/teacher/analytics.js?v=4.3"></script>
 <script src="assets/js/teacher/teacher_calendar.js?v=2.0"></script>
 <script src="assets/js/teacher/teacher_desktop_menu.js?v=1.0"></script>

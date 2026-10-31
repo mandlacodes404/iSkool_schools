@@ -615,18 +615,9 @@ textarea.ev-dp-in { resize: vertical; line-height: 1.5; }
     display: none;
 }
 
-/* Mobile detail page (openMobileTeacherEvaluation) — replaces the old
-   evalResultsModal popup + .ev-mobile-results-subtitle (2026-09-12). */
-.ev-mobile-detail { padding: 16px; }
-.ev-mobile-detail-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 20px;
-}
-.ev-mobile-detail-title { font-size: 19px; font-weight: 700; color: #e2e8f0; margin: 0 0 6px; }
-.ev-mobile-detail-meta { font-size: 13px; color: #8b949e; }
+/* Mobile detail page (openMobileTeacherEvaluation): drawn by teacher_detail.css (.td-detail). Its old padded
+   container (.ev-mobile-detail { padding: 16px }) and header rules were removed so the page has the same side
+   padding as the list. .ev-mobile-detail stays as the marker the light-mode gate looks for. */
 
 /* Modal size variant (releaseEvalModal only now — the results modal
    this used to also size was removed) */

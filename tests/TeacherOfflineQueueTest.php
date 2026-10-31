@@ -278,7 +278,7 @@ final class TeacherOfflineQueueTest extends TestCase
         $this->assertLessThan($shared, $grades);
         $this->assertLessThan($shared, $owner, 'the signed-in teacher\'s email must exist before the strip starts counting their saves');
         $this->assertLessThan($glue, $shared);
-        $this->assertStringContainsString('assets/js/teacher/grades.js?v=5.4', $page, 'grades.js changed, so its cache-busting version moved');
+        $this->assertStringContainsString('assets/js/teacher/grades.js?v=5.5', $page, 'grades.js changed, so its cache-busting version moved');
         $this->assertStringContainsString('assets/js/shared/net_status.js?v=1.1', $page, 'net_status.js changed, so its cache-busting version moved');
     }
 

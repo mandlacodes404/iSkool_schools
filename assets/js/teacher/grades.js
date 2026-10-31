@@ -844,7 +844,7 @@ window.openMobileTeacherGradeQuiz = async function(quizId) {
 
     apiArea.innerHTML = `
         <div class="gr-panel-empty gr-mobile-detail">
-            <svg viewBox="0 0 24 24" width="30" height="30" stroke="#4fd1c5" stroke-width="2" fill="none"
+            <svg viewBox="0 0 24 24" width="30" height="30" stroke="currentColor" stroke-width="2" fill="none"
                 class="gr-panel-loading-spinner">
                 <circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="12"></circle>
             </svg>
@@ -898,100 +898,75 @@ function renderMobileGradeDetail(type, data, apiArea) {
     }
 }
 
-// Read-only table: same columns as the desktop/legacy table minus the
-// Edit column entirely (not just visually hidden, since mobile never
-// calls openEditMarksFromElement at all).
+// Read-only list: one row per learner (initials, name, score and a percentage pill). The same three things the
+// desktop/legacy table shows (Learner, Score, Percentage) minus its Edit column, since the phone never calls
+// openEditMarksFromElement. The look is teacher_detail.css; the root keeps .gr-mobile-detail for the light-mode gate.
 function renderMobileStandardGrades(data, apiArea) {
-    let html = `
-        <div class="gr-panel-content gr-mobile-detail">
-            <div class="gr-panel-header">
-                <div class="gr-panel-title">${escapeHtml(data.quiz_title)}</div>
-                <div class="gr-panel-meta">${data.learners.length} learner${data.learners.length !== 1 ? 's' : ''}</div>
+    const T = window.tdUi;
+    const learners = data.learners || [];
+    // Same bands as getGradeBadgeClass: 75+ / 50-74 / below 50
+    const tone = pct => { const v = parseFloat(pct); return v >= 75 ? 'green' : v >= 50 ? 'orange' : 'red'; };
+
+    const rows = learners.map(learner => {
+        const hasScore = learner.score !== null && learner.score !== undefined;
+        const score = hasScore ? `${T.esc(learner.score)} / ${T.esc(learner.total)}` : 'Not recorded';
+        const perc = learner.percentage
+            ? T.pill(learner.percentage, tone(learner.percentage))
+            : '<span class="td-mute">—</span>';
+        return `
+            <div class="td-row td-row--tile">
+                <div class="td-tile">${T.esc(T.initials(learner.name))}</div>
+                <div class="td-main"><b>${T.esc(learner.name)}</b><span>${score}</span></div>
+                ${perc}
             </div>`;
+    }).join('');
 
-    if (data.learners.length === 0) {
-        html += `<p class="teacher-empty-state">No learners found in this class.</p>`;
-    } else {
-        html += `<div class="teacher-grades-table-wrapper">
-            <table class="teacher-grades-table">
-                <thead>
-                    <tr>
-                        <th>Learner</th>
-                        <th>Score</th>
-                        <th>Percentage</th>
-                    </tr>
-                </thead>
-                <tbody>`;
-
-        data.learners.forEach(learner => {
-            const score = learner.score !== null
-                ? `${escapeHtml(learner.score)} / ${escapeHtml(learner.total)}`
-                : '<span class="gr-cell-muted">Not recorded</span>';
-            const perc  = learner.percentage
-                ? `<span class="teacher-grade-badge ${getGradeBadgeClass(learner.percentage)}">${escapeHtml(learner.percentage)}</span>`
-                : '<span class="gr-cell-muted">—</span>';
-
-            html += `
-                <tr>
-                    <td>${escapeHtml(learner.name)}</td>
-                    <td>${score}</td>
-                    <td>${perc}</td>
-                </tr>`;
-        });
-
-        html += `</tbody></table></div>`;
-    }
-
-    html += `</div>`;
-    apiArea.innerHTML = html;
+    apiArea.innerHTML = `
+        <div class="gr-mobile-detail td-detail td-detail--grade">
+            <div class="td-top"><span class="td-eyebrow">Grades</span></div>
+            <div class="td-title">${T.esc(data.quiz_title)}</div>
+            <p class="td-sub">${learners.length} learner${learners.length !== 1 ? 's' : ''}</p>
+            ${learners.length === 0
+                ? `<div class="td-panel td-gap"><div class="td-empty">No learners found in this class.</div></div>`
+                : `<div class="td-panel td-gap">${rows}</div>`}
+        </div>`;
 }
 
 // Read-only open-ended summary: score/status per learner only. No
 // per-learner accordion (that only ever housed the grading form), no
 // Release/Unpublish toggle.
 function renderMobileOpenEndedGrades(data, apiArea) {
+    const T = window.tdUi;
     const results = data.results || [];
     const fullyGraded = data.quiz_fully_graded === true || data.quiz_fully_graded === 1;
 
-    let html = `
-        <div class="gr-panel-content gr-mobile-detail">
-            <div class="gr-panel-header">
-                <div>
-                    <div class="gr-panel-title">${escapeHtml(data.quiz_title || 'Assessment Results')}</div>
-                    <div class="gr-panel-meta">${results.length} submitted learner${results.length !== 1 ? 's' : ''}</div>
-                </div>
+    const rows = results.map(learner => {
+        const openQuestions = learner.open_ended || [];
+        const pendingCount = openQuestions.filter(question => !question.grade).length;
+        const scoreDisplay = data.has_open_ended == 1 && !fullyGraded
+            ? '***'
+            : T.esc(learner.score ?? '0');
+        const name = learner.name || learner.user_email || 'Learner';
+        const badge = learner.is_fully_graded
+            ? T.pill('Fully graded', 'green')
+            : T.pill(`Pending ${pendingCount} question${pendingCount !== 1 ? 's' : ''}`, 'orange');
+        return `
+            <div class="td-row td-row--tile">
+                <div class="td-tile">${T.esc(T.initials(name))}</div>
+                <div class="td-main"><b>${T.esc(name)}</b><span>Score ${scoreDisplay} / ${T.esc(learner.total ?? '0')}</span></div>
+                ${badge}
             </div>`;
+    }).join('');
 
-    if (results.length === 0) {
-        html += `<p class="teacher-empty-state">No submitted attempts found for this assessment.</p>`;
-    } else {
-        results.forEach(learner => {
-            const openQuestions = learner.open_ended || [];
-            const pendingCount = openQuestions.filter(question => !question.grade).length;
-            const scoreDisplay = data.has_open_ended == 1 && !fullyGraded
-                ? '***'
-                : escapeHtml(learner.score ?? '0');
-            const badge = learner.is_fully_graded
-                ? `<span class="gr-oe-badge gr-oe-badge--graded">Fully Graded</span>`
-                : `<span class="gr-oe-badge gr-oe-badge--pending">Pending ${pendingCount} question${pendingCount !== 1 ? 's' : ''}</span>`;
-
-            html += `
-                <div class="gr-oe-learner-card">
-                    <div class="gr-oe-learner-card-top">
-                        <div>
-                            <div class="gr-oe-learner-name">${escapeHtml(learner.name || learner.user_email || 'Learner')}</div>
-                            <div class="gr-oe-learner-score">Score: ${scoreDisplay} / ${escapeHtml(learner.total ?? '0')}</div>
-                        </div>
-                        <div class="gr-oe-learner-actions">
-                            ${badge}
-                        </div>
-                    </div>
-                </div>`;
-        });
-    }
-
-    html += `</div>`;
-    apiArea.innerHTML = html;
+    apiArea.innerHTML = `
+        <div class="gr-mobile-detail td-detail td-detail--grade">
+            <div class="td-top"><span class="td-eyebrow">Grades</span></div>
+            <div class="td-title">${T.esc(data.quiz_title || 'Assessment Results')}</div>
+            <p class="td-sub">${results.length} submitted learner${results.length !== 1 ? 's' : ''}</p>
+            ${results.length === 0
+                ? `<div class="td-panel td-gap"><div class="td-empty">No submitted attempts found for this assessment.</div></div>`
+                : `<div class="td-panel td-gap">${rows}</div>`}
+        </div>`;
 }
 
 function renderQuizGrades(data) {

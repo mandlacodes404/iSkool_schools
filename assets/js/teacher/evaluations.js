@@ -552,62 +552,64 @@ window.openMobileTeacherEvaluation = function(flatIndex) {
         color: '#1e90ff'
     });
 
-    let body = `
-        <article class="ev-mobile-detail">
-            <div class="ev-mobile-detail-header">
-                <div>
-                    <div class="ev-mobile-detail-title">${ev.title}</div>
-                    <div class="ev-mobile-detail-meta">
-                        ${ev.response_count} response${ev.response_count !== 1 ? 's' : ''}
-                        ${ev.description ? ' &mdash; ' + ev.description : ''}
-                    </div>
-                </div>
-                <button class="ev-panel-delete-btn" onclick="confirmDeleteEvaluation(${ev.id})">
-                    <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none">
-                        <polyline points="3 6 5 6 21 6"></polyline>
-                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
-                        <path d="M10 11v6"></path>
-                        <path d="M14 11v6"></path>
-                        <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
-                    </svg>
-                    Delete
-                </button>
-            </div>`;
+    const T = window.tdUi;
+    const responses = Number(ev.response_count) || 0;
+    const comments  = ev.comments || [];
+    // Answer colours by wording: the API's own colours put teal on "Agree", which the app no longer uses
+    const BAR = { 'strongly agree': 'sa', 'agree': 'a', 'neutral': 'n', 'disagree': 'd', 'strongly disagree': 'sd' };
+    const sentence = text => { const t = String(text == null ? '' : text); return t.charAt(0) + t.slice(1).toLowerCase(); };
 
-    ev.statements.forEach(s => {
-        body += `<div class="eval-question-block">
-            <div class="eval-question-text">${s.statement}</div>
-            <div class="eval-bars">`;
-
-        s.breakdown.forEach(b => {
-            body += `
-                <div class="eval-bar-container">
-                    <div class="eval-bar-label">${b.label} (${b.count})</div>
-                    <div class="eval-bar-bg">
-                        <div class="eval-bar-fill" style="--eval-bar-width:${b.percentage}%;--eval-bar-color:${b.color};">
-                            ${b.percentage}%
-                        </div>
-                    </div>
+    const questions = (ev.statements || []).map(s => `
+        <div class="td-q">
+            <div class="td-q-text">${T.esc(s.statement)}</div>
+            ${(s.breakdown || []).map(b => {
+                const pct = Math.max(0, Math.min(100, Number(b.percentage) || 0));
+                const key = BAR[String(b.label).toLowerCase()] || 'n';
+                return `<div class="td-bar${Number(b.count) ? '' : ' is-zero'}">
+                    <div class="td-bar-top"><span>${T.esc(sentence(b.label))}<em>${T.esc(b.count)}</em></span><b>${pct}%</b></div>
+                    <div class="td-track"><i style="width:${pct}%;--td-fill:var(--td-b-${key})"></i></div>
                 </div>`;
-        });
+            }).join('')}
+        </div>`).join('');
 
-        body += `</div></div>`;
-    });
+    // The delete sheet uses the id and class names the desktop page's handlers look for (deleteEvaluationModal,
+    // .ev-delete-confirm-btn), so confirmDeleteEvaluation / executeDeleteEvaluation work here too.
+    const body = `
+        <article class="ev-mobile-detail td-detail td-detail--eval">
+            <div class="td-top">
+                <span class="td-eyebrow">Evaluation</span>
+                ${T.pill(`${responses} response${responses !== 1 ? 's' : ''}`, '')}
+            </div>
+            <div class="td-title">${T.esc(ev.title)}</div>
+            ${ev.description ? `<p class="td-sub">${T.esc(ev.description)}</p>` : ''}
 
-    body += `<div class="eval-comments-section">
-        <div class="eval-comments-title">
-            Anonymous Comments (${ev.response_count} total responses)
-        </div>`;
+            <div class="td-gt">Results</div>
+            <div class="td-panel">${questions || '<div class="td-empty">No statements.</div>'}</div>
 
-    if (ev.comments.length === 0) {
-        body += `<p class="eval-no-comments">No additional comments.</p>`;
-    } else {
-        ev.comments.forEach(c => {
-            body += `<div class="eval-comment">${c.replace(/\n/g, '<br>')}</div>`;
-        });
-    }
+            <div class="td-gt">Anonymous comments</div>
+            <div class="td-panel">
+                ${comments.length
+                    ? comments.map(c => `<div class="td-comment">${T.multiline(c)}</div>`).join('')
+                    : '<div class="td-empty">No additional comments.</div>'}
+            </div>
 
-    body += `</div></article>`;
+            <div class="td-panel td-danger-gap">
+                <button type="button" class="td-row td-row--danger" onclick="confirmDeleteEvaluation(${Number(ev.id)})">
+                    ${T.icon('trash')}
+                    <div class="td-main"><b>Delete evaluation</b></div>
+                </button>
+            </div>
+
+            ${T.confirmSheet({
+                id: 'deleteEvaluationModal',
+                closeCall: 'closeDeleteEvaluationModal()',
+                title: 'Delete evaluation',
+                body: `Delete <b>${T.esc(ev.title)}</b>? All of its responses and comments go with it, and this can't be undone.`,
+                confirmClass: 'ev-delete-confirm-btn',
+                confirmAttrs: 'onclick="executeDeleteEvaluation()"',
+                confirmLabel: 'Delete evaluation'
+            })}
+        </article>`;
 
     apiArea.innerHTML = body;
     apiArea.scrollTop = 0;
