@@ -828,41 +828,9 @@
    quizzes.js — see .qz-mobile-list / .qz-mobile-folder-label /
    .qz-mobile-row there. */
 
-/* Mobile detail page (openMobileTeacherQuiz). Reuses .teacher-quiz-card
-   as its outer class so the shared action-button/status-badge/publish-
-   status rules above still apply without duplication — but the base
-   .teacher-quiz-card visuals (background/border/border-radius/margin)
-   are a boxed-card look, so they're overridden to flat/full-bleed here,
-   consistent with the assignments/announcements/resources mobile
-   pattern: no card, just padding + a single edge-to-edge divider under
-   the header. */
-.qz-mobile-detail.teacher-quiz-card {
-    background: transparent;
-    border: none;
-    border-radius: 0;
-    margin: 0;
-    padding: 20px 16px;
-}
-@media (max-width: 899px) {
-    .qz-mobile-detail.teacher-quiz-card {
-        margin-left: -20px;
-        margin-right: -20px;
-    }
-}
-.qz-mobile-detail-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 8px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid rgba(255,255,255,0.07);
-}
-.qz-mobile-detail-title { font-size: 19px; font-weight: 700; color: #e2e8f0; }
-.qz-mobile-detail-meta {
-    display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
-    font-size: 12.5px; color: #8b949e;
-}
+/* Mobile detail page (openMobileTeacherQuiz): drawn by teacher_detail.css (.td-detail). The old flat-card rules for
+   .qz-mobile-detail.teacher-quiz-card and its header, title and meta were removed with the markup they styled.
+   .qz-mobile-detail stays as the marker the light-mode gate looks for. */
 
 /* ── QUIZ REVIEW ── */
 .teacher-review-score-card {

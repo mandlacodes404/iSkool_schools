@@ -894,9 +894,8 @@ select.sbo-dp-in,
 .sbo-mobile-row-meta { font-size: 12px; color: #8b949e; margin-top: 2px; }
 .sbo-mobile-row-chevron { flex-shrink: 0; color: #73746d; }
 
-.sbo-mobile-detail {
-    padding: 16px;
-}
+/* .sbo-mobile-detail (the phone detail page) is drawn by teacher_detail.css (.td-detail); its old 16px padded
+   container was removed so the page has the same side padding as the list. The class stays as the light-mode marker. */
 
 /* ── Delete modal ── */
 .sbo-modal-hidden {
