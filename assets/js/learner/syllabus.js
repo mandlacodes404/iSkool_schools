@@ -722,8 +722,9 @@ function renderSyllabusPage(data) {
             }
 
             @media (max-width: 480px) {
+                /* One column. No extra side padding on .syl-wrapper here: #api-content-area already pads 18px on a
+                   phone (the list inset), and another 14px on top pushed the cards in to 32px. */
                 .syl-cards-grid { grid-template-columns: 1fr; }
-                .syl-wrapper { padding: 16px 14px; }
             }
 
             /* ═══ Light mode: learner Syllabus (desktop) ═══════════════════════════════════════════════════════════════

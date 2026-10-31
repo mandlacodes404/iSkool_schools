@@ -578,7 +578,8 @@
 /* ── MOBILE: ANNOUNCEMENT DETAIL VIEW ── */
 /* (was: second inline <style> block, injected in openMobileLearnerAnnouncement) */
 .lan-mobile-detail {
-    padding: 18px 16px 96px;
+    /* 18px at the sides, the same inset as .lan-mobile-row (the margin below cancels the container's 18px) */
+    padding: 18px 18px 96px;
 }
 @media (max-width: 899px) {
     .lan-mobile-detail {
