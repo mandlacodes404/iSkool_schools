@@ -665,6 +665,23 @@ iframe {
     background: rgba(248,81,73,0.08);
 }
 
+/* Regular-weight Nunito for the phone back button's label. The page only loads Nunito at weight 600 from Google Fonts
+   (see the <link> in learner_dashboard.php), and every other Nunito text here relies on that, so a regular weight cannot
+   be added to that link without thinning the whole app. This is a tiny self-hosted copy under a family name of its own,
+   used by the back button only. The licence (SIL OFL 1.1) is next to the file. */
+@font-face {
+    font-family: 'iSkool Back Label';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('../../fonts/nunito-latin-400.woff2') format('woff2');
+}
+
+/* Back button on detail screens. Desktop shows the arrow; phones show the chevron (see the phone block below). The
+   padding lives here, not in the markup's style attribute, so the phone block can change it. */
+#headerBackBtn { padding: 5px; }
+#headerBackBtn .hb-chevron { display: none; }
+
 @media (max-width: 768px) {
     /* The avatar dropdown was using #161b22 (a leftover mismatched dark
        slate colour) instead of the app's actual dark theme colour
@@ -678,15 +695,55 @@ iframe {
         border: none;
     }
 
+    /* Back button: the same one the teacher app shows on its detail pages (#teacherHeaderBackBtn in
+       teacher_dashboard.css): a thin 30px chevron and the name of the page you came from, 17px regular, with a 44px tall
+       touch area. The same font rule is on #headerRight::before further down, which has to measure the same text. */
+    .main-header {
+        /* The longest the label may be: 140px, and never more than what leaves the header's two equal halves (the
+           button on the left, its invisible mirror on the right) room inside the screen on a small phone. "Announcements"
+           is about 126px. */
+        --hb-label-max: min(140px, calc(50vw - 50px));
+    }
+
+    #headerBackBtn,
+    .main-header.mobile-detail-mode #headerRight::before {
+        font: 400 17px/1 'iSkool Back Label', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        letter-spacing: .1px;
+    }
+
     #headerBackBtn {
         align-items: center;
-        gap: 4px;
+        gap: 0;
         min-width: 0;
-        max-width: 126px;
+        max-width: calc(42px + var(--hb-label-max));   /* chevron 30 - 2 + label + right padding 14 */
+        min-height: 44px;
+        padding: 0 14px 0 0;
+        margin-left: -8px;         /* the header pads 16px and the chevron's box has about 10px of empty space inside it
+                                      to the left of the stroke, so the chevron itself starts 18px from the screen edge,
+                                      the same as the page content below */
+        border-radius: 12px;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    #headerBackBtn:active {
+        opacity: 0.55;
     }
 
     #headerBackBtn svg {
         flex-shrink: 0;
+    }
+
+    #headerBackBtn .hb-arrow {
+        display: none;
+    }
+
+    /* The size and stroke are set here as well as in the markup because `.main-header button svg` (20px) would win over
+       the width and height attributes */
+    #headerBackBtn .hb-chevron {
+        display: block;
+        width: 30px;
+        height: 30px;
+        stroke-width: 2.1;
     }
 
     .main-header {
@@ -705,17 +762,50 @@ iframe {
     #headerBackLabel {
         display: inline-block;
         min-width: 0;
-        max-width: 92px;
+        max-width: var(--hb-label-max);
+        margin-left: -2px;         /* the chevron's box has empty space on its right too */
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-        font-size: 14px;
-        font-weight: 600;
-        line-height: 1;
+        font: inherit;
+    }
+
+    /* The back button is now wider than the quarter of the header the left side used to get, so on a detail screen
+       the left side is as wide as the button and the title takes what is left. The right side is empty, but it is
+       given the same width as the button (an invisible copy of the label, plus the chevron and padding), so the
+       title stays centred on the screen and can never run under the button. */
+    .main-header.mobile-detail-mode #headerLeft,
+    .main-header.mobile-detail-mode #headerRight {
+        flex: 0 0 auto !important;
+    }
+
+    .main-header.mobile-detail-mode .logo-container {
+        flex: 1 1 0 !important;
+    }
+
+    /* The button is 44px tall, taller than the title, and the header top-aligns its contents, so centre them on a
+       detail screen. The top and bottom padding is a little smaller so the bar stays the height it was. */
+    .main-header.mobile-detail-mode {
+        align-items: center;
+        padding-top: calc(5px + env(safe-area-inset-top, 0));
+        padding-bottom: 5px;
+    }
+
+    .main-header.mobile-detail-mode #headerRight::before {
+        content: attr(data-back-label);
+        display: block;
+        box-sizing: content-box;
+        max-width: var(--hb-label-max);   /* same cap as #headerBackLabel */
+        padding: 0 14px 0 20px;    /* the button's width without its label: 30 - 2 + 14, less its -8px left margin */
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        visibility: hidden;
     }
 
     .main-header.mobile-detail-mode .logo-container {
         min-width: 0;
+        container-type: inline-size;
     }
 
     .main-header.mobile-detail-mode #headerTitle {
@@ -733,7 +823,7 @@ iframe {
     }
 
     .main-header.mobile-detail-mode #headerBackBtn {
-        color: #ffffff !important;
+        color: #f3f2ee !important;     /* the teacher back button's colour; light mode paints its own in mobile_light.css */
     }
 
     .main-header.mobile-detail-mode.detail-title-collapsed #headerTitle {
@@ -745,6 +835,16 @@ iframe {
     .main-header.mobile-detail-mode #settingsBtn,
     .main-header.mobile-detail-mode .top-nav-avatar-btn {
         display: none !important;
+    }
+
+    /* With a long label ("Announcements") on a small phone there is hardly any room left between the button and its
+       mirror, and a title squeezed to two letters and an ellipsis is worse than none. The page's own heading is
+       still on screen, so below 72px the small title is left out. (This has to come after the
+       `display: block !important` rule for #headerTitle above, which it has the same weight as.) */
+    @container (max-width: 71px) {
+        .main-header.mobile-detail-mode #headerTitle {
+            display: none !important;
+        }
     }
 }
 
