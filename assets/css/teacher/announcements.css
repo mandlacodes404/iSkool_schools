@@ -1965,25 +1965,8 @@
 .an-mobile-row-date  { font-size: 11px; color: #484f58; }
 .an-mobile-row-chevron { flex-shrink: 0; color: #73746d; }
 
-/* Mobile detail page (openMobileTeacherAnnouncement) */
-.an-mobile-detail { padding: 16px; }
-.an-mobile-detail-title { font-size: 19px; font-weight: 700; color: #e2e8f0; margin: 0 0 8px; }
-.an-mobile-detail-meta {
-    display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
-    font-size: 12.5px; color: #8b949e; margin-bottom: 16px;
-}
-.an-mobile-detail-edited-meta { font-style: italic; }
-.an-mobile-detail-actions { display: flex; gap: 10px; margin-bottom: 18px; }
-.an-mobile-detail-delete-btn {
-    display: flex; align-items: center; gap: 6px;
-    background: rgba(255,85,85,0.1); border: 1px solid rgba(255,85,85,0.3);
-    color: #ff5555; border-radius: 8px; padding: 8px 14px;
-    font-size: 13px; font-weight: 600; cursor: pointer;
-}
-.an-mobile-detail-message {
-    font-size: 14.5px; line-height: 1.7; color: #c9d1d9;
-    white-space: pre-wrap;
-}
+/* Mobile detail page (openMobileTeacherAnnouncement)
+   Drawn by teacher_detail.css (.td-detail): it sits at the same side padding as the list, with no padded container of its own. */
 
 /* ── New button (matches pattern used in assignments/resources) ── */
 .an-new-btn {

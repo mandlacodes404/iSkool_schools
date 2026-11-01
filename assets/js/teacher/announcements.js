@@ -433,52 +433,44 @@ window.openMobileTeacherAnnouncement = function(flatIndex) {
         color: '#d891ae'
     });
 
-    const schoolBadge = ann.is_school
-        ? `<span class="an-school-badge">
-               <svg viewBox="0 0 24 24" width="9" height="9" stroke="currentColor" stroke-width="2.5" fill="none">
-                   <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                   <polyline points="9 22 9 12 15 12 15 22"/>
-               </svg>
-               School
-           </span> &bull;`
-        : '';
-
-    // School-wide announcements aren't editable/deletable from here, same
-    // rule as the desktop panel (selectDesktopAnnouncement). Edit is
-    // desktop-only for now (openEditAnnouncementPanel targets #an-main-panel,
-    // which doesn't exist in the mobile DOM) — see PROJECT_NOTES.md, flagged
-    // as a follow-up rather than wired to a dead button or silently
-    // reimplemented as a new mobile form outside this task's scope.
-    const detailActions = ann.is_school ? '' : `
-        <div class="an-mobile-detail-actions">
-            <button class="an-mobile-detail-delete-btn" onclick="confirmDeleteAnnouncement(${ann.id})">
-                <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none">
-                    <polyline points="3 6 5 6 21 6"></polyline>
-                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
-                    <path d="M10 11v6"></path>
-                    <path d="M14 11v6"></path>
-                    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
-                </svg>
-                Delete
-            </button>
-        </div>`;
-
-    const editedMeta = ann.is_edited
-        ? `<span>&bull;</span><span class="an-mobile-detail-edited-meta">Edited ${ann.edited_date}</span>`
-        : '';
+    const T = window.tdUi;
+    // School-wide announcements aren't editable/deletable from here, same rule as the desktop panel
+    // (selectDesktopAnnouncement). Edit is desktop-only for now (openEditAnnouncementPanel targets #an-main-panel,
+    // which doesn't exist in the mobile DOM) — see PROJECT_NOTES.md.
+    // The look is teacher_detail.css. The delete sheet uses the id and class names the desktop page's handlers look
+    // for (deleteAnnouncementModal, .an-delete-confirm-btn): the one the list draws is not on the page while a
+    // detail is open.
+    const edited = ann.is_edited ? `<span class="td-dot">&bull;</span>Edited ${T.esc(ann.edited_date)}` : '';
 
     apiArea.innerHTML = `
-        <article class="an-mobile-detail">
-            <h1 class="an-mobile-detail-title">${ann.title}</h1>
-            <div class="an-mobile-detail-meta">
-                ${schoolBadge}
-                <span>${ann.class_name}</span>
-                <span>&bull;</span>
-                <span>${ann.display_date}</span>
-                ${editedMeta}
+        <article class="an-mobile-detail td-detail td-detail--ann">
+            <div class="td-top">
+                <span class="td-eyebrow">Announcement</span>
+                ${ann.is_school ? T.pill('From school', 'blue') : ''}
             </div>
-            ${detailActions}
-            <div class="an-mobile-detail-message">${ann.message.replace(/\n/g, '<br>')}</div>
+            <div class="td-title">${T.esc(ann.title)}</div>
+            <p class="td-sub">${T.esc(ann.class_name)}<span class="td-dot">&bull;</span>${T.esc(ann.display_date)}${edited}</p>
+
+            <div class="td-panel td-gap"><div class="td-note td-note--read">${T.multiline(ann.message)}</div></div>
+
+            ${ann.is_school ? `
+            <p class="td-foot">Posted by your school's admin to the whole school. It can't be edited or deleted from a teacher account.</p>` : `
+            <div class="td-panel td-danger-gap">
+                <button type="button" class="td-row td-row--danger" onclick="confirmDeleteAnnouncement(${Number(ann.id)})">
+                    ${T.icon('trash')}
+                    <div class="td-main"><b>Delete announcement</b></div>
+                </button>
+            </div>
+
+            ${T.confirmSheet({
+                id: 'deleteAnnouncementModal',
+                closeCall: 'closeDeleteAnnouncementModal()',
+                title: 'Delete announcement',
+                body: `Delete <b>${T.esc(ann.title)}</b>? It goes for everyone in ${T.esc(ann.class_name)}, and this can't be undone.`,
+                confirmClass: 'an-delete-confirm-btn',
+                confirmAttrs: 'onclick="executeDeleteAnnouncement()"',
+                confirmLabel: 'Delete announcement'
+            })}`}
         </article>`;
 
     apiArea.scrollTop = 0;

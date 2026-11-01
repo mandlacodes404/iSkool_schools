@@ -41,6 +41,7 @@
 .td-detail--syl { --td-acc: #c9a27c; }
 .td-detail--eval { --td-acc: #6aa9ff; }
 .td-detail--assign { --td-acc: #a78bfa; }
+.td-detail--ann { --td-acc: #d891ae; }
 .td-detail *, .td-detail *::before, .td-detail *::after { box-sizing: border-box; }
 /* a button takes the page's type and colour. The .td-btn / .td-x rules below are written as .td-detail .x so this
    (one element deeper than a bare class) cannot override their own colour and size. */
@@ -127,6 +128,8 @@ a.td-row { color: inherit; text-decoration: none; }
 .td-w .td-track i { opacity: .72; }
 .td-note { padding: 14px 16px; color: var(--td-soft); font-size: 14.5px; line-height: 1.55; overflow-wrap: anywhere; }
 .td-empty { padding: 16px; color: var(--td-muted); font-size: 14px; }
+.td-note--read { padding: 18px 18px 20px; color: var(--td-text); font-size: 16px; line-height: 1.65; }   /* a message to read, not a caption */
+.td-foot { margin: 14px 8px 0; color: var(--td-muted); font-size: 13.5px; line-height: 1.5; }
 
 /* ── Assignment: one block per learner, with what they handed in underneath ── */
 .td-learner { position: relative; }
