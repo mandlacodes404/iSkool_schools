@@ -124,8 +124,8 @@ if ($teacherYearResult && ($teacherYearRow = $teacherYearResult->fetch_assoc()))
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Geist:wght@400..600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=14.2">
-    <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_menu.css?v=2.5">
-    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_menu.css?v=1.7">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_menu.css?v=2.6">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_menu.css?v=1.8">
     <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_settings.css?v=1.5">
     <link rel="stylesheet" href="assets/css/shared/pwa_prompts.css?v=1.0">
     <link rel="stylesheet" href="assets/css/shared/pull_to_refresh.css?v=1.0">
@@ -1612,7 +1612,7 @@ document.addEventListener('DOMContentLoaded', function () {
 <script src="assets/js/teacher/class-picker.js?v=1.1"></script>
 <script src="assets/js/teacher/teacher_detail.js?v=1.1"></script>
 <script src="assets/js/teacher/quizzes.js?v=8.7"></script>
-<script src="assets/js/teacher/announcements.js?v=6.3"></script>
+<script src="assets/js/teacher/announcements.js?v=6.4"></script>
 <script src="assets/js/teacher/evaluations.js?v=5.4"></script>
 <script src="assets/js/teacher/resources.js?v=4.9"></script>
 <script src="assets/js/teacher/grades.js?v=5.5"></script>
@@ -1620,8 +1620,8 @@ document.addEventListener('DOMContentLoaded', function () {
 <script src="assets/js/teacher/sbo.js?v=5.2"></script>
 <script src="assets/js/teacher/analytics.js?v=4.3"></script>
 <script src="assets/js/teacher/teacher_calendar.js?v=2.0"></script>
-<script src="assets/js/teacher/teacher_desktop_menu.js?v=1.0"></script>
-<script src="assets/js/teacher/teacher_mobile_menu.js?v=1.0"></script>
+<script src="assets/js/teacher/teacher_desktop_menu.js?v=1.1"></script>
+<script src="assets/js/teacher/teacher_mobile_menu.js?v=1.1"></script>
 <script>window.ISKOOL_TEACHER = <?= json_encode(['name'=>$teacherFullName,'email'=>$teacherEmail,'initials'=>$teacherInitials], JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?>;</script>
 <script src="assets/js/teacher/teacher_mobile_settings.js?v=1.1"></script>
 <script src="assets/js/teacher/teacher_desktop_settings.js?v=1.4"></script>

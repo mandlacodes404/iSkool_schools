@@ -57,7 +57,7 @@
     ['teacher_grades',        'chart',     'g', 'marks results gradebook reports scores',         'Grades'],
     ['teacher_evaluations',   'star',      'e', 'feedback review rating',                         'Evaluations'],
     ['teacher_analytics',     'pie',       'y', 'statistics performance insights charts trends',  'Analytics'],
-    ['teacher_announcements', 'megaphone', 'n', 'news notices updates post',                      'Announcements'],
+    ['teacher_announcements', 'bell',      'n', 'news notices updates post',                      'Announcements'],
     ['teacher_calendar',      'calendar',  'c', 'schedule events reminders dates',                'Calendar'],
     ['teacher_settings',      'sliders',   '',  'account notifications photo preferences',        'Settings']
   ];

@@ -161,8 +161,8 @@ final class MenuRoleAndYearTest extends TestCase
         $this->assertStringContainsString('learner/mobile_menu.css?v=2.1', $learner);
 
         $teacher = $this->source('teacher_dashboard.php');
-        $this->assertStringContainsString('teacher_desktop_menu.css?v=2.5', $teacher);
-        $this->assertStringContainsString('teacher_mobile_menu.css?v=1.7', $teacher);
+        $this->assertStringContainsString('teacher_desktop_menu.css?v=2.6', $teacher);
+        $this->assertStringContainsString('teacher_mobile_menu.css?v=1.8', $teacher);
 
         $this->assertStringContainsString('parent_menu.css?v=1.3', $this->source('parent_dashboard.php'));
     }

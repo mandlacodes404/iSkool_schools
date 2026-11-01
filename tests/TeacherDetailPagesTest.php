@@ -48,7 +48,7 @@ final class TeacherDetailPagesTest extends TestCase
         $php = $this->source('teacher_dashboard.php');
         foreach ([
             'announcements.css?v=7.5', 'sbo.css?v=2.4', 'evaluations.css?v=3.2', 'assignments.css?v=3.5', 'teacher_detail.css?v=1.2', 'teacher_mobile_light.css?v=1.8',
-            'quizzes.js?v=8.7', 'evaluations.js?v=5.4', 'grades.js?v=5.5', 'sbo.js?v=5.2', 'assignments.js?v=5.6', 'announcements.js?v=6.3', 'teacher_detail.js?v=1.1',
+            'quizzes.js?v=8.7', 'evaluations.js?v=5.4', 'grades.js?v=5.5', 'sbo.js?v=5.2', 'assignments.js?v=5.6', 'announcements.js?v=6.4', 'teacher_detail.js?v=1.1',
         ] as $versioned) {
             $this->assertStringContainsString($versioned, $php);
         }
