@@ -233,7 +233,10 @@ $parentLink = ((int)$parentCount > 0); // true when at least one parent is linke
     <link rel="stylesheet" href="assets/css/learner/grades.css?v=4.4">
     <link rel="stylesheet" href="assets/css/learner/resources.css?v=3.3">
      <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=5.6">
-     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=14.4">
+     <!-- The phone back button's regular-weight Nunito (see @font-face 'iSkool Back Label' in learner_dashboard.css), fetched
+         early so the label does not flash in another font the first time a detail page opens. Phones only. -->
+    <link rel="preload" href="assets/fonts/nunito-latin-400.woff2" as="font" type="font/woff2" crossorigin media="(max-width: 768px)">
+    <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=14.5">
     <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=3.2">
     <link rel="stylesheet" href="assets/css/learner/mobile_menu.css?v=2.1">
     <link rel="stylesheet" href="assets/css/learner/mobile_settings.css?v=1.7">
@@ -641,10 +644,13 @@ if (!empty($joinedClassIds)) {
     </svg>
 </button>
 
-        <button id="headerBackBtn" type="button" style="display: none; background: none; border: none; color: inherit; cursor: pointer; padding: 5px;" onclick="return window.handleHeaderBack(event)">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <button id="headerBackBtn" type="button" style="display: none; background: none; border: none; color: inherit; cursor: pointer;" onclick="return window.handleHeaderBack(event)">
+            <svg class="hb-arrow" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="19" y1="12" x2="5" y2="12"></line>
                 <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            <svg class="hb-chevron" xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                <polyline points="15 18 9 12 15 6"></polyline>
             </svg>
             <span id="headerBackLabel"></span>
         </button>
@@ -3543,6 +3549,9 @@ if (!title || title === 'Home' || title === 'partials/manual.html' || title === 
         : null;
     const backLabel = config.backLabel || window.learnerHeaderCurrentTitle || '';
     if (backLabelEl) backLabelEl.innerText = backLabel;
+    // The same text goes on the (invisible) right side, so the header can keep the title centred on a phone: see the
+    // #headerRight::before rule in learner_dashboard.css.
+    if (rightSide) rightSide.setAttribute('data-back-label', backLabel);
     if (mainHeader && window.innerWidth <= 768) {
         mainHeader.classList.add('mobile-detail-mode');
         if (mainContent && mainContent.scrollTop > 28) {
@@ -3571,6 +3580,7 @@ if (!title || title === 'Home' || title === 'partials/manual.html' || title === 
         window.learnerHeaderBackAction = null;
         window.learnerHeaderCurrentTitle = title;
         if (backLabelEl) backLabelEl.innerText = '';
+        if (rightSide) rightSide.removeAttribute('data-back-label');
         if (mainHeader) mainHeader.classList.remove('mobile-detail-mode', 'detail-title-collapsed');
         // --- STANDARD MODE: EXPLORATION ---
         // On mobile, this will show the nav. On desktop, your CSS still keeps it hidden.
