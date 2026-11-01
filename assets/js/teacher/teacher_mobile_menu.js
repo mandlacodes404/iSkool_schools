@@ -176,7 +176,7 @@
 
   /* ── Search ──────────────────────────────────────────────────────────── */
   var ICON = {
-    teacher_manual: 'home', teacher_assignments: 'assign', teacher_resources: 'folder', teacher_announcements: 'megaphone',
+    teacher_manual: 'home', teacher_assignments: 'assign', teacher_resources: 'folder', teacher_announcements: 'bell',
     teacher_quizzes: 'quiz', teacher_grades: 'chart', teacher_syllabus: 'book', teacher_evaluations: 'star',
     teacher_analytics: 'chart', teacher_calendar: 'calendar', teacher_settings: 'sliders'
   };
