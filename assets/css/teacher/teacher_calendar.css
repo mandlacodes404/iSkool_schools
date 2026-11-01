@@ -463,6 +463,15 @@
     .full-cal-upcoming { width: 100%; }
 }
 
+/* Phone: the bottom nav is fixed over the bottom of the page (85px + the phone's safe area, --mbn-h in
+   teacher_dashboard.css). #api-content-area only has 20px of padding, so without this the last block of the
+   calendar (the upcoming events) scrolled to the end sits under the nav. */
+@media (max-width: 768px) {
+    .full-cal-page-wrapper {
+        padding-bottom: calc(var(--mbn-h, 85px) + env(safe-area-inset-bottom, 0px) + 8px);
+    }
+}
+
 @media (max-width: 600px) {
     .full-cal-cell { min-height: 56px; padding: 4px; }
     .full-cal-pill { display: none; }
