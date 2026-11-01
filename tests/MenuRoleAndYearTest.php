@@ -158,7 +158,7 @@ final class MenuRoleAndYearTest extends TestCase
         // The service worker caches /assets/ by full URL, so the numbers in the pages must move with the files
         $learner = $this->source('learner_dashboard.php');
         $this->assertStringContainsString('learner/desktop_menu.css?v=3.2', $learner);
-        $this->assertStringContainsString('learner/mobile_menu.css?v=2.1', $learner);
+        $this->assertStringContainsString('learner/mobile_menu.css?v=2.2', $learner);
 
         $teacher = $this->source('teacher_dashboard.php');
         $this->assertStringContainsString('teacher_desktop_menu.css?v=2.6', $teacher);

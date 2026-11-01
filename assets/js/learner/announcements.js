@@ -257,8 +257,8 @@ function renderAnnouncements(data) {
             <div class="lan-mobile-list">
                 <div class="lan-mobile-empty">
                     <svg viewBox="0 0 24 24" width="48" height="48" stroke="#f28c38" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M11 5L6 9H2v6h4l5 4V5z"/>
-                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                        <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+                        <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
                     </svg>
                     <p class="lan-mobile-empty-title">No announcements yet</p>
                     <p class="lan-mobile-empty-body">Your teachers haven't posted any announcements. Check back soon.</p>
@@ -361,10 +361,9 @@ function renderAnnouncements(data) {
                     onclick="openMobileLearnerAnnouncement(${mobileFlatIdx})"
                     onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openMobileLearnerAnnouncement(${mobileFlatIdx}); }">
                     <div class="lan-mobile-card-icon">
-                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="#73746d" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
-                            <path d="M11 6a13 13 0 0 0 8.4-2.8A1 1 0 0 1 21 4v12a1 1 0 0 1-1.6.8A13 13 0 0 0 11 14H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/>
-                            <path d="M6 14a12 12 0 0 0 2.4 7.2 2 2 0 0 0 3.2-2.4A8 8 0 0 1 10 14"/>
-                            <path d="M8 6v8"/>
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="#73746d" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
+                            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+                            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
                         </svg>
                     </div>
                     <div class="lan-mobile-card-body">
@@ -413,10 +412,9 @@ function renderAnnouncements(data) {
                         onclick="openMobileLearnerAnnouncement(${mobileFlatIdx})"
                         onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openMobileLearnerAnnouncement(${mobileFlatIdx}); }">
                         <div class="lan-mobile-card-icon">
-                            <svg viewBox="0 0 24 24" width="18" height="18" stroke="#73746d" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
-                                <path d="M11 6a13 13 0 0 0 8.4-2.8A1 1 0 0 1 21 4v12a1 1 0 0 1-1.6.8A13 13 0 0 0 11 14H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/>
-                                <path d="M6 14a12 12 0 0 0 2.4 7.2 2 2 0 0 0 3.2-2.4A8 8 0 0 1 10 14"/>
-                                <path d="M8 6v8"/>
+                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="#73746d" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
+                                <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+                                <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
                             </svg>
                         </div>
                         <div class="lan-mobile-card-body">

@@ -238,7 +238,7 @@ $parentLink = ((int)$parentCount > 0); // true when at least one parent is linke
     <link rel="preload" href="assets/fonts/nunito-latin-400.woff2" as="font" type="font/woff2" crossorigin media="(max-width: 768px)">
     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=14.5">
     <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=3.2">
-    <link rel="stylesheet" href="assets/css/learner/mobile_menu.css?v=2.1">
+    <link rel="stylesheet" href="assets/css/learner/mobile_menu.css?v=2.2">
     <link rel="stylesheet" href="assets/css/learner/mobile_settings.css?v=1.7">
     <link rel="stylesheet" href="assets/css/shared/pwa_prompts.css?v=1.0">
     <link rel="stylesheet" href="assets/css/shared/back_button.css?v=1.0">
@@ -3980,7 +3980,7 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/quiz.js?v=12.8"></script>
 <script src="assets/js/learner/assignments.js?v=10.4"></script>
 <script src="assets/js/learner/resources.js?v=8.9"></script>
-<script src="assets/js/learner/announcements.js?v=9.5"></script>
+<script src="assets/js/learner/announcements.js?v=9.6"></script>
 <script src="assets/js/learner/grades.js?v=10.6"></script>
 <script src="assets/js/learner/evaluations.js?v=7.5"></script>
 <script src="assets/js/learner/discussions.js?v=11.2"></script>
@@ -3989,7 +3989,7 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/shared/net_status.js?v=1.1"></script>
 <script src="assets/js/learner/learner_net_status.js?v=1.0"></script>
 <script src="assets/js/learner/desktop_menu.js?v=1.4"></script>
-<script src="assets/js/learner/mobile_menu.js?v=1.4"></script>
+<script src="assets/js/learner/mobile_menu.js?v=1.5"></script>
 <script src="assets/js/learner/mobile_settings.js?v=1.7"></script>
 <script src="assets/js/learner/parent_invite.js?v=1.0"></script>
 <script src="assets/js/learner/mobile_class.js?v=1.2"></script>
