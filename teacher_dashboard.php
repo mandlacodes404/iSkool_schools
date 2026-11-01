@@ -117,7 +117,7 @@ if ($teacherYearResult && ($teacherYearRow = $teacherYearResult->fetch_assoc()))
     <link rel="stylesheet" href="assets/css/teacher/evaluations.css?v=3.2">
     <link rel="stylesheet" href="assets/css/teacher/grades.css?v=3.2">
     <link rel="stylesheet" href="assets/css/teacher/teacher_detail.css?v=1.2">
-    <link rel="stylesheet" href="assets/css/teacher/teacher_calendar.css?v=1.3">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_calendar.css?v=1.4">
     <title>Dashboard - <?= htmlspecialchars($schoolName) ?></title>
     <link rel="manifest" href="/manifest.php?v=1.2">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -126,7 +126,7 @@ if ($teacherYearResult && ($teacherYearRow = $teacherYearResult->fetch_assoc()))
     <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=14.2">
     <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_menu.css?v=2.5">
     <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_menu.css?v=1.7">
-    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_settings.css?v=1.4">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_settings.css?v=1.5">
     <link rel="stylesheet" href="assets/css/shared/pwa_prompts.css?v=1.0">
     <link rel="stylesheet" href="assets/css/shared/pull_to_refresh.css?v=1.0">
     <link rel="stylesheet" href="assets/css/shared/net_status.css?v=1.0">
