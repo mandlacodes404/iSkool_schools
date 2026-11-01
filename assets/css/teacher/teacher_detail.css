@@ -23,6 +23,7 @@
     --td-track: rgba(255, 255, 255, .08);
     --td-b-sa: #22c55e;   --td-b-a: #7fd48f;   --td-b-n: #fdd663;   --td-b-d: #e67e22;   --td-b-sd: #ef5b4f;
     --td-acc: #fdd663;
+    color-scheme: dark;   /* the audio player and scrollbars follow the page */
 
     box-sizing: border-box;
     padding: 14px 16px calc(28px + env(safe-area-inset-bottom, 0px));
@@ -39,6 +40,7 @@
 .td-detail--grade { --td-acc: #22c55e; }
 .td-detail--syl { --td-acc: #c9a27c; }
 .td-detail--eval { --td-acc: #6aa9ff; }
+.td-detail--assign { --td-acc: #a78bfa; }
 .td-detail *, .td-detail *::before, .td-detail *::after { box-sizing: border-box; }
 /* a button takes the page's type and colour. The .td-btn / .td-x rules below are written as .td-detail .x so this
    (one element deeper than a bare class) cannot override their own colour and size. */
@@ -62,7 +64,8 @@
 
 .td-title { margin: 10px 0 0; color: var(--td-text); font-size: 28px; font-weight: 600; line-height: 1.22; overflow-wrap: anywhere; }
 .td-sub { margin: 6px 0 0; color: var(--td-muted); font-size: 14.5px; line-height: 1.45; overflow-wrap: anywhere; }
-.td-sub .td-dot { margin: 0 6px; color: var(--td-faint); }
+.td-sub .td-dot, .td-main .td-dot { margin: 0 6px; color: var(--td-faint); font-style: normal; }
+.td-nw { font-style: normal; white-space: nowrap; }   /* a date or a word that must not break in the middle */
 .td-gt { margin: 26px 8px 8px; color: var(--td-muted); font-size: 13px; font-weight: 600; }
 .td-top + .td-title + .td-gt, .td-sub + .td-gt { margin-top: 22px; }
 .td-gap { margin-top: 22px; }
@@ -74,8 +77,9 @@
     position: relative; display: flex; align-items: center; gap: 14px; width: 100%; min-height: 52px; margin: 0; padding: 14px 16px;
     background: none; border: 0; border-radius: 0; text-align: left; cursor: default; -webkit-tap-highlight-color: transparent; appearance: none; -webkit-appearance: none;
 }
-button.td-row { cursor: pointer; }
-button.td-row:active { background: var(--td-chip); }
+button.td-row, a.td-row { cursor: pointer; }
+button.td-row:active, a.td-row:active { background: var(--td-chip); }
+a.td-row { color: inherit; text-decoration: none; }
 .td-row + .td-row::before { content: ''; position: absolute; top: 0; right: 0; left: 16px; height: 1px; background: var(--td-line); }
 .td-row--icon + .td-row--icon::before { left: 52px; }
 .td-row--tile + .td-row--tile::before { left: 68px; }
@@ -123,6 +127,16 @@ button.td-row:active { background: var(--td-chip); }
 .td-w .td-track i { opacity: .72; }
 .td-note { padding: 14px 16px; color: var(--td-soft); font-size: 14.5px; line-height: 1.55; overflow-wrap: anywhere; }
 .td-empty { padding: 16px; color: var(--td-muted); font-size: 14px; }
+
+/* ── Assignment: one block per learner, with what they handed in underneath ── */
+.td-learner { position: relative; }
+.td-learner + .td-learner::before { content: ''; position: absolute; top: 0; right: 0; left: 68px; height: 1px; background: var(--td-line); }
+.td-learner-work { padding: 0 16px 14px 68px; }
+.td-link { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px; border-radius: 99px; background: var(--td-chip); color: var(--td-text); font-size: 14px; font-weight: 600; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+.td-link svg { width: 16px; height: 16px; }
+.td-link:active { opacity: .7; }
+.td-answer { padding: 12px 14px; border-radius: 12px; background: var(--td-inset); color: var(--td-soft); font-size: 14px; line-height: 1.55; overflow-wrap: anywhere; }
+.td-audio { display: block; width: 100%; height: 40px; }
 
 /* ── Evaluation questions ── */
 .td-q { padding: 16px 16px 6px; }
