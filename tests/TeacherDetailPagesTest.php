@@ -3,7 +3,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Guards for the teacher's phone detail pages: an open quiz and its integrity report, a graded assessment, a syllabus
- * brief and an evaluation (assets/css/teacher/teacher_detail.css, assets/js/teacher/teacher_detail.js and the four
+ * brief, an evaluation and an assignment (assets/css/teacher/teacher_detail.css, assets/js/teacher/teacher_detail.js and the four
  * page scripts). They share one look (.td-detail) and sit at the same side padding as the lists, so these checks read
  * the sources for the things a later edit could quietly undo: the padding, the light-mode marker classes, the handler
  * ids the page scripts look for, and the colour and weight rules. How the pages look and behave was checked in a
@@ -22,6 +22,7 @@ final class TeacherDetailPagesTest extends TestCase
         'assets/js/teacher/sbo.js'         => 'sbo-mobile-detail td-detail td-detail--syl',
         'assets/js/teacher/evaluations.js' => 'ev-mobile-detail td-detail td-detail--eval',
         'assets/js/teacher/grades.js'      => 'gr-mobile-detail td-detail td-detail--grade',
+        'assets/js/teacher/assignments.js' => 'as-mobile-detail td-detail td-detail--assign',
     ];
 
     public function test_the_page_loads_the_shared_detail_files_before_the_scripts_and_light_mode_that_use_them(): void
@@ -35,7 +36,7 @@ final class TeacherDetailPagesTest extends TestCase
 
         $js = strpos($php, 'assets/js/teacher/teacher_detail.js?v=');
         $this->assertNotFalse($js, 'teacher_detail.js is not loaded');
-        foreach (['quizzes', 'grades', 'sbo', 'evaluations'] as $page) {
+        foreach (['quizzes', 'grades', 'sbo', 'evaluations', 'assignments'] as $page) {
             $this->assertLessThan(strpos($php, 'assets/js/teacher/' . $page . '.js?v='), $js, 'teacher_detail.js must load before ' . $page . '.js (they call window.tdUi)');
         }
     }
@@ -45,8 +46,8 @@ final class TeacherDetailPagesTest extends TestCase
         // the service worker caches /assets/ by full URL: a changed file under an unchanged ?v= is never fetched again
         $php = $this->source('teacher_dashboard.php');
         foreach ([
-            'announcements.css?v=7.4', 'sbo.css?v=2.4', 'evaluations.css?v=3.2', 'teacher_mobile_light.css?v=1.6',
-            'quizzes.js?v=8.7', 'evaluations.js?v=5.4', 'grades.js?v=5.5', 'sbo.js?v=5.2',
+            'announcements.css?v=7.4', 'sbo.css?v=2.4', 'evaluations.css?v=3.2', 'assignments.css?v=3.5', 'teacher_detail.css?v=1.1', 'teacher_mobile_light.css?v=1.7',
+            'quizzes.js?v=8.7', 'evaluations.js?v=5.4', 'grades.js?v=5.5', 'sbo.js?v=5.2', 'assignments.js?v=5.6', 'teacher_detail.js?v=1.1',
         ] as $versioned) {
             $this->assertStringContainsString($versioned, $php);
         }
@@ -62,7 +63,7 @@ final class TeacherDetailPagesTest extends TestCase
         $this->assertSame(1, preg_match('/@media \(max-width: 899px\) \{\s*\.td-detail \{\s*margin-left: -20px;\s*margin-right: -20px;/s', $css), 'the root cancels the 20px of #api-content-area, like .gr-mobile-list');
 
         // the old padded containers are gone
-        foreach (['assets/css/teacher/evaluations.css' => '.ev-mobile-detail', 'assets/css/teacher/sbo.css' => '.sbo-mobile-detail', 'assets/css/teacher/announcements.css' => '.qz-mobile-detail'] as $file => $selector) {
+        foreach (['assets/css/teacher/evaluations.css' => '.ev-mobile-detail', 'assets/css/teacher/sbo.css' => '.sbo-mobile-detail', 'assets/css/teacher/announcements.css' => '.qz-mobile-detail', 'assets/css/teacher/assignments.css' => '.as-mobile-detail'] as $file => $selector) {
             $this->assertSame(0, preg_match('/^' . preg_quote($selector, '/') . '[^{]*\{[^}]*padding/m', $this->source($file)), $file . ' still pads ' . $selector);
         }
     }
@@ -98,7 +99,7 @@ final class TeacherDetailPagesTest extends TestCase
         }
 
         // the old per-element rules for these pages are gone from the light stylesheet
-        foreach (['.qz-mobile-detail-', '.ev-mobile-detail-', '.sbo-mobile-detail ', '.gr-mobile-detail .gr-panel-header', '.gr-mobile-detail .gr-panel-title', '.gr-mobile-detail .gr-panel-meta', '.gr-mobile-detail .teacher-grades-table'] as $old) {
+        foreach (['.qz-mobile-detail-', '.ev-mobile-detail-', '.sbo-mobile-detail ', '.as-mobile-detail-', '.as-mobile-detail .teacher-grades-table', '.gr-mobile-detail .gr-panel-header', '.gr-mobile-detail .gr-panel-title', '.gr-mobile-detail .gr-panel-meta', '.gr-mobile-detail .teacher-grades-table'] as $old) {
             $this->assertStringNotContainsString($old, $light_rules, $old . ' rules should have been replaced by the variables');
         }
     }
@@ -167,6 +168,28 @@ final class TeacherDetailPagesTest extends TestCase
         foreach (["id: 'deleteEvaluationModal'", "confirmClass: 'ev-delete-confirm-btn'", 'onclick="executeDeleteEvaluation()"', 'confirmDeleteEvaluation(${Number(ev.id)})'] as $needle) {
             $this->assertStringContainsString($needle, $ev);
         }
+    }
+
+    public function test_the_assignment_page_carries_the_delete_sheet_and_keeps_its_handlers(): void
+    {
+        $js = $this->source('assets/js/teacher/assignments.js');
+        $start = strpos($js, 'window.openMobileTeacherAssignment = function');
+        $page = substr($js, $start, strpos($js, 'window.openMobileTeacherAssignmentById') - $start);
+
+        // the list draws #deleteAssignmentModal, and the list is not on the page while a detail is open
+        foreach (["id: 'deleteAssignmentModal'", "confirmClass: 'as-delete-confirm-btn'", 'onclick="executeDeleteAssignment()"', 'confirmDeleteAssignment(${Number(assignment.id)})', 'downloadSubmissions(${Number(assignment.id)})', "closeCall: 'closeDeleteAssignmentModal()'"] as $needle) {
+            $this->assertStringContainsString($needle, $page, $needle . ' is missing from the phone assignment page');
+        }
+        // what learners type (names, text answers) and what the teacher typed (title, instructions) is escaped
+        foreach (['T.esc(assignment.title)', 'T.multiline(assignment.description)', 'T.multiline(sub.text_answer)', 'T.esc(sub.name)', 'T.esc(sub.file_url)', 'T.esc(assignment.file_url)'] as $needle) {
+            $this->assertStringContainsString($needle, $page, $needle);
+        }
+        $this->assertStringNotContainsString('.replace(/\n/g', $page, 'line breaks go through T.multiline, which escapes first');
+        // the page's colours are the page's own: the helper's low-progress colour is teal and is not used here
+        $this->assertStringNotContainsString('progressColor', $page);
+        $this->assertStringNotContainsString('#4fd1c5', $page);
+        // the old table builder is gone with its only caller
+        $this->assertStringNotContainsString('buildTeacherSubmissionsTableRows', $js);
     }
 
     public function test_the_shared_helpers_escape_what_teachers_and_learners_type(): void
