@@ -234,6 +234,7 @@ function saveAssignmentPageState() {
         mainScroll:    mainContent ? mainContent.scrollTop : 0,
         panelScroll:   (document.querySelector('.las-body') || {}).scrollTop || 0,
         mobileSearch: document.getElementById('lasMobileSearch')?.value || '',
+        mobileFilter: window._lasMobFilter || 'all',
         openFolders: Array.from(document.querySelectorAll('.las-mobile-folder-body:not(.collapsed)')).map(el => el.id),
         // Desktop teacher groups the learner has folded away (open is the default)
         collapsedTeachers: Array.from(window._lasCollapsed || []),
@@ -271,14 +272,11 @@ function restoreAssignmentPageState() {
                     window.lasMobileSearch(state.mobileSearch);
                 }
             }
+            if (state.mobileFilter && state.mobileFilter !== 'all') window.lasMobileSetFilter(state.mobileFilter);
             if (Array.isArray(state.openFolders)) {
                 document.querySelectorAll('.las-mobile-folder-body').forEach(body => {
-                    const open = state.openFolders.includes(body.id);
-                    body.classList.toggle('collapsed', !open);
                     const header = body.previousElementSibling;
-                    if (header) header.classList.toggle('las-mobile-folder-header--collapsed', !open);
-                    const chev = header?.querySelector('.las-mobile-folder-chevron');
-                    if (chev) chev.classList.toggle('open', open);
+                    if (header) lasMobileSetFolder(header, body, state.openFolders.includes(body.id));
                 });
             }
             if (Array.isArray(state.collapsedTeachers)) {
@@ -339,6 +337,31 @@ function getSortedLearnerAssignmentEntries(groupedData) {
         .sort((a, b) => (b.latestTime - a.latestTime) || (a.index - b.index));
 }
 
+// ── Phone list helpers ──────────────────────────────────────────────────────────────────────────────────────
+// The small status ring at the start of each row. It draws in currentColor, so the colour comes from the
+// .las-mobile-row-icon--{todo|soon|done|closed} classes (and so follows light and dark mode with no extra rules).
+function lasMobileRing(key) {
+    const ring = '<circle cx="12" cy="12" r="9.2" stroke="currentColor" stroke-width="1.7"/>';
+    let inner = ring;
+    if (key === 'done') inner = '<circle cx="12" cy="12" r="9.6" fill="currentColor" stroke="none"/><path d="m7.8 12.4 2.8 2.8 5.6-6" stroke="#fff" stroke-width="2"/>';
+    else if (key === 'closed') inner = ring + '<path d="M8.6 12h6.8" stroke="currentColor" stroke-width="1.8"/>';
+    return `<svg class="las-icon-crisp" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${inner}</svg>`;
+}
+
+// The one line under a row's title: the state word where there is one, then the date.
+function lasMobileMeta(task, s, soon) {
+    if (s.key === 'done') {
+        const at = parseLearnerAssignmentTime(task.submitted_at);
+        return `<span class="las-mobile-st las-mobile-st--ok">Submitted</span>${at ? ' · ' + lasFmtDay(at).replace(/^\w+ /, '') : ''}`;
+    }
+    const dueMs = lasDueMs(task);
+    if (s.key === 'closed') return 'Closed' + (dueMs ? ' · was due ' + lasFmtDay(dueMs) : '');
+    if (!dueMs) return 'No due date';
+    const rel = s.days === 0 ? 'today' : s.days === 1 ? 'tomorrow' : s.days > 1 ? `in ${s.days} days` : '';
+    const due = `Due ${lasFmtDue(task)}`;
+    return (soon ? `<span class="las-mobile-st las-mobile-st--soon">${due}</span>` : due) + (rel ? ' · ' + rel : '');
+}
+
 function renderAssignmentCards(groupedData) {
     const apiArea = document.getElementById('api-content-area');
     if (!apiArea) return;
@@ -391,16 +414,46 @@ function renderAssignmentCards(groupedData) {
 
         <!-- ═══ MOBILE LIST ═══ -->`;
 
+    // ── Phone: title and counts, search, filter chips, then the teacher groups ──
+    // (the desktop layout above is a separate tree; the phone tree below is hidden from 900px up)
+    let todoCount = 0, soonCount = 0;
+    window._allLearnerAssignmentsFlat.forEach(task => {
+        const s = lasTaskState(task);
+        if (s.key !== 'todo') return;
+        todoCount++;
+        if (s.days !== null && s.days <= 3) soonCount++;
+    });
+    const mobileSummary = !hasAnyAssignments ? ''
+        : todoCount === 0 ? 'All caught up'
+        : `${todoCount} to do${soonCount ? ` · <b>${soonCount} due soon</b>` : ''}`;
+
+    html += `
+        <div class="las-mobile-head">
+            <h1 class="las-mobile-title">Assignments</h1>
+            ${mobileSummary ? `<p class="las-mobile-sub">${mobileSummary}</p>` : ''}
+        </div>`;
+
     // Mobile search bar — always rendered and tappable, even when there are
     // zero assignments or a filter currently matches nothing.
     html += `
         <div class="las-mobile-search-wrap">
-            <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="las-icon-crisp">
-                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            <svg viewBox="0 0 24 24" width="17" height="17" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="las-icon-crisp" aria-hidden="true">
+                <circle cx="11" cy="11" r="7.5"/><line x1="20.5" y1="20.5" x2="16.3" y2="16.3"/>
             </svg>
             <input type="text" class="las-mobile-search" id="lasMobileSearch"
-                placeholder="Search assignments..." oninput="lasMobileSearch(this.value)">
+                placeholder="Search assignments" aria-label="Search assignments" oninput="lasMobileSearch(this.value)">
         </div>`;
+
+    if (hasAnyAssignments) {
+        html += `<div class="las-mobile-chips" role="group" aria-label="Filter assignments">${
+            [['all', 'All'], ['todo', 'To do'], ['done', 'Done'], ['closed', 'Closed']]
+                .map(([k, label]) => `<button type="button" class="las-mobile-chip${k === 'all' ? ' on' : ''}" data-filter="${k}" aria-pressed="${k === 'all'}" onclick="lasMobileSetFilter('${k}')">${label}</button>`)
+                .join('')
+        }</div>`;
+    }
+
+    window._lasMobFilter = 'all';
+    window._lasMobTerm = '';
 
     html += `<div class="las-mobile-list">`;
 
@@ -408,7 +461,7 @@ function renderAssignmentCards(groupedData) {
     if (!hasAnyAssignments) {
         html += `
             <div class="las-mobile-empty">
-                <svg viewBox="0 0 24 24" width="46" height="46" stroke="#a78bfa" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" class="las-icon-crisp">
+                <svg viewBox="0 0 24 24" width="44" height="44" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" class="las-icon-crisp" aria-hidden="true">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                     <polyline points="14 2 14 8 20 8"></polyline>
                     <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -419,16 +472,15 @@ function renderAssignmentCards(groupedData) {
             </div>`;
     }
 
-    // Zero-results state — hidden by default, shown by lasMobileSearch()
-    // when a search term matches nothing. Kept in the DOM so it can just
-    // be toggled rather than injected fresh each keystroke.
+    // Zero-results state — hidden by default, shown by lasMobileApply() when a
+    // search or filter matches nothing. Kept in the DOM so it can just be toggled.
     html += `
         <div class="las-mobile-empty las-mobile-search-empty" id="lasMobileSearchEmpty" style="display:none;">
-            <svg viewBox="0 0 24 24" width="40" height="40" stroke="#555e6a" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round" class="las-icon-crisp">
+            <svg viewBox="0 0 24 24" width="40" height="40" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round" class="las-icon-crisp" aria-hidden="true">
                 <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
             <p class="las-mobile-empty-title" id="lasMobileSearchEmptyText">No matches</p>
-            <p class="las-mobile-empty-body">Try a different title or teacher name.</p>
+            <p class="las-mobile-empty-body" id="lasMobileSearchEmptyBody">Try a different title or teacher name.</p>
         </div>`;
 
     let mobileFlatIdx = 0;
@@ -436,55 +488,46 @@ function renderAssignmentCards(groupedData) {
     let mobileGroupIdx = 0;
     for (const { teacher, tasks } of teacherEntries) {
         const gid = `las-mg-${mobileGroupIdx}`;
+        // A teacher's group starts open while it still holds work to do; a group that is all done or closed starts folded.
+        // A learner's own choice (saved page state) wins over this, see restoreAssignmentPageState().
+        const open = tasks.some(task => lasTaskState(task).key === 'todo');
+        const classNames = [...new Set(tasks.map(task => String(task.class_name || '').trim()).filter(Boolean))];
+        const classSub = classNames.length === 1 ? classNames[0] : classNames.length > 1 ? `${classNames.length} classes` : '';
         html += `
-            <div class="las-mobile-folder-header las-mobile-folder-header--collapsed" onclick="toggleLasMobileFolder('${gid}', this)">
-                <div class="las-mobile-folder-icon">
-                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="#73746d" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-                    </svg>
-                </div>
+            <div class="las-mobile-folder-header${open ? '' : ' las-mobile-folder-header--collapsed'}" role="button" tabindex="0"
+                aria-expanded="${open}" aria-controls="${gid}"
+                data-search="${escapeLearnerAssignmentHtml(`${teacher} ${classNames.join(' ')}`.toLowerCase())}"
+                onclick="toggleLasMobileFolder('${gid}', this)"
+                onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggleLasMobileFolder('${gid}', this); }">
                 <span class="las-mobile-folder-name">${escapeLearnerAssignmentHtml(teacher)}</span>
-                <span class="las-mobile-folder-count">${tasks.length} assignment${tasks.length !== 1 ? 's' : ''}</span>
-                <svg class="las-mobile-folder-chevron las-icon-crisp" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="9 18 15 12 9 6"/>
+                <span class="las-mobile-folder-sub">${escapeLearnerAssignmentHtml(classSub)}</span>
+                <span class="las-mobile-folder-count">${tasks.length}</span>
+                <svg class="las-mobile-folder-chevron las-icon-crisp" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="m6 9 6 6 6-6"/>
                 </svg>
             </div>
-            <div class="las-mobile-folder-body collapsed" id="${gid}">`;
+            <div class="las-mobile-folder-body${open ? '' : ' collapsed'}" id="${gid}">`;
         mobileGroupIdx++;
 
-        tasks.forEach(task => {
-            const isDone = hasLearnerAssignmentSubmission(task);
-            const metaClass = task.is_past_due ? 'las-mobile-row-meta--past-due'
-                : isDone ? 'las-mobile-row-meta--done' : 'las-mobile-row-meta--pending';
+        tasks.forEach((task, taskIdx) => {
+            const s = lasTaskState(task);
+            const soon = s.key === 'todo' && s.days !== null && s.days <= 3;
 
             html += `
-                <div class="las-mobile-row${task.is_past_due ? ' las-mobile-row--past-due' : ''}" role="button" tabindex="0"
-                    data-title="${escapeLearnerAssignmentHtml(task.title||''). toLowerCase()}"
+                <div class="las-mobile-row${taskIdx === 0 ? ' las-mobile-row--first' : ''}" role="button" tabindex="0"
+                    data-title="${escapeLearnerAssignmentHtml(task.title||''). toLowerCase()}" data-state="${s.key}"
                     onclick="openMobileLearnerAssignment(${mobileFlatIdx})"
                     onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openMobileLearnerAssignment(${mobileFlatIdx}); }">
-                    <div class="las-mobile-row-icon">
-                        <svg viewBox="0 0 24 24" width="24" height="24" stroke="#73746d" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round" class="las-icon-crisp">
-                            <rect x="4" y="3" width="11" height="18" rx="1.5"></rect>
-                            <rect x="7" y="6.3" width="5" height="3" rx="0.6"></rect>
-                            <line x1="7" y1="13" x2="11" y2="13"></line>
-                            <line x1="7" y1="16" x2="10" y2="16"></line>
-                            <path d="M20.6283 13.1654A1.2685 1.2685 0 0 0 18.8346 11.3713L12.8289 17.3783A0.9 0.9 0 0 0 12.6039 17.7518L12.0095 19.7102A0.225 0.225 0 0 0 12.2898 19.9901L14.2487 19.3961A0.9 0.9 0 0 0 14.6222 19.1725Z"></path>
-                            <path d="M17.85 12.35L19.65 14.15"></path>
-                        </svg>
-                    </div>
+                    <div class="las-mobile-row-icon las-mobile-row-icon--${s.key === 'todo' ? (soon ? 'soon' : 'todo') : s.key}">${lasMobileRing(s.key)}</div>
                     <div class="las-mobile-row-body">
                         <div class="las-mobile-row-title">
                             <span class="las-mobile-row-title-text">${escapeLearnerAssignmentHtml(task.title || 'Assignment')}</span>
                         </div>
-                        <div class="las-mobile-row-meta ${metaClass}">
-                            ${formatAssignmentDueDate(task.due_date)}
-                        </div>
+                        <div class="las-mobile-row-meta">${lasMobileMeta(task, s, soon)}</div>
                     </div>
-                    <div class="las-mobile-row-chevron">
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="las-icon-crisp">
-                            <polyline points="9 18 15 12 9 6"></polyline>
-                        </svg>
-                    </div>
+                    <svg class="las-mobile-row-chevron las-icon-crisp" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="1.9" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="m9 18 6-6-6-6"></path>
+                    </svg>
                 </div>`;
             mobileFlatIdx++;
         });
@@ -514,14 +557,19 @@ function recheckMobileNavAfterToggle() {
     });
 }
 
+// Open or fold one teacher group, keeping the header, the body and the screen-reader state in step.
+function lasMobileSetFolder(header, body, open) {
+    body.classList.toggle('collapsed', !open);
+    header.classList.toggle('las-mobile-folder-header--collapsed', !open);
+    header.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+
 window.toggleLasMobileFolder = function(id, headerEl) {
     const body = document.getElementById(id);
-    if (!body) return;
-    const chevron = headerEl.querySelector('.las-mobile-folder-chevron');
-    const isOpen = !body.classList.contains('collapsed');
-    body.classList.toggle('collapsed', isOpen);
-    headerEl.classList.toggle('las-mobile-folder-header--collapsed', isOpen);
-    if (chevron) chevron.classList.toggle('open', !isOpen);
+    if (!body || !headerEl) return;
+    // While a search or filter is on, every group with a match is shown open; folding one would change nothing.
+    if (body.closest('.las-mobile-list')?.classList.contains('is-filtering')) return;
+    lasMobileSetFolder(headerEl, body, body.classList.contains('collapsed'));
     saveAssignmentPageState();
 
     // Opening/closing a folder changes the page's actual scrollable
@@ -532,42 +580,53 @@ window.toggleLasMobileFolder = function(id, headerEl) {
     recheckMobileNavAfterToggle();
 };
 
-window.lasMobileSearch = function(val) {
-    if (window.learnerPageState) window.learnerPageState.update('assignments', { mobileSearch: val });
-    const term = val.toLowerCase().trim();
+window._lasMobFilter = 'all';
+window._lasMobTerm = '';
+
+// Shows the rows that match both the filter chip and the search box, and only the groups that still have a row.
+// Folding is left alone (the list just shows every match while filtering), so clearing the search puts it back as it was.
+function lasMobileApply() {
+    const list = document.querySelector('.las-mobile-list');
+    if (!list) return;
+    const term = window._lasMobTerm || '';
+    const filter = window._lasMobFilter || 'all';
+    const filtering = !!term || filter !== 'all';
+    list.classList.toggle('is-filtering', filtering);
+
     let totalVisible = 0;
-    document.querySelectorAll('.las-mobile-folder-body').forEach(body => {
+    list.querySelectorAll('.las-mobile-folder-body').forEach(body => {
         const header = body.previousElementSibling;
-        const folderName = header ? header.querySelector('.las-mobile-folder-name').textContent.toLowerCase() : '';
-        const rows = body.querySelectorAll('.las-mobile-row');
+        // a search that names the teacher or the class shows all of that group's rows
+        const groupHit = !!term && (header?.dataset.search || '').includes(term);
         let visible = 0;
-        rows.forEach(row => {
-            const title = (row.dataset.title || '');
-            const show = !term || title.includes(term) || folderName.includes(term);
+        body.querySelectorAll('.las-mobile-row').forEach(row => {
+            const show = (filter === 'all' || row.dataset.state === filter)
+                && (!term || groupHit || (row.dataset.title || '').includes(term));
             row.style.display = show ? '' : 'none';
+            row.classList.toggle('las-mobile-row--first', show && visible === 0);
             if (show) visible++;
         });
-        const folderShown = (visible || !term || folderName.includes(term));
-        if (header) header.style.display = folderShown ? '' : 'none';
-        body.style.display = folderShown ? '' : 'none';
-        if (folderShown) totalVisible += (term ? visible : rows.length);
-        if (term && visible) {
-            body.classList.remove('collapsed');
-            if (header) header.classList.remove('las-mobile-folder-header--collapsed');
-            const chev = header ? header.querySelector('.las-mobile-folder-chevron') : null;
-            if (chev) chev.classList.add('open');
+        if (header) {
+            header.style.display = visible ? '' : 'none';
+            const count = header.querySelector('.las-mobile-folder-count');
+            if (count) count.textContent = String(visible);
         }
+        body.style.display = visible ? '' : 'none';
+        totalVisible += visible;
     });
 
-    // Zero-results empty state — only relevant when actively searching
-    // and nothing at all in the list matched.
+    // Zero-results empty state — only when a search or filter is on and nothing matched.
     const searchEmpty = document.getElementById('lasMobileSearchEmpty');
     if (searchEmpty) {
-        const showEmpty = term.length > 0 && totalVisible === 0;
+        const showEmpty = filtering && totalVisible === 0;
         searchEmpty.style.display = showEmpty ? 'flex' : 'none';
         if (showEmpty) {
             const label = document.getElementById('lasMobileSearchEmptyText');
-            if (label) label.textContent = `No matches for "${val.trim()}"`;
+            const body = document.getElementById('lasMobileSearchEmptyBody');
+            const raw = (document.getElementById('lasMobileSearch')?.value || '').trim();
+            const none = { todo: 'Nothing to do right now', done: 'Nothing submitted yet', closed: 'No closed assignments' };
+            if (label) label.textContent = raw ? `No matches for "${raw}"` : (none[filter] || 'No matches');
+            if (body) body.textContent = raw ? 'Try a different title or teacher name.' : 'Pick another filter to see more.';
         }
     }
 
@@ -575,6 +634,23 @@ window.lasMobileSearch = function(val) {
     // height just like expanding/collapsing a folder does, but without a
     // real scroll event — same recalculation fix as the folder toggle.
     recheckMobileNavAfterToggle();
+}
+
+window.lasMobileSetFilter = function(key) {
+    window._lasMobFilter = key || 'all';
+    document.querySelectorAll('.las-mobile-chip').forEach(chip => {
+        const on = chip.dataset.filter === window._lasMobFilter;
+        chip.classList.toggle('on', on);
+        chip.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    lasMobileApply();
+    saveAssignmentPageState();
+};
+
+window.lasMobileSearch = function(val) {
+    if (window.learnerPageState) window.learnerPageState.update('assignments', { mobileSearch: val });
+    window._lasMobTerm = String(val || '').toLowerCase().trim();
+    lasMobileApply();
 };
 
 function escapeLearnerAssignmentHtml(value) {
@@ -589,14 +665,6 @@ function escapeLearnerAssignmentHtml(value) {
 
 function escapeLearnerAssignmentJsString(value) {
     return String(value ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\r?\n/g, ' ');
-}
-
-function getLearnerAssignmentInitials(name) {
-    const clean = String(name ?? '').trim();
-    if (!clean) return '?';
-    const parts = clean.split(/\s+/).filter(Boolean);
-    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
-    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
 }
 
 function formatLearnerAssignmentPostedDate(rawDate) {
@@ -629,52 +697,65 @@ window.openMobileLearnerAssignment = function(flatIdx) {
     }
     showLearnerAssignmentMobileBottomNav();
 
-    const isDone = hasLearnerAssignmentSubmission(task);
-    const statusDotClass = task.is_past_due ? 'las-status-dot--past-due'
-        : isDone ? 'las-status-dot--done' : 'las-status-dot--pending';
-    const statusLabel = task.is_past_due ? 'Locked' : (isDone ? 'Submitted' : 'Not Submitted');
-    const actionLabel = task.is_past_due ? 'Submission Closed' : (isDone ? 'Update Submission' : 'Submit Assignment');
+    const s = lasTaskState(task);
+    const soon = s.key === 'todo' && s.days !== null && s.days <= 3;
+    const pill = s.key === 'done' ? { cls: 'ok', text: 'Submitted' }
+        : s.key === 'closed' ? { cls: 'closed', text: 'Closed' }
+        : { cls: soon ? 'soon' : 'todo', text: 'Not submitted' };
+    const actionLabel = task.is_past_due ? 'Submission Closed' : (s.key === 'done' ? 'Update Submission' : 'Submit Assignment');
     const submissionFormId = `las-mobile-submission-${task.id}`;
 
     const sender = task.teacher || 'Teacher';
-    const initials = task.initials || getLearnerAssignmentInitials(sender);
+
+    // Due: the day in large type, the time and how long is left beneath it
+    const dueMs = lasDueMs(task);
+    let dueDay = 'No due date', dueSmall = '';
+    if (dueMs) {
+        const due = new Date(dueMs);
+        dueDay = lasFmtDay(dueMs);
+        dueSmall = due.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+        if (s.key === 'todo') {
+            dueSmall += s.days === 0 ? ' · today' : s.days === 1 ? ' · tomorrow' : s.days > 1 ? ` · in ${s.days} days` : '';
+        } else if (s.key === 'closed') {
+            dueSmall += ' · closed';
+        }
+    }
+    const fileRow = (label, note, onclick) => `
+                    <a class="las-mobile-detail-link" href="javascript:void(0)" onclick="${onclick}">
+                        <svg class="las-mobile-detail-link-icon las-icon-crisp" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path><path d="M14 3v5h5"></path></svg>
+                        <span class="las-mobile-detail-link-text"><span class="las-mobile-detail-link-name">${label}</span><span class="las-mobile-detail-link-note">${note}</span></span>
+                        <svg class="las-mobile-detail-link-chev las-icon-crisp" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="1.9" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
+                    </a>`;
 
     apiArea.innerHTML = `
         <article class="las-mobile-detail">
-            <div class="las-mobile-detail-author-row">
-                <div class="las-mobile-detail-avatar">${escapeLearnerAssignmentHtml(initials)}</div>
-                <div class="las-mobile-detail-author-info">
-                    <div class="las-mobile-detail-author-name">${escapeLearnerAssignmentHtml(sender)}</div>
-                    <div class="las-mobile-detail-author-role">
-                        <span>Author</span><span class="las-mobile-detail-role-sep">|</span><span class="las-mobile-detail-role-badge">Teacher</span>
-                    </div>
-                    <div class="las-mobile-detail-posted">Posted ${escapeLearnerAssignmentHtml(task.created_at ? formatLearnerAssignmentPostedDate(task.created_at) : '')}</div>
-                </div>
-            </div>
-            <div class="las-mobile-detail-status">
-                <span class="las-mobile-row-status-dot ${statusDotClass}"></span>
-                ${statusLabel}
+            <div class="las-mobile-detail-top">
+                <span class="las-mobile-detail-eyebrow">Assignment</span>
+                <span class="las-mobile-detail-status las-mobile-detail-status--${pill.cls}">${pill.text}</span>
             </div>
             <h1 class="las-mobile-detail-title">${escapeLearnerAssignmentHtml(task.title || 'Assignment')}</h1>
-            <div class="las-mobile-detail-meta">
-                Due ${escapeLearnerAssignmentHtml(task.due_date || 'No Due Date')}
+            ${task.created_at ? `<div class="las-mobile-detail-posted">Posted ${escapeLearnerAssignmentHtml(formatLearnerAssignmentPostedDate(task.created_at))}</div>` : ''}
+            <div class="las-mobile-detail-facts">
+                <div class="las-mobile-detail-fact">
+                    <div class="las-mobile-detail-fact-label">Due</div>
+                    <div class="las-mobile-detail-fact-value">${escapeLearnerAssignmentHtml(dueDay)}</div>
+                    ${dueSmall ? `<div class="las-mobile-detail-fact-note${soon ? ' las-mobile-detail-fact-note--soon' : ''}">${escapeLearnerAssignmentHtml(dueSmall)}</div>` : ''}
+                </div>
+                <div class="las-mobile-detail-fact">
+                    <div class="las-mobile-detail-fact-label">Teacher</div>
+                    <div class="las-mobile-detail-fact-value las-mobile-detail-fact-value--name">${escapeLearnerAssignmentHtml(sender)}</div>
+                    ${task.class_name ? `<div class="las-mobile-detail-fact-note">${escapeLearnerAssignmentHtml(task.class_name)}</div>` : ''}
+                </div>
             </div>
+            <div class="las-mobile-detail-label">Instructions</div>
             <div class="las-mobile-detail-desc">
                 ${task.description ? escapeLearnerAssignmentHtml(task.description).replace(/\n/g, '<br>') : 'No description provided.'}
             </div>
             <div class="las-mobile-detail-links">
-                ${task.teacher_file ? `
-                    <a class="las-mobile-detail-link" href="javascript:void(0)"
-                       onclick="viewDocument('${escapeLearnerAssignmentJsString(task.teacher_file)}', 'Teacher Attachment: ${escapeLearnerAssignmentJsString(task.title)}')">
-                        <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="las-icon-crisp"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
-                        Teacher Attachment
-                    </a>` : ''}
-                ${task.submission_file ? `
-                    <a class="las-mobile-detail-link" href="javascript:void(0)"
-                       onclick="viewDocument('${escapeLearnerAssignmentJsString(task.submission_file)}', 'My Submission: ${escapeLearnerAssignmentJsString(task.title)}')">
-                        <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="las-icon-crisp"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                        View My Work
-                    </a>` : ''}
+                ${task.teacher_file ? fileRow('Teacher attachment', 'From your teacher',
+                    `viewDocument('${escapeLearnerAssignmentJsString(task.teacher_file)}', 'Teacher Attachment: ${escapeLearnerAssignmentJsString(task.title)}')`) : ''}
+                ${task.submission_file ? fileRow('My submission', 'Tap to view your work',
+                    `viewDocument('${escapeLearnerAssignmentJsString(task.submission_file)}', 'My Submission: ${escapeLearnerAssignmentJsString(task.title)}')`) : ''}
             </div>
             ${task.is_past_due
                 ? `<span class="las-mobile-detail-action las-mobile-detail-action--locked">${actionLabel}</span>`

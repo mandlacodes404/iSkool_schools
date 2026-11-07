@@ -123,7 +123,7 @@ final class QuizInstructionsTest extends TestCase
     {
         $page = $this->source('learner_dashboard.php');
 
-        $this->assertStringContainsString('assets/css/learner/quiz.css?v=6.8', $page);
-        $this->assertStringContainsString('assets/js/learner/quiz.js?v=12.8', $page);
+        $this->assertStringContainsString('assets/css/learner/quiz.css?v=6.9', $page);
+        $this->assertStringContainsString('assets/js/learner/quiz.js?v=12.9', $page);
     }
 }

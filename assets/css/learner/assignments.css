@@ -9,6 +9,8 @@
     .las-desktop-layout { display: flex !important; }
     .las-mobile-list    { display: none !important; }
     .las-mobile-search-wrap { display: none !important; }
+    .las-mobile-head    { display: none !important; }
+    .las-mobile-chips   { display: none !important; }
 }
 @media (max-width: 899px) {
     .las-desktop-layout { display: none !important; }
@@ -378,7 +380,45 @@
 .las-btn2:hover { color: var(--las-text); background: var(--las-hover); }
 
 
-/* ── MOBILE LIST STYLES (flat, no card wrapper) ── */
+/* ── MOBILE LIST: the quiet list (phones, and the 769–899px range that still shows the phone layout) ──
+   One calm column: a title with a counts line, a search box, filter chips, then a label for each teacher with
+   a status ring, a title and one line of detail per row. Weights stay at 400 (text) and 600 (titles and names),
+   the same as the rest of the phone pages. The colours are the --qm-* tokens below, so light mode only has to
+   change the tokens (see the light blocks at the end of this file). */
+.las-mobile-head,
+.las-mobile-search-wrap,
+.las-mobile-chips,
+.las-mobile-list,
+.las-mobile-detail {
+    --qm-title: #ecece9;
+    --qm-body: #c2c3b7;
+    --qm-muted: #8b8b87;
+    --qm-faint: #5f605a;
+    --qm-line: rgba(255,255,255,0.07);
+    --qm-press: rgba(255,255,255,0.04);
+    --qm-surf: #272726;
+    --qm-field: #20201f;
+    --qm-ring: #73746d;
+    --qm-soon: #f28c38;
+    --qm-ok: #4dbb85;
+    --qm-chipline: rgba(255,255,255,0.12);
+    --qm-chipon: #ecece9;
+    --qm-chipon-text: #20201f;
+}
+
+.las-mobile-head { padding: 4px 2px 0; }
+.las-mobile-title {
+    margin: 0;
+    font-family: inherit;
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.2px;
+    color: var(--qm-title);
+}
+.las-mobile-sub { margin: 5px 0 0; font-size: 14px; line-height: 1.4; font-weight: 400; color: var(--qm-muted); }
+.las-mobile-sub b { font-weight: 600; color: var(--qm-soon); }
+
 .las-mobile-list {
     background: transparent;
     border-radius: 0;
@@ -391,156 +431,162 @@
         margin-right: -18px;
     }
 }
+
+/* search */
+.las-mobile-search-wrap { display: block; position: relative; margin: 14px 0 0; }
+.las-mobile-search-wrap svg {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--qm-muted);
+}
+.las-mobile-search {
+    width: 100%;
+    box-sizing: border-box;
+    height: 42px;
+    padding: 0 14px 0 42px;
+    border: 0;
+    border-radius: 12px;
+    background: var(--qm-surf);
+    color: var(--qm-title);
+    font: inherit;
+    font-size: 16px; /* 16px stops iOS zooming the page when the box is focused */
+    font-weight: 400;
+    -webkit-appearance: none;
+    appearance: none;
+}
+.las-mobile-search:focus { outline: none; box-shadow: inset 0 0 0 1px var(--qm-chipline); }
+.las-mobile-search::placeholder { color: var(--qm-muted); opacity: 1; }
+
+/* filter chips */
+.las-mobile-chips {
+    display: flex;
+    gap: 6px;
+    margin: 12px 0 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.las-mobile-chips::-webkit-scrollbar { display: none; }
+.las-mobile-chip {
+    flex: none;
+    height: 32px;
+    padding: 0 10px;
+    border-radius: 16px;
+    border: 1px solid var(--qm-chipline);
+    background: transparent;
+    color: var(--qm-muted);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 400;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+.las-mobile-chip.on { background: var(--qm-chipon); border-color: var(--qm-chipon); color: var(--qm-chipon-text); }
+
+/* a teacher's label: name, class, how many, fold arrow */
 .las-mobile-folder-header {
     display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 16px 18px;
+    align-items: baseline;
+    gap: 8px;
+    padding: 20px 20px 4px;
     background: transparent;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
     cursor: pointer;
     user-select: none;
-    transition: background 0.2s;
+    -webkit-tap-highlight-color: transparent;
 }
-.las-mobile-folder-header:active { background: rgba(255,255,255,0.03); }
-.las-mobile-folder-header:not(.las-mobile-folder-header--collapsed) {
-    background: rgba(255,255,255,0.05);
-}
-.las-mobile-folder-icon { flex-shrink: 0; }
+.las-mobile-folder-header:focus-visible { outline: 2px solid var(--qm-chipline); outline-offset: -2px; }
 .las-mobile-folder-name {
-    flex: 1;
-    font-size: 16px;
+    flex: 0 1 auto;
+    min-width: 0;
+    font-size: 14px;
     font-weight: 600;
-    color: #e2e8f0;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    color: var(--qm-body);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
-.las-mobile-folder-count {
-    font-size: 12px;
-    color: #8b949e;
-    font-weight: 600;
-    background: rgba(255,255,255,0.05);
-    padding: 2px 8px;
-    border-radius: 20px;
-    flex-shrink: 0;
+.las-mobile-folder-sub {
+    flex: 1 1 0;
+    min-width: 0;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--qm-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
+.las-mobile-folder-count { flex: none; margin-left: auto; font-size: 13px; font-weight: 400; color: var(--qm-muted); }
 .las-mobile-folder-chevron {
-    flex-shrink: 0;
-    color: #73746d;
-    transition: transform 0.3s ease;
+    flex: none;
+    align-self: center;
+    color: var(--qm-muted);
+    transition: transform 0.2s ease;
 }
-.las-mobile-folder-chevron.open { transform: rotate(90deg); }
+.las-mobile-folder-header--collapsed .las-mobile-folder-chevron { transform: rotate(-90deg); }
 .las-mobile-folder-body { display: block; }
 .las-mobile-folder-body.collapsed { display: none; }
+/* while a search or filter is on, every group that has a match shows open and nothing is saved */
+.las-mobile-list.is-filtering .las-mobile-folder-body.collapsed { display: block; }
+.las-mobile-list.is-filtering .las-mobile-folder-header--collapsed .las-mobile-folder-chevron { transform: none; }
+
+/* a row: ring, title, one line of detail, arrow. The hairline starts under the title, not under the ring. */
 .las-mobile-row {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 13px 18px;
+    gap: 14px;
+    padding: 11px 20px;
     background: transparent;
-    border-bottom: 0;
-    border-radius: 0;
-    border-left: 0;
-    border-right: 0;
     cursor: pointer;
     transition: background 0.15s;
     position: relative;
+    -webkit-tap-highlight-color: transparent;
 }
-.las-mobile-row::after {
+.las-mobile-row::before {
     content: '';
     position: absolute;
-    bottom: 0;
-    left: 0;
+    top: 0;
+    left: 58px;
     right: 0;
     height: 1px;
-    background: rgba(255,255,255,0.06);
+    background: var(--qm-line);
 }
-.las-mobile-row:last-child::after { display: none; }
-.las-mobile-row:active { background: rgba(255,255,255,0.03); }
-.las-mobile-row-icon {
-    width: 32px;
-    height: 32px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-.las-mobile-row-icon svg {
-    width: 24px;
-    height: 24px;
-}
+.las-mobile-row--first::before { display: none; }
+.las-mobile-row:active { background: var(--qm-press); }
+.las-mobile-row:focus-visible { outline: 2px solid var(--qm-chipline); outline-offset: -2px; }
+.las-mobile-row-icon { flex: none; width: 24px; height: 24px; display: inline-flex; color: var(--qm-ring); }
+.las-mobile-row-icon svg { width: 24px; height: 24px; }
+.las-mobile-row-icon--soon { color: var(--qm-soon); }
+.las-mobile-row-icon--done { color: var(--qm-ok); }
+.las-mobile-row-icon--closed { color: var(--qm-faint); }
 .las-mobile-row-body { flex: 1; min-width: 0; }
 .las-mobile-row-title {
-    font-size: 15px;
-    font-weight: 600;
-    color: #e2e8f0;
     margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--qm-title);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    display: flex;
-    align-items: center;
-    gap: 6px;
 }
-.las-mobile-row-status-dot {
-    display: inline-block;
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-.las-mobile-row-title-text {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
+.las-mobile-row-title-text { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .las-mobile-row-meta {
-    font-size: 12px;
-    color: #8E8E93;
-    margin-top: 2px;
+    margin-top: 3px;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.3;
+    color: var(--qm-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
-.las-mobile-row-chevron {
-    flex-shrink: 0;
-    color: #73746d;
-}
+.las-mobile-st--soon { color: var(--qm-soon); }
+.las-mobile-st--ok { color: var(--qm-ok); }
+.las-mobile-row-chevron { flex: none; color: var(--qm-faint); }
 
-/* ── MOBILE SEARCH BAR ── */
-@media (max-width: 899px) {
-    .las-mobile-search-wrap {
-        display: block;
-        margin-bottom: 10px;
-        position: relative;
-    }
-    .las-mobile-search-wrap svg {
-        position: absolute;
-        left: 12px;
-        top: 50%;
-        transform: translateY(-50%);
-        pointer-events: none;
-        opacity: 0.4;
-    }
-    .las-mobile-search {
-        width: 100%;
-        box-sizing: border-box;
-        padding: 9px 14px 9px 36px;
-        border-radius: 10px;
-        background: rgba(255,255,255,0.05);
-        border: none;
-        color: #e2e8f0;
-        font-size: 15px;
-        font-family: 'Nunito', sans-serif;
-        transition: background 0.2s;
-    }
-    .las-mobile-search:focus { outline: none; background: rgba(255,255,255,0.08); }
-    .las-mobile-search::placeholder { color: #555e6a; }
-}
-
-/* ── MOBILE EMPTY STATES (no assignments / no search matches) ── */
+/* ── MOBILE EMPTY STATES (no assignments / no search or filter matches) ── */
 .las-mobile-empty {
     display: flex;
     flex-direction: column;
@@ -548,23 +594,23 @@
     justify-content: center;
     text-align: center;
     padding: 24px;
-    color: #555e6a;
-    min-height: calc(100vh - 280px);
+    color: var(--qm-muted);
+    min-height: 46vh;
 }
-.las-mobile-empty svg { opacity: 0.35; margin-bottom: 14px; }
+.las-mobile-empty svg { opacity: 0.5; margin-bottom: 14px; }
 .las-mobile-empty-title {
-    color: #c9d1d9;
-    font-size: 15px;
-    font-weight: 700;
+    color: var(--qm-title);
+    font-size: 16px;
+    font-weight: 600;
     margin: 0 0 6px;
 }
 .las-mobile-empty-body {
-    color: #8b949e;
-    font-size: 13px;
+    color: var(--qm-muted);
+    font-size: 14px;
+    font-weight: 400;
     margin: 0;
     line-height: 1.5;
 }
-.las-mobile-search-empty svg { opacity: 0.5; }
 
 /* ── SHARED UTILITIES ── */
 /* (was: inline style="" attributes scattered through renderAssignmentCards,
@@ -592,26 +638,6 @@
 .las-sidebar-status-dot--done     { background: #a78bfa; }
 .las-sidebar-status-dot--pending  { background: #e67e22; }
 
-/* Status dot colors — panel / mobile-detail variant (was: inline
-   style="background:${statusDotColor};" in selectDesktopLearnerAssignment
-   and openMobileLearnerAssignment; "done" here is green) */
-.las-status-dot--past-due { background: #6b7280; }
-.las-status-dot--done     { background: #22c55e; }
-.las-status-dot--pending  { background: #e67e22; }
-
-/* Mobile row due-date text color (was: inline
-   style="color:${...};" on .las-mobile-row-meta — same 3-color
-   scheme as the sidebar dot, since it mirrors the sidebar's palette) */
-.las-mobile-row-meta--past-due { color: #6b7280; }
-.las-mobile-row-meta--done     { color: #a78bfa; }
-.las-mobile-row-meta--pending  { color: #e67e22; }
-
-/* Past-due mobile row dimming (was: inline
-   style="${task.is_past_due ? 'opacity:0.65;' : ''}" on .las-mobile-row) */
-.las-mobile-row--past-due {
-    opacity: 0.65;
-}
-
 /* Fetch error / empty states (was: inline style="" on the error block in
    fetchAssignments() and the empty-state <p> in renderAssignmentCards()) */
 .las-error-state {
@@ -626,10 +652,11 @@
 
 
 /* ── MOBILE: ASSIGNMENT DETAIL VIEW ── */
-/* (was: second inline <style> block, injected in openMobileLearnerAssignment) */
+/* Same look as the quiz instructions screen: what it is and where it stands, the title, the due date up front,
+   the instructions, any files, then the button. Colours are the --qm-* tokens defined with the list above. */
 .las-mobile-detail {
-    /* 18px at the sides, the same inset as .las-mobile-row (the margin below cancels the container's 18px) */
-    padding: 18px 18px 96px;
+    /* 20px at the sides, the same inset as .las-mobile-row (the margin below cancels the container's 18px) */
+    padding: 8px 20px 96px;
 }
 @media (max-width: 899px) {
     .las-mobile-detail {
@@ -637,177 +664,163 @@
         margin-right: -18px;
     }
 }
-.las-mobile-detail-author-row {
+.las-mobile-detail-top {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 12px;
-    margin-bottom: 18px;
 }
-.las-mobile-detail-avatar {
-    flex: 0 0 auto;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    border: 1px solid rgba(167,139,250,0.35);
-    background: rgba(167,139,250,0.08);
-    color: #a78bfa;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 15px;
-    font-weight: 800;
-    letter-spacing: 0.2px;
-}
-.las-mobile-detail-author-info {
-    min-width: 0;
-}
-.las-mobile-detail-author-name {
-    color: #e2e8f0;
-    font-size: 16px;
-    font-weight: 700;
-    line-height: 1.3;
-    overflow-wrap: anywhere;
-}
-.las-mobile-detail-author-role {
-    color: #8b949e;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.6px;
-    text-transform: uppercase;
-    margin-top: 2px;
-}
-.las-mobile-detail-role-badge {
-    color: #a78bfa;
-}
-.las-mobile-detail-role-sep {
-    color: #5a6472;
-    margin: 0 6px;
-}
-.las-mobile-detail-posted {
-    color: #8b949e;
+.las-mobile-detail-eyebrow {
     font-size: 12px;
-    margin-top: 4px;
+    font-weight: 600;
+    letter-spacing: 0.9px;
+    text-transform: uppercase;
+    color: var(--qm-muted);
 }
 .las-mobile-detail-status {
     display: inline-flex;
     align-items: center;
-    gap: 7px;
-    padding: 4px 9px;
-    border-radius: 6px;
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0.6px;
-    text-transform: uppercase;
-    margin-bottom: 12px;
-    color: #c9d1d9;
-    border: 1px solid rgba(255,255,255,0.1);
-    background: rgba(255,255,255,0.04);
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--qm-muted);
+    border: 1px solid var(--qm-chipline);
 }
+.las-mobile-detail-status--soon,
+.las-mobile-detail-status--todo { color: var(--qm-soon); border-color: color-mix(in srgb, var(--qm-soon) 40%, transparent); background: color-mix(in srgb, var(--qm-soon) 11%, transparent); }
+.las-mobile-detail-status--ok { color: var(--qm-ok); border-color: color-mix(in srgb, var(--qm-ok) 40%, transparent); background: color-mix(in srgb, var(--qm-ok) 11%, transparent); }
 .las-mobile-detail-title {
-    margin: 0 0 10px;
-    color: #e2e8f0;
-    font-size: 21px;
-    line-height: 1.28;
-    font-weight: 800;
-}
-.las-mobile-detail-meta {
-    color: #8b949e;
-    font-size: 12px;
-    line-height: 1.6;
-    padding-bottom: 18px;
-    border-bottom: 1px solid rgba(255,255,255,0.07);
-    margin-bottom: 18px;
-}
-.las-mobile-detail-desc {
-    color: #e2e8f0;
-    font-size: 15px;
-    line-height: 1.75;
+    margin: 12px 0 0;
+    color: var(--qm-title);
+    font-family: inherit;
+    font-size: 26px;
+    line-height: 1.2;
+    font-weight: 600;
+    letter-spacing: -0.2px;
     overflow-wrap: anywhere;
-    margin-bottom: 20px;
+}
+.las-mobile-detail-posted { margin-top: 6px; font-size: 13px; font-weight: 400; color: var(--qm-muted); }
+.las-mobile-detail-facts {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    margin-top: 18px;
+    background: var(--qm-surf);
+    border-radius: 18px;
+}
+.las-mobile-detail-fact { padding: 14px 16px 15px; min-width: 0; }
+.las-mobile-detail-fact + .las-mobile-detail-fact { border-left: 1px solid var(--qm-line); }
+.las-mobile-detail-fact-label { font-size: 13px; font-weight: 400; color: var(--qm-muted); }
+.las-mobile-detail-fact-value { margin: 6px 0 3px; font-size: 20px; font-weight: 600; line-height: 1.15; color: var(--qm-title); overflow-wrap: anywhere; }
+.las-mobile-detail-fact-value--name { margin-top: 8px; font-size: 16px; line-height: 1.25; }
+.las-mobile-detail-fact-note { font-size: 13px; font-weight: 400; color: var(--qm-muted); }
+.las-mobile-detail-fact-note--soon { color: var(--qm-soon); }
+.las-mobile-detail-label { margin: 24px 0 8px 2px; font-size: 13.5px; font-weight: 600; color: var(--qm-muted); }
+.las-mobile-detail-desc {
+    color: var(--qm-body);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
 }
 .las-mobile-detail-links {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    margin-bottom: 22px;
+    gap: 10px;
+    margin: 18px 0 22px;
 }
-.las-mobile-detail-link,
-.las-mobile-detail-action {
-    display: inline-flex;
+.las-mobile-detail-links:empty { display: none; }
+/* a file: a quiet row with the file icon, a name and a note, and an arrow */
+.las-mobile-detail-link {
+    display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 8px;
-    min-height: 44px;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 800;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: var(--qm-surf);
+    color: var(--qm-muted);
     text-decoration: none;
     box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
 }
-.las-mobile-detail-link {
-    color: #a78bfa;
-    border: 1px solid rgba(167,139,250,0.35);
-    background: rgba(167,139,250,0.08);
-}
+.las-mobile-detail-link-icon { flex: none; }
+.las-mobile-detail-link-text { flex: 1; min-width: 0; display: block; }
+.las-mobile-detail-link-name { display: block; font-size: 15px; font-weight: 600; color: var(--qm-title); }
+.las-mobile-detail-link-note { display: block; margin-top: 1px; font-size: 12.5px; font-weight: 400; }
+.las-mobile-detail-link-chev { flex: none; color: var(--qm-faint); }
+/* the main button: light on the dark page, dark on the light one */
 .las-mobile-detail-action {
-    color: #0d1117;
-    background: #a78bfa;
-    border: 1px solid #a78bfa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 100%;
-    font-family: inherit;
+    min-height: 48px;
+    border-radius: 14px;
+    border: 0;
+    box-sizing: border-box;
+    background: var(--qm-chipon);
+    color: var(--qm-chipon-text);
+    font: inherit;
+    font-size: 16px;
+    font-weight: 600;
+    text-decoration: none;
     cursor: pointer;
 }
 .las-mobile-detail-action--locked {
-    color: #8b949e;
-    background: rgba(255,255,255,0.04);
-    border-color: rgba(255,255,255,0.1);
+    color: var(--qm-muted);
+    background: transparent;
+    box-shadow: inset 0 0 0 1px var(--qm-chipline);
+    cursor: default;
 }
 @media (min-width: 900px) {
     .las-mobile-detail { display: none; }
 }
 
 /* Inline assignment submission — kept within the assignment detail rather
-   than navigating the learner away to a separate page. */
+   than navigating the learner away to a separate page. It sits inside .las-mobile-detail, so it uses the same
+   --qm-* colours (defined with the quiet list above) and the same 400 / 600 weights as the rest of the screen. */
 .las-submission-form {
     margin-top: 18px;
     padding: 20px;
-    border: 1px solid rgba(167,139,250,0.28);
-    border-radius: 12px;
-    background: rgba(167,139,250,0.055);
+    border: 1px solid var(--qm-line);
+    border-radius: 16px;
+    background: var(--qm-surf);
 }
 .las-submission-form[hidden] { display: none; }
 .las-submission-form-heading {
-    color: #e2e8f0;
+    color: var(--qm-title);
     font-size: 16px;
-    font-weight: 800;
+    font-weight: 600;
 }
 .las-submission-form-help {
     margin: 5px 0 18px;
-    color: #8b949e;
-    font-size: 12px;
+    color: var(--qm-muted);
+    font-size: 13px;
+    font-weight: 400;
     line-height: 1.5;
 }
 .las-submission-label {
     display: block;
     margin: 16px 0 7px;
-    color: #c9d1d9;
-    font-size: 13px;
-    font-weight: 800;
+    color: var(--qm-body);
+    font-size: 13.5px;
+    font-weight: 600;
 }
 .las-submission-label span {
-    color: #8b949e;
-    font-weight: 600;
+    color: var(--qm-muted);
+    font-weight: 400;
 }
 .las-submission-textarea,
 .las-submission-file {
     width: 100%;
     box-sizing: border-box;
-    color: #e2e8f0;
-    background: rgba(13,17,23,0.72);
-    border: 1px solid rgba(255,255,255,0.13);
-    border-radius: 9px;
+    color: var(--qm-title);
+    background: var(--qm-field);
+    border: 1px solid var(--qm-chipline);
+    border-radius: 10px;
     font: inherit;
-    font-size: 13px;
+    font-size: 16px; /* 16px stops iOS zooming the page when a field is focused */
+    font-weight: 400;
 }
 .las-submission-textarea {
     min-height: 132px;
@@ -817,29 +830,30 @@
 }
 .las-submission-file {
     padding: 9px;
+    font-size: 14px;
 }
 .las-submission-textarea:focus,
 .las-submission-file:focus {
     outline: none;
-    border-color: #a78bfa;
-    box-shadow: 0 0 0 3px rgba(167,139,250,0.13);
+    border-color: var(--qm-muted);
 }
 .las-submission-current-file {
     margin: 0 0 8px;
-    color: #8b949e;
-    font-size: 12px;
+    color: var(--qm-muted);
+    font-size: 13px;
 }
 .las-submission-current-file a {
-    color: #a78bfa;
-    font-weight: 800;
-    text-decoration: none;
+    color: var(--qm-title);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 2px;
 }
 .las-submission-error {
     margin: 14px 0 0;
     padding: 10px 12px;
     color: #ffaaa5;
     border: 1px solid rgba(248,81,73,0.38);
-    border-radius: 8px;
+    border-radius: 10px;
     background: rgba(248,81,73,0.09);
     font-size: 13px;
 }
@@ -851,27 +865,27 @@
 }
 .las-submission-cancel,
 .las-submission-submit {
-    min-height: 42px;
+    min-height: 44px;
     padding: 0 16px;
-    border-radius: 9px;
+    border-radius: 12px;
     font: inherit;
-    font-size: 13px;
-    font-weight: 800;
+    font-size: 14px;
+    font-weight: 600;
     cursor: pointer;
 }
 .las-submission-cancel {
-    color: #c9d1d9;
-    border: 1px solid rgba(255,255,255,0.14);
-    background: rgba(255,255,255,0.04);
+    color: var(--qm-body);
+    border: 1px solid var(--qm-chipline);
+    background: transparent;
 }
 .las-submission-submit {
     min-width: 158px;
-    color: #0d1117;
-    border: 1px solid #a78bfa;
-    background: #a78bfa;
+    color: var(--qm-chipon-text);
+    border: 1px solid var(--qm-chipon);
+    background: var(--qm-chipon);
 }
 .las-submission-submit .btn-spinner span {
-    background: #0d1117;
+    background: var(--qm-chipon-text);
 }
 @media (max-width: 899px) {
     .las-submission-form {
@@ -980,62 +994,28 @@ html[data-learner-theme="light"] .las-panel-status-dot[style*="#9b9c92" i] { bac
 html[data-learner-theme="light"] .las-panel-status-dot[style*="#7a7b73" i] { background: #73746d !important; }
 
 /* ── 769px to 899px: the split layout starts at 900px, so until then the phone-style list, detail view and
-      submission form are what show. Their colours are hard-coded for a dark page. ── */
-html[data-learner-theme="light"] .las-mobile-folder-header { border-bottom-color: #dfded8; }
-html[data-learner-theme="light"] .las-mobile-folder-header:active,
-html[data-learner-theme="light"] .las-mobile-folder-header:not(.las-mobile-folder-header--collapsed) { background: rgba(38,39,35,.04); }
-html[data-learner-theme="light"] .las-mobile-folder-name,
-html[data-learner-theme="light"] .las-mobile-row-title { color: #282924; }
-html[data-learner-theme="light"] .las-mobile-folder-count { color: #73746d; background: rgba(38,39,35,.06); }
-html[data-learner-theme="light"] .las-mobile-folder-chevron,
-html[data-learner-theme="light"] .las-mobile-row-chevron { color: #8b8b83; }
-html[data-learner-theme="light"] .las-mobile-row::after { background: #ebeae5; }
-html[data-learner-theme="light"] .las-mobile-row:active { background: rgba(38,39,35,.04); }
-/* row due date: the base rule first, then the done / pending variants (same specificity, so order matters) */
-html[data-learner-theme="light"] .las-mobile-row-meta { color: #73746d; }
-html[data-learner-theme="light"] .las-mobile-row-meta--done { color: #6b4fc7; }
-html[data-learner-theme="light"] .las-mobile-row-meta--pending { color: #b85f12; }
-html[data-learner-theme="light"] .las-mobile-search-wrap svg { color: #282924; }
-html[data-learner-theme="light"] .las-mobile-search { background: #ffffff; border: 1px solid #dfded8; color: #282924; }
-html[data-learner-theme="light"] .las-mobile-search:focus { border-color: #bdbcb4; }
-html[data-learner-theme="light"] .las-mobile-search::placeholder { color: #8b8b83; }
-html[data-learner-theme="light"] .las-mobile-empty-title { color: #282924; }
-html[data-learner-theme="light"] .las-mobile-empty-body { color: #73746d; }
-html[data-learner-theme="light"] .las-mobile-list [stroke="#a78bfa" i] { stroke: #6b4fc7; }
-html[data-learner-theme="light"] .las-status-dot--done { background: #16a34a; }
-html[data-learner-theme="light"] .las-status-dot--pending { background: #d97706; }
-
-/* phone-style assignment detail */
-html[data-learner-theme="light"] .las-mobile-detail-avatar { border-color: rgba(107,79,199,.35); background: rgba(107,79,199,.08); color: #6b4fc7; }
-html[data-learner-theme="light"] .las-mobile-detail-author-name,
-html[data-learner-theme="light"] .las-mobile-detail-title { color: #282924; }
-html[data-learner-theme="light"] .las-mobile-detail-author-role,
-html[data-learner-theme="light"] .las-mobile-detail-posted,
-html[data-learner-theme="light"] .las-mobile-detail-meta { color: #73746d; }
-html[data-learner-theme="light"] .las-mobile-detail-meta { border-bottom-color: #dfded8; }
-html[data-learner-theme="light"] .las-mobile-detail-role-badge { color: #6b4fc7; }
-html[data-learner-theme="light"] .las-mobile-detail-role-sep { color: #8b8b83; }
-html[data-learner-theme="light"] .las-mobile-detail-status { color: #53544e; border-color: #dfded8; background: #ffffff; }
-html[data-learner-theme="light"] .las-mobile-detail-desc { color: #53544e; }
-html[data-learner-theme="light"] .las-mobile-detail-link { color: #6b4fc7; border-color: rgba(107,79,199,.35); background: rgba(107,79,199,.08); }
-html[data-learner-theme="light"] .las-mobile-detail-action { color: #ffffff; background: #252624; border-color: #252624; }
-html[data-learner-theme="light"] .las-mobile-detail-action--locked { color: #73746d; background: rgba(38,39,35,.04); border-color: #dfded8; }
-
-/* phone-style submission form */
-html[data-learner-theme="light"] .las-submission-form { border-color: #dfded8; background: #ffffff; }
-html[data-learner-theme="light"] .las-submission-form-heading { color: #282924; }
-html[data-learner-theme="light"] .las-submission-form-help,
-html[data-learner-theme="light"] .las-submission-current-file,
-html[data-learner-theme="light"] .las-submission-label span { color: #73746d; }
-html[data-learner-theme="light"] .las-submission-label { color: #53544e; }
-html[data-learner-theme="light"] .las-submission-textarea,
-html[data-learner-theme="light"] .las-submission-file { color: #282924; background: #faf9f5; border-color: #d0cfc8; }
-html[data-learner-theme="light"] .las-submission-textarea:focus,
-html[data-learner-theme="light"] .las-submission-file:focus { border-color: #187a72; box-shadow: 0 0 0 3px rgba(24,122,114,.14); }
-html[data-learner-theme="light"] .las-submission-current-file a { color: #187a72; }
-html[data-learner-theme="light"] .las-submission-cancel { color: #53544e; border-color: #dfded8; background: #ffffff; }
-html[data-learner-theme="light"] .las-submission-submit { color: #ffffff; border-color: #252624; background: #252624; }
-html[data-learner-theme="light"] .las-submission-submit .btn-spinner span { background: #ffffff; }
+      submission form are what show. Their colours are the --qm-* tokens (set for dark in the quiet list above),
+      so light mode is just the light set of tokens. ── */
+html[data-learner-theme="light"] .las-mobile-head,
+html[data-learner-theme="light"] .las-mobile-search-wrap,
+html[data-learner-theme="light"] .las-mobile-chips,
+html[data-learner-theme="light"] .las-mobile-list,
+html[data-learner-theme="light"] .las-mobile-detail {
+    --qm-title: #282924;
+    --qm-body: #4a4b44;
+    --qm-muted: #73746d;
+    --qm-faint: #a3a39a;
+    --qm-line: rgba(40,41,36,.09);
+    --qm-press: rgba(38,39,35,.04);
+    --qm-surf: #f1efe8;
+    --qm-field: #faf9f5;
+    --qm-ring: #a3a39a;
+    --qm-soon: #b85f12;
+    --qm-ok: #15803d;
+    --qm-chipline: rgba(40,41,36,.16);
+    --qm-chipon: #252624;
+    --qm-chipon-text: #faf9f5;
+}
 
 /* fetch error state ("Unable to load assignments") */
 html[data-learner-theme="light"] .las-error-state p { color: #bd4a43; }
@@ -1045,68 +1025,35 @@ html[data-learner-theme="light"] .las-error-state p { color: #bd4a43; }
 
 /* ── Phones (768px and narrower): light mode ───────────────────────────────────────────────────────────
    Applies only when <html data-learner-mobile-theme="light"> (mobile_theme.js, Settings > Appearance).
-   Dark mode and 769px and wider are untouched. Same rules as the 769–899px block above, with the mobile
-   mockup's choices: status colours are amber (pending) and green (submitted), and the purple accents are
-   neutral. The page background and the menu are in mobile_light.css. */
+   Dark mode and 769px and wider are untouched. The same light tokens as the 769–899px block above:
+   the list, the detail screen and the submission form read all their colours from them. The page background and
+   the menu are in mobile_light.css. */
 @media (max-width: 768px) {
 
-html[data-learner-mobile-theme="light"] .las-mobile-folder-header { border-bottom-color: #dfded8; }
-html[data-learner-mobile-theme="light"] .las-mobile-folder-header:active,
-html[data-learner-mobile-theme="light"] .las-mobile-folder-header:not(.las-mobile-folder-header--collapsed) { background: rgba(38,39,35,.04); }
-html[data-learner-mobile-theme="light"] .las-mobile-folder-name,
-html[data-learner-mobile-theme="light"] .las-mobile-row-title { color: #282924; }
-html[data-learner-mobile-theme="light"] .las-mobile-folder-count { color: #73746d; background: rgba(38,39,35,.06); }
-html[data-learner-mobile-theme="light"] .las-mobile-folder-chevron,
-html[data-learner-mobile-theme="light"] .las-mobile-row-chevron { color: #73746d; }
-html[data-learner-mobile-theme="light"] .las-mobile-row::after { background: #ebeae5; }
-html[data-learner-mobile-theme="light"] .las-mobile-row:active { background: rgba(38,39,35,.04); }
-/* row due date: the base rule first, then the done / pending variants (same specificity, so order matters) */
-html[data-learner-mobile-theme="light"] .las-mobile-row-meta { color: #73746d; }
-html[data-learner-mobile-theme="light"] .las-mobile-row-meta--done { color: #15803d; }
-html[data-learner-mobile-theme="light"] .las-mobile-row-meta--pending { color: #b85f12; }
-html[data-learner-mobile-theme="light"] .las-mobile-search-wrap svg { color: #282924; }
-html[data-learner-mobile-theme="light"] .las-mobile-search { background: #ffffff; border: 1px solid #dfded8; color: #282924; }
-html[data-learner-mobile-theme="light"] .las-mobile-search:focus { border-color: #bdbcb4; }
-html[data-learner-mobile-theme="light"] .las-mobile-search::placeholder { color: #8b8b83; }
-html[data-learner-mobile-theme="light"] .las-mobile-empty-title { color: #282924; }
-html[data-learner-mobile-theme="light"] .las-mobile-empty-body { color: #73746d; }
-html[data-learner-mobile-theme="light"] .las-mobile-list [stroke="#a78bfa" i] { stroke: #73746d; }
-html[data-learner-mobile-theme="light"] .las-status-dot--done { background: #16a34a; }
-html[data-learner-mobile-theme="light"] .las-status-dot--pending { background: #d97706; }
+html[data-learner-mobile-theme="light"] .las-mobile-head,
+html[data-learner-mobile-theme="light"] .las-mobile-search-wrap,
+html[data-learner-mobile-theme="light"] .las-mobile-chips,
+html[data-learner-mobile-theme="light"] .las-mobile-list,
+html[data-learner-mobile-theme="light"] .las-mobile-detail {
+    --qm-title: #282924;
+    --qm-body: #4a4b44;
+    --qm-muted: #73746d;
+    --qm-faint: #a3a39a;
+    --qm-line: rgba(40,41,36,.09);
+    --qm-press: rgba(38,39,35,.04);
+    --qm-surf: #f1efe8;
+    --qm-field: #faf9f5;
+    --qm-ring: #a3a39a;
+    --qm-soon: #b85f12;
+    --qm-ok: #15803d;
+    --qm-chipline: rgba(40,41,36,.16);
+    --qm-chipon: #252624;
+    --qm-chipon-text: #faf9f5;
+}
 
-/* phone-style assignment detail */
-html[data-learner-mobile-theme="light"] .las-mobile-detail-avatar { border-color: #d0cfc8; background: #ffffff; color: #53544e; }
-html[data-learner-mobile-theme="light"] .las-mobile-detail-author-name,
-html[data-learner-mobile-theme="light"] .las-mobile-detail-title { color: #282924; }
-html[data-learner-mobile-theme="light"] .las-mobile-detail-author-role,
-html[data-learner-mobile-theme="light"] .las-mobile-detail-posted,
-html[data-learner-mobile-theme="light"] .las-mobile-detail-meta { color: #73746d; }
-html[data-learner-mobile-theme="light"] .las-mobile-detail-meta { border-bottom-color: #dfded8; }
-html[data-learner-mobile-theme="light"] .las-mobile-detail-role-badge { color: #53544e; }
-html[data-learner-mobile-theme="light"] .las-mobile-detail-role-sep { color: #8b8b83; }
-html[data-learner-mobile-theme="light"] .las-mobile-detail-status { color: #53544e; border-color: #dfded8; background: #ffffff; }
-html[data-learner-mobile-theme="light"] .las-mobile-detail-desc { color: #53544e; }
-html[data-learner-mobile-theme="light"] .las-mobile-detail-link { color: #53544e; border-color: #dfded8; background: #ffffff; }
-html[data-learner-mobile-theme="light"] .las-mobile-detail-action { color: #ffffff; background: #252624; border-color: #252624; }
-html[data-learner-mobile-theme="light"] .las-mobile-detail-action--locked { color: #73746d; background: rgba(38,39,35,.04); border-color: #dfded8; }
-
-/* phone-style submission form */
-html[data-learner-mobile-theme="light"] .las-submission-form { border-color: #dfded8; background: #ffffff; }
-html[data-learner-mobile-theme="light"] .las-submission-form-heading { color: #282924; }
-html[data-learner-mobile-theme="light"] .las-submission-form-help,
-html[data-learner-mobile-theme="light"] .las-submission-current-file,
-html[data-learner-mobile-theme="light"] .las-submission-label span { color: #73746d; }
-html[data-learner-mobile-theme="light"] .las-submission-label { color: #53544e; }
-html[data-learner-mobile-theme="light"] .las-submission-textarea,
-html[data-learner-mobile-theme="light"] .las-submission-file { color: #282924; background: #faf9f5; border-color: #d0cfc8; }
-html[data-learner-mobile-theme="light"] .las-submission-textarea:focus,
-html[data-learner-mobile-theme="light"] .las-submission-file:focus { border-color: #187a72; box-shadow: 0 0 0 3px rgba(24,122,114,.14); }
-html[data-learner-mobile-theme="light"] .las-submission-current-file a { color: #187a72; }
-html[data-learner-mobile-theme="light"] .las-submission-cancel { color: #53544e; border-color: #dfded8; background: #ffffff; }
-html[data-learner-mobile-theme="light"] .las-submission-submit { color: #ffffff; border-color: #252624; background: #252624; }
-html[data-learner-mobile-theme="light"] .las-submission-submit .btn-spinner span { background: #ffffff; }
+/* the form's error message: the dark-mode pink is unreadable on light */
+html[data-learner-mobile-theme="light"] .las-submission-error { color: #a8332c; border-color: rgba(189,74,67,.35); background: rgba(189,74,67,.08); }
 
 /* fetch error state */
 html[data-learner-mobile-theme="light"] .las-error-state p { color: #bd4a43; }
-
 }

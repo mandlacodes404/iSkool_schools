@@ -110,7 +110,7 @@ final class MobileLightModeTest extends TestCase
 
     public function test_quiz_resources_and_home_phone_light_blocks_only_apply_to_phones_in_light(): void
     {
-        foreach (['assets/css/learner/quiz.css' => ['.lqz-mobile-row-title', '.inst-container .start-btn', '.lqz-retry-btn'],
+        foreach (['assets/css/learner/quiz.css' => ['.lqz-mobile-list', '.inst-container .start-btn', '.lqz-retry-btn'],
                   'assets/css/learner/resources.css' => ['.lrs-mobile-row-title', '.lrs-mobile-video-title', '.lrs-error-state'],
                   'assets/css/learner/manual.css' => ['.lh-row-title', '.lh-carousel-card', '.lh-home-error']] as $file => $selectors) {
             $css = $this->source($file);

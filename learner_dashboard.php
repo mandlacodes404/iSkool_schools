@@ -225,10 +225,10 @@ $parentLink = ((int)$parentCount > 0); // true when at least one parent is linke
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dashboard - <?= htmlspecialchars($schoolName) ?></title>
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
-    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=6.8">
+    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=6.9">
     <link rel="stylesheet" href="assets/css/learner/manual.css?v=8.7">
     <link rel="stylesheet" href="assets/css/learner/announcements.css?v=4.3">
-    <link rel="stylesheet" href="assets/css/learner/assignments.css?v=4.3">
+    <link rel="stylesheet" href="assets/css/learner/assignments.css?v=4.4">
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
     <link rel="stylesheet" href="assets/css/learner/grades.css?v=4.4">
     <link rel="stylesheet" href="assets/css/learner/resources.css?v=3.3">
@@ -3977,8 +3977,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
 <script src="assets/js/learner/main.js?v=1.2"></script>
 <script src="assets/js/learner/manual.js?v=12.0"></script>
-<script src="assets/js/learner/quiz.js?v=12.8"></script>
-<script src="assets/js/learner/assignments.js?v=10.4"></script>
+<script src="assets/js/learner/quiz.js?v=12.9"></script>
+<script src="assets/js/learner/assignments.js?v=10.5"></script>
 <script src="assets/js/learner/resources.js?v=8.9"></script>
 <script src="assets/js/learner/announcements.js?v=9.6"></script>
 <script src="assets/js/learner/grades.js?v=10.6"></script>
