@@ -75,6 +75,6 @@ final class TeacherBackButtonTest extends TestCase
     public function test_the_stylesheet_carries_a_new_version(): void
     {
         // the service worker caches /assets/ by full URL: a changed file under an unchanged ?v= is never fetched again
-        $this->assertStringContainsString('assets/css/teacher/teacher_dashboard.css?v=14.2', $this->source('teacher_dashboard.php'));
+        $this->assertStringContainsString('assets/css/teacher/teacher_dashboard.css?v=14.3', $this->source('teacher_dashboard.php'));
     }
 }

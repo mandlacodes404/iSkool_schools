@@ -90,15 +90,26 @@ if ($result && $row = $result->fetch_assoc()) {
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/index.css?v=9.5">
+    <link rel="stylesheet" href="assets/css/index.css?v=9.6">
     <?php require __DIR__ . '/includes/login_theme_head.php'; ?>
+    <?php
+    // A teacher who is already signed in saves their phone theme under their own key (the one teacher_dashboard.php builds,
+    // keep the two in step), so the splash reads that one and matches the teacher waiting screen it hands over to.
+    // Everyone else keeps reading the learner's key below.
+    $splashPhoneThemeKey = '';
+    if (($_SESSION['role'] ?? '') === 'teacher' && !empty($_SESSION['email'])) {
+        $splashPhoneThemeKey = 'iskoolTeacherMobileTheme:' . hash('sha256', ($_SESSION['current_school_db'] ?? '') . '|' . $_SESSION['email']);
+    }
+    ?>
     <script>
-    // Phone light mode (768px and below): apply the phone theme saved by the learner dashboard BEFORE first paint, so the
-    // splash and the login page never start dark and then flip. Dark is the default. The attribute only has CSS at 768px
-    // and below (index_light.css, splash_light.css); the status bar colour (theme-color above) follows it on phones.
+    // Phone light mode (768px and below): apply the phone theme saved by the learner dashboard (or, for a signed-in teacher,
+    // by the teacher dashboard) BEFORE first paint, so the splash and the login page never start dark and then flip. Dark
+    // is the default. The attribute only has CSS at 768px and below (index_light.css, splash_light.css); the status bar
+    // colour (theme-color above) follows it on phones.
     (function () {
         try {
-            var light = localStorage.getItem(window.ISKOOL_LEARNER_MOBILE_THEME_KEY || 'iskoolLearnerMobileTheme') === 'light';
+            var key = <?= json_encode($splashPhoneThemeKey) ?> || window.ISKOOL_LEARNER_MOBILE_THEME_KEY || 'iskoolLearnerMobileTheme';
+            var light = localStorage.getItem(key) === 'light';
             if (light) document.documentElement.setAttribute('data-login-mobile-theme', 'light');
             var meta = document.querySelector('meta[name="theme-color"]');
             var phone = window.matchMedia('(max-width: 768px)');

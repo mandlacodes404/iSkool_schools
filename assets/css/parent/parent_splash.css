@@ -70,10 +70,10 @@
     #pa-splash-wordmark { font-size: 26px; }
 }
 
-/* index.css's real result on phones and narrow windows (899px and below): background #20201f and a taller footer wordmark */
+/* index.css's real result on phones and narrow windows (899px and below): background #20201f and the 125px footer wordmark */
 @media (max-width: 899px) {
     #pa-splash { background: #20201f; }
-    #pa-splash-brand-wordmark { height: 145px; bottom: -12px; }
+    #pa-splash-brand-wordmark { height: 125px; bottom: -12px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

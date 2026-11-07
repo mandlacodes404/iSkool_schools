@@ -317,7 +317,7 @@ final class ParentLaunchLikeLearnerTest extends TestCase
         // The service worker caches /assets/ by full URL, so the numbers in the page must move with the files
         $page = $this->source('parent_dashboard.php');
         foreach ([
-            'parent_app.css?v=1.14', 'parent_splash.css?v=1.0', 'pill-loader.css?v=1.0', 'pwa_prompts.css?v=1.0', 'back_button.css?v=1.0',
+            'parent_app.css?v=1.14', 'parent_splash.css?v=1.1', 'pill-loader.css?v=1.0', 'pwa_prompts.css?v=1.0', 'back_button.css?v=1.0',
             'parent_menu.js?v=1.1', 'parent_app.js?v=1.12', 'parent_pwa.js?v=1.0', 'pwa_prompts.js?v=1.0', 'back_button.js?v=1.0', 'parent_back_button.js?v=1.0',
         ] as $file) {
             $this->assertStringContainsString($file, $page);
