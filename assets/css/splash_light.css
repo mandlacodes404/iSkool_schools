@@ -27,24 +27,27 @@
     }
 }
 
-/* ═══ Phones and narrow windows (768px and below): learner only ═══════════════════════════════════════════════
+/* ═══ Phones and narrow windows (768px and below): learner and teacher ═══════════════════════════════════════
  * The same paper/ink pair, switched on by the phone theme instead of the desktop one:
  *   - index.php               <html data-login-mobile-theme="light">   set in the <head> of index.php, before first paint, from
- *                             the phone theme the learner dashboard saves (localStorage iskoolLearnerMobileTheme)
- *   - learner_dashboard.php   <html data-learner-mobile-theme="light">  set by mobile_theme.js (loaded in the <head>)
- * The teacher dashboard has no phone light mode, so its splash stays dark on phones.
+ *                             the phone theme the dashboard saves: the learner's (localStorage iskoolLearnerMobileTheme), or for
+ *                             a teacher who is already signed in, the teacher's own key
+ *   - learner_dashboard.php   <html data-learner-mobile-theme="light"> set by mobile_theme.js (loaded in the <head>)
+ *   - teacher_dashboard.php   <html data-teacher-mobile-theme="light"> set by teacher_mobile_theme.js (loaded in the <head>)
  * The page behind the splash is handled where it is set: index_light.css on the login page, and the
- * #dash-splash-bg-override <style> in learner_dashboard.php on the dashboard.
+ * #dash-splash-bg-override <style> in learner_dashboard.php and teacher_dashboard.php on the dashboards.
  * To remove it, delete this block (and the phone block in index_light.css, the setter <script> in index.php). */
 @media (max-width: 768px) {
 
     html[data-login-mobile-theme="light"] #animation-wrapper,
-    html[data-learner-mobile-theme="light"] #dash-splash {
+    html[data-learner-mobile-theme="light"] #dash-splash,
+    html[data-teacher-mobile-theme="light"] #dash-splash {
         background: #faf9f5;
     }
 
     html[data-login-mobile-theme="light"] #splash-wordmark,
-    html[data-learner-mobile-theme="light"] #dash-splash-wordmark {
+    html[data-learner-mobile-theme="light"] #dash-splash-wordmark,
+    html[data-teacher-mobile-theme="light"] #dash-splash-wordmark {
         color: #282924;
     }
 }

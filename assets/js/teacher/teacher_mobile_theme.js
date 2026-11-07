@@ -46,6 +46,9 @@
   // Only the two plain bar colours are swapped; a colour the dashboard chose for a scrolled, coloured page, or
   // the menu's own colour while it is open, is left alone.
   function bar() {
+    // While the login splash is being continued teacher_dashboard.php paints the bar the splash's colour (paper in
+    // light mode); the page behind the splash is not showing yet, so leave it. It calls this again when the splash is gone.
+    if (root.classList.contains('splash-handoff')) return;
     var m = document.querySelector('meta[name="theme-color"]'); if (!m) return;
     var now = (m.getAttribute('content') || '').toLowerCase();
     if (lightOnScreen()) { if (now === DARK_BAR) m.setAttribute('content', LIGHT_BAR); }

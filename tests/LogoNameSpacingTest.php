@@ -62,8 +62,8 @@ final class LogoNameSpacingTest extends TestCase
 
     public function test_every_stylesheet_that_changed_has_a_new_cache_version(): void
     {
-        $this->assertStringContainsString('learner/learner_dashboard.css?v=14.5', $this->source('learner_dashboard.php'));
-        $this->assertStringContainsString('teacher/teacher_dashboard.css?v=14.2', $this->source('teacher_dashboard.php'));
-        $this->assertStringContainsString('assets/css/index.css?v=9.5', $this->source('index.php'));
+        $this->assertStringContainsString('learner/learner_dashboard.css?v=14.6', $this->source('learner_dashboard.php'));
+        $this->assertStringContainsString('teacher/teacher_dashboard.css?v=14.3', $this->source('teacher_dashboard.php'));
+        $this->assertStringContainsString('assets/css/index.css?v=9.6', $this->source('index.php'));
     }
 }

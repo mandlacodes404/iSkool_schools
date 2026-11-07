@@ -514,11 +514,11 @@
         }
 
         /* Same 899px breakpoint index.css uses — background #20201f and
-           the larger footer wordmark on mobile. */
+           the footer wordmark at 125px on mobile (same as index.css). */
         @media (max-width: 899px) {
             #dash-splash { background: #20201f; }
             #dash-splash-brand-wordmark {
-                height: 145px;
+                height: 125px;
                 bottom: -12px;
             }
         }

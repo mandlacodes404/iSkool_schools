@@ -123,7 +123,7 @@ if ($teacherYearResult && ($teacherYearRow = $teacherYearResult->fetch_assoc()))
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Geist:wght@400..600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=14.2">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=14.3">
     <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_menu.css?v=2.6">
     <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_menu.css?v=1.8">
     <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_settings.css?v=1.5">
@@ -160,7 +160,7 @@ if ($teacherYearResult && ($teacherYearRow = $teacherYearResult->fetch_assoc()))
     </script>
     <!-- Phone light / dark: sets <html data-teacher-mobile-theme> and the status bar colour before first paint
          (see teacher_mobile_theme.js). Needs the theme-color <meta> tag above. -->
-    <script src="assets/js/teacher/teacher_mobile_theme.js?v=1.3"></script>
+    <script src="assets/js/teacher/teacher_mobile_theme.js?v=1.4"></script>
 <script>
 function getCsrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
@@ -174,7 +174,9 @@ function getCsrfToken() {
      from learner_dashboard.php. Deliberately uses the SAME colours as the
      learner splash: index.php shows one splash to every role before it
      knows who is logging in, so a role-specific colour here would create
-     the very flash this is meant to remove. -->
+     the very flash this is meant to remove. The one thing that does follow
+     the teacher is the phone light / dark choice: index.php reads the same
+     saved choice for a signed-in teacher, so both pages are light together. -->
 <style id="dash-splash-bg-override">
     /* Match body to the splash so the dashboard's own background never
        shows through around/under it during paint or fade-out. Removed
@@ -186,6 +188,10 @@ function getCsrfToken() {
     /* Desktop light mode (769px and up): the splash is light, see assets/css/splash_light.css */
     @media (min-width: 769px) {
         html[data-teacher-theme="light"] body { background-color: #faf9f5 !important; }
+    }
+    /* Phone light mode (768px and below): the splash is light too, see assets/css/splash_light.css */
+    @media (max-width: 768px) {
+        html[data-teacher-mobile-theme="light"] body { background-color: #faf9f5 !important; }
     }
 </style>
 <div id="dash-splash">
@@ -244,7 +250,8 @@ function getCsrfToken() {
     // the browser bar the same colour as the splash for the duration.
     window.suppressInitialLoader = true;
     root.classList.add('splash-handoff');
-    if (isMobile && themeMeta) themeMeta.setAttribute('content', '#20201f');
+    // (paper, the splash's colour, when the phone is in light mode, so the bar is not a dark strip above a light splash)
+    if (isMobile && themeMeta) themeMeta.setAttribute('content', root.getAttribute('data-teacher-mobile-theme') === 'light' ? '#faf9f5' : '#20201f');
 
     var MIN_SPLASH_MS = 1300;
     var MAX_SPLASH_MS = 6000;
