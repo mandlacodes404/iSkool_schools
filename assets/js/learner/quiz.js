@@ -45,14 +45,6 @@ function learnerQuizPencilSvg(width = 20, height = 20, color = 'currentColor') {
         .replace('stroke="currentColor"', `stroke="${color}"`);
 }
 
-// Mobile row-list only — thinner stroke for the folder-row icon.
-// Desktop sidebar / empty-state icons keep the original weight via
-// learnerQuizPencilSvg() above; don't repoint them at this helper.
-function learnerQuizPencilSvgThin(width = 20, height = 20, color = 'currentColor') {
-    return learnerQuizPencilSvg(width, height, color)
-        .replace('stroke-width="2"', 'stroke-width="1.3"');
-}
-
 // ─────────────────────────────────────────────
 // SILENT BACKGROUND PREFETCH
 // Called from the dashboard ~1 500 ms after home loads.
@@ -198,6 +190,7 @@ function saveQuizPageState() {
         mainScroll:    mainContent ? mainContent.scrollTop : 0,
         panelScroll:   (document.querySelector('.lqz-body') || {}).scrollTop || 0,
         mobileSearch: document.getElementById('lqzMobileSearch')?.value || '',
+        mobileFilter: window._lqzMobFilter || 'all',
         openFolders: Array.from(document.querySelectorAll('.lqz-mobile-folder-body:not(.collapsed)')).map(el => el.id),
         // Desktop teacher groups the learner has folded away (open is the default)
         collapsedTeachers: Array.from(window._lqzCollapsed || []),
@@ -235,14 +228,11 @@ function restoreQuizPageState() {
                     window.lqzMobileSearch(state.mobileSearch);
                 }
             }
+            if (state.mobileFilter && state.mobileFilter !== 'all') window.lqzMobileSetFilter(state.mobileFilter);
             if (Array.isArray(state.openFolders)) {
                 document.querySelectorAll('.lqz-mobile-folder-body').forEach(body => {
-                    const open = state.openFolders.includes(body.id);
-                    body.classList.toggle('collapsed', !open);
                     const header = body.previousElementSibling;
-                    if (header) header.classList.toggle('lqz-mobile-folder-header--collapsed', !open);
-                    const chev = header?.querySelector('.lqz-mobile-folder-chevron');
-                    if (chev) chev.classList.toggle('open', open);
+                    if (header) lqzMobileSetFolder(header, body, state.openFolders.includes(body.id));
                 });
             }
             if (Array.isArray(state.collapsedTeachers)) {
@@ -370,6 +360,65 @@ function lqzEnsureFont() {
     document.head.appendChild(link);
 }
 
+// ── Phone list helpers ──────────────────────────────────────────────────────────────────────────────────────
+// The status ring at the start of a row. It draws in currentColor, so the colour comes from the
+// .lqz-mobile-row-icon--{go|prog|soonq|wait|done|closed} classes (and follows light and dark mode with no extra rules).
+function lqzMobileRing(kind) {
+    const circle = (extra = '') => `<circle cx="12" cy="12" r="9.2" stroke="currentColor" stroke-width="1.7"${extra}/>`;
+    let inner = circle();
+    if (kind === 'done') inner = '<circle cx="12" cy="12" r="9.6" fill="currentColor" stroke="none"/><path d="m7.8 12.4 2.8 2.8 5.6-6" stroke="#fff" stroke-width="2"/>';
+    else if (kind === 'closed') inner = circle() + '<path d="M8.6 12h6.8" stroke="currentColor" stroke-width="1.8"/>';
+    else if (kind === 'wait') inner = circle() + '<path d="m8.2 12.3 2.6 2.6 5-5.4" stroke="currentColor" stroke-width="1.8"/>';
+    else if (kind === 'soonq') inner = circle(' stroke-dasharray="2.6 3.4"');
+    else if (kind === 'prog') inner = circle() + '<path class="lqz-mobile-ring-arc" d="M12 2.8a9.2 9.2 0 0 1 0 18.4" stroke-width="2.3"/>';
+    return `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${inner}</svg>`;
+}
+
+function lqzMobileDay(ms) {
+    const d = new Date(ms);
+    return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()] + ' ' + d.getDate() + ' ' + d.toLocaleString('en-GB', { month: 'short' });
+}
+
+function lqzMobileTime(ms) {
+    const d = new Date(ms);
+    return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+}
+
+// "2d 3h", "5h 20m", "12m 5s": short, because it sits on the right of a row (the row itself says when the quiz opens)
+function lqzMobileCountdownText(diff) {
+    const h = Math.floor(diff / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    if (h >= 24) return `${Math.floor(h / 24)}d ${h % 24}h`;
+    if (h > 0) return `${h}h ${m}m`;
+    if (m > 0) return `${m}m ${s}s`;
+    return `${s}s`;
+}
+
+// A quiz that was "not open yet" has just opened: turn its row into an open one (ring, line, Start, tap to open)
+function lqzMobileRowOpen(row, quizId) {
+    if (!row) return;
+    row.dataset.state = 'open';
+    row.classList.remove('lqz-mobile-row--static');
+    row.setAttribute('role', 'button');
+    row.tabIndex = 0;
+    row.onclick = () => loadQuizInstructions(quizId);
+    row.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); loadQuizInstructions(quizId); } };
+    const icon = row.querySelector('.lqz-mobile-row-icon');
+    if (icon) { icon.className = 'lqz-mobile-row-icon lqz-mobile-row-icon--go'; icon.innerHTML = lqzMobileRing('go'); }
+    const meta = row.querySelector('.lqz-mobile-row-meta');
+    if (meta) {
+        meta.textContent = '';
+        const word = document.createElement('span');
+        word.className = 'lqz-mobile-st lqz-mobile-st--go';
+        word.textContent = 'Available now';
+        meta.appendChild(word);
+        if (row.dataset.details) meta.appendChild(document.createTextNode(' · ' + row.dataset.details));
+    }
+    const action = row.querySelector('.lqz-mobile-cd');
+    if (action) { action.className = 'lqz-mobile-row-action'; action.textContent = 'Start'; }
+}
+
 function renderQuizCards(groupedData) {
     const apiArea = document.getElementById('api-content-area');
     if (!apiArea) return;
@@ -432,6 +481,8 @@ function renderQuizCards(groupedData) {
                 .lqz-desktop-layout { display: flex !important; }
                 .lqz-mobile-list    { display: none !important; }
                 .lqz-mobile-search-wrap { display: none !important; }
+                .lqz-mobile-head    { display: none !important; }
+                .lqz-mobile-chips   { display: none !important; }
             }
             @media (max-width: 899px) {
                 .lqz-desktop-layout { display: none !important; }
@@ -806,7 +857,45 @@ function renderQuizCards(groupedData) {
             .lqz-kv b { font-weight: var(--lqz-w-medium); text-align: right; color: var(--lqz-text); }
             @container (max-width: 899px) { .lqz-rail { display: none; } }
 
-            /* ── MOBILE LIST STYLES (flat, no card wrapper) ── */
+            /* ── MOBILE LIST: the quiet list (phones, and the 769–899px range that still shows the phone layout). Same look as the Assignments list ──
+               One calm column: a title with a counts line, a search box, filter chips, then a label for each teacher with
+               a status ring, a title and one line of detail per row. Weights stay at 400 (text) and 600 (titles and names),
+               the same as the rest of the phone pages. The colours are the --qm-* tokens below, so light mode only has to
+               change the tokens (see the light blocks in quiz.css). */
+            .lqz-mobile-head,
+            .lqz-mobile-search-wrap,
+            .lqz-mobile-chips,
+            .lqz-mobile-list {
+                --qm-title: #ecece9;
+                --qm-body: #c2c3b7;
+                --qm-muted: #8b8b87;
+                --qm-faint: #5f605a;
+                --qm-line: rgba(255,255,255,0.07);
+                --qm-press: rgba(255,255,255,0.04);
+                --qm-surf: #272726;
+                --qm-ring: #73746d;
+                --qm-soon: #f28c38;
+                --qm-go: #4fd1c5;
+                --qm-amber: #fdd663;
+                --qm-ok: #4dbb85;
+                --qm-chipline: rgba(255,255,255,0.12);
+                --qm-chipon: #ecece9;
+                --qm-chipon-text: #20201f;
+            }
+
+            .lqz-mobile-head { padding: 4px 2px 0; }
+            .lqz-mobile-title {
+                margin: 0;
+                font-family: inherit;
+                font-size: 28px;
+                font-weight: 600;
+                line-height: 1.15;
+                letter-spacing: -0.2px;
+                color: var(--qm-title);
+            }
+            .lqz-mobile-sub { margin: 5px 0 0; font-size: 14px; line-height: 1.4; font-weight: 400; color: var(--qm-muted); }
+            .lqz-mobile-sub b { font-weight: 600; color: var(--qm-soon); }
+
             .lqz-mobile-list {
                 background: transparent;
                 border-radius: 0;
@@ -819,136 +908,197 @@ function renderQuizCards(groupedData) {
                     margin-right: -18px;
                 }
             }
+
+            /* search */
+            .lqz-mobile-search-wrap { display: block; position: relative; margin: 14px 0 0; }
+            .lqz-mobile-search-wrap svg {
+                position: absolute;
+                left: 14px;
+                top: 50%;
+                transform: translateY(-50%);
+                pointer-events: none;
+                color: var(--qm-muted);
+            }
+            .lqz-mobile-search {
+                width: 100%;
+                box-sizing: border-box;
+                height: 42px;
+                padding: 0 14px 0 42px;
+                border: 0;
+                border-radius: 12px;
+                background: var(--qm-surf);
+                color: var(--qm-title);
+                font: inherit;
+                font-size: 16px; /* 16px stops iOS zooming the page when the box is focused */
+                font-weight: 400;
+                -webkit-appearance: none;
+                appearance: none;
+            }
+            .lqz-mobile-search:focus { outline: none; box-shadow: inset 0 0 0 1px var(--qm-chipline); }
+            .lqz-mobile-search::placeholder { color: var(--qm-muted); opacity: 1; }
+
+            /* filter chips */
+            .lqz-mobile-chips {
+                display: flex;
+                gap: 6px;
+                margin: 12px 0 0;
+                overflow-x: auto;
+                scrollbar-width: none;
+            }
+            .lqz-mobile-chips::-webkit-scrollbar { display: none; }
+            .lqz-mobile-chip {
+                flex: none;
+                height: 32px;
+                padding: 0 10px;
+                border-radius: 16px;
+                border: 1px solid var(--qm-chipline);
+                background: transparent;
+                color: var(--qm-muted);
+                font: inherit;
+                font-size: 13px;
+                font-weight: 400;
+                cursor: pointer;
+                -webkit-tap-highlight-color: transparent;
+            }
+            .lqz-mobile-chip.on { background: var(--qm-chipon); border-color: var(--qm-chipon); color: var(--qm-chipon-text); }
+
+            /* a teacher's label: name, class, how many, fold arrow */
             .lqz-mobile-folder-header {
                 display: flex;
-                align-items: center;
-                gap: 12px;
-                padding: 16px 18px;
+                align-items: baseline;
+                gap: 8px;
+                padding: 20px 20px 4px;
                 background: transparent;
-                border-bottom: 1px solid rgba(255,255,255,0.08);
                 cursor: pointer;
                 user-select: none;
-                transition: background 0.2s;
+                -webkit-tap-highlight-color: transparent;
             }
-            .lqz-mobile-folder-header:active { background: rgba(255,255,255,0.03); }
-            .lqz-mobile-folder-header:not(.lqz-mobile-folder-header--collapsed) {
-                background: rgba(255,255,255,0.05);
-            }
-            .lqz-mobile-folder-icon { flex-shrink: 0; }
+            .lqz-mobile-folder-header:focus-visible { outline: 2px solid var(--qm-chipline); outline-offset: -2px; }
             .lqz-mobile-folder-name {
-                flex: 1;
-                font-size: 16px;
+                flex: 0 1 auto;
+                min-width: 0;
+                font-size: 14px;
                 font-weight: 600;
-                color: #e2e8f0;
-                display: flex;
-                align-items: center;
-                gap: 8px;
+                color: var(--qm-body);
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
-            .lqz-mobile-folder-count {
-                font-size: 12px;
-                color: #8b949e;
-                font-weight: 600;
-                background: rgba(255,255,255,0.05);
-                padding: 2px 8px;
-                border-radius: 20px;
-                flex-shrink: 0;
+            .lqz-mobile-folder-sub {
+                flex: 1 1 0;
+                min-width: 0;
+                font-size: 13px;
+                font-weight: 400;
+                color: var(--qm-muted);
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
+            .lqz-mobile-folder-count { flex: none; margin-left: auto; font-size: 13px; font-weight: 400; color: var(--qm-muted); }
             .lqz-mobile-folder-chevron {
-                flex-shrink: 0;
-                color: #73746d;
-                transition: transform 0.3s ease;
+                flex: none;
+                align-self: center;
+                color: var(--qm-muted);
+                transition: transform 0.2s ease;
             }
-            .lqz-mobile-folder-chevron.open { transform: rotate(90deg); }
+            .lqz-mobile-folder-header--collapsed .lqz-mobile-folder-chevron { transform: rotate(-90deg); }
             .lqz-mobile-folder-body { display: block; }
             .lqz-mobile-folder-body.collapsed { display: none; }
+            /* while a search or filter is on, every group that has a match shows open and nothing is saved */
+            .lqz-mobile-list.is-filtering .lqz-mobile-folder-body.collapsed { display: block; }
+            .lqz-mobile-list.is-filtering .lqz-mobile-folder-header--collapsed .lqz-mobile-folder-chevron { transform: none; }
+
+            /* a row: ring, title, one line of detail, arrow. The hairline starts under the title, not under the ring. */
             .lqz-mobile-row {
                 display: flex;
                 align-items: center;
-                gap: 12px;
-                padding: 13px 18px;
+                gap: 14px;
+                padding: 11px 20px;
                 background: transparent;
-                border-bottom: 0;
-                border-radius: 0;
-                border-left: 0;
-                border-right: 0;
                 cursor: pointer;
                 transition: background 0.15s;
                 position: relative;
+                -webkit-tap-highlight-color: transparent;
             }
-            .lqz-mobile-row::after {
+            .lqz-mobile-row::before {
                 content: '';
                 position: absolute;
-                bottom: 0;
-                left: 0;
+                top: 0;
+                left: 58px;
                 right: 0;
                 height: 1px;
-                background: rgba(255,255,255,0.06);
+                background: var(--qm-line);
             }
-            .lqz-mobile-row:last-child::after { display: none; }
-            .lqz-mobile-row:active:not([style*="opacity"]) { background: rgba(255,255,255,0.03); }
-            .lqz-mobile-row-icon {
-                width: 32px;
-                height: 32px;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                flex-shrink: 0;
-            }
-            .lqz-mobile-row-icon svg {
-                width: 20px;
-                height: 20px;
-            }
+            .lqz-mobile-row--first::before { display: none; }
+            .lqz-mobile-row:active { background: var(--qm-press); }
+            .lqz-mobile-row:focus-visible { outline: 2px solid var(--qm-chipline); outline-offset: -2px; }
+            .lqz-mobile-row-icon { flex: none; width: 24px; height: 24px; display: inline-flex; color: var(--qm-ring); }
+            .lqz-mobile-row-icon svg { width: 24px; height: 24px; }
+            .lqz-mobile-row-icon--go { color: var(--qm-go); }
+            .lqz-mobile-row-icon--wait { color: var(--qm-amber); }
+            .lqz-mobile-row-icon--prog { color: var(--qm-ring); }
+            .lqz-mobile-row-icon--prog .lqz-mobile-ring-arc { stroke: var(--qm-soon); }
+            .lqz-mobile-row-icon--done { color: var(--qm-ok); }
+            .lqz-mobile-row-icon--closed { color: var(--qm-faint); }
+            .lqz-mobile-row-icon--soonq { color: var(--qm-ring); }
             .lqz-mobile-row-body { flex: 1; min-width: 0; }
             .lqz-mobile-row-title {
-                font-size: 15px;
-                font-weight: 600;
-                color: #e2e8f0;
                 margin: 0;
+                font-size: 16px;
+                font-weight: 600;
+                line-height: 1.25;
+                color: var(--qm-title);
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
-                display: flex;
-                align-items: center;
-                gap: 6px;
             }
-            .lqz-mobile-row-action {
-                flex-shrink: 0;
-                font-size: 12px;
-                font-weight: 800;
-                cursor: pointer;
-            }
-            .lqz-mobile-row-status-dot {
-                display: inline-block;
-                width: 7px;
-                height: 7px;
-                border-radius: 50%;
-                flex-shrink: 0;
-            }
-            .lqz-mobile-row-status {
-                flex-shrink: 0;
-                padding: 3px 9px;
-                border-radius: 6px;
-                font-size: 11px;
-                font-weight: 700;
-                white-space: nowrap;
-            }
-            .lqz-mobile-row-title-text {
-                min-width: 0;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-            }
-            .lqz-mobile-row-chevron {
-                flex-shrink: 0;
-                color: #73746d;
-            }
+            .lqz-mobile-row-title-text { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
             .lqz-mobile-row-meta {
-                font-size: 12px;
-                color: #8E8E93;
-                margin-top: 2px;
+                margin-top: 3px;
+                font-size: 13px;
+                font-weight: 400;
+                line-height: 1.3;
+                color: var(--qm-muted);
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .lqz-mobile-st--soon { color: var(--qm-soon); }
+            .lqz-mobile-st--ok { color: var(--qm-ok); }
+            .lqz-mobile-st--go { color: var(--qm-go); }
+            .lqz-mobile-st--amber { color: var(--qm-amber); }
+            /* Start / Continue on the right, and the live countdown for a quiz that has not opened yet */
+            .lqz-mobile-row-action { flex: none; font-size: 14px; font-weight: 600; color: var(--qm-go); }
+            .lqz-mobile-row-action--prog { color: var(--qm-soon); }
+            .lqz-mobile-cd { flex: none; font-size: 12.5px; font-weight: 400; color: var(--qm-amber); font-variant-numeric: tabular-nums; }
+            /* a row with nothing to open (closed, done, not open yet) does not press or point */
+            .lqz-mobile-row--static { cursor: default; }
+            .lqz-mobile-row--static:active { background: transparent; }
+
+            /* ── MOBILE EMPTY STATES (no assignments / no search or filter matches) ── */
+            .lqz-mobile-empty {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                padding: 24px;
+                color: var(--qm-muted);
+                min-height: 46vh;
+            }
+            .lqz-mobile-empty svg { opacity: 0.5; margin-bottom: 14px; }
+            .lqz-mobile-empty-title {
+                color: var(--qm-title);
+                font-size: 16px;
+                font-weight: 600;
+                margin: 0 0 6px;
+            }
+            .lqz-mobile-empty-body {
+                color: var(--qm-muted);
+                font-size: 14px;
+                font-weight: 400;
+                margin: 0;
+                line-height: 1.5;
             }
             .lqz-summative-badge {
                 display: inline-flex;
@@ -964,63 +1114,6 @@ function renderQuizCards(groupedData) {
                 flex-shrink: 0;
                 white-space: nowrap;
             }
-
-            /* ── MOBILE SEARCH BAR ── */
-            @media (max-width: 899px) {
-                .lqz-mobile-search-wrap {
-                    display: block;
-                    margin-bottom: 10px;
-                    position: relative;
-                }
-                .lqz-mobile-search-wrap svg {
-                    position: absolute;
-                    left: 12px;
-                    top: 50%;
-                    transform: translateY(-50%);
-                    pointer-events: none;
-                    opacity: 0.4;
-                }
-                .lqz-mobile-search {
-                    width: 100%;
-                    box-sizing: border-box;
-                    padding: 9px 14px 9px 36px;
-                    border-radius: 10px;
-                    background: rgba(255,255,255,0.05);
-                    border: none;
-                    color: #e2e8f0;
-                    font-size: 15px;
-                    font-family: 'Nunito', sans-serif;
-                    transition: background 0.2s;
-                }
-                .lqz-mobile-search:focus { outline: none; background: rgba(255,255,255,0.08); }
-                .lqz-mobile-search::placeholder { color: #555e6a; }
-            }
-
-            /* ── MOBILE EMPTY STATES (no quizzes / no search matches) ── */
-            .lqz-mobile-empty {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                text-align: center;
-                padding: 24px;
-                color: #555e6a;
-                min-height: calc(100vh - 280px);
-            }
-            .lqz-mobile-empty svg { opacity: 0.35; margin-bottom: 14px; }
-            .lqz-mobile-empty-title {
-                color: #c9d1d9;
-                font-size: 15px;
-                font-weight: 700;
-                margin: 0 0 6px;
-            }
-            .lqz-mobile-empty-body {
-                color: #8b949e;
-                font-size: 13px;
-                margin: 0;
-                line-height: 1.5;
-            }
-            .lqz-mobile-search-empty svg { opacity: 0.5; }
 
         </style>
 
@@ -1050,16 +1143,45 @@ function renderQuizCards(groupedData) {
 
         <!-- ═══ MOBILE LIST ═══ -->`;
 
+    // ── Phone: title and counts, search, filter chips, then the teacher groups ──
+    // (the desktop layout above is a separate tree; the phone tree below is hidden from 900px up)
+    let openCount = 0, progressCount = 0, upcomingCount = 0;
+    window._allLearnerQuizzesFlat.forEach(quiz => {
+        const s = lqzQuizState(quiz);
+        if (s.key === 'open') { if (quiz.attempt_status === 'in_progress') progressCount++; else openCount++; }
+        else if (s.key === 'upcoming') upcomingCount++;
+    });
+    const mobileSummary = !hasAnyQuizzes ? ''
+        : [openCount && `${openCount} available now`, progressCount && `${progressCount} in progress`].filter(Boolean).join(' · ')
+            || (upcomingCount ? `${upcomingCount} coming up` : 'Nothing open right now');
+
+    html += `
+        <div class="lqz-mobile-head">
+            <h1 class="lqz-mobile-title">Quizzes</h1>
+            ${mobileSummary ? `<p class="lqz-mobile-sub">${mobileSummary}</p>` : ''}
+        </div>`;
+
     // Mobile search bar — always rendered and always tappable, even in
     // empty states, so the learner can search/clear without a dead-end UI.
     html += `
         <div class="lqz-mobile-search-wrap">
-            <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none">
-                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            <svg viewBox="0 0 24 24" width="17" height="17" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="7.5"/><line x1="20.5" y1="20.5" x2="16.3" y2="16.3"/>
             </svg>
             <input type="text" class="lqz-mobile-search" id="lqzMobileSearch"
-                placeholder="Search quizzes..." oninput="lqzMobileSearch(this.value)">
+                placeholder="Search quizzes" aria-label="Search quizzes" oninput="lqzMobileSearch(this.value)">
         </div>`;
+
+    if (hasAnyQuizzes) {
+        html += `<div class="lqz-mobile-chips" role="group" aria-label="Filter quizzes">${
+            [['all', 'All'], ['open', 'Open'], ['upcoming', 'Upcoming'], ['done', 'Done'], ['closed', 'Closed']]
+                .map(([k, label]) => `<button type="button" class="lqz-mobile-chip${k === 'all' ? ' on' : ''}" data-filter="${k}" aria-pressed="${k === 'all'}" onclick="lqzMobileSetFilter('${k}')">${label}</button>`)
+                .join('')
+        }</div>`;
+    }
+
+    window._lqzMobFilter = 'all';
+    window._lqzMobTerm = '';
 
     html += `<div class="lqz-mobile-list">`;
 
@@ -1067,122 +1189,96 @@ function renderQuizCards(groupedData) {
     if (!hasAnyQuizzes) {
         html += `
             <div class="lqz-mobile-empty">
-                ${learnerQuizPencilSvg(46, 46, '#fdd663')}
+                ${learnerQuizPencilSvg(44, 44, 'currentColor').replace('stroke-width="2"', 'stroke-width="1.5"')}
                 <p class="lqz-mobile-empty-title">No quizzes yet</p>
                 <p class="lqz-mobile-empty-body">Your teachers haven't posted any quizzes. Check back soon.</p>
             </div>`;
     }
 
-    // Zero-results state — hidden by default, shown by lqzMobileSearch()
-    // when a search term matches nothing. Kept in the DOM (not injected
-    // fresh each keystroke) so it can just be toggled.
+    // Zero-results state — hidden by default, shown by lqzMobileApply() when a
+    // search or filter matches nothing. Kept in the DOM (not injected fresh
+    // each keystroke) so it can just be toggled.
     html += `
         <div class="lqz-mobile-empty lqz-mobile-search-empty" id="lqzMobileSearchEmpty" style="display:none;">
-            <svg viewBox="0 0 24 24" width="40" height="40" stroke="#555e6a" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <svg viewBox="0 0 24 24" width="40" height="40" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
             <p class="lqz-mobile-empty-title" id="lqzMobileSearchEmptyText">No matches</p>
-            <p class="lqz-mobile-empty-body">Try a different title or teacher name.</p>
+            <p class="lqz-mobile-empty-body" id="lqzMobileSearchEmptyBody">Try a different title or teacher name.</p>
         </div>`;
 
     let mobileGroupIdx = 0;
     for (const { teacher, quizzes } of teacherEntries) {
         const gid = `lqz-mg-${mobileGroupIdx}`;
+        // A teacher's group starts open while it holds a quiz that is open or still to come; one that is all done or
+        // closed starts folded. A learner's own choice (saved page state) wins, see restoreQuizPageState().
+        const open = quizzes.some(quiz => ['open', 'upcoming'].includes(lqzQuizState(quiz).key));
         html += `
-            <div class="lqz-mobile-folder-header lqz-mobile-folder-header--collapsed" onclick="toggleLqzMobileFolder('${gid}', this)">
-                <div class="lqz-mobile-folder-icon">
-                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="#73746d" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-                    </svg>
-                </div>
+            <div class="lqz-mobile-folder-header${open ? '' : ' lqz-mobile-folder-header--collapsed'}" role="button" tabindex="0"
+                aria-expanded="${open}" aria-controls="${gid}"
+                data-search="${escapeHtml(String(teacher).toLowerCase())}"
+                onclick="toggleLqzMobileFolder('${gid}', this)"
+                onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggleLqzMobileFolder('${gid}', this); }">
                 <span class="lqz-mobile-folder-name">${escapeHtml(teacher)}</span>
-                <span class="lqz-mobile-folder-count">${quizzes.length} assessment${quizzes.length !== 1 ? 's' : ''}</span>
-                <svg class="lqz-mobile-folder-chevron" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none">
-                    <polyline points="9 18 15 12 9 6"/>
+                <span class="lqz-mobile-folder-sub"></span>
+                <span class="lqz-mobile-folder-count">${quizzes.length}</span>
+                <svg class="lqz-mobile-folder-chevron" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="m6 9 6 6 6-6"/>
                 </svg>
             </div>
-            <div class="lqz-mobile-folder-body collapsed" id="${gid}">`;
+            <div class="lqz-mobile-folder-body${open ? '' : ' collapsed'}" id="${gid}">`;
         mobileGroupIdx++;
 
-        quizzes.forEach(quiz => {
-            const displayDate = formatQuizDate(quiz.start_time);
-            let isScheduled = false;
-            let startTimeStr = quiz.start_time || "";
-            if (startTimeStr) {
-                const startTime = new Date(startTimeStr.replace(/-/g, "/"));
-                isScheduled = ((quiz.status === 'Scheduled' || quiz.status === 'Open') && startTime > now);
+        quizzes.forEach((quiz, quizIdx) => {
+            const s = lqzQuizState(quiz);
+            const inProgress = s.key === 'open' && quiz.attempt_status === 'in_progress';
+            const pending = s.key === 'done' && (quiz.publish_marks === 0 || quiz.result_label === 'Pending');
+            const ringKind = s.key === 'done' ? (pending ? 'wait' : 'done')
+                : s.key === 'closed' ? 'closed'
+                : s.key === 'upcoming' ? 'soonq'
+                : inProgress ? 'prog' : 'go';
+
+            // the one line under the title: a state word where there is one, then what the quiz is made of
+            const qs = quiz.question_count > 0 ? `${quiz.question_count} question${quiz.question_count !== 1 ? 's' : ''}` : '';
+            const pts = quiz.total_points > 0 ? `${quiz.total_points} pts` : '';
+            const mins = Number(quiz.duration) > 0 ? `${Number(quiz.duration)} min` : '';
+            const openDetail = [mins, qs].filter(Boolean).join(' · ');
+            const detail = (s.key === 'open' && !inProgress ? openDetail : [pts, qs].filter(Boolean).join(' · '));
+            const word = (cls, text) => `<span class="lqz-mobile-st lqz-mobile-st--${cls}">${text}</span>`;
+            let metaHtml, action = '';
+            const startMs = parseLearnerQuizTime(quiz.start_time);
+            if (s.key === 'done') metaHtml = word(pending ? 'amber' : 'ok', pending ? 'Awaiting results' : 'Completed') + (detail ? ' · ' + detail : '');
+            else if (s.key === 'closed') metaHtml = 'Closed' + (detail ? ' · ' + detail : '');
+            else if (s.key === 'upcoming') {
+                metaHtml = 'Opens ' + lqzMobileDay(startMs) + ', ' + lqzMobileTime(startMs);
+                action = `<span class="quiz-countdown lqz-mobile-cd" data-start="${startMs}" data-quiz-id="${quiz.id}"></span>`;
             }
-            const isClosed = quiz.status === 'Closed';
-
-            let actionBtn = '';
-            let rowClick = '';
-            let rowKeydown = '';
-            let statusText = '';
-
-            if (quiz.attempt_status === 'submitted') {
-                if (quiz.publish_marks === 0 || quiz.result_label === 'Pending') {
-                    actionBtn = `<span class="lqz-mobile-row-action" style="color:#fdd663;">Pending</span>`;
-                    statusText = 'Awaiting Results';
-                } else {
-                    actionBtn = `<span class="lqz-mobile-row-action" style="color:#22c55e;">✓ Done</span>`;
-                    statusText = 'Completed';
-                }
-            } else if (isClosed) {
-                actionBtn = `<span class="lqz-mobile-row-action" style="color:#6b7280;">Closed</span>`;
-                statusText = 'No Longer Available';
-            } else if (isScheduled) {
-                const startTime = new Date(startTimeStr.replace(/-/g, "/"));
-                actionBtn = `<span class="quiz-countdown lqz-mobile-row-action"
-                                   data-start="${startTime.getTime()}"
-                                   data-quiz-id="${quiz.id}"
-                                   style="color:#fdd663; font-size:11px;">
-                                Calculating...
-                             </span>`;
-                statusText = `Opens ${formatQuizDate(quiz.start_time)}`;
-            } else if (quiz.attempt_status === 'in_progress') {
-                rowClick = `onclick="loadQuizInstructions(${quiz.id})"`;
-                rowKeydown = `onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); loadQuizInstructions(${quiz.id}); }"`;
-                actionBtn = `<span class="lqz-mobile-row-action" style="color:#e67e22;" onclick="loadQuizInstructions(${quiz.id})">Continue</span>`;
-                statusText = 'In Progress';
-            } else {
-                rowClick = `onclick="loadQuizInstructions(${quiz.id})"`;
-                rowKeydown = `onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); loadQuizInstructions(${quiz.id}); }"`;
-                actionBtn = `<span class="lqz-mobile-row-action" style="color:#4fd1c5;" onclick="loadQuizInstructions(${quiz.id})">Start</span>`;
-                statusText = 'Available Now';
+            else if (inProgress) {
+                metaHtml = word('soon', 'In progress') + (detail ? ' · ' + detail : '');
+                action = '<span class="lqz-mobile-row-action lqz-mobile-row-action--prog">Continue</span>';
             }
-            const rowAttrs = rowClick ? `role="button" tabindex="0" ${rowClick} ${rowKeydown}` : '';
+            else {
+                metaHtml = word('go', 'Available now') + (detail ? ' · ' + detail : '');
+                action = '<span class="lqz-mobile-row-action">Start</span>';
+            }
 
-            const dotColor = quiz.attempt_status === 'submitted'
-                ? ((quiz.publish_marks === 0 || quiz.result_label === 'Pending') ? '#fdd663' : '#6b7280')
-                : isClosed ? '#6b7280'
-                : isScheduled ? '#fdd663'
-                : quiz.attempt_status === 'in_progress' ? '#e67e22'
-                : '#22c55e';
-
-            const metaPoints = (quiz.total_points > 0 || quiz.question_count > 0)
-                ? `${quiz.total_points} pts &bull; ${quiz.question_count} Question${quiz.question_count !== 1 ? 's' : ''}`
+            // only a quiz that is open (or unfinished) can be opened; the other rows are information
+            const canOpen = s.key === 'open';
+            const rowAttrs = canOpen
+                ? `role="button" tabindex="0" onclick="loadQuizInstructions(${quiz.id})" onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); loadQuizInstructions(${quiz.id}); }"`
                 : '';
 
             html += `
-                <div class="lqz-mobile-row" ${rowAttrs} data-quiz-id="${quiz.id}" data-title="${escapeHtml(quiz.title).toLowerCase()}">
-                    <div class="lqz-mobile-row-icon">
-                        ${learnerQuizPencilSvgThin(20, 20, '#73746d')}
-                    </div>
+                <div class="lqz-mobile-row${quizIdx === 0 ? ' lqz-mobile-row--first' : ''}${canOpen ? '' : ' lqz-mobile-row--static'}" ${rowAttrs}
+                    data-quiz-id="${quiz.id}" data-title="${escapeHtml(quiz.title).toLowerCase()}" data-state="${s.key}" data-details="${escapeHtml(openDetail)}">
+                    <div class="lqz-mobile-row-icon lqz-mobile-row-icon--${ringKind}">${lqzMobileRing(ringKind)}</div>
                     <div class="lqz-mobile-row-body">
                         <div class="lqz-mobile-row-title">
                             <span class="lqz-mobile-row-title-text">${escapeHtml(quiz.title)}</span>
                         </div>
-                        <div class="lqz-mobile-row-meta">${metaPoints}</div>
+                        <div class="lqz-mobile-row-meta">${metaHtml}</div>
                     </div>
-                    <span class="lqz-mobile-row-status"
-                        style="background:${dotColor}20;color:${dotColor};border:1px solid ${dotColor}50;">
-                        ${escapeHtml(statusText)}
-                    </span>
-                    <div class="lqz-mobile-row-chevron">
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
-                            <polyline points="9 18 15 12 9 6"></polyline>
-                        </svg>
-                    </div>
+                    ${action}
                 </div>`;
         });
         html += `</div>`; // close .lqz-mobile-folder-body
@@ -1374,44 +1470,53 @@ window.loadLearnerQuizPanelInstructions = async function(quizId, boxId) {
     }
 };
 
-window.lqzMobileSearch = function(val) {
-    if (window.learnerPageState) window.learnerPageState.update('quiz', { mobileSearch: val });
-    const term = val.toLowerCase().trim();
+window._lqzMobFilter = 'all';
+window._lqzMobTerm = '';
+
+// Shows the rows that match both the filter chip and the search box, and only the groups that still have a row.
+// Folding is left alone (the list just shows every match while filtering), so clearing the search puts it back as it was.
+function lqzMobileApply() {
+    const list = document.querySelector('.lqz-mobile-list');
+    if (!list) return;
+    const term = window._lqzMobTerm || '';
+    const filter = window._lqzMobFilter || 'all';
+    const filtering = !!term || filter !== 'all';
+    list.classList.toggle('is-filtering', filtering);
+
     let totalVisible = 0;
-    document.querySelectorAll('.lqz-mobile-folder-body').forEach(body => {
+    list.querySelectorAll('.lqz-mobile-folder-body').forEach(body => {
         const header = body.previousElementSibling;
-        const folderName = header ? header.querySelector('.lqz-mobile-folder-name').textContent.toLowerCase() : '';
-        const rows = body.querySelectorAll('.lqz-mobile-row');
+        // a search that names the teacher shows all of that group's rows
+        const groupHit = !!term && (header?.dataset.search || '').includes(term);
         let visible = 0;
-        rows.forEach(row => {
-            const title = (row.dataset.title || '');
-            const show = !term || title.includes(term) || folderName.includes(term);
+        body.querySelectorAll('.lqz-mobile-row').forEach(row => {
+            const show = (filter === 'all' || row.dataset.state === filter)
+                && (!term || groupHit || (row.dataset.title || '').includes(term));
             row.style.display = show ? '' : 'none';
+            row.classList.toggle('lqz-mobile-row--first', show && visible === 0);
             if (show) visible++;
         });
-        // Show/hide entire folder based on matches
-        const folderShown = (visible || !term || folderName.includes(term));
-        if (header) header.style.display = folderShown ? '' : 'none';
-        body.style.display = folderShown ? '' : 'none';
-        if (folderShown) totalVisible += (term ? visible : rows.length);
-        // Keep folder open while searching
-        if (term && visible) {
-            body.classList.remove('collapsed');
-            if (header) header.classList.remove('lqz-mobile-folder-header--collapsed');
-            const chev = header ? header.querySelector('.lqz-mobile-folder-chevron') : null;
-            if (chev) chev.classList.add('open');
+        if (header) {
+            header.style.display = visible ? '' : 'none';
+            const count = header.querySelector('.lqz-mobile-folder-count');
+            if (count) count.textContent = String(visible);
         }
+        body.style.display = visible ? '' : 'none';
+        totalVisible += visible;
     });
 
-    // Zero-results empty state — only relevant when actively searching
-    // and nothing at all in the list matched.
+    // Zero-results empty state — only when a search or filter is on and nothing matched.
     const searchEmpty = document.getElementById('lqzMobileSearchEmpty');
     if (searchEmpty) {
-        const showEmpty = term.length > 0 && totalVisible === 0;
+        const showEmpty = filtering && totalVisible === 0;
         searchEmpty.style.display = showEmpty ? 'flex' : 'none';
         if (showEmpty) {
             const label = document.getElementById('lqzMobileSearchEmptyText');
-            if (label) label.textContent = `No matches for "${val.trim()}"`;
+            const body = document.getElementById('lqzMobileSearchEmptyBody');
+            const raw = (document.getElementById('lqzMobileSearch')?.value || '').trim();
+            const none = { open: 'Nothing open right now', upcoming: 'Nothing coming up', done: 'Nothing completed yet', closed: 'No closed quizzes' };
+            if (label) label.textContent = raw ? `No matches for "${raw}"` : (none[filter] || 'No matches');
+            if (body) body.textContent = raw ? 'Try a different title or teacher name.' : 'Pick another filter to see more.';
         }
     }
 
@@ -1419,6 +1524,23 @@ window.lqzMobileSearch = function(val) {
     // height just like expanding/collapsing a folder does, but without a
     // real scroll event — same recalculation fix as the folder toggle.
     recheckMobileNavAfterToggle();
+}
+
+window.lqzMobileSetFilter = function(key) {
+    window._lqzMobFilter = key || 'all';
+    document.querySelectorAll('.lqz-mobile-chip').forEach(chip => {
+        const on = chip.dataset.filter === window._lqzMobFilter;
+        chip.classList.toggle('on', on);
+        chip.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    lqzMobileApply();
+    saveQuizPageState();
+};
+
+window.lqzMobileSearch = function(val) {
+    if (window.learnerPageState) window.learnerPageState.update('quiz', { mobileSearch: val });
+    window._lqzMobTerm = String(val || '').toLowerCase().trim();
+    lqzMobileApply();
 };
 
 // ─────────────────────────────────────────────
@@ -1627,14 +1749,19 @@ function recheckMobileNavAfterToggle() {
     });
 }
 
+// Open or fold one teacher group, keeping the header, the body and the screen-reader state in step.
+function lqzMobileSetFolder(header, body, open) {
+    body.classList.toggle('collapsed', !open);
+    header.classList.toggle('lqz-mobile-folder-header--collapsed', !open);
+    header.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+
 window.toggleLqzMobileFolder = function(id, headerEl) {
     const body = document.getElementById(id);
-    if (!body) return;
-    const chevron = headerEl.querySelector('.lqz-mobile-folder-chevron');
-    const isOpen = !body.classList.contains('collapsed');
-    body.classList.toggle('collapsed', isOpen);
-    headerEl.classList.toggle('lqz-mobile-folder-header--collapsed', isOpen);
-    if (chevron) chevron.classList.toggle('open', !isOpen);
+    if (!body || !headerEl) return;
+    // While a search or filter is on, every group with a match is shown open; folding one would change nothing.
+    if (body.closest('.lqz-mobile-list')?.classList.contains('is-filtering')) return;
+    lqzMobileSetFolder(headerEl, body, body.classList.contains('collapsed'));
     saveQuizPageState();
 
     // Opening/closing a folder changes the page's actual scrollable
@@ -1664,6 +1791,8 @@ function startQuizCountdowns() {
 
             if (diff <= 0) {
                 clearInterval(tick);
+                // Phone list: the whole row becomes an open one
+                if (el.classList.contains('lqz-mobile-cd')) { lqzMobileRowOpen(el.closest('.lqz-mobile-row'), quizId); return; }
                 // Smooth swap to Start button
                 el.style.transition = 'opacity 0.4s';
                 el.style.opacity = '0';
@@ -1679,6 +1808,7 @@ function startQuizCountdowns() {
                 return;
             }
 
+            if (el.classList.contains('lqz-mobile-cd')) { el.textContent = lqzMobileCountdownText(diff); return; }
             const h = Math.floor(diff / 3600000);
             const m = Math.floor((diff % 3600000) / 60000);
             const s = Math.floor((diff % 60000) / 1000);
@@ -1694,7 +1824,9 @@ function startQuizCountdowns() {
 
          // Run immediately so there's no 1s delay on first render
         const diff0 = startMs - Date.now();
-        if (diff0 > 0) {
+        if (diff0 > 0 && el.classList.contains('lqz-mobile-cd')) {
+            el.textContent = lqzMobileCountdownText(diff0);
+        } else if (diff0 > 0) {
             const h = Math.floor(diff0 / 3600000);
             const m = Math.floor((diff0 % 3600000) / 60000);
             const s = Math.floor((diff0 % 60000) / 1000);

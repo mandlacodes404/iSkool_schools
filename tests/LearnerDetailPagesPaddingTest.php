@@ -23,14 +23,22 @@ final class LearnerDetailPagesPaddingTest extends TestCase
         'assets/css/learner/evaluations.css'    => '.lev-mobile-detail',
     ];
 
-    public function test_each_detail_root_pads_18px_at_the_sides_like_the_list_rows(): void
+    /** The side padding each detail root uses, which is the inset of the rows in its own list. The quiet Assignments list (and
+     *  so its detail screen) insets by 20px, the others by 18px. The top and bottom padding are not part of this check. */
+    private const DETAIL_PADDING = [
+        'assets/css/learner/assignments.css'    => '\d+px 20px 96px',
+        'assets/css/learner/announcements.css'  => '18px 18px 96px',
+        'assets/css/learner/evaluations.css'    => '18px 18px 96px',
+    ];
+
+    public function test_each_detail_root_pads_like_the_list_rows_at_the_sides(): void
     {
         foreach (self::DETAIL_ROOTS as $file => $selector) {
             $css = $this->source($file);
             $this->assertSame(
                 1,
-                preg_match('/^\s*' . preg_quote($selector, '/') . ' \{[^}]*padding:\s*18px 18px 96px;/m', $css),
-                $file . ': ' . $selector . ' must pad 18px at the sides (the same as its list rows)'
+                preg_match('/^\s*' . preg_quote($selector, '/') . ' \{[^}]*padding:\s*' . self::DETAIL_PADDING[$file] . ';/m', $css),
+                $file . ': ' . $selector . ' must pad at the sides by the same as its list rows'
             );
             $this->assertSame(0, preg_match('/' . preg_quote($selector, '/') . ' \{[^}]*padding:\s*18px 16px/', $css), $file . ' still pads 16px');
         }
@@ -77,7 +85,7 @@ final class LearnerDetailPagesPaddingTest extends TestCase
         $php = $this->source('learner_dashboard.php');
         foreach ([
             'assets/css/learner/announcements.css?v=4.3',
-            'assets/css/learner/assignments.css?v=4.3',
+            'assets/css/learner/assignments.css?v=4.4',
             'assets/css/learner/evaluations.css?v=5.6',
             'assets/js/learner/syllabus.js?v=4.6',
         ] as $versioned) {

@@ -379,29 +379,27 @@ html[data-learner-theme="light"] .lqz-panel-status-dot[style*="#e67e22" i] { bac
 html[data-learner-theme="light"] .lqz-panel-status-dot[style*="#4fd1c5" i] { background: #187a72 !important; }
 
 /* ── 769px to 899px: the split layout starts at 900px, so until then the phone-style list is what shows.
-      Its colours are hard-coded for a dark page. ── */
-html[data-learner-theme="light"] .lqz-mobile-folder-header { border-bottom-color: #dfded8; }
-html[data-learner-theme="light"] .lqz-mobile-folder-header:active,
-html[data-learner-theme="light"] .lqz-mobile-folder-header:not(.lqz-mobile-folder-header--collapsed) { background: rgba(38,39,35,.04); }
-html[data-learner-theme="light"] .lqz-mobile-folder-name,
-html[data-learner-theme="light"] .lqz-mobile-row-title { color: #282924; }
-html[data-learner-theme="light"] .lqz-mobile-folder-count { color: #73746d; background: rgba(38,39,35,.06); }
-html[data-learner-theme="light"] .lqz-mobile-folder-chevron,
-html[data-learner-theme="light"] .lqz-mobile-row-chevron { color: #8b8b83; }
-html[data-learner-theme="light"] .lqz-mobile-row::after { background: #ebeae5; }
-html[data-learner-theme="light"] .lqz-mobile-row:active:not([style*="opacity"]) { background: rgba(38,39,35,.04); }
-html[data-learner-theme="light"] .lqz-mobile-row-meta { color: #73746d; }
-html[data-learner-theme="light"] .lqz-mobile-search-wrap svg { color: #282924; }
-html[data-learner-theme="light"] .lqz-mobile-search { background: #ffffff; border: 1px solid #dfded8; color: #282924; }
-html[data-learner-theme="light"] .lqz-mobile-search:focus { border-color: #bdbcb4; }
-html[data-learner-theme="light"] .lqz-mobile-search::placeholder { color: #8b8b83; }
-html[data-learner-theme="light"] .lqz-mobile-empty-title { color: #282924; }
-html[data-learner-theme="light"] .lqz-mobile-empty-body { color: #73746d; }
-html[data-learner-theme="light"] .lqz-mobile-list [style*="#fdd663" i] { color: #9a6b00 !important; }
-html[data-learner-theme="light"] .lqz-mobile-list [style*="#22c55e" i] { color: #15803d !important; }
-html[data-learner-theme="light"] .lqz-mobile-list [style*="#e67e22" i] { color: #b85f12 !important; }
-html[data-learner-theme="light"] .lqz-mobile-list [style*="#4fd1c5" i] { color: #187a72 !important; }
-html[data-learner-theme="light"] .lqz-mobile-list [stroke="#fdd663" i] { stroke: #9a6b00; }
+      Its colours are the --qm-* tokens (set for dark in quiz.js, with the list), so light mode is the light set. ── */
+html[data-learner-theme="light"] .lqz-mobile-head,
+html[data-learner-theme="light"] .lqz-mobile-search-wrap,
+html[data-learner-theme="light"] .lqz-mobile-chips,
+html[data-learner-theme="light"] .lqz-mobile-list {
+    --qm-title: #282924;
+    --qm-body: #4a4b44;
+    --qm-muted: #73746d;
+    --qm-faint: #a3a39a;
+    --qm-line: rgba(40,41,36,.09);
+    --qm-press: rgba(38,39,35,.04);
+    --qm-surf: #f1efe8;
+    --qm-ring: #a3a39a;
+    --qm-soon: #b85f12;
+    --qm-go: #187a72;
+    --qm-amber: #9a6b00;
+    --qm-ok: #15803d;
+    --qm-chipline: rgba(40,41,36,.16);
+    --qm-chipon: #252624;
+    --qm-chipon-text: #faf9f5;
+}
 
 /* ── Instructions screen (opened from the phone-style list; the desktop panel starts a quiz directly) ── */
 html[data-learner-theme="light"] .inst-container {
@@ -427,38 +425,33 @@ html[data-learner-theme="light"] p:has(+ .lqz-retry-btn) { color: #bd4a43 !impor
 /* ── Phones (768px and narrower): light mode ───────────────────────────────────────────────────────────
    Applies only when <html data-learner-mobile-theme="light"> (mobile_theme.js, Settings > Appearance) and only while
    the quiz list, the instructions screen or the list's error state is on screen (the gate in mobile_light.css).
-   Dark mode and 769px and wider are untouched. Same rules and palette as the 769-899px block above, which already
-   restyles this phone-style list for the desktop light mode; quiz.js needs no change. The page background, header
+   Dark mode and 769px and wider are untouched. Same palette as the 769-899px block above, which already
+   restyles this phone-style list for the desktop light mode (the list reads its colours from --qm-* tokens). The page background, header
    and bottom nav are in mobile_light.css. Not here: the quiz session and result pages (take_quiz.php,
    submit_quiz.php), which are separate pages and stay dark on phones for now. To remove it, delete this block. */
 @media (max-width: 768px) {
 
-/* the list: folders, rows, search and the empty states */
-html[data-learner-mobile-theme="light"] .lqz-mobile-folder-header { border-bottom-color: #dfded8; }
-html[data-learner-mobile-theme="light"] .lqz-mobile-folder-header:active,
-html[data-learner-mobile-theme="light"] .lqz-mobile-folder-header:not(.lqz-mobile-folder-header--collapsed) { background: rgba(38,39,35,.04); }
-html[data-learner-mobile-theme="light"] .lqz-mobile-folder-name,
-html[data-learner-mobile-theme="light"] .lqz-mobile-row-title { color: #282924; }
-html[data-learner-mobile-theme="light"] .lqz-mobile-folder-count { color: #73746d; background: rgba(38,39,35,.06); }
-html[data-learner-mobile-theme="light"] .lqz-mobile-folder-chevron,
-html[data-learner-mobile-theme="light"] .lqz-mobile-row-chevron { color: #73746d; }
-html[data-learner-mobile-theme="light"] .lqz-mobile-row::after { background: #ebeae5; }
-html[data-learner-mobile-theme="light"] .lqz-mobile-row:active:not([style*="opacity"]) { background: rgba(38,39,35,.04); }
-html[data-learner-mobile-theme="light"] .lqz-mobile-row-meta { color: #73746d; }
-html[data-learner-mobile-theme="light"] .lqz-mobile-search-wrap svg { color: #282924; }
-html[data-learner-mobile-theme="light"] .lqz-mobile-search { background: #ffffff; border: 1px solid #dfded8; color: #282924; }
-html[data-learner-mobile-theme="light"] .lqz-mobile-search:focus { border-color: #bdbcb4; }
-html[data-learner-mobile-theme="light"] .lqz-mobile-search::placeholder { color: #8b8b83; }
-html[data-learner-mobile-theme="light"] .lqz-mobile-empty-title { color: #282924; }
-html[data-learner-mobile-theme="light"] .lqz-mobile-empty-body { color: #73746d; }
-
-/* status colours quiz.js writes inline (Pending, Done, Continue, Start, the countdown and the status chip),
-   darkened so they read on a light page. The chip's tinted fill and border are inline too and stay as they are. */
-html[data-learner-mobile-theme="light"] .lqz-mobile-list [style*="#fdd663" i] { color: #9a6b00 !important; }
-html[data-learner-mobile-theme="light"] .lqz-mobile-list [style*="#22c55e" i] { color: #15803d !important; }
-html[data-learner-mobile-theme="light"] .lqz-mobile-list [style*="#e67e22" i] { color: #b85f12 !important; }
-html[data-learner-mobile-theme="light"] .lqz-mobile-list [style*="#4fd1c5" i] { color: #187a72 !important; }
-html[data-learner-mobile-theme="light"] .lqz-mobile-list [stroke="#fdd663" i] { stroke: #9a6b00; }
+/* the list: title, search, chips, rows and the empty states all read their colours from these tokens */
+html[data-learner-mobile-theme="light"] .lqz-mobile-head,
+html[data-learner-mobile-theme="light"] .lqz-mobile-search-wrap,
+html[data-learner-mobile-theme="light"] .lqz-mobile-chips,
+html[data-learner-mobile-theme="light"] .lqz-mobile-list {
+    --qm-title: #282924;
+    --qm-body: #4a4b44;
+    --qm-muted: #73746d;
+    --qm-faint: #a3a39a;
+    --qm-line: rgba(40,41,36,.09);
+    --qm-press: rgba(38,39,35,.04);
+    --qm-surf: #f1efe8;
+    --qm-ring: #a3a39a;
+    --qm-soon: #b85f12;
+    --qm-go: #187a72;
+    --qm-amber: #9a6b00;
+    --qm-ok: #15803d;
+    --qm-chipline: rgba(40,41,36,.16);
+    --qm-chipon: #252624;
+    --qm-chipon-text: #faf9f5;
+}
 
 /* instructions screen (opened from a row): the same light values as above; the button is spelled out because the
    gate in mobile_light.css and MobileLightModeTest both look for it */
