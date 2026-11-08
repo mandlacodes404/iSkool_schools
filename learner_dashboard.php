@@ -232,7 +232,7 @@ $parentLink = ((int)$parentCount > 0); // true when at least one parent is linke
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
     <link rel="stylesheet" href="assets/css/learner/grades.css?v=4.4">
     <link rel="stylesheet" href="assets/css/learner/resources.css?v=3.3">
-     <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=5.6">
+     <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=5.7">
      <!-- The phone back button's regular-weight Nunito (see @font-face 'iSkool Back Label' in learner_dashboard.css), fetched
          early so the label does not flash in another font the first time a detail page opens. Phones only. -->
     <link rel="preload" href="assets/fonts/nunito-latin-400.woff2" as="font" type="font/woff2" crossorigin media="(max-width: 768px)">
@@ -3982,7 +3982,7 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/resources.js?v=8.9"></script>
 <script src="assets/js/learner/announcements.js?v=9.7"></script>
 <script src="assets/js/learner/grades.js?v=10.6"></script>
-<script src="assets/js/learner/evaluations.js?v=7.5"></script>
+<script src="assets/js/learner/evaluations.js?v=7.6"></script>
 <script src="assets/js/learner/discussions.js?v=11.2"></script>
 <script src="assets/js/learner/syllabus.js?v=4.6"></script>
 <script src="assets/js/learner/learner_calendar.js?v=2.5"></script>

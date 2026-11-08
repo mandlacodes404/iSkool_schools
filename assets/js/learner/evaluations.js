@@ -34,6 +34,7 @@ function saveEvaluationPageState() {
         mainScroll:    mainContent ? mainContent.scrollTop : 0,
         panelScroll:   panel ? panel.scrollTop : 0,
         mobileSearch: document.getElementById('levMobileSearch')?.value || '',
+        mobileFilter: window._levMobFilter || 'all',
         openFolders: Array.from(document.querySelectorAll('.lev-mobile-folder-body:not(.collapsed)')).map(el => el.id),
         // Desktop teacher groups the learner has folded away (open is the default)
         collapsedTeachers: Array.from(window._levCollapsed || []),
@@ -71,14 +72,11 @@ function restoreEvaluationPageState() {
                     window.levMobileSearch(state.mobileSearch);
                 }
             }
+            if (state.mobileFilter && state.mobileFilter !== 'all') window.levMobileSetFilter(state.mobileFilter);
             if (Array.isArray(state.openFolders)) {
                 document.querySelectorAll('.lev-mobile-folder-body').forEach(body => {
-                    const open = state.openFolders.includes(body.id);
-                    body.classList.toggle('collapsed', !open);
                     const header = body.previousElementSibling;
-                    if (header) header.classList.toggle('lev-mobile-folder-header--collapsed', !open);
-                    const chev = header?.querySelector('.lev-mobile-folder-chevron');
-                    if (chev) chev.classList.toggle('open', open);
+                    if (header) levMobileSetFolder(header, body, state.openFolders.includes(body.id));
                 });
             }
             if (Array.isArray(state.collapsedTeachers)) {
@@ -129,7 +127,8 @@ window.fetchEvaluations = async function() {
     if (apiArea) apiArea.style.display = 'block';
 
     // Inject CSS
-    const evalStyleHref = 'assets/css/learner/evaluations.css?v=4.0';
+    // Same URL (and version) as the <link> in learner_dashboard.php, so there is one cached copy of the stylesheet
+    const evalStyleHref = 'assets/css/learner/evaluations.css?v=5.7';
     const existingEvalStyle = document.getElementById('eval-style');
     if (existingEvalStyle) {
         existingEvalStyle.href = evalStyleHref;
@@ -196,6 +195,64 @@ function getGroupedLearnerEvaluationEntries(data) {
     return order.map(teacher => ({ teacher, evaluations: map[teacher] }));
 }
 
+// ── Phone list helpers (the "quiet list": the same look as the learner Assignments and Quizzes lists) ─────────────
+// The small status ring at the start of each row. It draws in currentColor, so the colour comes from the
+// .lev-mobile-row-icon--{todo|done} classes (and so follows light and dark mode with no extra rules).
+function levMobileRing(done) {
+    const inner = done
+        ? '<circle cx="12" cy="12" r="9.6" fill="currentColor" stroke="none"/><path d="m7.8 12.4 2.8 2.8 5.6-6" stroke="#fff" stroke-width="2"/>'
+        : '<circle cx="12" cy="12" r="9.2" stroke="currentColor" stroke-width="1.7"/>';
+    return `<svg class="lev-icon-crisp" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${inner}</svg>`;
+}
+
+// "7 Nov at 21:41" -> "7 Nov": the list only needs the day
+function levMobileDay(displayDate) {
+    return String(displayDate || '').replace(/\s+at\s+.*$/, '').trim();
+}
+
+// The one line under a row's title: the state word, how many statements are left to answer, the day it was posted.
+function levMobileMeta(evaluation) {
+    const day = levMobileDay(evaluation.display_date);
+    const tail = day ? ' · ' + escapeLearnerEvaluationHtml(day) : '';
+    if (evaluation.submitted) return `<span class="lev-mobile-st lev-mobile-st--ok">Completed</span>${tail}`;
+    const n = (evaluation.statements || []).length;
+    return 'To do' + (n ? ` · ${n} statement${n === 1 ? '' : 's'}` : '') + tail;
+}
+
+function levMobileHeadHtml(summary) {
+    return `
+        <div class="lev-mobile-head">
+            <h1 class="lev-mobile-title">Evaluations</h1>
+            ${summary ? `<p class="lev-mobile-sub">${summary}</p>` : ''}
+        </div>`;
+}
+
+// Always rendered and tappable, even with no evaluations or when a filter matches nothing.
+function levMobileSearchHtml() {
+    return `
+        <div class="lev-mobile-search-wrap">
+            <svg viewBox="0 0 24 24" width="17" height="17" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lev-icon-crisp" aria-hidden="true">
+                <circle cx="11" cy="11" r="7.5"/><line x1="20.5" y1="20.5" x2="16.3" y2="16.3"/>
+            </svg>
+            <input type="text" class="lev-mobile-search" id="levMobileSearch"
+                placeholder="Search evaluations" aria-label="Search evaluations" oninput="levMobileSearch(this.value)">
+        </div>`;
+}
+
+const LEV_MOBILE_EMPTY_ICON = '<svg viewBox="0 0 24 24" width="44" height="44" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lev-icon-crisp" aria-hidden="true"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>';
+
+// The whole phone page when there is nothing to list: the title, the search box and a message.
+function levMobileEmptyHtml(title, body) {
+    return levMobileHeadHtml('') + levMobileSearchHtml() + `
+        <div class="lev-mobile-list">
+            <div class="lev-mobile-empty">
+                ${LEV_MOBILE_EMPTY_ICON}
+                <p class="lev-mobile-empty-title">${title}</p>
+                <p class="lev-mobile-empty-body">${body}</p>
+            </div>
+        </div>`;
+}
+
 // New Helper Function to handle the actual HTML building
 function renderEvaluationsUI(data) {
     const apiArea = document.getElementById('api-content-area');
@@ -230,23 +287,7 @@ function renderEvaluationsUI(data) {
             </div>
 
             <!-- ═══ MOBILE EMPTY ═══ -->
-            <div class="lev-mobile-search-wrap">
-                <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lev-icon-crisp">
-                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                </svg>
-                <input type="text" class="lev-mobile-search" id="levMobileSearch"
-                    placeholder="Search evaluations..." oninput="levMobileSearch(this.value)">
-            </div>
-            <div class="lev-mobile-list">
-                <div class="lev-mobile-empty">
-                    <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fa8fd" stroke-width="1.5" fill="none">
-                        <path d="M9 11l3 3L22 4"></path>
-                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-                    </svg>
-                    <p class="lev-mobile-empty-title">Not enrolled yet</p>
-                    <p class="lev-mobile-empty-body">You're not enrolled in a class yet. Check back soon.</p>
-                </div>
-            </div>`;
+            ${levMobileEmptyHtml("Not enrolled yet", "You're not enrolled in a class yet. Check back soon.")}`;
         return;
     }
     if (!data || data.length === 0) {
@@ -277,23 +318,7 @@ function renderEvaluationsUI(data) {
             </div>
 
             <!-- ═══ MOBILE EMPTY ═══ -->
-            <div class="lev-mobile-search-wrap">
-                <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lev-icon-crisp">
-                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                </svg>
-                <input type="text" class="lev-mobile-search" id="levMobileSearch"
-                    placeholder="Search evaluations..." oninput="levMobileSearch(this.value)">
-            </div>
-            <div class="lev-mobile-list">
-                <div class="lev-mobile-empty">
-                    <svg viewBox="0 0 24 24" width="48" height="48" stroke="#4fa8fd" stroke-width="1.5" fill="none">
-                        <path d="M9 11l3 3L22 4"></path>
-                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-                    </svg>
-                    <p class="lev-mobile-empty-title">No evaluations yet</p>
-                    <p class="lev-mobile-empty-body">Your teachers haven't posted any evaluations. Check back soon.</p>
-                </div>
-            </div>`;
+            ${levMobileEmptyHtml("No evaluations yet", "Your teachers haven't posted any evaluations. Check back soon.")}`;
         return;
     }
 
@@ -342,62 +367,71 @@ function renderEvaluationsUI(data) {
 
         <!-- ═══ MOBILE LIST ═══ -->`;
 
-    html += `
-        <div class="lev-mobile-search-wrap">
-            <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lev-icon-crisp">
-                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>
-            <input type="text" class="lev-mobile-search" id="levMobileSearch"
-                placeholder="Search evaluations..." oninput="levMobileSearch(this.value)">
-        </div>`;
+    // ── Phone: title and counts, search, filter chips, then a label for each teacher ──
+    // (the desktop layout above is a separate tree; the phone tree below is hidden from 900px up)
+    const todoCount = window._allLearnerEvaluationsFlat.filter(ev => !ev.submitted).length;
+    html += levMobileHeadHtml(todoCount === 0 ? 'All caught up' : `${todoCount} to do`);
+    html += levMobileSearchHtml();
+    html += `<div class="lev-mobile-chips" role="group" aria-label="Filter evaluations">${
+        [['all', 'All'], ['todo', 'To do'], ['done', 'Done']]
+            .map(([k, label]) => `<button type="button" class="lev-mobile-chip${k === 'all' ? ' on' : ''}" data-filter="${k}" aria-pressed="${k === 'all'}" onclick="levMobileSetFilter('${k}')">${label}</button>`)
+            .join('')
+    }</div>`;
+
+    window._levMobFilter = 'all';
+    window._levMobTerm = '';
 
     html += `<div class="lev-mobile-list">`;
+
+    // Zero-results state: hidden by default, shown by levMobileApply() when a search or filter matches nothing.
+    html += `
+        <div class="lev-mobile-empty lev-mobile-search-empty" id="levMobileSearchEmpty" style="display:none;">
+            <svg viewBox="0 0 24 24" width="40" height="40" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lev-icon-crisp" aria-hidden="true">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <p class="lev-mobile-empty-title" id="levMobileSearchEmptyText">No matches</p>
+            <p class="lev-mobile-empty-body" id="levMobileSearchEmptyBody">Try a different title or teacher name.</p>
+        </div>`;
 
     let mobileFlatIdx = 0;
     let mobileGroupIdx = 0;
     teacherEntries.forEach(({ teacher, evaluations }) => {
         const gid = `lev-mg-${mobileGroupIdx}`;
+        // A teacher's group starts open while it still holds an evaluation to do; a group that is all completed starts folded.
+        // A learner's own choice (saved page state) wins over this, see restoreEvaluationPageState().
+        const open = evaluations.some(evaluation => !evaluation.submitted);
         html += `
-            <div class="lev-mobile-folder-header lev-mobile-folder-header--collapsed" onclick="toggleLevMobileFolder('${gid}', this)">
-                <div class="lev-mobile-folder-icon">
-                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="#73746d" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-                    </svg>
-                </div>
+            <div class="lev-mobile-folder-header${open ? '' : ' lev-mobile-folder-header--collapsed'}" role="button" tabindex="0"
+                aria-expanded="${open}" aria-controls="${gid}"
+                data-search="${escapeLearnerEvaluationHtml(String(teacher).toLowerCase())}"
+                onclick="toggleLevMobileFolder('${gid}', this)"
+                onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggleLevMobileFolder('${gid}', this); }">
                 <span class="lev-mobile-folder-name">${escapeLearnerEvaluationHtml(teacher)}</span>
-                <span class="lev-mobile-folder-count">${evaluations.length} evaluation${evaluations.length !== 1 ? 's' : ''}</span>
-                <svg class="lev-mobile-folder-chevron lev-icon-crisp" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="9 18 15 12 9 6"/>
+                <span class="lev-mobile-folder-count">${evaluations.length}</span>
+                <svg class="lev-mobile-folder-chevron lev-icon-crisp" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="m6 9 6 6 6-6"/>
                 </svg>
             </div>
-            <div class="lev-mobile-folder-body collapsed" id="${gid}">`;
+            <div class="lev-mobile-folder-body${open ? '' : ' collapsed'}" id="${gid}">`;
         mobileGroupIdx++;
 
-        evaluations.forEach(evaluation => {
-            const statusText = evaluation.submitted ? 'Completed' : 'Pending';
-            const metaDate = evaluation.display_date ? `${escapeLearnerEvaluationHtml(evaluation.display_date)} &bull; ` : '';
+        evaluations.forEach((evaluation, evalIdx) => {
+            const done = !!evaluation.submitted;
             html += `
-                <div class="lev-mobile-row" role="button" tabindex="0"
-                    data-title="${escapeLearnerEvaluationHtml(evaluation.title||'').toLowerCase()}"
+                <div class="lev-mobile-row${evalIdx === 0 ? ' lev-mobile-row--first' : ''}" role="button" tabindex="0"
+                    data-title="${escapeLearnerEvaluationHtml(evaluation.title || '').toLowerCase()}" data-state="${done ? 'done' : 'todo'}"
                     onclick="openMobileLearnerEvaluation(${mobileFlatIdx})"
                     onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openMobileLearnerEvaluation(${mobileFlatIdx}); }">
-                    <div class="lev-mobile-row-icon">
-                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="#73746d" stroke-width="1.3" fill="none">
-                            <path d="M9 11l3 3L22 4"></path>
-                            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-                        </svg>
-                    </div>
+                    <div class="lev-mobile-row-icon lev-mobile-row-icon--${done ? 'done' : 'todo'}">${levMobileRing(done)}</div>
                     <div class="lev-mobile-row-body">
                         <div class="lev-mobile-row-title">
                             <span class="lev-mobile-row-title-text">${escapeLearnerEvaluationHtml(evaluation.title || 'Evaluation')}</span>
                         </div>
-                        <div class="lev-mobile-row-meta"><span>${metaDate}${statusText}</span></div>
+                        <div class="lev-mobile-row-meta">${levMobileMeta(evaluation)}</div>
                     </div>
-                    <div class="lev-mobile-row-chevron">
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
-                            <polyline points="9 18 15 12 9 6"></polyline>
-                        </svg>
-                    </div>
+                    <svg class="lev-mobile-row-chevron lev-icon-crisp" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="1.9" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="m9 18 6-6-6-6"></path>
+                    </svg>
                 </div>`;
             mobileFlatIdx++;
         });
@@ -432,14 +466,19 @@ function recheckMobileNavAfterToggle() {
     });
 }
 
+// Open or fold one teacher group, keeping the header, the body and the screen-reader state in step.
+function levMobileSetFolder(header, body, open) {
+    body.classList.toggle('collapsed', !open);
+    header.classList.toggle('lev-mobile-folder-header--collapsed', !open);
+    header.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+
 window.toggleLevMobileFolder = function(id, headerEl) {
     const body = document.getElementById(id);
-    if (!body) return;
-    const chevron = headerEl.querySelector('.lev-mobile-folder-chevron');
-    const isOpen = !body.classList.contains('collapsed');
-    body.classList.toggle('collapsed', isOpen);
-    headerEl.classList.toggle('lev-mobile-folder-header--collapsed', isOpen);
-    if (chevron) chevron.classList.toggle('open', !isOpen);
+    if (!body || !headerEl) return;
+    // While a search or filter is on, every group with a match is shown open; folding one would change nothing.
+    if (body.closest('.lev-mobile-list')?.classList.contains('is-filtering')) return;
+    levMobileSetFolder(headerEl, body, body.classList.contains('collapsed'));
     saveEvaluationPageState();
 
     // Opening/closing a folder changes the page's actual scrollable
@@ -450,34 +489,77 @@ window.toggleLevMobileFolder = function(id, headerEl) {
     recheckMobileNavAfterToggle();
 };
 
-window.levMobileSearch = function(val) {
-    if (window.learnerPageState) window.learnerPageState.update('evaluations', { mobileSearch: val });
-    const term = val.toLowerCase().trim();
-    document.querySelectorAll('.lev-mobile-folder-body').forEach(body => {
+window._levMobFilter = 'all';
+window._levMobTerm = '';
+
+// Shows the rows that match both the filter chip and the search box, and only the groups that still have a row.
+// Folding is left alone (the list just shows every match while filtering), so clearing the search puts it back as it was.
+function levMobileApply() {
+    const list = document.querySelector('.lev-mobile-list');
+    if (!list) return;
+    const term = window._levMobTerm || '';
+    const filter = window._levMobFilter || 'all';
+    const filtering = !!term || filter !== 'all';
+    list.classList.toggle('is-filtering', filtering);
+
+    let totalVisible = 0;
+    list.querySelectorAll('.lev-mobile-folder-body').forEach(body => {
         const header = body.previousElementSibling;
-        const folderName = header ? header.querySelector('.lev-mobile-folder-name').textContent.toLowerCase() : '';
-        const rows = body.querySelectorAll('.lev-mobile-row');
+        // a search that names the teacher shows all of that teacher's rows
+        const groupHit = !!term && (header?.dataset.search || '').includes(term);
         let visible = 0;
-        rows.forEach(row => {
-            const title = (row.dataset.title || '');
-            const show = !term || title.includes(term) || folderName.includes(term);
+        body.querySelectorAll('.lev-mobile-row').forEach(row => {
+            const show = (filter === 'all' || row.dataset.state === filter)
+                && (!term || groupHit || (row.dataset.title || '').includes(term));
             row.style.display = show ? '' : 'none';
+            row.classList.toggle('lev-mobile-row--first', show && visible === 0);
             if (show) visible++;
         });
-        if (header) header.style.display = (visible || !term || folderName.includes(term)) ? '' : 'none';
-        body.style.display = (visible || !term || folderName.includes(term)) ? '' : 'none';
-        if (term && visible) {
-            body.classList.remove('collapsed');
-            if (header) header.classList.remove('lev-mobile-folder-header--collapsed');
-            const chev = header ? header.querySelector('.lev-mobile-folder-chevron') : null;
-            if (chev) chev.classList.add('open');
+        if (header) {
+            header.style.display = visible ? '' : 'none';
+            const count = header.querySelector('.lev-mobile-folder-count');
+            if (count) count.textContent = String(visible);
         }
+        body.style.display = visible ? '' : 'none';
+        totalVisible += visible;
     });
+
+    // Zero-results empty state: only when a search or filter is on and nothing matched.
+    const searchEmpty = document.getElementById('levMobileSearchEmpty');
+    if (searchEmpty) {
+        const showEmpty = filtering && totalVisible === 0;
+        searchEmpty.style.display = showEmpty ? 'flex' : 'none';
+        if (showEmpty) {
+            const label = document.getElementById('levMobileSearchEmptyText');
+            const body = document.getElementById('levMobileSearchEmptyBody');
+            const raw = (document.getElementById('levMobileSearch')?.value || '').trim();
+            const none = { todo: 'Nothing to do right now', done: 'Nothing completed yet' };
+            if (label) label.textContent = raw ? `No matches for "${raw}"` : (none[filter] || 'No matches');
+            if (body) body.textContent = raw ? 'Try a different title or teacher name.' : 'Pick another filter to see more.';
+        }
+    }
 
     // Filtering rows/folders in/out of view changes the page's scrollable
     // height just like expanding/collapsing a folder does, but without a
     // real scroll event — same recalculation fix as the folder toggle.
     recheckMobileNavAfterToggle();
+}
+
+window.levMobileSetFilter = function(key) {
+    window._levMobFilter = key || 'all';
+    document.querySelectorAll('.lev-mobile-chip').forEach(chip => {
+        const on = chip.dataset.filter === window._levMobFilter;
+        chip.classList.toggle('on', on);
+        chip.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    levMobileApply();
+    saveEvaluationPageState();
+};
+
+window.levMobileSearch = function(val) {
+    if (window.learnerPageState) window.learnerPageState.update('evaluations', { mobileSearch: val });
+    window._levMobTerm = String(val || '').toLowerCase().trim();
+    levMobileApply();
 };
 
 // ─────────────────────────────────────────────
@@ -501,41 +583,33 @@ function getLearnerEvaluationInitials(name) {
     return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
 }
 
-function getLearnerEvaluationFormHtml(evaluation) {
-    if (evaluation.submitted) {
-        return `
-            <div class="lev-completed-state">
-                <svg viewBox="0 0 24 24" width="52" height="52" stroke="#22c55e" stroke-width="1.5" fill="none">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                </svg>
-                <div class="lev-completed-title">Completed</div>
-                <div class="lev-completed-copy">You have already submitted this evaluation.</div>
-            </div>`;
-    }
-
+// The phone form: one block per statement (its number, the statement, the five answers as a quiet list), the optional
+// comment, then the button. The radios stay in the page (visually hidden, not display:none) so the browser can point at
+// the first unanswered statement when "required" stops a submit.
+function levMobileFormHtml(evaluation) {
+    const statements = evaluation.statements || [];
+    const formId = `lev-mobile-form-${evaluation.id}`;
     return `
-        <div class="eval-description">${escapeLearnerEvaluationHtml(evaluation.description || '')}</div>
-        <form onsubmit="handleEvalSubmit(event, ${evaluation.id})">
+        <form id="${formId}" class="lev-mobile-form" onsubmit="handleEvalSubmit(event, ${evaluation.id})">
             <input type="hidden" name="eval_id" value="${evaluation.id}">
-            ${(evaluation.statements || []).map(s => `
-                <div class="question-box">
-                    <div class="question-text">${escapeLearnerEvaluationHtml(s.statement || '')}</div>
-                    <div class="eval-options">
-                        ${['strongly_agree', 'agree', 'neutral', 'disagree', 'strongly_disagree'].map(val => `
-                            <label class="option-label">
+            ${statements.map((s, i) => `
+                <div class="lev-mobile-q" role="radiogroup" aria-labelledby="${formId}-q${i}">
+                    <div class="lev-mobile-q-n">Statement ${i + 1} of ${statements.length}</div>
+                    <div class="lev-mobile-q-text" id="${formId}-q${i}">${escapeLearnerEvaluationHtml(s.statement || '')}</div>
+                    <div class="lev-mobile-scale">
+                        ${LEV_SCALE.map(([val, label]) => `
+                            <label class="lev-mobile-opt">
                                 <input type="radio" name="answer[${s.id}]" value="${val}" required>
-                                <span>${val.replace('_', ' ').toUpperCase()}</span>
-                            </label>
-                        `).join('')}
+                                <span class="lev-mobile-opt-dot" aria-hidden="true"></span>
+                                <span class="lev-mobile-opt-label">${label}</span>
+                            </label>`).join('')}
                     </div>
-                </div>
-            `).join('')}
-            <div class="lev-comments-field">
-                <label>Additional Comments (Optional)</label>
-                <textarea name="comments"></textarea>
+                </div>`).join('')}
+            <div class="lev-mobile-comments">
+                <label for="${formId}-comments">Additional comments <span>(optional)</span></label>
+                <textarea id="${formId}-comments" name="comments"></textarea>
             </div>
-            <button type="submit" class="eval-submit-btn"><i class="fas fa-paper-plane"></i> Submit Feedback</button>
+            <button type="submit" class="lev-mobile-detail-action">Submit feedback</button>
         </form>`;
 }
 
@@ -560,30 +634,47 @@ window.openMobileLearnerEvaluation = function(idx) {
         window.configureHeader({ title: evaluation.title || 'Evaluation', mode: 'detail', detailType: 'Evaluation', color: '#4fa8fd' });
     }
 
+    const done = !!evaluation.submitted;
     const teacherName = evaluation.teacher || 'Teacher';
-    const initials = evaluation.teacher_initials || getLearnerEvaluationInitials(teacherName);
+    const count = (evaluation.statements || []).length;
+
+    // Once an evaluation is submitted the API stops sending its statements, so the second fact says where it stands instead.
+    const secondFact = done
+        ? `<div class="lev-mobile-detail-fact-label">Status</div>
+           <div class="lev-mobile-detail-fact-value lev-mobile-detail-fact-value--name">Submitted</div>
+           <div class="lev-mobile-detail-fact-note">Thank you</div>`
+        : `<div class="lev-mobile-detail-fact-label">Statements</div>
+           <div class="lev-mobile-detail-fact-value">${count}</div>
+           <div class="lev-mobile-detail-fact-note">to answer</div>`;
+
+    const body = done
+        ? `<div class="lev-mobile-done">
+               <svg class="lev-icon-crisp" viewBox="0 0 24 24" width="32" height="32" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                   <circle cx="12" cy="12" r="9.6" fill="currentColor" stroke="none"/><path d="m7.8 12.4 2.8 2.8 5.6-6" stroke="#fff" stroke-width="2"/>
+               </svg>
+               <div class="lev-mobile-done-title">Completed</div>
+               <div class="lev-mobile-done-copy">You have already submitted this evaluation.</div>
+           </div>`
+        : `${evaluation.description ? `<div class="lev-mobile-detail-label">About this evaluation</div>
+           <div class="lev-mobile-detail-desc">${escapeLearnerEvaluationHtml(evaluation.description).replace(/\n/g, '<br>')}</div>` : ''}
+           ${levMobileFormHtml(evaluation)}`;
 
     apiArea.innerHTML = `
         <article class="lev-mobile-detail">
-            <div class="lev-mobile-detail-badge">
-                <svg viewBox="0 0 24 24" width="11" height="11" stroke="#4fa8fd" stroke-width="2.5" fill="none">
-                    <path d="M9 11l3 3L22 4"></path>
-                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-                </svg>
-                Evaluation
+            <div class="lev-mobile-detail-top">
+                <span class="lev-mobile-detail-eyebrow">Evaluation</span>
+                <span class="lev-mobile-detail-status lev-mobile-detail-status--${done ? 'ok' : 'todo'}">${done ? 'Completed' : 'To do'}</span>
             </div>
-            <div class="lev-mobile-detail-author-row">
-                <div class="lev-mobile-detail-avatar">${escapeLearnerEvaluationHtml(initials)}</div>
-                <div class="lev-mobile-detail-author-info">
-                    <div class="lev-mobile-detail-author-name">${escapeLearnerEvaluationHtml(teacherName)}</div>
-                    <div class="lev-mobile-detail-author-role">
-                        <span>Author</span><span class="lev-mobile-detail-role-sep">|</span><span class="lev-mobile-detail-role-badge">Teacher</span>
-                    </div>
-                    ${evaluation.display_date ? `<div class="lev-mobile-detail-posted">Posted ${escapeLearnerEvaluationHtml(evaluation.display_date)}</div>` : ''}
+            <h1 class="lev-mobile-detail-title">${escapeLearnerEvaluationHtml(evaluation.title || 'Evaluation')}</h1>
+            ${evaluation.display_date ? `<div class="lev-mobile-detail-posted">Posted ${escapeLearnerEvaluationHtml(evaluation.display_date)}</div>` : ''}
+            <div class="lev-mobile-detail-facts">
+                <div class="lev-mobile-detail-fact">
+                    <div class="lev-mobile-detail-fact-label">Teacher</div>
+                    <div class="lev-mobile-detail-fact-value lev-mobile-detail-fact-value--name">${escapeLearnerEvaluationHtml(teacherName)}</div>
                 </div>
+                <div class="lev-mobile-detail-fact">${secondFact}</div>
             </div>
-            <h1 class="lev-mobile-detail-title learner-mobile-detail-title">${escapeLearnerEvaluationHtml(evaluation.title || 'Evaluation')}</h1>
-            ${getLearnerEvaluationFormHtml(evaluation)}
+            ${body}
         </article>`;
 
     if (mainContent) mainContent.scrollTop = 0;
