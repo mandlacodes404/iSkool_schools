@@ -25,7 +25,7 @@
     }
 
     #api-content-area:not(.disc-thread-active) {
-        max-height: calc(100vh - 68px - env(safe-area-inset-top, 0)) !important;
+        max-height: calc(100vh - var(--lh-header-bottom, calc(64px + 2 * env(safe-area-inset-top, 0px)))) !important;
         overflow-y: auto !important;
         overflow-x: hidden !important;
         padding: 18px !important;
@@ -163,8 +163,8 @@
 /* Phones: the screen is exactly one page tall (the list area minus its 18px top padding and its bottom space for the nav bar), so the button rests above the nav */
 @media (max-width: 767px) {
     .inst-container {
-        min-height: calc(100vh - 68px - env(safe-area-inset-top, 0px) - 18px - 96px - env(safe-area-inset-bottom, 0px));
-        min-height: calc(100dvh - 68px - env(safe-area-inset-top, 0px) - 18px - 96px - env(safe-area-inset-bottom, 0px));
+        min-height: calc(100vh - var(--lh-header-bottom, calc(64px + 2 * env(safe-area-inset-top, 0px))) - 18px - 96px - env(safe-area-inset-bottom, 0px));
+        min-height: calc(100dvh - var(--lh-header-bottom, calc(64px + 2 * env(safe-area-inset-top, 0px))) - 18px - 96px - env(safe-area-inset-bottom, 0px));
     }
 }
 

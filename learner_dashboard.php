@@ -225,7 +225,7 @@ $parentLink = ((int)$parentCount > 0); // true when at least one parent is linke
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dashboard - <?= htmlspecialchars($schoolName) ?></title>
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
-    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=6.9">
+    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=7.0">
     <link rel="stylesheet" href="assets/css/learner/manual.css?v=8.8">
     <link rel="stylesheet" href="assets/css/learner/announcements.css?v=4.4">
     <link rel="stylesheet" href="assets/css/learner/assignments.css?v=4.4">
@@ -236,7 +236,7 @@ $parentLink = ((int)$parentCount > 0); // true when at least one parent is linke
      <!-- The phone back button's regular-weight Nunito (see @font-face 'iSkool Back Label' in learner_dashboard.css), fetched
          early so the label does not flash in another font the first time a detail page opens. Phones only. -->
     <link rel="preload" href="assets/fonts/nunito-latin-400.woff2" as="font" type="font/woff2" crossorigin media="(max-width: 768px)">
-    <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=14.6">
+    <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=14.7">
     <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=3.2">
     <link rel="stylesheet" href="assets/css/learner/mobile_menu.css?v=2.2">
     <link rel="stylesheet" href="assets/css/learner/mobile_settings.css?v=1.7">
