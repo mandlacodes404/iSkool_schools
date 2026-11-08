@@ -101,7 +101,7 @@ final class QuizInstructionsTest extends TestCase
 
         $this->assertStringContainsString('.inst-form { margin: auto 0 0; padding-top: 24px; }', $css);
         $this->assertStringContainsString('height: 50px;', $css);
-        $this->assertStringContainsString('min-height: calc(100dvh - 68px - env(safe-area-inset-top, 0px) - 18px - 96px - env(safe-area-inset-bottom, 0px));', $css);
+        $this->assertStringContainsString('min-height: calc(100dvh - var(--lh-header-bottom, calc(64px + 2 * env(safe-area-inset-top, 0px))) - 18px - 96px - env(safe-area-inset-bottom, 0px));', $css);
     }
 
     public function test_light_modes_swap_the_same_variables_and_old_rules_are_gone(): void
@@ -123,7 +123,7 @@ final class QuizInstructionsTest extends TestCase
     {
         $page = $this->source('learner_dashboard.php');
 
-        $this->assertStringContainsString('assets/css/learner/quiz.css?v=6.9', $page);
+        $this->assertStringContainsString('assets/css/learner/quiz.css?v=7.0', $page);
         $this->assertStringContainsString('assets/js/learner/quiz.js?v=12.9', $page);
     }
 }

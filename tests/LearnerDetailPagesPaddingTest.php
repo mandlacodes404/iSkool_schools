@@ -23,12 +23,13 @@ final class LearnerDetailPagesPaddingTest extends TestCase
         'assets/css/learner/evaluations.css'    => '.lev-mobile-detail',
     ];
 
-    /** The side padding each detail root uses, which is the inset of the rows in its own list. The quiet Assignments list (and
-     *  so its detail screen) insets by 20px, the others by 18px. The top and bottom padding are not part of this check. */
+    /** The side padding each detail root uses, which is the inset of the rows in its own list. The quiet Assignments,
+     *  Announcements and Evaluations lists (and so their detail screens) all inset by 20px. The top and bottom padding are
+     *  not part of this check. */
     private const DETAIL_PADDING = [
         'assets/css/learner/assignments.css'    => '\d+px 20px 96px',
-        'assets/css/learner/announcements.css'  => '18px 18px 96px',
-        'assets/css/learner/evaluations.css'    => '18px 18px 96px',
+        'assets/css/learner/announcements.css'  => '\d+px 20px 96px',
+        'assets/css/learner/evaluations.css'    => '\d+px 20px 96px',
     ];
 
     public function test_each_detail_root_pads_like_the_list_rows_at_the_sides(): void
@@ -66,10 +67,10 @@ final class LearnerDetailPagesPaddingTest extends TestCase
     public function test_the_evaluation_form_fits_inside_the_padded_detail(): void
     {
         $css = $this->source('assets/css/learner/evaluations.css');
-        // the old 16px side margins on the button would double up inside the padded root
-        $this->assertSame(1, preg_match('/\.lev-mobile-detail \.eval-submit-btn \{[^}]*width:\s*100%;[^}]*max-width:\s*none;[^}]*margin:\s*20px 0 0;/', $css), 'the submit button runs the full width of the content');
+        // the button runs the width of the padded content with no side margins of its own
+        $this->assertSame(1, preg_match('/\.lev-mobile-detail-action \{[^}]*width:\s*100%;[^}]*box-sizing:\s*border-box;/s', $css), 'the submit button runs the full width of the content');
         // width:100% plus padding is wider than the box unless it is border-box, and the page has no global reset
-        $this->assertSame(1, preg_match('/\.lev-mobile-detail \.lev-comments-field textarea \{[^}]*box-sizing:\s*border-box;/', $css), 'the comments box would run past the screen edge');
+        $this->assertSame(1, preg_match('/\.lev-mobile-comments textarea \{[^}]*box-sizing:\s*border-box;/s', $css), 'the comments box would run past the screen edge');
     }
 
     public function test_the_syllabus_phone_list_and_detail_sit_at_the_same_side_inset_as_the_other_quiet_lists(): void
@@ -90,10 +91,10 @@ final class LearnerDetailPagesPaddingTest extends TestCase
         // The browser and the installed app keep files by full URL, so a changed file needs a new ?v= number
         $php = $this->source('learner_dashboard.php');
         foreach ([
-            'assets/css/learner/announcements.css?v=4.3',
+            'assets/css/learner/announcements.css?v=4.4',
             'assets/css/learner/assignments.css?v=4.4',
-            'assets/css/learner/evaluations.css?v=5.6',
-            'assets/js/learner/syllabus.js?v=4.7',
+            'assets/css/learner/evaluations.css?v=5.7',
+               'assets/js/learner/syllabus.js?v=4.7',
         ] as $versioned) {
             $this->assertStringContainsString($versioned, $php);
         }
