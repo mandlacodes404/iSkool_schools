@@ -136,7 +136,7 @@ final class MobileLightModeTest extends TestCase
         preg_match_all('/^\s*(html\S*)/m', $m[1], $starts);
         $this->assertNotEmpty($starts[1]);
         $this->assertSame(['html[data-learner-mobile-theme="light"]'], array_values(array_unique($starts[1])), 'every rule in the Syllabus phone block must start with the light attribute');
-        foreach (['.syl-card', '.syl-tab-active', '.syl-assess-weight[style*="#34d399" i]'] as $sel) {
+        foreach (['.syl-mobile-head', '.syl-mobile-search-wrap', '.syl-mobile-chips', '.syl-mobile-list', '.syl-mobile-detail'] as $sel) {
             $this->assertStringContainsString('html[data-learner-mobile-theme="light"] ' . $sel, $m[1], 'the Syllabus phone block misses ' . $sel);
         }
     }

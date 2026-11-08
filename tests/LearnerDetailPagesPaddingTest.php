@@ -72,11 +72,17 @@ final class LearnerDetailPagesPaddingTest extends TestCase
         $this->assertSame(1, preg_match('/\.lev-mobile-detail \.lev-comments-field textarea \{[^}]*box-sizing:\s*border-box;/', $css), 'the comments box would run past the screen edge');
     }
 
-    public function test_the_syllabus_page_adds_no_side_padding_of_its_own_on_small_phones(): void
+    public function test_the_syllabus_phone_list_and_detail_sit_at_the_same_side_inset_as_the_other_quiet_lists(): void
     {
         $js = $this->source('assets/js/learner/syllabus.js');
-        $this->assertSame(0, preg_match('/\.syl-wrapper \{ padding: 16px 14px; \}/', $js), 'an extra 14px each side pushed the cards in to 32px');
-        $this->assertSame(1, preg_match('/@media \(max-width: 480px\) \{[^}]*\.syl-cards-grid \{ grid-template-columns: 1fr; \}/s', $js), 'one column on small phones');
+        // the old wrapper and its extra 14px each side (which pushed the cards in to 32px) are gone
+        $this->assertStringNotContainsString('.syl-wrapper', $js);
+        $this->assertSame(0, preg_match('/\.syl-wrapper \{ padding: 16px 14px; \}/', $js));
+        // the list cancels the content area's 18px and insets its rows by 20px; the detail does the same
+        $this->assertSame(1, preg_match('/\.syl-mobile-list \{ margin-left: -18px; margin-right: -18px; \}/', $js), 'the list cancels the 18px of #api-content-area');
+        $this->assertSame(1, preg_match('/\.syl-mobile-detail \{ margin-left: -18px; margin-right: -18px; \}/', $js), 'the detail cancels the 18px of #api-content-area');
+        $this->assertSame(1, preg_match('/\.syl-mobile-detail \{ padding: 8px 20px 96px; \}/', $js));
+        $this->assertSame(1, preg_match('/\.syl-mobile-row \{[^}]*padding: 11px 20px;/s', $js));
     }
 
     public function test_the_dashboard_loads_the_changed_files_with_a_fresh_version_number(): void
@@ -87,7 +93,7 @@ final class LearnerDetailPagesPaddingTest extends TestCase
             'assets/css/learner/announcements.css?v=4.3',
             'assets/css/learner/assignments.css?v=4.4',
             'assets/css/learner/evaluations.css?v=5.6',
-            'assets/js/learner/syllabus.js?v=4.6',
+            'assets/js/learner/syllabus.js?v=4.7',
         ] as $versioned) {
             $this->assertStringContainsString($versioned, $php);
         }
