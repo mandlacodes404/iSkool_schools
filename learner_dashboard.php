@@ -227,7 +227,7 @@ $parentLink = ((int)$parentCount > 0); // true when at least one parent is linke
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
     <link rel="stylesheet" href="assets/css/learner/quiz.css?v=6.9">
     <link rel="stylesheet" href="assets/css/learner/manual.css?v=8.7">
-    <link rel="stylesheet" href="assets/css/learner/announcements.css?v=4.3">
+    <link rel="stylesheet" href="assets/css/learner/announcements.css?v=4.4">
     <link rel="stylesheet" href="assets/css/learner/assignments.css?v=4.4">
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
     <link rel="stylesheet" href="assets/css/learner/grades.css?v=4.4">
@@ -3980,7 +3980,7 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/quiz.js?v=12.9"></script>
 <script src="assets/js/learner/assignments.js?v=10.5"></script>
 <script src="assets/js/learner/resources.js?v=8.9"></script>
-<script src="assets/js/learner/announcements.js?v=9.6"></script>
+<script src="assets/js/learner/announcements.js?v=9.7"></script>
 <script src="assets/js/learner/grades.js?v=10.6"></script>
 <script src="assets/js/learner/evaluations.js?v=7.6"></script>
 <script src="assets/js/learner/discussions.js?v=11.2"></script>

@@ -23,11 +23,12 @@ final class LearnerDetailPagesPaddingTest extends TestCase
         'assets/css/learner/evaluations.css'    => '.lev-mobile-detail',
     ];
 
-    /** The side padding each detail root uses, which is the inset of the rows in its own list. The quiet Assignments and Evaluations lists (and
-     *  so their detail screens) inset by 20px, the others by 18px. The top and bottom padding are not part of this check. */
+    /** The side padding each detail root uses, which is the inset of the rows in its own list. The quiet Assignments,
+     *  Announcements and Evaluations lists (and so their detail screens) all inset by 20px. The top and bottom padding are
+     *  not part of this check. */
     private const DETAIL_PADDING = [
         'assets/css/learner/assignments.css'    => '\d+px 20px 96px',
-        'assets/css/learner/announcements.css'  => '18px 18px 96px',
+        'assets/css/learner/announcements.css'  => '\d+px 20px 96px',
         'assets/css/learner/evaluations.css'    => '\d+px 20px 96px',
     ];
 
@@ -84,7 +85,7 @@ final class LearnerDetailPagesPaddingTest extends TestCase
         // The browser and the installed app keep files by full URL, so a changed file needs a new ?v= number
         $php = $this->source('learner_dashboard.php');
         foreach ([
-            'assets/css/learner/announcements.css?v=4.3',
+            'assets/css/learner/announcements.css?v=4.4',
             'assets/css/learner/assignments.css?v=4.4',
             'assets/css/learner/evaluations.css?v=5.7',
             'assets/js/learner/syllabus.js?v=4.6',

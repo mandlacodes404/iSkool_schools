@@ -3,12 +3,14 @@
    the teacher text ladder, a list grouped by sender, and rings that mark unread.
    Colour tokens are literal values taken from teacher_desktop_menu.css so nothing
    here depends on which --dm-* variables the learner shell defines.
-   The mobile styles further down are unchanged. */
+   The phone list and detail (the quiet list, further down) follow the learner assignments and quiz pages. */
 
 @media (min-width: 900px) {
     .lan-desktop-layout { display: flex !important; }
     .lan-mobile-list    { display: none !important; }
     .lan-mobile-search-wrap { display: none !important; }
+    .lan-mobile-head    { display: none !important; }
+    .lan-mobile-chips   { display: none !important; }
 }
 @media (max-width: 899px) {
     .lan-desktop-layout { display: none !important; }
@@ -339,7 +341,60 @@
 @container (max-width: 899px) { .lan-rail { display: none; } }
 
 
-/* ── MOBILE LIST STYLES (flat, no card wrapper) ── */
+/* ── MOBILE LIST: the quiet list (phones, and the 769–899px range that still shows the phone layout) ──
+   The same calm column as the learner Assignments and Quiz pages: a title with a counts line, a search box,
+   filter chips, then a plain label for each sender with a bell, a title and one line of detail per row.
+   Unread rows get an orange bell with a dot and a heavier title. Weights stay at 400 (text) and 600 (titles and
+   names). The colours are the --qm-* tokens below, so light mode only has to change the tokens (see the light
+   blocks at the end of this file). */
+.lan-mobile-head,
+.lan-mobile-search-wrap,
+.lan-mobile-chips,
+.lan-mobile-list,
+.lan-mobile-detail {
+    --qm-title: #ecece9;
+    --qm-body: #c2c3b7;
+    --qm-muted: #8b8b87;
+    --qm-faint: #5f605a;
+    --qm-line: rgba(255,255,255,0.07);
+    --qm-press: rgba(255,255,255,0.04);
+    --qm-surf: #272726;
+    --qm-ring: #73746d;
+    --qm-new: #f28c38;
+    --qm-edit: #d97757;
+    --qm-chipline: rgba(255,255,255,0.12);
+    --qm-chipon: #ecece9;
+    --qm-chipon-text: #20201f;
+}
+
+.lan-mobile-head { padding: 4px 2px 0; }
+.lan-mobile-title {
+    margin: 0;
+    font-family: inherit;
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.2px;
+    color: var(--qm-title);
+}
+.lan-mobile-subrow { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 5px; }
+.lan-mobile-sub { margin: 0; min-width: 0; font-size: 14px; line-height: 1.4; font-weight: 400; color: var(--qm-muted); }
+.lan-mobile-sub b { font-weight: 600; color: var(--qm-new); }
+.lan-mobile-markall {
+    flex: none;
+    margin: -10px -4px -10px 0;
+    padding: 10px 4px 10px 12px;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--qm-body);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+.lan-mobile-markall[hidden] { display: none; }
+
 .lan-mobile-list {
     background: transparent;
     border-radius: 0;
@@ -352,157 +407,193 @@
         margin-right: -18px;
     }
 }
+
+/* search */
+.lan-mobile-search-wrap { display: block; position: relative; margin: 14px 0 0; }
+.lan-mobile-search-wrap svg {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--qm-muted);
+}
+.lan-mobile-search {
+    width: 100%;
+    box-sizing: border-box;
+    height: 42px;
+    padding: 0 14px 0 42px;
+    border: 0;
+    border-radius: 12px;
+    background: var(--qm-surf);
+    color: var(--qm-title);
+    font: inherit;
+    font-size: 16px; /* 16px stops iOS zooming the page when the box is focused */
+    font-weight: 400;
+    -webkit-appearance: none;
+    appearance: none;
+}
+.lan-mobile-search:focus { outline: none; box-shadow: inset 0 0 0 1px var(--qm-chipline); }
+.lan-mobile-search::placeholder { color: var(--qm-muted); opacity: 1; }
+
+/* filter chips */
+.lan-mobile-chips {
+    display: flex;
+    gap: 6px;
+    margin: 12px 0 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.lan-mobile-chips::-webkit-scrollbar { display: none; }
+.lan-mobile-chip {
+    flex: none;
+    height: 32px;
+    padding: 0 10px;
+    border-radius: 16px;
+    border: 1px solid var(--qm-chipline);
+    background: transparent;
+    color: var(--qm-muted);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 400;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+.lan-mobile-chip.on { background: var(--qm-chipon); border-color: var(--qm-chipon); color: var(--qm-chipon-text); }
+
+/* a sender's label: name, who it is for, how many, fold arrow */
 .lan-mobile-folder-header {
     display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 16px 18px;
+    align-items: baseline;
+    gap: 8px;
+    padding: 20px 20px 4px;
     background: transparent;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
     cursor: pointer;
     user-select: none;
-    transition: background 0.2s;
+    -webkit-tap-highlight-color: transparent;
 }
-.lan-mobile-folder-header:active { background: rgba(255,255,255,0.03); }
-.lan-mobile-folder-header:not(.lan-mobile-folder-header--collapsed) {
-    background: rgba(255,255,255,0.05);
-}
-.lan-mobile-folder-icon { flex-shrink: 0; }
+.lan-mobile-folder-header:focus-visible { outline: 2px solid var(--qm-chipline); outline-offset: -2px; }
 .lan-mobile-folder-name {
-    flex: 1;
-    font-size: 16px;
+    flex: 0 1 auto;
+    min-width: 0;
+    font-size: 14px;
     font-weight: 600;
-    color: #e2e8f0;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    color: var(--qm-body);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
-.lan-mobile-folder-count {
-    font-size: 12px;
-    color: #8b949e;
-    font-weight: 600;
-    background: rgba(255,255,255,0.05);
-    padding: 2px 8px;
-    border-radius: 20px;
-    flex-shrink: 0;
+.lan-mobile-folder-sub {
+    flex: 1 1 0;
+    min-width: 0;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--qm-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
+.lan-mobile-folder-count { flex: none; margin-left: auto; font-size: 13px; font-weight: 400; color: var(--qm-muted); }
 .lan-mobile-folder-chevron {
-    flex-shrink: 0;
-    color: #73746d;
-    transition: transform 0.3s ease;
+    flex: none;
+    align-self: center;
+    color: var(--qm-muted);
+    transition: transform 0.2s ease;
 }
-.lan-mobile-folder-chevron.open { transform: rotate(90deg); }
+.lan-mobile-folder-header--collapsed .lan-mobile-folder-chevron { transform: rotate(-90deg); }
 .lan-mobile-folder-body { display: block; }
 .lan-mobile-folder-body.collapsed { display: none; }
-.lan-mobile-card {
+/* while a search or filter is on, every group that has a match shows open and nothing is saved */
+.lan-mobile-list.is-filtering .lan-mobile-folder-body.collapsed { display: block; }
+.lan-mobile-list.is-filtering .lan-mobile-folder-header--collapsed .lan-mobile-folder-chevron { transform: none; }
+
+/* a row: bell, title, one line of detail, arrow. The hairline starts under the title, not under the bell. */
+.lan-mobile-row {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 13px 18px;
+    gap: 14px;
+    padding: 11px 20px;
     background: transparent;
-    border-bottom: 0;
-    border-radius: 0;
-    border-left: 0;
-    border-right: 0;
     cursor: pointer;
     transition: background 0.15s;
     position: relative;
+    -webkit-tap-highlight-color: transparent;
 }
-.lan-mobile-card::after {
+.lan-mobile-row::before {
     content: '';
     position: absolute;
-    bottom: 0;
-    left: 0;
+    top: 0;
+    left: 58px;
     right: 0;
     height: 1px;
-    background: rgba(255,255,255,0.06);
+    background: var(--qm-line);
 }
-.lan-mobile-card:last-child::after { display: none; }
-.lan-mobile-card--school {
-    border-left: 0 !important;
-}
-.lan-mobile-card:active { background: rgba(255,255,255,0.03); }
-.lan-mobile-card-icon {
-    width: 32px;
-    height: 32px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-.lan-mobile-card-icon svg {
-    width: 20px;
-    height: 20px;
-}
-.lan-mobile-card-body { flex: 1; min-width: 0; }
-.lan-mobile-card-title {
-    font-size: 15px;
-    font-weight: 600;
-    color: #e2e8f0;
-    margin: 0;
-    line-height: 1.3;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-.lan-mobile-card-title-text {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-.lan-mobile-status-dot {
-    display: inline-block;
+.lan-mobile-row--first::before { display: none; }
+.lan-mobile-row:active { background: var(--qm-press); }
+.lan-mobile-row:focus-visible { outline: 2px solid var(--qm-chipline); outline-offset: -2px; }
+.lan-mobile-row-icon { flex: none; position: relative; width: 24px; height: 24px; display: inline-flex; color: var(--qm-ring); }
+.lan-mobile-row-icon svg { width: 24px; height: 24px; }
+.lan-mobile-row-icon--unread { color: var(--qm-new); }
+.lan-mobile-row-icon--unread::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: -1px;
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    flex-shrink: 0;
+    background: var(--qm-new);
 }
-.lan-mobile-card-chevron {
-    flex-shrink: 0;
-    color: #73746d;
+.lan-mobile-row-body { flex: 1; min-width: 0; }
+.lan-mobile-row-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.25;
+    color: var(--qm-body);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
-.lan-mobile-card-date {
-    font-size: 12px;
-    color: #8E8E93;
-    margin-top: 2px;
+.lan-mobile-row--unread .lan-mobile-row-title { font-weight: 600; color: var(--qm-title); }
+.lan-mobile-row-title-text { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lan-mobile-row-meta {
+    margin-top: 3px;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.3;
+    color: var(--qm-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
+.lan-mobile-st--new { color: var(--qm-body); }
+.lan-mobile-row-chevron { flex: none; color: var(--qm-faint); }
 
-/* ── MOBILE SEARCH BAR ── */
-@media (max-width: 899px) {
-    .lan-mobile-search-wrap {
-        display: block;
-        margin-bottom: 10px;
-        position: relative;
-    }
-    .lan-mobile-search-wrap svg {
-        position: absolute;
-        left: 12px;
-        top: 50%;
-        transform: translateY(-50%);
-        pointer-events: none;
-        opacity: 0.4;
-    }
-    .lan-mobile-search {
-        width: 100%;
-        box-sizing: border-box;
-        padding: 9px 14px 9px 36px;
-        border-radius: 10px;
-        background: rgba(255,255,255,0.05);
-        border: none;
-        color: #e2e8f0;
-        font-size: 15px;
-        font-family: 'Nunito', sans-serif;
-        transition: background 0.2s;
-    }
-    .lan-mobile-search:focus { outline: none; background: rgba(255,255,255,0.08); }
-    .lan-mobile-search::placeholder { color: #555e6a; }
+/* ── MOBILE EMPTY STATES (no announcements / no search or filter matches) ── */
+.lan-mobile-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+    color: var(--qm-muted);
+    min-height: 46vh;
+}
+.lan-mobile-empty svg { opacity: 0.5; margin-bottom: 14px; }
+.lan-mobile-empty-title {
+    color: var(--qm-title);
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 6px;
+}
+.lan-mobile-empty-body {
+    color: var(--qm-muted);
+    font-size: 14px;
+    font-weight: 400;
+    margin: 0;
+    line-height: 1.5;
 }
 
 /* ── SHARED UTILITIES ── */
@@ -549,37 +640,12 @@
     margin-top: 60px;
 }
 
-/* ── MOBILE EMPTY STATE (no announcements / no search matches) ── */
-.lan-mobile-empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 24px;
-    color: #555e6a;
-    min-height: calc(100vh - 280px);
-}
-.lan-mobile-empty svg { opacity: 0.35; margin-bottom: 14px; }
-.lan-mobile-empty-title {
-    color: #c9d1d9;
-    font-size: 15px;
-    font-weight: 700;
-    margin: 0 0 6px;
-}
-.lan-mobile-empty-body {
-    color: #8b949e;
-    font-size: 13px;
-    margin: 0;
-    line-height: 1.5;
-}
-.lan-mobile-search-empty svg { opacity: 0.5; }
-
 /* ── MOBILE: ANNOUNCEMENT DETAIL VIEW ── */
-/* (was: second inline <style> block, injected in openMobileLearnerAnnouncement) */
+/* Same look as the assignment detail: what it is, the title, when it was posted, who it is from and who it is for,
+   then the message and one quiet button. Colours are the --qm-* tokens defined with the list above. */
 .lan-mobile-detail {
-    /* 18px at the sides, the same inset as .lan-mobile-row (the margin below cancels the container's 18px) */
-    padding: 18px 18px 96px;
+    /* 20px at the sides, the same inset as .lan-mobile-row (the margin below cancels the container's 18px) */
+    padding: 8px 20px 96px;
 }
 @media (max-width: 899px) {
     .lan-mobile-detail {
@@ -587,119 +653,91 @@
         margin-right: -18px;
     }
 }
-.lan-mobile-detail-author-row {
+.lan-mobile-detail-top {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 12px;
-    margin-bottom: 18px;
 }
-.lan-mobile-detail-avatar {
-    flex: 0 0 auto;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    border: 1px solid rgba(242,140,56,0.35);
-    background: rgba(242,140,56,0.1);
-    color: #f28c38;
-    display: flex;
+.lan-mobile-detail-eyebrow {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.9px;
+    text-transform: uppercase;
+    color: var(--qm-muted);
+}
+.lan-mobile-detail-status {
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    font-size: 15px;
-    font-weight: 800;
-    letter-spacing: 0.2px;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--qm-muted);
+    border: 1px solid var(--qm-chipline);
 }
-.lan-mobile-detail-author-info {
-    min-width: 0;
-}
-.lan-mobile-detail-author-name {
-    color: #e2e8f0;
-    font-size: 16px;
-    font-weight: 700;
-    line-height: 1.3;
+.lan-mobile-detail-status--edited { color: var(--qm-edit); border-color: color-mix(in srgb, var(--qm-edit) 40%, transparent); background: color-mix(in srgb, var(--qm-edit) 11%, transparent); }
+.lan-mobile-detail-title {
+    margin: 12px 0 0;
+    color: var(--qm-title);
+    font-family: inherit;
+    font-size: 26px;
+    line-height: 1.2;
+    font-weight: 600;
+    letter-spacing: -0.2px;
     overflow-wrap: anywhere;
 }
-.lan-mobile-detail-author-role {
-    color: #8b949e;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.6px;
-    text-transform: uppercase;
-    margin-top: 2px;
+.lan-mobile-detail-posted { margin-top: 6px; font-size: 13px; font-weight: 400; color: var(--qm-muted); }
+.lan-mobile-detail-facts {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    margin-top: 18px;
+    background: var(--qm-surf);
+    border-radius: 18px;
 }
-.lan-mobile-detail-role-badge {
-    color: #f28c38;
-}
-.lan-mobile-detail-role-sep {
-    color: #5a6472;
-    margin: 0 6px;
-}
-.lan-mobile-detail-posted {
-    color: #8b949e;
-    font-size: 12px;
-    margin-top: 4px;
-}
-.lan-mobile-detail-title {
-    margin: 0 0 18px;
-    color: #e2e8f0;
-    font-size: 28px;
-    line-height: 1.28;
-    font-weight: 800;
-    letter-spacing: 0;
-    padding-bottom: 18px;
-    border-bottom: 1px solid rgba(255,255,255,0.07);
-}
+.lan-mobile-detail-fact { padding: 14px 16px 15px; min-width: 0; }
+.lan-mobile-detail-fact + .lan-mobile-detail-fact { border-left: 1px solid var(--qm-line); }
+.lan-mobile-detail-fact-label { font-size: 13px; font-weight: 400; color: var(--qm-muted); }
+.lan-mobile-detail-fact-value { margin: 8px 0 3px; font-size: 16px; font-weight: 600; line-height: 1.25; color: var(--qm-title); overflow-wrap: anywhere; }
+.lan-mobile-detail-fact-note { font-size: 13px; font-weight: 400; color: var(--qm-muted); }
+.lan-mobile-detail-label { margin: 24px 0 8px 2px; font-size: 13.5px; font-weight: 600; color: var(--qm-muted); }
+.lan-mobile-detail-edited { margin: 0 0 10px 2px; font-size: 13px; font-weight: 400; color: var(--qm-edit); }
 .lan-mobile-detail-message {
-    color: #e2e8f0;
-    font-size: 15px;
-    line-height: 1.75;
+    color: var(--qm-body);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.6;
     overflow-wrap: anywhere;
     white-space: normal;
 }
+/* the changed words in an edited message */
+.lan-mobile-detail .an-edited-highlight { color: var(--qm-edit); font-weight: 600; }
+.lan-mobile-detail-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 48px;
+    margin-top: 28px;
+    border-radius: 14px;
+    border: 0;
+    box-sizing: border-box;
+    background: transparent;
+    color: var(--qm-body);
+    box-shadow: inset 0 0 0 1px var(--qm-chipline);
+    font: inherit;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+.lan-mobile-detail-action:active { background: var(--qm-press); }
 @media (min-width: 900px) {
     .lan-mobile-detail { display: none; }
 }
 
-/* ══════════════════════════════════════
-   EDITED ANNOUNCEMENTS
-   Orange accent (#d97757 — Claude logo orange) marks anything related to
-   an edit: the "Edited" tag next to a title, the "Edited <date>" meta
-   line, and the highlighted new/changed words inside an edited message.
-   Deliberately a different orange from the existing #f28c38 (teacher
-   accent) and #d29522 (school-wide accent) already used in this file, so
-   "this was edited" reads as its own distinct signal.
-   ══════════════════════════════════════ */
-
-.lan-edited-tag {
-    display: inline-block;
-    font-size: 9px;
-    font-weight: 800;
-    letter-spacing: 0.4px;
-    text-transform: uppercase;
-    color: #d97757;
-    background: rgba(217,119,87,0.12);
-    border: 1px solid rgba(217,119,87,0.35);
-    border-radius: 20px;
-    padding: 1px 6px;
-    margin-left: 6px;
-    flex-shrink: 0;
-    vertical-align: middle;
-}
-
-.lan-edited-meta {
-    color: #d97757;
-    font-size: 12px;
-    margin-top: 4px;
-}
-
-/* Sits between the desktop panel title and the message body */
-.lan-panel-title + .lan-edited-meta { margin-bottom: 2px; }
-
-/* Mobile detail view only (.lan-mobile-detail is hidden ≥900px, see above) —
-   adds breathing room between the "Edited <date>" line and the message
-   body below it, which otherwise sat right up against each other. */
-.lan-mobile-detail .lan-edited-meta { margin-bottom: 16px; }
-
-/* Highlighted new/changed words within an edited message body */
+/* Highlighted new/changed words within an edited message body. The server sends them wrapped in
+   .an-edited-highlight; the desktop pane restyles them (.lan-msg above) and the phone detail uses --qm-edit. */
 .an-edited-highlight {
     color: #d97757;
     font-weight: 600;
@@ -709,7 +747,6 @@
    Scoped to .lan-desktop-layout so these shared styles keep their Nunito weights on mobile. */
 @media (min-width: 900px) {
     .lan-desktop-layout .lan-auth b { font-weight: var(--lan-w-strong, 500); }
-    .lan-desktop-layout .lan-edited-tag { font-weight: var(--lan-w-strong, 500); }
 }
 
 /* ═══ Light mode: learner Announcements (desktop) ═══════════════════════════════════════════════════════════
@@ -762,45 +799,27 @@ html[data-learner-theme="light"] .lan-msg .an-edited-highlight { background: rgb
 html[data-learner-theme="light"] .lan-panel-empty svg[stroke="#4fd1c5" i] { stroke: #187a72; }
 
 /* ── 769px to 899px: the split layout starts at 900px, so until then the phone-style list and detail view
-      are what show. Their colours are hard-coded for a dark page. ── */
-html[data-learner-theme="light"] .lan-mobile-folder-header { border-bottom-color: #dfded8; }
-html[data-learner-theme="light"] .lan-mobile-folder-header:active,
-html[data-learner-theme="light"] .lan-mobile-folder-header:not(.lan-mobile-folder-header--collapsed) { background: rgba(38,39,35,.04); }
-html[data-learner-theme="light"] .lan-mobile-folder-name,
-html[data-learner-theme="light"] .lan-mobile-card-title { color: #282924; }
-html[data-learner-theme="light"] .lan-mobile-folder-count { color: #73746d; background: rgba(38,39,35,.06); }
-html[data-learner-theme="light"] .lan-mobile-folder-chevron,
-html[data-learner-theme="light"] .lan-mobile-card-chevron { color: #8b8b83; }
-html[data-learner-theme="light"] .lan-mobile-card::after { background: #ebeae5; }
-html[data-learner-theme="light"] .lan-mobile-card:active { background: rgba(38,39,35,.04); }
-html[data-learner-theme="light"] .lan-mobile-card-date { color: #73746d; }
-html[data-learner-theme="light"] .lan-mobile-search-wrap svg { color: #282924; }
-html[data-learner-theme="light"] .lan-mobile-search { background: #ffffff; border: 1px solid #dfded8; color: #282924; }
-html[data-learner-theme="light"] .lan-mobile-search:focus { border-color: #bdbcb4; }
-html[data-learner-theme="light"] .lan-mobile-search::placeholder { color: #8b8b83; }
-html[data-learner-theme="light"] .lan-mobile-empty-title { color: #282924; }
-html[data-learner-theme="light"] .lan-mobile-empty-body { color: #73746d; }
-/* folder and megaphone icons: the two oranges announcements.js sets as strokes, darkened so they read on white */
-html[data-learner-theme="light"] .lan-mobile-list [stroke="#f28c38" i] { stroke: #b85f12; }
-html[data-learner-theme="light"] .lan-mobile-list [stroke="#d29522" i] { stroke: #9a6b00; }
-
-/* phone-style announcement detail */
-html[data-learner-theme="light"] .lan-mobile-detail-avatar { border-color: rgba(184,95,18,.35); background: rgba(184,95,18,.08); color: #b85f12; }
-html[data-learner-theme="light"] .lan-mobile-detail-author-name,
-html[data-learner-theme="light"] .lan-mobile-detail-title { color: #282924; }
-html[data-learner-theme="light"] .lan-mobile-detail-title { border-bottom-color: #dfded8; }
-html[data-learner-theme="light"] .lan-mobile-detail-author-role,
-html[data-learner-theme="light"] .lan-mobile-detail-posted { color: #73746d; }
-html[data-learner-theme="light"] .lan-mobile-detail-role-badge { color: #b85f12; }
-html[data-learner-theme="light"] .lan-mobile-detail-role-sep { color: #8b8b83; }
-html[data-learner-theme="light"] .lan-mobile-detail-message { color: #53544e; }
-
-/* "Edited" tag, "Edited <date>" line and highlighted words (phone-style views only; the desktop pane uses its own chip and highlight).
-   Rebuilt from a darker orange so the 9px tag and the 12px line stay readable on white. The highlight is scoped to the
-   detail view so it cannot reach the desktop highlight above. */
-html[data-learner-theme="light"] .lan-edited-tag { color: #b8553a; background: rgba(184,85,58,.08); border-color: rgba(184,85,58,.35); }
-html[data-learner-theme="light"] .lan-edited-meta { color: #b8553a; }
-html[data-learner-theme="light"] .lan-mobile-detail .an-edited-highlight { color: #b8553a; }
+      are what show. They are built from the --qm-* tokens (dark values with the list above), so light mode is just
+      the token values below. ── */
+html[data-learner-theme="light"] .lan-mobile-head,
+html[data-learner-theme="light"] .lan-mobile-search-wrap,
+html[data-learner-theme="light"] .lan-mobile-chips,
+html[data-learner-theme="light"] .lan-mobile-list,
+html[data-learner-theme="light"] .lan-mobile-detail {
+    --qm-title: #282924;
+    --qm-body: #4a4b44;
+    --qm-muted: #73746d;
+    --qm-faint: #a3a39a;
+    --qm-line: rgba(40,41,36,.09);
+    --qm-press: rgba(38,39,35,.04);
+    --qm-surf: #f1efe8;
+    --qm-ring: #a3a39a;
+    --qm-new: #b85f12;
+    --qm-edit: #b8553a;
+    --qm-chipline: rgba(40,41,36,.16);
+    --qm-chipon: #252624;
+    --qm-chipon-text: #faf9f5;
+}
 
 /* fetch error ("Error loading announcements.") */
 html[data-learner-theme="light"] .lan-error-state { color: #bd4a43; }
@@ -811,59 +830,32 @@ html[data-learner-theme="light"] .lan-error-state { color: #bd4a43; }
    Phones only (max-width: 768px), switched on by <html data-learner-mobile-theme="light"> (mobile_theme.js).
    The page shell (page background, header, bottom nav, profile dropdown) is in mobile_light.css, which finds this page
    by its markup: .lan-mobile-list (the list and its empty state), .lan-mobile-detail (an open announcement) and
-   .lan-error-state (the fetch error). This block colours what is inside the page: the search box, the sender folders,
-   the announcement rows, the detail view, the "Edited" tag and the error. Same palette as the desktop light block above
-   and the other phone pages (Resources, Assignments, Quiz).
-   Dark mode and desktop are untouched, and announcements.js needs no change (the two oranges it sets as icon strokes
-   are darkened here, the same way the 769px to 899px block does it).
+   .lan-error-state (the fetch error). The list and the detail are drawn from the --qm-* tokens set with the quiet list
+   above, so this block only gives the tokens their light values, the same as the Assignments and Quiz pages, and
+   colours the fetch error.
+   Dark mode and desktop are untouched, and announcements.js needs no change.
    To remove it, delete this block, the three .lan- markers in mobile_light.css and the same three in PAGE in mobile_theme.js. */
 @media (max-width: 768px) {
 
-/* search box: white with a hairline border, like the other light phone pages */
-html[data-learner-mobile-theme="light"] .lan-mobile-search-wrap svg { color: #282924; }
-html[data-learner-mobile-theme="light"] .lan-mobile-search { background: #ffffff; border: 1px solid #dfded8; color: #282924; }
-html[data-learner-mobile-theme="light"] .lan-mobile-search:focus { border-color: #bdbcb4; }
-html[data-learner-mobile-theme="light"] .lan-mobile-search::placeholder { color: #8b8b83; }
-
-/* sender folders (School-wide and one per teacher) */
-html[data-learner-mobile-theme="light"] .lan-mobile-folder-header { border-bottom-color: #dfded8; }
-html[data-learner-mobile-theme="light"] .lan-mobile-folder-header:active,
-html[data-learner-mobile-theme="light"] .lan-mobile-folder-header:not(.lan-mobile-folder-header--collapsed) { background: rgba(38,39,35,.04); }
-html[data-learner-mobile-theme="light"] .lan-mobile-folder-name { color: #282924; }
-html[data-learner-mobile-theme="light"] .lan-mobile-folder-count { color: #73746d; background: rgba(38,39,35,.06); }
-html[data-learner-mobile-theme="light"] .lan-mobile-folder-chevron,
-html[data-learner-mobile-theme="light"] .lan-mobile-card-chevron { color: #73746d; }
-
-/* announcement rows */
-html[data-learner-mobile-theme="light"] .lan-mobile-card-title { color: #282924; }
-html[data-learner-mobile-theme="light"] .lan-mobile-card-date { color: #73746d; }
-html[data-learner-mobile-theme="light"] .lan-mobile-card::after { background: #ebeae5; }
-html[data-learner-mobile-theme="light"] .lan-mobile-card:active { background: rgba(38,39,35,.04); }
-
-/* folder and megaphone icons: the two oranges announcements.js sets as strokes, darkened so they read on the cream page */
-html[data-learner-mobile-theme="light"] .lan-mobile-list [stroke="#f28c38" i] { stroke: #b85f12; }
-
-/* empty state ("No announcements yet") */
-html[data-learner-mobile-theme="light"] .lan-mobile-empty { color: #8b8b83; }
-html[data-learner-mobile-theme="light"] .lan-mobile-empty-title { color: #282924; }
-html[data-learner-mobile-theme="light"] .lan-mobile-empty-body { color: #73746d; }
-
-/* an open announcement */
-html[data-learner-mobile-theme="light"] .lan-mobile-detail-avatar { border-color: rgba(184,95,18,.35); background: rgba(184,95,18,.08); color: #b85f12; }
-html[data-learner-mobile-theme="light"] .lan-mobile-detail-author-name,
-html[data-learner-mobile-theme="light"] .lan-mobile-detail-title { color: #282924; }
-html[data-learner-mobile-theme="light"] .lan-mobile-detail-title { border-bottom-color: #dfded8; }
-html[data-learner-mobile-theme="light"] .lan-mobile-detail-author-role,
-html[data-learner-mobile-theme="light"] .lan-mobile-detail-posted { color: #73746d; }
-html[data-learner-mobile-theme="light"] .lan-mobile-detail-role-badge { color: #b85f12; }
-html[data-learner-mobile-theme="light"] .lan-mobile-detail-role-sep { color: #8b8b83; }
-html[data-learner-mobile-theme="light"] .lan-mobile-detail-message { color: #53544e; }
-
-/* "Edited" tag, "Edited <date>" line and the highlighted words in an edited message.
-   Rebuilt from a darker orange so the 9px tag and the 12px line stay readable on the cream page. */
-html[data-learner-mobile-theme="light"] .lan-edited-tag { color: #b8553a; background: rgba(184,85,58,.08); border-color: rgba(184,85,58,.35); }
-html[data-learner-mobile-theme="light"] .lan-edited-meta { color: #b8553a; }
-html[data-learner-mobile-theme="light"] .lan-mobile-detail .an-edited-highlight { color: #b8553a; }
+html[data-learner-mobile-theme="light"] .lan-mobile-head,
+html[data-learner-mobile-theme="light"] .lan-mobile-search-wrap,
+html[data-learner-mobile-theme="light"] .lan-mobile-chips,
+html[data-learner-mobile-theme="light"] .lan-mobile-list,
+html[data-learner-mobile-theme="light"] .lan-mobile-detail {
+    --qm-title: #282924;
+    --qm-body: #4a4b44;
+    --qm-muted: #73746d;
+    --qm-faint: #a3a39a;
+    --qm-line: rgba(40,41,36,.09);
+    --qm-press: rgba(38,39,35,.04);
+    --qm-surf: #f1efe8;
+    --qm-ring: #a3a39a;
+    --qm-new: #b85f12;
+    --qm-edit: #b8553a;
+    --qm-chipline: rgba(40,41,36,.16);
+    --qm-chipon: #252624;
+    --qm-chipon-text: #faf9f5;
+}
 
 /* fetch error ("Error loading announcements.") */
 html[data-learner-mobile-theme="light"] .lan-error-state { color: #bd4a43; }
