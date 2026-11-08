@@ -164,7 +164,10 @@ window.loadManual = async function(containerId = 'api-content-area') {
         const classData  = classRes.ok ? await classRes.json().catch(() => null) : null;
         if (classData) homeData.myClass = classData;
 
-        const manualStyleHref = 'assets/css/learner/manual.css?v=8.7';
+        // Same URL (and version) as the <link> in learner_dashboard.php, so there is one cached copy of the stylesheet.
+        // This copy is added last and wins ties, so an older version here would paint the old Home over the new one.
+        const pageManualStyle = document.querySelector('link[rel="stylesheet"][href*="learner/manual.css"]');
+        const manualStyleHref = pageManualStyle ? pageManualStyle.getAttribute('href') : 'assets/css/learner/manual.css?v=8.8';
         const existingManualStyle = document.getElementById('manual-style');
         if (existingManualStyle) {
             existingManualStyle.href = manualStyleHref;
