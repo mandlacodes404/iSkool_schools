@@ -47,6 +47,7 @@ window.fetchSyllabus = async function() {
         if (typeof injectSharedDesktopLayoutStyles === 'function') injectSharedDesktopLayoutStyles();
         sylEnsureFont();
         if (typeof window.sylInitDesktop === 'function') window.sylInitDesktop();
+        sylMobileApply();
         restoreSyllabusPageState();
         if (typeof window.loaderTimeout !== 'undefined') clearTimeout(window.loaderTimeout);
         if (loader) loader.style.display = 'none';
@@ -67,6 +68,7 @@ window.fetchSyllabus = async function() {
         if (typeof injectSharedDesktopLayoutStyles === 'function') injectSharedDesktopLayoutStyles();
         sylEnsureFont();
         if (typeof window.sylInitDesktop === 'function') window.sylInitDesktop();
+        sylMobileApply();
         restoreSyllabusPageState();
 
     } catch (err) {
@@ -112,11 +114,14 @@ window.fetchSyllabus = async function() {
 // STATE PERSISTENCE (sessionStorage)
 // ─────────────────────────────────────────────
 function saveSyllabusPageState() {
+    // while a phone detail is open the page is not the list, so its scroll must not overwrite the list's
+    if (window._sylMobDetail) return;
     const mainContent = document.querySelector('.main-content');
     const sidebar = document.querySelector('.syl-sidebar-scroll');
     const panel = document.querySelector('.syl-body');
     const state = {
         activeTerm:  window._syllabusActiveTerm ?? null,
+        mobileSearch: document.getElementById('sylMobileSearch')?.value || '',
         selectedKey: (typeof sylKey === 'function' && window._sylBriefs && window._sylSelectedIdx !== null && window._sylBriefs[window._sylSelectedIdx]) ? sylKey(window._sylBriefs[window._sylSelectedIdx]) : null,
         scrollTop:   mainContent ? mainContent.scrollTop : 0,
         sidebarScroll: sidebar ? sidebar.scrollTop : 0,
@@ -140,6 +145,10 @@ function restoreSyllabusPageState() {
                 const tab = document.getElementById(`syl-mob-tab-${state.activeTerm}`)
                     || document.getElementById(`syl-chip-${state.activeTerm}`);
                 if (tab) tab.click();
+                if (state.mobileSearch) {
+                    const input = document.getElementById('sylMobileSearch');
+                    if (input) { input.value = state.mobileSearch; window.sylMobileSearch(state.mobileSearch); }
+                }
                 if (state.selectedKey && document.getElementById('syl-list')) {
                     const i = (window._sylBriefs || []).findIndex(b => sylKey(b) === state.selectedKey);
                     if (i >= 0 && Number(window._sylBriefs[i].term) === Number(window._syllabusActiveTerm)) window.selectDesktopSyllabusBrief(i);
@@ -218,14 +227,13 @@ function renderSyllabusPage(data) {
     window._syllabusActiveTerm = activeTerm;
     window._sylTerm = '';
     window._sylSelectedIdx = null;
+    window._sylMobDetail = false;
 
-    // ── Mobile: term tabs ──
+    // ── Phone: term chips (the same ids the page-state restore clicks) ──
+    window._sylMobTerm = '';
     const mobileTabsHtml = terms.map(t => `
-        <button class="syl-tab ${t === activeTerm ? 'syl-tab-active' : ''}"
-                onclick="switchSylTab(${t})"
-                id="syl-mob-tab-${t}">
-            Term ${t} ${t === currentTerm ? '<span class="syl-current-badge">Current</span>' : ''}
-        </button>`).join('');
+        <button type="button" class="syl-mobile-chip${t === activeTerm ? ' on' : ''}" data-term="${t}" aria-pressed="${t === activeTerm}"
+                onclick="switchSylTab(${t})" id="syl-mob-tab-${t}">${t === currentTerm ? '<span class="syl-mobile-cd"></span>' : ''}Term ${t}</button>`).join('');
 
     return `
         <style>
@@ -554,187 +562,14 @@ function renderSyllabusPage(data) {
             .syl-rail h4.syl-rail-sub { margin: 28px 0 4px; }
 
 
-            /* ══════════════════════════════════════════
-               SHARED STYLES
-               ══════════════════════════════════════════ */
-
-            /* Mobile wrapper */
-            .syl-wrapper {
-                max-width: 900px;
-                margin: 0 auto;
-                padding: 0 0 24px 0;
-            }
-            .syl-page-title {
-                font-size: 20px;
-                font-weight: 900;
-                color: #e2e8f0;
-                margin-bottom: 20px;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-            }
-
-            /* Mobile tabs */
-            .syl-tabs {
-                display: flex;
-                gap: 8px;
-                flex-wrap: wrap;
-                margin-bottom: 24px;
-            }
-            .syl-tab {
-                padding: 8px 16px;
-                border-radius: 20px;
-                border: 1px solid rgba(255,255,255,0.1);
-                background: transparent;
-                color: #8b949e;
-                font-size: 13px;
-                font-weight: 700;
-                cursor: pointer;
-                transition: all 0.2s ease;
-                display: flex;
-                align-items: center;
-                gap: 6px;
-            }
-            .syl-tab:hover { border-color: #4fd1c5; color: #4fd1c5; }
-            .syl-tab-active {
-                background: rgba(79,209,197,0.15);
-                border-color: #4fd1c5;
-                color: #4fd1c5;
-            }
-            .syl-current-badge {
-                background: rgba(79,209,197,0.2);
-                color: #4fd1c5;
-                font-size: 10px;
-                padding: 2px 6px;
-                border-radius: 10px;
-                font-weight: 800;
-            }
-
-            /* Cards grid — used by both layouts */
-            .syl-cards-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-                gap: 16px;
-            }
-
-            /* Brief card */
-            .syl-card {
-                background: #1a1919;
-                border: 1px solid rgba(255,255,255,0.07);
-                border-radius: 16px;
-                padding: 20px;
-                transition: border-color 0.2s ease;
-            }
-            .syl-card:hover { border-color: rgba(79,209,197,0.3); }
-
-            /* Mobile: match the home page box treatment — flat colour, no border */
-            @media (max-width: 899px) {
-                .syl-card {
-                    background: #272726;
-                    border: none;
-                }
-                .syl-card:hover {
-                    border-color: transparent;
-                }
-            }
-            .syl-card-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: flex-start;
-                margin-bottom: 16px;
-            }
-            .syl-subject {
-                font-size: 16px;
-                font-weight: 900;
-                color: #e2e8f0;
-                line-height: 1.3;
-            }
-            .syl-teacher {
-                font-size: 12px;
-                color: #8b949e;
-                margin-top: 3px;
-                font-weight: 600;
-            }
-            .syl-updated {
-                font-size: 11px;
-                color: #8b949e;
-                white-space: nowrap;
-                flex-shrink: 0;
-            }
-            .syl-section-title {
-                font-size: 11px;
-                font-weight: 800;
-                color: #8b949e;
-                text-transform: uppercase;
-                letter-spacing: 0.8px;
-                margin: 14px 0 8px;
-            }
-            .syl-topics {
-                list-style: none;
-                padding: 0;
-                margin: 0;
-            }
-            .syl-topics li {
-                font-size: 13px;
-                color: #c9d1d9;
-                padding: 5px 0;
-                border-bottom: 1px solid rgba(255,255,255,0.04);
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                font-weight: 600;
-            }
-            .syl-topics li:last-child { border-bottom: none; }
-            .syl-topics li::before {
-                content: '';
-                width: 5px; height: 5px;
-                border-radius: 50%;
-                background: #4fd1c5;
-                flex-shrink: 0;
-            }
-            .syl-assess-row {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 6px 0;
-                border-bottom: 1px solid rgba(255,255,255,0.04);
-            }
-            .syl-assess-row:last-child { border-bottom: none; }
-            .syl-assess-type { font-size: 13px; color: #c9d1d9; font-weight: 600; }
-            .syl-assess-weight { font-size: 13px; font-weight: 900; color: #4fd1c5; }
-            .syl-assess-bar-wrap {
-                width: 100%; height: 3px;
-                background: rgba(255,255,255,0.06);
-                border-radius: 2px;
-                margin-top: 4px;
-                overflow: hidden;
-            }
-            .syl-assess-bar { height: 100%; border-radius: 2px; background: #4fd1c5; }
-            .syl-notes {
-                font-size: 12px;
-                color: #8b949e;
-                background: rgba(255,255,255,0.03);
-                border-radius: 8px;
-                padding: 10px 12px;
-                margin-top: 14px;
-                line-height: 1.5;
-                border-left: 3px solid rgba(79,209,197,0.3);
-            }
-
-            @media (max-width: 480px) {
-                /* One column. No extra side padding on .syl-wrapper here: #api-content-area already pads 18px on a
-                   phone (the list inset), and another 14px on top pushed the cards in to 32px. */
-                .syl-cards-grid { grid-template-columns: 1fr; }
-            }
-
             /* ═══ Light mode: learner Syllabus (desktop) ═══════════════════════════════════════════════════════════════
                The desktop Syllabus page is driven by the --syl-* variables above, so most of light mode is the variable
                block below, the same way the Home page does it with --lhd-*, the Quiz page with --lqz-*, the Assignments page
                with --las-* and the Announcements page with --lan-*. The rest fixes the colours that are hard-coded: the search
-               box, scrollbars, resize handle, the icon in the empty detail pane, the assessment bar and its legend (colours
-               set inline by selectDesktopSyllabusBrief), and the phone-style page shown between 769px and 899px (title, term
-               tabs, brief cards, topic lists and weighting bars, whose colours are set inline by renderBriefCard). Same
-               palette as the Home page, the sidebar and the Quiz, Assignments and Announcements pages.
+               box, scrollbars, resize handle, the icon in the empty detail pane, and the assessment bar and its legend
+               (colours set inline by selectDesktopSyllabusBrief). The phone list and detail (shown on phones and from 769px to
+               899px) are drawn from the --qm-* tokens in sylQuietStyle(), which has their own light values. Same palette as
+               the Home page, the sidebar and the Quiz, Assignments and Announcements pages.
                Applies only when <html data-learner-theme="light"> on 769px and wider. Dark mode and phones are untouched.
                To remove it, delete this block. */
             @media (min-width: 769px) {
@@ -774,112 +609,25 @@ function renderSyllabusPage(data) {
             /* book icon in the empty detail pane: its stroke is set in the markup, and the dark-mode teal at 30% all but vanishes on white */
             html[data-learner-theme="light"] .syl-panel-empty svg[stroke="#4fd1c5" i] { stroke: #187a72; }
 
-            /* assessment colours the JS writes inline (COL in selectDesktopSyllabusBrief, barColours in renderBriefCard), each matched by
-               its value and swapped for a darker one that holds up on white. Fills first: the weighting bar and legend squares on desktop,
-               and the bars in the phone-style cards. The percentages in those cards are text and come further down. */
+            /* assessment colours the JS writes inline (COL in selectDesktopSyllabusBrief), each matched by its value and swapped
+               for a darker one that holds up on white: the weighting bar and legend squares on desktop. */
             html[data-learner-theme="light"] .syl-stack > [style*="#c2c3b7" i],
             html[data-learner-theme="light"] .syl-wrow > i[style*="#c2c3b7" i] { background: #8b8b83 !important; }
             html[data-learner-theme="light"] .syl-stack > [style*="#a78bfa" i],
-            html[data-learner-theme="light"] .syl-wrow > i[style*="#a78bfa" i],
-            html[data-learner-theme="light"] .syl-assess-bar[style*="#a78bfa" i] { background: #6b4fc7 !important; }
+            html[data-learner-theme="light"] .syl-wrow > i[style*="#a78bfa" i] { background: #6b4fc7 !important; }
             html[data-learner-theme="light"] .syl-stack > [style*="#f28c38" i],
-            html[data-learner-theme="light"] .syl-wrow > i[style*="#f28c38" i],
-            html[data-learner-theme="light"] .syl-assess-bar[style*="#f28c38" i] { background: #d97706 !important; }
+            html[data-learner-theme="light"] .syl-wrow > i[style*="#f28c38" i] { background: #d97706 !important; }
             html[data-learner-theme="light"] .syl-stack > [style*="#f472b6" i],
-            html[data-learner-theme="light"] .syl-wrow > i[style*="#f472b6" i],
-            html[data-learner-theme="light"] .syl-assess-bar[style*="#f472b6" i] { background: #db2777 !important; }
+            html[data-learner-theme="light"] .syl-wrow > i[style*="#f472b6" i] { background: #db2777 !important; }
             html[data-learner-theme="light"] .syl-stack > [style*="#fdd663" i],
-            html[data-learner-theme="light"] .syl-wrow > i[style*="#fdd663" i],
-            html[data-learner-theme="light"] .syl-assess-bar[style*="#fdd663" i] { background: #c99a00 !important; }
+            html[data-learner-theme="light"] .syl-wrow > i[style*="#fdd663" i] { background: #c99a00 !important; }
             html[data-learner-theme="light"] .syl-stack > [style*="#34d399" i],
-            html[data-learner-theme="light"] .syl-wrow > i[style*="#34d399" i],
-            html[data-learner-theme="light"] .syl-assess-bar[style*="#34d399" i] { background: #16a34a !important; }
-            html[data-learner-theme="light"] .syl-assess-bar[style*="#4fd1c5" i] { background: #187a72 !important; }
-
-            /* ── 769px to 899px: the split layout starts at 900px, so until then the phone-style page is what shows.
-                  Its colours are hard-coded for a dark page. ── */
-            html[data-learner-theme="light"] .syl-page-title { color: #282924; }
-            html[data-learner-theme="light"] .syl-page-title svg[stroke="#4fd1c5" i] { stroke: #187a72; }
-
-            /* term tabs: base, hover, then active (same specificity, so order matters) */
-            html[data-learner-theme="light"] .syl-tab { border-color: #dfded8; color: #73746d; }
-            html[data-learner-theme="light"] .syl-tab:hover { border-color: #187a72; color: #187a72; }
-            html[data-learner-theme="light"] .syl-tab-active { background: rgba(24,122,114,.10); border-color: #187a72; color: #187a72; }
-            html[data-learner-theme="light"] .syl-current-badge { background: rgba(24,122,114,.12); color: #187a72; }
-
-            /* brief cards: white with a warm-grey line, flat (no hover), like the cards on the other pages */
-            html[data-learner-theme="light"] .syl-card { background: #ffffff; border: 1px solid #dfded8; }
-            html[data-learner-theme="light"] .syl-subject { color: #282924; }
-            html[data-learner-theme="light"] .syl-teacher,
-            html[data-learner-theme="light"] .syl-updated,
-            html[data-learner-theme="light"] .syl-section-title { color: #73746d; }
-            html[data-learner-theme="light"] .syl-topics li { color: #53544e; border-bottom-color: #ebeae5; }
-            html[data-learner-theme="light"] .syl-topics li::before { background: #187a72; }
-            html[data-learner-theme="light"] .syl-assess-row { border-bottom-color: #ebeae5; }
-            html[data-learner-theme="light"] .syl-assess-type { color: #53544e; }
-            html[data-learner-theme="light"] .syl-assess-bar-wrap { background: rgba(38,39,35,.08); }
-            html[data-learner-theme="light"] .syl-notes { color: #73746d; background: rgba(38,39,35,.03); border-left-color: rgba(24,122,114,.35); }
-
-            /* weighting percentages in the cards (text, so the darker tone of each colour) */
-            html[data-learner-theme="light"] .syl-assess-weight[style*="#4fd1c5" i] { color: #187a72 !important; }
-            html[data-learner-theme="light"] .syl-assess-weight[style*="#a78bfa" i] { color: #6b4fc7 !important; }
-            html[data-learner-theme="light"] .syl-assess-weight[style*="#f28c38" i] { color: #b85f12 !important; }
-            html[data-learner-theme="light"] .syl-assess-weight[style*="#f472b6" i] { color: #be185d !important; }
-            html[data-learner-theme="light"] .syl-assess-weight[style*="#fdd663" i] { color: #9a6b00 !important; }
-            html[data-learner-theme="light"] .syl-assess-weight[style*="#34d399" i] { color: #15803d !important; }
-
-            }
-
-            /* ═══ Light mode: learner Syllabus (phones) ════════════════════════════════════════════════════════════════
-               On a phone the page is the .syl-mobile-layout above (the split layout is hidden below 900px). It is the same
-               page the block above recolours between 769px and 899px, so this is the same set of rules and palette behind the
-               phone attribute: <html data-learner-mobile-theme="light">, set by Settings > Appearance through mobile_theme.js.
-               The assessment colours are written inline by renderBriefCard, so they are matched by value and swapped for a
-               darker one. The page background, header and bottom nav come from the gate in mobile_light.css, which lists
-               .syl-mobile-layout (the page), .syl-empty (no briefs yet) and .syl-retry-btn (the error state) for this page.
-               Dark mode and the desktop layouts are untouched. To remove it, delete this block. */
-            @media (max-width: 768px) {
-
-                html[data-learner-mobile-theme="light"] .syl-page-title { color: #282924; }
-                html[data-learner-mobile-theme="light"] .syl-page-title svg[stroke="#4fd1c5" i] { stroke: #187a72; }
-
-                /* term tabs: base, hover, then active (same specificity, so order matters) */
-                html[data-learner-mobile-theme="light"] .syl-tab { border-color: #dfded8; color: #6b6c65; }
-                html[data-learner-mobile-theme="light"] .syl-tab:hover { border-color: #187a72; color: #187a72; }
-                html[data-learner-mobile-theme="light"] .syl-tab-active { background: rgba(24,122,114,.10); border-color: #187a72; color: #187a72; }
-                html[data-learner-mobile-theme="light"] .syl-current-badge { background: rgba(24,122,114,.12); color: #187a72; }
-
-                /* brief cards: white with a warm-grey line (the dark phone card is a flat #272726 with no border) */
-                html[data-learner-mobile-theme="light"] .syl-card { background: #ffffff; border: 1px solid #dfded8; }
-                html[data-learner-mobile-theme="light"] .syl-subject { color: #282924; }
-                html[data-learner-mobile-theme="light"] .syl-teacher,
-                html[data-learner-mobile-theme="light"] .syl-updated,
-                html[data-learner-mobile-theme="light"] .syl-section-title { color: #6b6c65; }
-                html[data-learner-mobile-theme="light"] .syl-topics li { color: #53544e; border-bottom-color: #ebeae5; }
-                html[data-learner-mobile-theme="light"] .syl-topics li::before { background: #187a72; }
-                html[data-learner-mobile-theme="light"] .syl-assess-row { border-bottom-color: #ebeae5; }
-                html[data-learner-mobile-theme="light"] .syl-assess-type { color: #53544e; }
-                html[data-learner-mobile-theme="light"] .syl-assess-bar-wrap { background: rgba(38,39,35,.08); }
-                html[data-learner-mobile-theme="light"] .syl-notes { color: #6b6c65; background: rgba(38,39,35,.03); border-left-color: rgba(24,122,114,.35); }
-
-                /* weighting bars (fills, so graphics) in the darker tone of each colour */
-                html[data-learner-mobile-theme="light"] .syl-assess-bar[style*="#4fd1c5" i] { background: #187a72 !important; }
-                html[data-learner-mobile-theme="light"] .syl-assess-bar[style*="#a78bfa" i] { background: #6b4fc7 !important; }
-                html[data-learner-mobile-theme="light"] .syl-assess-bar[style*="#f28c38" i] { background: #d97706 !important; }
-                html[data-learner-mobile-theme="light"] .syl-assess-bar[style*="#f472b6" i] { background: #db2777 !important; }
-                html[data-learner-mobile-theme="light"] .syl-assess-bar[style*="#fdd663" i] { background: #c99a00 !important; }
-                html[data-learner-mobile-theme="light"] .syl-assess-bar[style*="#34d399" i] { background: #16a34a !important; }
-
-                /* weighting percentages (text, so a tone that holds 4.5:1 on the white card) */
-                html[data-learner-mobile-theme="light"] .syl-assess-weight[style*="#4fd1c5" i] { color: #187a72 !important; }
-                html[data-learner-mobile-theme="light"] .syl-assess-weight[style*="#a78bfa" i] { color: #6b4fc7 !important; }
-                html[data-learner-mobile-theme="light"] .syl-assess-weight[style*="#f28c38" i] { color: #a64f0c !important; }
-                html[data-learner-mobile-theme="light"] .syl-assess-weight[style*="#f472b6" i] { color: #be185d !important; }
-                html[data-learner-mobile-theme="light"] .syl-assess-weight[style*="#fdd663" i] { color: #9a6b00 !important; }
-                html[data-learner-mobile-theme="light"] .syl-assess-weight[style*="#34d399" i] { color: #15803d !important; }
+            html[data-learner-theme="light"] .syl-wrow > i[style*="#34d399" i] { background: #16a34a !important; }
 
             }
         </style>
+
+        ${sylQuietStyle()}
 
         <!-- ═══ DESKTOP SPLIT LAYOUT ═══ -->
         <div class="syl-desktop-layout lqz-flat-layout" id="syl-desktop-layout">
@@ -908,83 +656,467 @@ function renderSyllabusPage(data) {
             </div>
         </div>
 
-        <!-- ═══ MOBILE LAYOUT (unchanged) ═══ -->
+        <!-- ═══ MOBILE LAYOUT: the quiet list ═══ -->
         <div class="syl-mobile-layout">
-            <div class="syl-wrapper">
-                <div class="syl-page-title">
-                    <svg viewBox="0 0 24 24" width="22" height="22" stroke="#4fd1c5"
-                         stroke-width="2" fill="none">
-                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-                        <line x1="12" y1="6" x2="16" y2="6"/>
-                        <line x1="12" y1="10" x2="16" y2="10"/>
-                        <line x1="12" y1="14" x2="16" y2="14"/>
+            <div class="syl-mobile-head">
+                <h1 class="syl-mobile-title">Syllabus</h1>
+                <p class="syl-mobile-sub" id="sylMobileSub">${sylMobileSummary(activeTerm, currentTerm, byTerm[activeTerm].length, byTerm[activeTerm].length, '')}</p>
+            </div>
+            <div class="syl-mobile-search-wrap">
+                <svg viewBox="0 0 24 24" width="17" height="17" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision" aria-hidden="true">
+                    <circle cx="11" cy="11" r="7.5"/><line x1="20.5" y1="20.5" x2="16.3" y2="16.3"/>
+                </svg>
+                <input type="text" class="syl-mobile-search" id="sylMobileSearch"
+                    placeholder="Search subjects or topics" aria-label="Search subjects or topics" oninput="sylMobileSearch(this.value)">
+            </div>
+            <div class="syl-mobile-chips" role="group" aria-label="Choose a term">${mobileTabsHtml}</div>
+            <div class="syl-mobile-list" id="sylMobileList">
+                ${briefs.map((b, idx) => sylMobileRowHtml(b, idx)).join('')}
+                <div class="syl-mobile-empty" id="sylMobileSearchEmpty" style="display:none;">
+                    <svg viewBox="0 0 24 24" width="40" height="40" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision" aria-hidden="true">
+                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                     </svg>
-                    Subject Briefs & Outlines
+                    <p class="syl-mobile-empty-title" id="sylMobileSearchEmptyText">No matches</p>
+                    <p class="syl-mobile-empty-body">Try a different subject, teacher or topic.</p>
                 </div>
-
-                <div class="syl-tabs">${mobileTabsHtml}</div>
-
-                ${terms.map(t => `
-                    <div class="syl-mob-panel" id="syl-mob-panel-${t}"
-                         style="display:${t === activeTerm ? 'block' : 'none'};">
-                        <div class="syl-cards-grid">
-                            ${byTerm[t].map(b => renderBriefCard(b)).join('')}
-                        </div>
-                    </div>`).join('')}
             </div>
         </div>`;
 }
 
 // ─────────────────────────────────────────────
-// RENDER SINGLE BRIEF CARD
+// PHONE STYLES: the quiet list and detail
+// Same calm look as the learner Assignments, Quizzes and Announcements pages: a title with a counts line, a search box,
+// term chips, then one plain row per subject; an open subject uses the same detail look as an open assignment. Weights
+// stay at 400 (text) and 600 (titles and names). Every colour is a --qm-* token, so light mode is only the token values
+// at the end. The list and the detail are separate screens that each replace the page, so both embed this style.
 // ─────────────────────────────────────────────
-function renderBriefCard(brief) {
-    const updatedDate = new Date(brief.updated_at).toLocaleDateString('en-GB', {
-        day: 'numeric', month: 'short', year: 'numeric'
-    });
+function sylQuietStyle() {
+    return `<style>
+            @media (min-width: 900px) {
+                .syl-mobile-head, .syl-mobile-search-wrap, .syl-mobile-chips, .syl-mobile-list, .syl-mobile-detail { display: none !important; }
+            }
 
-    const topicsHtml = brief.topics.length
-        ? `<div class="syl-section-title">Syllabus Topics</div>
-           <ul class="syl-topics">
-               ${brief.topics.map(t => `<li>${t}</li>`).join('')}
-           </ul>`
-        : '';
+            .syl-mobile-head,
+            .syl-mobile-search-wrap,
+            .syl-mobile-chips,
+            .syl-mobile-list,
+            .syl-mobile-detail {
+                --qm-title: #ecece9;
+                --qm-body: #c2c3b7;
+                --qm-muted: #8b8b87;
+                --qm-faint: #5f605a;
+                --qm-line: rgba(255,255,255,0.07);
+                --qm-press: rgba(255,255,255,0.04);
+                --qm-surf: #272726;
+                --qm-ring: #73746d;
+                --qm-chipline: rgba(255,255,255,0.12);
+                --qm-chipon: #ecece9;
+                --qm-chipon-text: #20201f;
+            }
 
-    const barColours = ['#4fd1c5', '#a78bfa', '#f28c38', '#f472b6', '#fdd663', '#34d399'];
-    const assessHtml = brief.assessments.length
-        ? `<div class="syl-section-title">Assessment Weighting</div>
-           ${brief.assessments.map((a, i) => {
-               const colour = barColours[i % barColours.length];
-               return `
-                   <div class="syl-assess-row">
-                       <span class="syl-assess-type">${a.type}</span>
-                       <span class="syl-assess-weight" style="color:${colour};">${a.weight}%</span>
-                   </div>
-                   <div class="syl-assess-bar-wrap">
-                       <div class="syl-assess-bar" style="width:${a.weight}%;background:${colour};"></div>
-                   </div>`;
-           }).join('')}`
-        : '';
+            .syl-mobile-head { padding: 4px 2px 0; }
+            .syl-mobile-title {
+                margin: 0;
+                font-family: inherit;
+                font-size: 28px;
+                font-weight: 600;
+                line-height: 1.15;
+                letter-spacing: -0.2px;
+                color: var(--qm-title);
+            }
+            .syl-mobile-sub { margin: 5px 0 0; font-size: 14px; line-height: 1.4; font-weight: 400; color: var(--qm-muted); }
+            .syl-mobile-sub b { font-weight: 600; color: var(--qm-title); }
 
-    const notesHtml = brief.notes
-        ? `<div class="syl-notes">📝 ${brief.notes}</div>`
-        : '';
+            .syl-mobile-list { background: transparent; border-radius: 0; overflow: visible; margin: 8px 0 14px; }
+            @media (max-width: 899px) {
+                .syl-mobile-list { margin-left: -18px; margin-right: -18px; }
+            }
 
+            /* search */
+            .syl-mobile-search-wrap { display: block; position: relative; margin: 14px 0 0; }
+            .syl-mobile-search-wrap svg {
+                position: absolute;
+                left: 14px;
+                top: 50%;
+                transform: translateY(-50%);
+                pointer-events: none;
+                color: var(--qm-muted);
+            }
+            .syl-mobile-search {
+                width: 100%;
+                box-sizing: border-box;
+                height: 42px;
+                padding: 0 14px 0 42px;
+                border: 0;
+                border-radius: 12px;
+                background: var(--qm-surf);
+                color: var(--qm-title);
+                font: inherit;
+                font-size: 16px; /* 16px stops iOS zooming the page when the box is focused */
+                font-weight: 400;
+                -webkit-appearance: none;
+                appearance: none;
+            }
+            .syl-mobile-search:focus { outline: none; box-shadow: inset 0 0 0 1px var(--qm-chipline); }
+            .syl-mobile-search::placeholder { color: var(--qm-muted); opacity: 1; }
+
+            /* term chips */
+            .syl-mobile-chips { display: flex; gap: 6px; margin: 12px 0 0; overflow-x: auto; scrollbar-width: none; }
+            .syl-mobile-chips::-webkit-scrollbar { display: none; }
+            .syl-mobile-chip {
+                flex: none;
+                height: 32px;
+                padding: 0 10px;
+                border-radius: 16px;
+                border: 1px solid var(--qm-chipline);
+                background: transparent;
+                color: var(--qm-muted);
+                font: inherit;
+                font-size: 13px;
+                font-weight: 400;
+                cursor: pointer;
+                -webkit-tap-highlight-color: transparent;
+            }
+            .syl-mobile-chip.on { background: var(--qm-chipon); border-color: var(--qm-chipon); color: var(--qm-chipon-text); }
+            /* the dot that marks the current term */
+            .syl-mobile-cd { display: inline-block; width: 6px; height: 6px; margin-right: 6px; border-radius: 50%; background: currentColor; vertical-align: 1px; }
+
+            /* a row: book, subject, one line of detail, arrow. The hairline starts under the title, not under the book. */
+            .syl-mobile-row {
+                display: flex;
+                align-items: center;
+                gap: 14px;
+                padding: 11px 20px;
+                background: transparent;
+                cursor: pointer;
+                transition: background 0.15s;
+                position: relative;
+                -webkit-tap-highlight-color: transparent;
+            }
+            .syl-mobile-row::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 58px;
+                right: 0;
+                height: 1px;
+                background: var(--qm-line);
+            }
+            .syl-mobile-row--first::before { display: none; }
+            .syl-mobile-row:active { background: var(--qm-press); }
+            .syl-mobile-row:focus-visible { outline: 2px solid var(--qm-chipline); outline-offset: -2px; }
+            .syl-mobile-row-icon { flex: none; width: 24px; height: 24px; display: inline-flex; color: var(--qm-ring); }
+            .syl-mobile-row-icon svg { width: 24px; height: 24px; }
+            .syl-mobile-row-body { flex: 1; min-width: 0; }
+            .syl-mobile-row-title {
+                margin: 0;
+                font-size: 16px;
+                font-weight: 600;
+                line-height: 1.25;
+                color: var(--qm-title);
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .syl-mobile-row-meta {
+                margin-top: 3px;
+                font-size: 13px;
+                font-weight: 400;
+                line-height: 1.3;
+                color: var(--qm-muted);
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .syl-mobile-row-chevron { flex: none; color: var(--qm-faint); }
+
+            /* no search matches */
+            .syl-mobile-empty {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                padding: 24px;
+                color: var(--qm-muted);
+                min-height: 40vh;
+            }
+            .syl-mobile-empty svg { opacity: 0.5; margin-bottom: 14px; }
+            .syl-mobile-empty-title { color: var(--qm-title); font-size: 16px; font-weight: 600; margin: 0 0 6px; }
+            .syl-mobile-empty-body { color: var(--qm-muted); font-size: 14px; font-weight: 400; margin: 0; line-height: 1.5; }
+
+            /* ── an open subject: same look as the assignment detail ── */
+            .syl-mobile-detail { padding: 8px 20px 96px; }
+            @media (max-width: 899px) {
+                .syl-mobile-detail { margin-left: -18px; margin-right: -18px; }
+            }
+            .syl-mobile-detail-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+            .syl-mobile-detail-eyebrow { font-size: 12px; font-weight: 600; letter-spacing: 0.9px; text-transform: uppercase; color: var(--qm-muted); }
+            .syl-mobile-detail-status {
+                display: inline-flex;
+                align-items: center;
+                padding: 4px 10px;
+                border-radius: 8px;
+                font-size: 12.5px;
+                font-weight: 600;
+                color: var(--qm-body);
+                border: 1px solid var(--qm-chipline);
+            }
+            .syl-mobile-detail-title {
+                margin: 12px 0 0;
+                color: var(--qm-title);
+                font-family: inherit;
+                font-size: 26px;
+                line-height: 1.2;
+                font-weight: 600;
+                letter-spacing: -0.2px;
+                overflow-wrap: anywhere;
+            }
+            .syl-mobile-detail-posted { margin-top: 6px; font-size: 13px; font-weight: 400; color: var(--qm-muted); }
+            .syl-mobile-detail-facts { display: grid; grid-template-columns: 1.2fr 1fr; margin-top: 18px; background: var(--qm-surf); border-radius: 18px; }
+            .syl-mobile-detail-fact { padding: 14px 16px 15px; min-width: 0; }
+            .syl-mobile-detail-fact + .syl-mobile-detail-fact { border-left: 1px solid var(--qm-line); }
+            .syl-mobile-detail-fact-label { font-size: 13px; font-weight: 400; color: var(--qm-muted); }
+            .syl-mobile-detail-fact-value { margin: 8px 0 3px; font-size: 16px; font-weight: 600; line-height: 1.25; color: var(--qm-title); overflow-wrap: anywhere; }
+            .syl-mobile-detail-fact-value--num { margin-top: 6px; font-size: 20px; line-height: 1.15; }
+            .syl-mobile-detail-fact-note { font-size: 13px; font-weight: 400; color: var(--qm-muted); }
+            .syl-mobile-detail-label { margin: 24px 0 8px 2px; font-size: 13.5px; font-weight: 600; color: var(--qm-muted); }
+            .syl-mobile-detail-text { margin: 0; color: var(--qm-body); font-size: 16px; font-weight: 400; line-height: 1.6; overflow-wrap: anywhere; white-space: pre-line; }
+            .syl-mobile-detail-text--quiet { color: var(--qm-muted); margin-top: 24px; }
+
+            /* topics: numbered rows with a hairline between them */
+            .syl-mobile-topics { list-style: none; margin: 0; padding: 0; }
+            .syl-mobile-topics li {
+                display: flex;
+                gap: 14px;
+                padding: 11px 0;
+                border-top: 1px solid var(--qm-line);
+                font-size: 16px;
+                font-weight: 400;
+                line-height: 1.4;
+                color: var(--qm-body);
+                overflow-wrap: anywhere;
+            }
+            .syl-mobile-topics li:first-child { border-top: 0; padding-top: 2px; }
+            .syl-mobile-topics li span { flex: none; width: 22px; padding-top: 2px; font-size: 13px; font-variant-numeric: tabular-nums; color: var(--qm-faint); }
+
+            /* assessment weighting: the type, the percentage, and one thin bar */
+            .syl-mobile-assess { padding: 8px 0 10px; border-top: 1px solid var(--qm-line); }
+            .syl-mobile-assess:first-child { border-top: 0; padding-top: 2px; }
+            .syl-mobile-assess-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+            .syl-mobile-assess-type { min-width: 0; font-size: 16px; font-weight: 400; line-height: 1.4; color: var(--qm-body); overflow-wrap: anywhere; }
+            .syl-mobile-assess-weight { flex: none; font-size: 16px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--qm-title); }
+            .syl-mobile-assess-track { height: 4px; margin-top: 8px; border-radius: 2px; background: var(--qm-chipline); overflow: hidden; }
+            .syl-mobile-assess-fill { height: 100%; border-radius: 2px; background: var(--qm-body); }
+
+            /* ═══ Light mode: learner Syllabus (769px to 899px) ═══════════════════════════════════════════════════════
+               The split layout starts at 900px, so until then the phone-style list and detail are what show. They are
+               drawn from the --qm-* tokens above, so light mode is just the token values below. */
+            @media (min-width: 769px) {
+                html[data-learner-theme="light"] .syl-mobile-head,
+                html[data-learner-theme="light"] .syl-mobile-search-wrap,
+                html[data-learner-theme="light"] .syl-mobile-chips,
+                html[data-learner-theme="light"] .syl-mobile-list,
+                html[data-learner-theme="light"] .syl-mobile-detail {
+                    --qm-title: #282924;
+                    --qm-body: #4a4b44;
+                    --qm-muted: #73746d;
+                    --qm-faint: #a3a39a;
+                    --qm-line: rgba(40,41,36,.09);
+                    --qm-press: rgba(38,39,35,.04);
+                    --qm-surf: #f1efe8;
+                    --qm-ring: #a3a39a;
+                    --qm-chipline: rgba(40,41,36,.16);
+                    --qm-chipon: #252624;
+                    --qm-chipon-text: #faf9f5;
+                }
+            }
+
+            /* ═══ Light mode: learner Syllabus (phones) ════════════════════════════════════════════════════════════════
+               Phones only (max-width: 768px), switched on by <html data-learner-mobile-theme="light"> (Settings > Appearance,
+               set by mobile_theme.js). The page background, header and bottom nav come from the gate in mobile_light.css,
+               which lists .syl-mobile-layout (the list and the open subject), .syl-empty (no briefs yet) and .syl-retry-btn
+               (the error state) for this page. The list and the detail are drawn from the --qm-* tokens, so this block only
+               gives them their light values, the same as the Assignments, Quiz and Announcements pages.
+               Dark mode and the desktop layouts are untouched. To remove it, delete this block. */
+            @media (max-width: 768px) {
+
+                html[data-learner-mobile-theme="light"] .syl-mobile-head,
+                html[data-learner-mobile-theme="light"] .syl-mobile-search-wrap,
+                html[data-learner-mobile-theme="light"] .syl-mobile-chips,
+                html[data-learner-mobile-theme="light"] .syl-mobile-list,
+                html[data-learner-mobile-theme="light"] .syl-mobile-detail {
+                    --qm-title: #282924;
+                    --qm-body: #4a4b44;
+                    --qm-muted: #73746d;
+                    --qm-faint: #a3a39a;
+                    --qm-line: rgba(40,41,36,.09);
+                    --qm-press: rgba(38,39,35,.04);
+                    --qm-surf: #f1efe8;
+                    --qm-ring: #a3a39a;
+                    --qm-chipline: rgba(40,41,36,.16);
+                    --qm-chipon: #252624;
+                    --qm-chipon-text: #faf9f5;
+                }
+
+            }
+        </style>`;
+}
+
+// ─────────────────────────────────────────────
+// PHONE LIST: rows, search, term, and the open subject
+// ─────────────────────────────────────────────
+window._sylMobTerm = '';
+window._sylMobDetail = false;
+
+// The line under the title: which term, whether it is the current one, and how many subjects are showing.
+function sylMobileSummary(active, cur, shown, total, term) {
+    const count = term ? `${shown} of ${total} subject${total === 1 ? '' : 's'}` : `${total} subject${total === 1 ? '' : 's'}`;
+    return `<b>Term ${active}</b> · ${active === cur ? 'Current · ' : ''}${count}`;
+}
+
+// One subject: a book, the subject, then the teacher and how many topics. Tapping opens it.
+function sylMobileRowHtml(b, idx) {
+    const topics = Array.isArray(b.topics) ? b.topics : [];
+    const meta = [b.teacher ? sylEsc(b.teacher) : '', topics.length ? `${topics.length} topic${topics.length === 1 ? '' : 's'}` : 'No topics yet']
+        .filter(Boolean).join(' · ');
     return `
-        <div class="syl-card">
-            <div class="syl-card-header">
-                <div>
-                    <div class="syl-subject">${brief.subject}</div>
-                    <div class="syl-teacher">${brief.teacher}</div>
+                <div class="syl-mobile-row" role="button" tabindex="0" data-idx="${idx}" data-term="${sylEsc(b.term)}"
+                    onclick="openMobileSyllabusBrief(${idx})"
+                    onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openMobileSyllabusBrief(${idx}); }">
+                    <div class="syl-mobile-row-icon">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision" aria-hidden="true">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                        </svg>
+                    </div>
+                    <div class="syl-mobile-row-body">
+                        <div class="syl-mobile-row-title">${sylEsc(b.subject)}</div>
+                        <div class="syl-mobile-row-meta">${meta}</div>
+                    </div>
+                    <svg class="syl-mobile-row-chevron" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="1.9" fill="none" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision" aria-hidden="true">
+                        <path d="m9 18 6-6-6-6"></path>
+                    </svg>
+                </div>`;
+}
+
+// Shows the subjects of the chosen term that match the search box, and keeps the counts line and the empty state in step.
+function sylMobileApply() {
+    const list = document.getElementById('sylMobileList');
+    if (!list) return;
+    const briefs = window._sylBriefs || [];
+    const active = Number(window._syllabusActiveTerm);
+    const cur = Number(window._sylCurrentTerm);
+    const term = window._sylMobTerm || '';
+    let inTerm = 0, shown = 0;
+    list.querySelectorAll('.syl-mobile-row').forEach(row => {
+        const b = briefs[Number(row.dataset.idx)];
+        if (!b) return;
+        const here = Number(b.term) === active;
+        if (here) inTerm++;
+        const hay = `${b.subject || ''} ${b.teacher || ''} ${(Array.isArray(b.topics) ? b.topics : []).join(' ')}`.toLowerCase();
+        const show = here && (!term || hay.includes(term));
+        row.style.display = show ? '' : 'none';
+        row.classList.toggle('syl-mobile-row--first', show && shown === 0);
+        if (show) shown++;
+    });
+    const sub = document.getElementById('sylMobileSub');
+    if (sub) sub.innerHTML = sylMobileSummary(active, cur, shown, inTerm, term);
+    const empty = document.getElementById('sylMobileSearchEmpty');
+    if (empty) {
+        const none = !!term && shown === 0;
+        empty.style.display = none ? 'flex' : 'none';
+        const label = document.getElementById('sylMobileSearchEmptyText');
+        if (label && none) label.textContent = `No matches for "${(document.getElementById('sylMobileSearch')?.value || '').trim()}"`;
+    }
+    // Rows coming and going change the page's scrollable height without a real scroll event, so the
+    // bottom nav and header are re-checked (the same fix the other phone lists use).
+    if (typeof window.recalcMobileScrollUI === 'function') [0, 100, 200, 300, 400].forEach(delay => setTimeout(() => window.recalcMobileScrollUI(), delay));
+}
+
+window.sylMobileSearch = function (val) {
+    if (window.learnerPageState) window.learnerPageState.update('syllabus', { mobileSearch: val });
+    window._sylMobTerm = String(val || '').toLowerCase().trim();
+    sylMobileApply();
+};
+
+// One open subject: the term, the title, when it was updated, who teaches it and how much is in it,
+// then the teacher's note, the topics and the assessment weighting.
+function sylMobileDetailHtml(b) {
+    const topics = Array.isArray(b.topics) ? b.topics : [];
+    const assess = Array.isArray(b.assessments) ? b.assessments : [];
+    const isCur = Number(b.term) === Number(window._sylCurrentTerm);
+    const updated = sylFullDate(b.updated_at);
+
+    const noteHtml = b.notes
+        ? `<div class="syl-mobile-detail-label">Note from ${sylEsc(b.teacher)}</div><p class="syl-mobile-detail-text">${sylEsc(b.notes)}</p>` : '';
+    const topicsHtml = topics.length
+        ? `<div class="syl-mobile-detail-label">Syllabus topics</div><ol class="syl-mobile-topics">${topics.map((t, i) => `<li><span>${i < 9 ? '0' : ''}${i + 1}</span>${sylEsc(t)}</li>`).join('')}</ol>` : '';
+    const assessHtml = assess.length
+        ? `<div class="syl-mobile-detail-label">Assessment weighting</div><div>${assess.map(a => `
+                <div class="syl-mobile-assess">
+                    <div class="syl-mobile-assess-row"><span class="syl-mobile-assess-type">${sylEsc(a.type)}</span><span class="syl-mobile-assess-weight">${sylEsc(a.weight)}%</span></div>
+                    <div class="syl-mobile-assess-track"><div class="syl-mobile-assess-fill" style="width:${Math.max(0, Math.min(100, Number(a.weight) || 0))}%;"></div></div>
+                </div>`).join('')}</div>` : '';
+    const emptyHtml = (!noteHtml && !topicsHtml && !assessHtml)
+        ? `<p class="syl-mobile-detail-text syl-mobile-detail-text--quiet">No details have been posted for this subject yet.</p>` : '';
+
+    return `${sylQuietStyle()}
+        <div class="syl-mobile-layout">
+            <article class="syl-mobile-detail">
+                <div class="syl-mobile-detail-top">
+                    <span class="syl-mobile-detail-eyebrow">Term ${sylEsc(b.term)}</span>
+                    ${isCur ? '<span class="syl-mobile-detail-status">Current</span>' : ''}
                 </div>
-                <div class="syl-updated">${updatedDate}</div>
-            </div>
-            ${topicsHtml}
-            ${assessHtml}
-            ${notesHtml}
+                <h1 class="syl-mobile-detail-title">${sylEsc(b.subject)}</h1>
+                ${updated ? `<div class="syl-mobile-detail-posted">Updated ${sylEsc(updated)}</div>` : ''}
+                <div class="syl-mobile-detail-facts">
+                    <div class="syl-mobile-detail-fact">
+                        <div class="syl-mobile-detail-fact-label">Teacher</div>
+                        <div class="syl-mobile-detail-fact-value">${sylEsc(b.teacher)}</div>
+                    </div>
+                    <div class="syl-mobile-detail-fact">
+                        <div class="syl-mobile-detail-fact-label">Topics</div>
+                        <div class="syl-mobile-detail-fact-value syl-mobile-detail-fact-value--num">${topics.length}</div>
+                        <div class="syl-mobile-detail-fact-note">${assess.length} assessment${assess.length === 1 ? '' : 's'}</div>
+                    </div>
+                </div>
+                ${noteHtml}${topicsHtml}${assessHtml}${emptyHtml}
+            </article>
         </div>`;
 }
+
+window.openMobileSyllabusBrief = function (idx) {
+    if (window.innerWidth > 899) return;
+    const b = (window._sylBriefs || [])[idx];
+    const apiArea = document.getElementById('api-content-area');
+    if (!b || !apiArea) return;
+
+    // Keep where the list was scrolled, then stop the scroll listener from saving the detail's scroll over it.
+    saveSyllabusPageState();
+    window._sylMobDetail = true;
+
+    const iframe = document.getElementById('mainFrame');
+    const myClassContent = document.getElementById('myClassContent');
+    const mainContent = document.querySelector('.main-content');
+    if (iframe) iframe.style.display = 'none';
+    apiArea.style.display = 'block';
+    if (myClassContent) myClassContent.classList.remove('active');
+    if (mainContent) mainContent.scrollTop = 0;
+
+    sessionStorage.setItem('lastLearnerPage', 'syllabus');
+    if (window.configureHeader) {
+        window.configureHeader({
+            title: b.subject || 'Syllabus', mode: 'detail', detailType: 'Syllabus', backLabel: 'Syllabus',
+            backAction: () => window.fetchSyllabus(),
+        });
+    }
+    // detail mode hides the bottom nav; the phone detail screens keep it
+    const nav = document.getElementById('mobileBottomNav');
+    if (nav) nav.style.setProperty('display', 'flex', 'important');
+
+    apiArea.innerHTML = sylMobileDetailHtml(b);
+    if (mainContent) mainContent.scrollTop = 0;
+};
 
 // ─────────────────────────────────────────────
 // TAB SWITCHER — works for both desktop & mobile
@@ -1001,13 +1133,13 @@ window.switchSylTab = function(term) {
         window.sylSelectFirst();
     }
 
-    // ── Mobile panels ──
-    document.querySelectorAll('.syl-mob-panel').forEach(p => p.style.display = 'none');
-    document.querySelectorAll('.syl-tab').forEach(t => t.classList.remove('syl-tab-active'));
-    const mobPanel = document.getElementById(`syl-mob-panel-${term}`);
-    const mobTab   = document.getElementById(`syl-mob-tab-${term}`);
-    if (mobPanel) mobPanel.style.display = 'block';
-    if (mobTab)   mobTab.classList.add('syl-tab-active');
+    // ── Phone chips and list ──
+    document.querySelectorAll('.syl-mobile-chip').forEach(c => {
+        const on = Number(c.dataset.term) === Number(term);
+        c.classList.toggle('on', on);
+        c.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    sylMobileApply();
 };
 
 
