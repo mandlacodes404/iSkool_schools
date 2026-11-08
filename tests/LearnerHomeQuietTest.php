@@ -174,6 +174,20 @@ final class LearnerHomeQuietTest extends TestCase
         // the service worker caches /assets/ by full URL: a changed file under an unchanged ?v= is never fetched again
         $php = $this->source('learner_dashboard.php');
         $this->assertStringContainsString('learner/manual.css?v=8.8', $php);
-        $this->assertStringContainsString('learner/manual.js?v=12.1', $php);
+        $this->assertStringContainsString('learner/manual.js?v=12.2', $php);
+    }
+
+    public function test_the_stylesheet_the_home_script_adds_is_the_same_version_as_the_page_link(): void
+    {
+        // manual.js adds its own <link> to manual.css when Home opens, after every other stylesheet, so it wins ties.
+        // It once asked for ?v=8.7 while the page asked for ?v=8.8: the installed app then painted the old Home look
+        // (grey card, dark button, boxed rows) over the new markup. The script now reuses the page's own link, and its
+        // fallback must be the same URL as that link.
+        $js = $this->source('assets/js/learner/manual.js');
+        $php = $this->source('learner_dashboard.php');
+        $this->assertSame(1, preg_match('#<link rel="stylesheet" href="assets/css/learner/(manual\.css\?v=[0-9.]+)">#', $php, $page));
+        $this->assertSame(1, preg_match("#const manualStyleHref = pageManualStyle \? pageManualStyle\.getAttribute\('href'\) : 'assets/css/learner/(manual\.css\?v=[0-9.]+)';#", $js, $script));
+        $this->assertSame($page[1], $script[1], 'manual.js and learner_dashboard.php ask for different versions of manual.css');
+        $this->assertSame(1, substr_count($js, 'manual.css?v='), 'only one place in manual.js names a version of manual.css');
     }
 }
