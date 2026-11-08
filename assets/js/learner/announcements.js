@@ -103,6 +103,7 @@ function saveAnnouncementPageState() {
         mainScroll:    mainContent ? mainContent.scrollTop : 0,
         panelScroll:   (document.querySelector('.lan-body') || {}).scrollTop || 0,
         mobileSearch: document.getElementById('lanMobileSearch')?.value || '',
+        mobileFilter: window._lanMobFilter || 'all',
         openFolders: Array.from(document.querySelectorAll('.lan-mobile-folder-body:not(.collapsed)')).map(el => el.id),
         // Desktop sender groups the learner has folded away (open is the default)
         collapsedTeachers: Array.from(window._lanCollapsed || []),
@@ -143,14 +144,11 @@ function restoreAnnouncementPageState() {
                     window.lanMobileSearch(state.mobileSearch);
                 }
             }
+            if (state.mobileFilter && state.mobileFilter !== 'all') window.lanMobileSetFilter(state.mobileFilter);
             if (Array.isArray(state.openFolders)) {
                 document.querySelectorAll('.lan-mobile-folder-body').forEach(body => {
-                    const open = state.openFolders.includes(body.id);
-                    body.classList.toggle('collapsed', !open);
                     const header = body.previousElementSibling;
-                    if (header) header.classList.toggle('lan-mobile-folder-header--collapsed', !open);
-                    const chev = header?.querySelector('.lan-mobile-folder-chevron');
-                    if (chev) chev.classList.toggle('open', open);
+                    if (header) lanMobileSetFolder(header, body, state.openFolders.includes(body.id));
                 });
             }
             if (Array.isArray(state.collapsedTeachers)) {
@@ -162,7 +160,9 @@ function restoreAnnouncementPageState() {
                 : state.selectedId
                     ? (window._allLearnerAnnouncementsFlat || []).findIndex(ann => String(ann.id) === String(state.selectedId))
                 : state.selectedIdx;
-            if (selectedIdx !== null && selectedIdx !== undefined && selectedIdx >= 0) {
+            // The desktop pane marks what it shows as read, so it is only driven on desktop: on a phone the
+            // learner has not opened anything yet, and nothing should turn read behind their back.
+            if (window.innerWidth >= 900 && selectedIdx !== null && selectedIdx !== undefined && selectedIdx >= 0) {
                 window.selectDesktopLearnerAnnouncement(selectedIdx);
             }
             const sidebar = document.querySelector('.lan-sidebar-scroll');
@@ -247,16 +247,11 @@ function renderAnnouncements(data) {
             </div>
 
             <!-- ═══ MOBILE EMPTY ═══ -->
-            <div class="lan-mobile-search-wrap">
-                <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
-                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                </svg>
-                <input type="text" class="lan-mobile-search" id="lanMobileSearch"
-                    placeholder="Search announcements..." oninput="lanMobileSearch(this.value)">
-            </div>
+            ${lanMobileHeadHtml('', false)}
+            ${lanMobileSearchHtml()}
             <div class="lan-mobile-list">
                 <div class="lan-mobile-empty">
-                    <svg viewBox="0 0 24 24" width="48" height="48" stroke="#f28c38" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <svg viewBox="0 0 24 24" width="44" height="44" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp" aria-hidden="true">
                         <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
                         <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
                     </svg>
@@ -266,9 +261,6 @@ function renderAnnouncements(data) {
             </div>`;
         return;
     }
-
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
     // ── Build flat list (school-wide FIRST, then teacher) ──
     window._allLearnerAnnouncementsFlat = [];
@@ -322,119 +314,74 @@ function renderAnnouncements(data) {
 
         <!-- ═══ MOBILE LIST ═══ -->`;
 
-    html += `
-        <div class="lan-mobile-search-wrap">
-            <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
-                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            </svg>
-            <input type="text" class="lan-mobile-search" id="lanMobileSearch"
-                placeholder="Search announcements..." oninput="lanMobileSearch(this.value)">
-        </div>`;
+    // ── Phone: title and counts, search, filter chips, then the sender groups ──
+    // (the desktop layout above is a separate tree; the phone tree below is hidden from 900px up)
+    // Read state is loaded here, before the phone rows are drawn, so the dots are right on the first paint.
+    lanLoadRead();
+    const lanReadSet = window._lanRead;
+    const flatAll = window._allLearnerAnnouncementsFlat;
+    const unreadTotal = flatAll.filter(a => !lanReadSet.has(lanKey(a))).length;
+
+    html += lanMobileHeadHtml(lanMobileSummary(unreadTotal, flatAll.length), unreadTotal > 0);
+    html += lanMobileSearchHtml();
+    html += `<div class="lan-mobile-chips" role="group" aria-label="Filter announcements">${
+        [['all', 'All'], ['unread', 'Unread'], ['school', 'School-wide'], ['teacher', 'Teachers']]
+            .map(([k, label]) => `<button type="button" class="lan-mobile-chip${k === 'all' ? ' on' : ''}" data-filter="${k}" aria-pressed="${k === 'all'}" onclick="lanMobileSetFilter('${k}')">${label}</button>`)
+            .join('')
+    }</div>`;
+
+    window._lanMobFilter = 'all';
+    window._lanMobTerm = '';
 
     html += `<div class="lan-mobile-list">`;
 
-    let mobileFlatIdx = 0;
+    // Zero-results state: hidden by default, shown by lanMobileApply() when a search or filter matches nothing.
+    html += `
+        <div class="lan-mobile-empty lan-mobile-search-empty" id="lanMobileSearchEmpty" style="display:none;">
+            <svg viewBox="0 0 24 24" width="40" height="40" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp" aria-hidden="true">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <p class="lan-mobile-empty-title" id="lanMobileSearchEmptyText">No matches</p>
+            <p class="lan-mobile-empty-body" id="lanMobileSearchEmptyBody">Try a different word or sender.</p>
+        </div>`;
 
-    // Mobile — School-wide section
+    // The flat list is school-wide first, then each teacher, so a group's rows are consecutive indexes into it.
+    let flatCursor = 0;
+    const mobileGroups = [];
     if (hasSchoolWide) {
-        const swGid = 'lan-mg-school';
+        mobileGroups.push({ gid: 'lan-mg-school', name: 'School-wide', sub: 'Whole school', rows: schoolWide.map(() => flatCursor++) });
+    }
+    teacherEntries.forEach(({ teacher, items }, i) => {
+        mobileGroups.push({ gid: `lan-mg-teacher-${i}`, name: teacher, sub: '', rows: items.map(() => flatCursor++) });
+    });
+
+    // A group starts open while it holds something unread. If nothing is unread anywhere the first group opens,
+    // so the page is never just a column of folded labels. A learner's own choice (saved page state) wins over
+    // this, see restoreAnnouncementPageState().
+    const groupHasUnread = g => g.rows.some(idx => !lanReadSet.has(lanKey(flatAll[idx])));
+    const anyOpen = mobileGroups.some(groupHasUnread);
+
+    mobileGroups.forEach((g, gi) => {
+        const open = anyOpen ? groupHasUnread(g) : gi === 0;
         html += `
-            <div class="lan-mobile-folder-header lan-mobile-folder-header--collapsed" onclick="toggleLanMobileFolder('${swGid}', this)">
-                <div class="lan-mobile-folder-icon">
-                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="#73746d" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-                    </svg>
-                </div>
-                <span class="lan-mobile-folder-name">School-wide</span>
-                <span class="lan-mobile-folder-count">${schoolWide.length} announcement${schoolWide.length !== 1 ? 's' : ''}</span>
-                <svg class="lan-mobile-folder-chevron lan-icon-crisp" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="9 18 15 12 9 6"/>
+            <div class="lan-mobile-folder-header${open ? '' : ' lan-mobile-folder-header--collapsed'}" role="button" tabindex="0"
+                aria-expanded="${open}" aria-controls="${g.gid}"
+                data-search="${escapeLearnerAnnouncementHtml(g.name.toLowerCase())}"
+                onclick="toggleLanMobileFolder('${g.gid}', this)"
+                onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggleLanMobileFolder('${g.gid}', this); }">
+                <span class="lan-mobile-folder-name">${escapeLearnerAnnouncementHtml(g.name)}</span>
+                <span class="lan-mobile-folder-sub">${escapeLearnerAnnouncementHtml(g.sub)}</span>
+                <span class="lan-mobile-folder-count">${g.rows.length}</span>
+                <svg class="lan-mobile-folder-chevron lan-icon-crisp" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="m6 9 6 6 6-6"/>
                 </svg>
             </div>
-            <div class="lan-mobile-folder-body collapsed" id="${swGid}">`;
-
-        schoolWide.forEach(ann => {
-            const isNew = new Date(ann.created_at) > sevenDaysAgo;
-            html += `
-                <div class="lan-mobile-card lan-mobile-card--school" role="button" tabindex="0"
-                    data-title="${escapeLearnerAnnouncementHtml(ann.title||''). toLowerCase()}"
-                    onclick="openMobileLearnerAnnouncement(${mobileFlatIdx})"
-                    onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openMobileLearnerAnnouncement(${mobileFlatIdx}); }">
-                    <div class="lan-mobile-card-icon">
-                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="#73746d" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
-                            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
-                            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
-                        </svg>
-                    </div>
-                    <div class="lan-mobile-card-body">
-                        <div class="lan-mobile-card-title">
-                            <span class="lan-mobile-card-title-text">${escapeLearnerAnnouncementHtml(ann.title || 'Announcement')}</span>
-                            ${ann.is_edited ? '<span class="lan-edited-tag">Edited</span>' : ''}
-                        </div>
-                        <div class="lan-mobile-card-date">${escapeLearnerAnnouncementHtml(ann.display_date || '')}</div>
-                    </div>
-                    <div class="lan-mobile-card-chevron">
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
-                            <polyline points="9 18 15 12 9 6"></polyline>
-                        </svg>
-                    </div>
-                </div>`;
-            mobileFlatIdx++;
+            <div class="lan-mobile-folder-body${open ? '' : ' collapsed'}" id="${g.gid}">`;
+        g.rows.forEach((idx, rowIdx) => {
+            html += lanMobileRowHtml(flatAll[idx], idx, rowIdx === 0, !lanReadSet.has(lanKey(flatAll[idx])));
         });
-        html += `</div>`; // close school folder body
-    }
-
-    // Mobile — Teacher section
-    if (hasTeacher) {
-        let teacherGroupIdx = 0;
-        for (const { teacher, items } of teacherEntries) {
-            const tGid = `lan-mg-teacher-${teacherGroupIdx}`;
-            html += `
-                <div class="lan-mobile-folder-header lan-mobile-folder-header--collapsed" onclick="toggleLanMobileFolder('${tGid}', this)">
-                    <div class="lan-mobile-folder-icon">
-                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="#73746d" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-                        </svg>
-                    </div>
-                    <span class="lan-mobile-folder-name">${escapeLearnerAnnouncementHtml(teacher)}</span>
-                    <span class="lan-mobile-folder-count">${items.length} announcement${items.length !== 1 ? 's' : ''}</span>
-                    <svg class="lan-mobile-folder-chevron lan-icon-crisp" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="9 18 15 12 9 6"/>
-                    </svg>
-                </div>
-                <div class="lan-mobile-folder-body collapsed" id="${tGid}">`;
-            teacherGroupIdx++;
-            items.forEach(ann => {
-                const isNew = new Date(ann.created_at) > sevenDaysAgo;
-                html += `
-                    <div class="lan-mobile-card" role="button" tabindex="0"
-                        data-title="${escapeLearnerAnnouncementHtml(ann.title||''). toLowerCase()}"
-                        onclick="openMobileLearnerAnnouncement(${mobileFlatIdx})"
-                        onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openMobileLearnerAnnouncement(${mobileFlatIdx}); }">
-                        <div class="lan-mobile-card-icon">
-                            <svg viewBox="0 0 24 24" width="20" height="20" stroke="#73746d" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
-                                <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
-                                <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
-                            </svg>
-                        </div>
-                        <div class="lan-mobile-card-body">
-                            <div class="lan-mobile-card-title">
-                                <span class="lan-mobile-card-title-text">${escapeLearnerAnnouncementHtml(ann.title || 'Announcement')}</span>
-                                ${ann.is_edited ? '<span class="lan-edited-tag">Edited</span>' : ''}
-                            </div>
-                            <div class="lan-mobile-card-date">${escapeLearnerAnnouncementHtml(ann.display_date || '')}</div>
-                        </div>
-                        <div class="lan-mobile-card-chevron">
-                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp">
-                                <polyline points="9 18 15 12 9 6"></polyline>
-                            </svg>
-                        </div>
-                    </div>`;
-                mobileFlatIdx++;
-            });
-            html += `</div>`; // close teacher folder body
-        }
-    }
+        html += `</div>`; // close .lan-mobile-folder-body
+    });
 
     html += `</div>`; // close .lan-mobile-list
 
@@ -444,30 +391,70 @@ function renderAnnouncements(data) {
     window.lanInitDesktop();
 }
 
-window.lanMobileSearch = function(val) {
-    if (window.learnerPageState) window.learnerPageState.update('announcements', { mobileSearch: val });
-    const term = val.toLowerCase().trim();
-    document.querySelectorAll('.lan-mobile-folder-body').forEach(body => {
-        const header = body.previousElementSibling;
-        const folderName = header ? header.querySelector('.lan-mobile-folder-name').textContent.toLowerCase() : '';
-        const cards = body.querySelectorAll('.lan-mobile-card');
-        let visible = 0;
-        cards.forEach(card => {
-            const title = (card.dataset.title || '');
-            const show = !term || title.includes(term) || folderName.includes(term);
-            card.style.display = show ? '' : 'none';
-            if (show) visible++;
-        });
-        if (header) header.style.display = (visible || !term || folderName.includes(term)) ? '' : 'none';
-        body.style.display = (visible || !term || folderName.includes(term)) ? '' : 'none';
-        if (term && visible) {
-            body.classList.remove('collapsed');
-            if (header) header.classList.remove('lan-mobile-folder-header--collapsed');
-            const chev = header ? header.querySelector('.lan-mobile-folder-chevron') : null;
-            if (chev) chev.classList.add('open');
-        }
-    });
-};
+// ── Phone list helpers ──────────────────────────────────────────────────────────────────────────────────────
+
+// The title and counts line at the top of the phone list. "Mark all read" only shows while something is unread.
+function lanMobileHeadHtml(summaryHtml, showMarkAll) {
+    return `
+        <div class="lan-mobile-head">
+            <h1 class="lan-mobile-title">Announcements</h1>
+            ${summaryHtml || showMarkAll ? `<div class="lan-mobile-subrow">
+                <p class="lan-mobile-sub" id="lanMobileSub">${summaryHtml}</p>
+                <button type="button" class="lan-mobile-markall" id="lanMobileMarkAll" onclick="lanMobileMarkAllRead()"${showMarkAll ? '' : ' hidden'}>Mark all read</button>
+            </div>` : ''}
+        </div>`;
+}
+
+function lanMobileSearchHtml() {
+    return `
+        <div class="lan-mobile-search-wrap">
+            <svg viewBox="0 0 24 24" width="17" height="17" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lan-icon-crisp" aria-hidden="true">
+                <circle cx="11" cy="11" r="7.5"/><line x1="20.5" y1="20.5" x2="16.3" y2="16.3"/>
+            </svg>
+            <input type="text" class="lan-mobile-search" id="lanMobileSearch"
+                placeholder="Search announcements" aria-label="Search announcements" oninput="lanMobileSearch(this.value)">
+        </div>`;
+}
+
+function lanMobileSummary(unread, total) {
+    if (!total) return '';
+    return unread === 0 ? 'All caught up' : `<b>${unread} unread</b> · ${total} in all`;
+}
+
+// The bell at the start of each row. It draws in currentColor, so the colour comes from the
+// .lan-mobile-row-icon classes (muted when read, orange when unread) and follows light and dark mode with no extra rules.
+function lanMobileBell() {
+    return '<svg class="lan-icon-crisp" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>';
+}
+
+// The one line under a row's title: the state word where there is one, then when it was posted, then "Edited".
+function lanMobileMeta(ann, unread) {
+    const parts = [];
+    if (unread) parts.push('<span class="lan-mobile-st lan-mobile-st--new">Unread</span>');
+    if (ann.display_date) parts.push(escapeLearnerAnnouncementHtml(ann.display_date));
+    if (ann.is_edited) parts.push('Edited');
+    return parts.join(' · ');
+}
+
+function lanMobileRowHtml(ann, idx, first, unread) {
+    const kind = ann._type === 'school' ? 'school' : 'teacher';
+    return `
+            <div class="lan-mobile-row${first ? ' lan-mobile-row--first' : ''}${unread ? ' lan-mobile-row--unread' : ''}" role="button" tabindex="0"
+                data-idx="${idx}" data-kind="${kind}" data-state="${unread ? 'unread' : 'read'}"
+                onclick="openMobileLearnerAnnouncement(${idx})"
+                onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openMobileLearnerAnnouncement(${idx}); }">
+                <div class="lan-mobile-row-icon${unread ? ' lan-mobile-row-icon--unread' : ''}">${lanMobileBell()}</div>
+                <div class="lan-mobile-row-body">
+                    <div class="lan-mobile-row-title">
+                        <span class="lan-mobile-row-title-text">${escapeLearnerAnnouncementHtml(ann.title || 'Announcement')}</span>
+                    </div>
+                    <div class="lan-mobile-row-meta">${lanMobileMeta(ann, unread)}</div>
+                </div>
+                <svg class="lan-mobile-row-chevron lan-icon-crisp" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="1.9" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="m9 18 6-6-6-6"></path>
+                </svg>
+            </div>`;
+}
 
 // Re-checks the bottom nav/header scroll-state repeatedly for a short
 // window after a folder is expanded/collapsed — same fix as in
@@ -484,14 +471,19 @@ function recheckMobileNavAfterToggle() {
     });
 }
 
+// Open or fold one sender group, keeping the header, the body and the screen-reader state in step.
+function lanMobileSetFolder(header, body, open) {
+    body.classList.toggle('collapsed', !open);
+    header.classList.toggle('lan-mobile-folder-header--collapsed', !open);
+    header.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+
 window.toggleLanMobileFolder = function(id, headerEl) {
     const body = document.getElementById(id);
-    if (!body) return;
-    const chevron = headerEl.querySelector('.lan-mobile-folder-chevron');
-    const isOpen = !body.classList.contains('collapsed');
-    body.classList.toggle('collapsed', isOpen);
-    headerEl.classList.toggle('lan-mobile-folder-header--collapsed', isOpen);
-    if (chevron) chevron.classList.toggle('open', !isOpen);
+    if (!body || !headerEl) return;
+    // While a search or filter is on, every group with a match is shown open; folding one would change nothing.
+    if (body.closest('.lan-mobile-list')?.classList.contains('is-filtering')) return;
+    lanMobileSetFolder(headerEl, body, body.classList.contains('collapsed'));
     saveAnnouncementPageState();
 
     // Opening/closing a folder changes the page's actual scrollable
@@ -500,6 +492,115 @@ window.toggleLanMobileFolder = function(id, headerEl) {
     // height — it could stay stuck showing whatever state it was in
     // before the folder toggled.
     recheckMobileNavAfterToggle();
+};
+
+window._lanMobFilter = 'all';
+window._lanMobTerm = '';
+
+// Shows the rows that match both the filter chip and the search box, and only the groups that still have a row.
+// Folding is left alone (the list just shows every match while filtering), so clearing the search puts it back as it was.
+function lanMobileApply() {
+    const list = document.querySelector('.lan-mobile-list');
+    if (!list) return;
+    const flat = window._allLearnerAnnouncementsFlat || [];
+    const term = window._lanMobTerm || '';
+    const filter = window._lanMobFilter || 'all';
+    const filtering = !!term || filter !== 'all';
+    list.classList.toggle('is-filtering', filtering);
+
+    let totalVisible = 0;
+    list.querySelectorAll('.lan-mobile-folder-body').forEach(body => {
+        const header = body.previousElementSibling;
+        // a search that names the sender shows all of that group's rows
+        const groupHit = !!term && (header?.dataset.search || '').includes(term);
+        let visible = 0;
+        body.querySelectorAll('.lan-mobile-row').forEach(row => {
+            const ann = flat[Number(row.dataset.idx)] || {};
+            const okFilter = filter === 'all'
+                || (filter === 'unread' && row.dataset.state === 'unread')
+                || (filter === row.dataset.kind);
+            const hay = `${ann.title || ''} ${ann.message || ''}`.toLowerCase();
+            const show = okFilter && (!term || groupHit || hay.includes(term));
+            row.style.display = show ? '' : 'none';
+            row.classList.toggle('lan-mobile-row--first', show && visible === 0);
+            if (show) visible++;
+        });
+        if (header) {
+            header.style.display = visible ? '' : 'none';
+            const count = header.querySelector('.lan-mobile-folder-count');
+            if (count) count.textContent = String(visible);
+        }
+        body.style.display = visible ? '' : 'none';
+        totalVisible += visible;
+    });
+
+    // Zero-results empty state: only when a search or filter is on and nothing matched.
+    const searchEmpty = document.getElementById('lanMobileSearchEmpty');
+    if (searchEmpty) {
+        const showEmpty = filtering && totalVisible === 0;
+        searchEmpty.style.display = showEmpty ? 'flex' : 'none';
+        if (showEmpty) {
+            const label = document.getElementById('lanMobileSearchEmptyText');
+            const body = document.getElementById('lanMobileSearchEmptyBody');
+            const raw = (document.getElementById('lanMobileSearch')?.value || '').trim();
+            const none = { unread: "You're all caught up", school: 'No school-wide announcements', teacher: 'No teacher announcements' };
+            if (label) label.textContent = raw ? `No matches for "${raw}"` : (none[filter] || 'No matches');
+            if (body) body.textContent = raw ? 'Try a different word or sender.' : (filter === 'unread' ? 'Nothing unread right now.' : 'Pick another filter to see more.');
+        }
+    }
+
+    // Filtering rows/folders in/out of view changes the page's scrollable
+    // height just like expanding/collapsing a folder does, but without a
+    // real scroll event — same recalculation fix as the folder toggle.
+    recheckMobileNavAfterToggle();
+}
+
+window.lanMobileSetFilter = function(key) {
+    window._lanMobFilter = key || 'all';
+    document.querySelectorAll('.lan-mobile-chip').forEach(chip => {
+        const on = chip.dataset.filter === window._lanMobFilter;
+        chip.classList.toggle('on', on);
+        chip.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    lanMobileApply();
+    saveAnnouncementPageState();
+};
+
+window.lanMobileSearch = function(val) {
+    if (window.learnerPageState) window.learnerPageState.update('announcements', { mobileSearch: val });
+    window._lanMobTerm = String(val || '').toLowerCase().trim();
+    lanMobileApply();
+};
+
+// Brings every row, the counts line and the "Mark all read" button back in line with the read state.
+function lanMobileRefreshRead() {
+    const flat = window._allLearnerAnnouncementsFlat || [];
+    const read = window._lanRead || new Set();
+    document.querySelectorAll('.lan-mobile-row').forEach(row => {
+        const ann = flat[Number(row.dataset.idx)];
+        if (!ann) return;
+        const unread = !read.has(lanKey(ann));
+        row.dataset.state = unread ? 'unread' : 'read';
+        row.classList.toggle('lan-mobile-row--unread', unread);
+        const icon = row.querySelector('.lan-mobile-row-icon');
+        if (icon) icon.classList.toggle('lan-mobile-row-icon--unread', unread);
+        const meta = row.querySelector('.lan-mobile-row-meta');
+        if (meta) meta.innerHTML = lanMobileMeta(ann, unread);
+    });
+    const unreadTotal = flat.filter(a => !read.has(lanKey(a))).length;
+    const sub = document.getElementById('lanMobileSub');
+    if (sub) sub.innerHTML = lanMobileSummary(unreadTotal, flat.length);
+    const btn = document.getElementById('lanMobileMarkAll');
+    if (btn) btn.hidden = unreadTotal === 0;
+    lanMobileApply();
+}
+
+window.lanMobileMarkAllRead = function () {
+    if (!window._lanRead) lanLoadRead();
+    (window._allLearnerAnnouncementsFlat || []).forEach(a => window._lanRead.add(lanKey(a)));
+    lanSaveRead();
+    lanMobileRefreshRead();
+    if (typeof window.lanRenderDesktopList === 'function') window.lanRenderDesktopList();
 };
 
 function escapeLearnerAnnouncementHtml(value) {
@@ -530,14 +631,6 @@ function renderLearnerAnnouncementBody(ann) {
     return formatLearnerAnnouncementMessage(ann ? ann.message : '');
 }
 
-function getLearnerAnnouncementInitials(name) {
-    const clean = String(name ?? '').trim();
-    if (!clean) return '?';
-    const parts = clean.split(/\s+/).filter(Boolean);
-    if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
-    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
-}
-
 window.openMobileLearnerAnnouncement = function(flatIdx) {
     if (window.innerWidth > 899) return;
 
@@ -563,23 +656,35 @@ window.openMobileLearnerAnnouncement = function(flatIdx) {
     const isSchool = ann._type === 'school';
     const sender = ann.teacher || ann.sender || (isSchool ? 'School Admin' : 'Teacher');
     const roleLabel = isSchool ? 'School Admin' : 'Teacher';
-    const initials = ann.initials || getLearnerAnnouncementInitials(sender);
+
+    // Opening an announcement on a phone reads it. "Mark as unread" at the bottom puts it back.
+    if (!window._lanRead) lanLoadRead();
+    window._lanRead.add(lanKey(ann));
+    lanSaveRead();
 
     apiArea.innerHTML = `
         <article class="lan-mobile-detail">
-            <div class="lan-mobile-detail-author-row">
-                <div class="lan-mobile-detail-avatar">${escapeLearnerAnnouncementHtml(initials)}</div>
-                <div class="lan-mobile-detail-author-info">
-                    <div class="lan-mobile-detail-author-name">${escapeLearnerAnnouncementHtml(sender)}</div>
-                    <div class="lan-mobile-detail-author-role">
-                        <span>Author</span><span class="lan-mobile-detail-role-sep">|</span><span class="lan-mobile-detail-role-badge">${escapeLearnerAnnouncementHtml(roleLabel)}</span>
-                    </div>
-                    <div class="lan-mobile-detail-posted">Posted ${escapeLearnerAnnouncementHtml(ann.display_date || '')}</div>
+            <div class="lan-mobile-detail-top">
+                <span class="lan-mobile-detail-eyebrow">${isSchool ? 'School-wide' : 'Announcement'}</span>
+                ${ann.is_edited ? '<span class="lan-mobile-detail-status lan-mobile-detail-status--edited">Edited</span>' : ''}
+            </div>
+            <h1 class="lan-mobile-detail-title learner-mobile-detail-title">${escapeLearnerAnnouncementHtml(ann.title || 'Announcement')}</h1>
+            ${ann.display_date ? `<div class="lan-mobile-detail-posted">Posted ${escapeLearnerAnnouncementHtml(ann.display_date)}</div>` : ''}
+            <div class="lan-mobile-detail-facts">
+                <div class="lan-mobile-detail-fact">
+                    <div class="lan-mobile-detail-fact-label">From</div>
+                    <div class="lan-mobile-detail-fact-value">${escapeLearnerAnnouncementHtml(sender)}</div>
+                    <div class="lan-mobile-detail-fact-note">${escapeLearnerAnnouncementHtml(roleLabel)}</div>
+                </div>
+                <div class="lan-mobile-detail-fact">
+                    <div class="lan-mobile-detail-fact-label">Sent to</div>
+                    <div class="lan-mobile-detail-fact-value">${isSchool ? 'Whole school' : 'Your class'}</div>
                 </div>
             </div>
-            <h1 class="lan-mobile-detail-title learner-mobile-detail-title">${escapeLearnerAnnouncementHtml(ann.title || 'Announcement')}${ann.is_edited ? '<span class="lan-edited-tag">Edited</span>' : ''}</h1>
-            ${ann.is_edited ? `<div class="lan-edited-meta">Edited ${escapeLearnerAnnouncementHtml(ann.edited_date || '')}</div>` : ''}
+            <div class="lan-mobile-detail-label">Message</div>
+            ${ann.is_edited ? `<div class="lan-mobile-detail-edited">Edited ${escapeLearnerAnnouncementHtml(ann.edited_date || '')} · Changes are highlighted</div>` : ''}
             <div class="lan-mobile-detail-message">${renderLearnerAnnouncementBody(ann)}</div>
+            <button type="button" class="lan-mobile-detail-action lan-mobile-detail-action--quiet" id="lanMobileReadBtn" onclick="lanMobileToggleRead(${flatIdx})">Mark as unread</button>
         </article>`;
 
     if (mainContent) mainContent.scrollTop = 0;
@@ -593,6 +698,17 @@ window.openMobileLearnerAnnouncementById = function(announcementId, scope = '') 
     if (flatIdx >= 0) {
         window.openMobileLearnerAnnouncement(flatIdx);
     }
+};
+
+window.lanMobileToggleRead = function (flatIdx) {
+    const ann = (window._allLearnerAnnouncementsFlat || [])[flatIdx];
+    if (!ann) return;
+    if (!window._lanRead) lanLoadRead();
+    const key = lanKey(ann);
+    if (window._lanRead.has(key)) window._lanRead.delete(key); else window._lanRead.add(key);
+    lanSaveRead();
+    const btn = document.getElementById('lanMobileReadBtn');
+    if (btn) btn.textContent = window._lanRead.has(key) ? 'Mark as unread' : 'Mark as read';
 };
 
 // ─────────────────────────────────────────────

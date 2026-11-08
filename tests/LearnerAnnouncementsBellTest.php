@@ -3,11 +3,12 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Guards for the learner announcements icon on phones. The teacher app draws Announcements as a bell (see
- * TeacherAnnouncementsBellTest), so the learner phone app does too: the menu row and its search result, each card of the
+ * TeacherAnnouncementsBellTest), so the learner phone app does too: the menu row and its search result, each row of the
  * announcements list (school-wide and teacher), and the empty list. They were a megaphone and a speaker. The desktop
  * learner menu and desktop panel are not part of this change.
  * The icons were checked by eye in a phone-sized browser with the real stylesheets and the real icon markup, in dark and
- * light mode; these read the sources so the bell is not quietly swapped back.
+ * light mode; these read the sources so the bell is not quietly swapped back. (The rows of the quiet list draw the bell
+ * in currentColor, so the colour comes from the row's classes; see LearnerAnnouncementsQuietTest.)
  */
 final class LearnerAnnouncementsBellTest extends TestCase
 {
@@ -57,34 +58,32 @@ final class LearnerAnnouncementsBellTest extends TestCase
         $this->assertStringContainsString("'var(--dm-i-' + x.r.ico + ')'", $js);
     }
 
-    public function test_each_card_of_the_phone_list_uses_the_bell_in_the_list_grey(): void
+    public function test_each_row_of_the_phone_list_uses_the_bell_in_the_row_colour(): void
     {
         $js = $this->source('assets/js/learner/announcements.js');
-        $this->assertSame(2, substr_count($js, '<div class="lan-mobile-card-icon">'), 'a school-wide card and a teacher card');
+        // one bell, drawn by one helper that every row (school-wide and teacher) goes through
+        $bell = $this->between($js, 'function lanMobileBell() {', '}');
+        $this->assertStringContainsString(self::BELL_BODY, $bell);
+        $this->assertStringContainsString(self::BELL_CLAPPER, $bell);
+        $this->assertStringContainsString('stroke="currentColor"', $bell, 'the row classes colour the bell: muted when read, orange when unread');
+        $this->assertStringContainsString('width="24" height="24"', $bell, 'the row icon slot is 24px; the markup says the same');
+        $this->assertStringNotContainsString(self::OLD_MEGAPHONE, $bell);
 
-        $from = 0;
-        for ($i = 0; $i < 2; $i++) {
-            $from = strpos($js, '<div class="lan-mobile-card-icon">', $from) + 1;
-            $icon = $this->between($js, '<div class="lan-mobile-card-icon">', '</div>', $from - 1);
-            $this->assertStringContainsString(self::BELL_BODY, $icon);
-            $this->assertStringContainsString(self::BELL_CLAPPER, $icon);
-            $this->assertStringContainsString('stroke="#73746d" stroke-width="1.5"', $icon, 'the card icon keeps the list grey, at the teacher list\'s weight');
-            $this->assertStringContainsString('width="20" height="20"', $icon, 'the stylesheet sizes it 20px; the markup says the same');
-            $this->assertStringNotContainsString(self::OLD_MEGAPHONE, $icon);
-        }
+        $row = $this->between($js, 'function lanMobileRowHtml(', '</svg>');
+        $this->assertStringContainsString('<div class="lan-mobile-row-icon', $row);
+        $this->assertStringContainsString('${lanMobileBell()}', $row, 'the row draws the bell through the helper');
         $this->assertStringNotContainsString(self::OLD_MEGAPHONE, $js, 'the old megaphone is gone from the learner list');
     }
 
-    public function test_the_empty_phone_list_uses_the_bell_and_keeps_the_orange_the_light_mode_rules_look_for(): void
+    public function test_the_empty_phone_list_uses_the_bell(): void
     {
         $js = $this->source('assets/js/learner/announcements.js');
         $empty = $this->between($js, '<div class="lan-mobile-empty">', '</svg>');
         $this->assertStringContainsString(self::BELL_BODY, $empty);
         $this->assertStringContainsString(self::BELL_CLAPPER, $empty);
         $this->assertStringNotContainsString(self::OLD_SPEAKER, $empty);
-        // announcements.css darkens strokes of exactly this colour in light mode, so it must stay
-        $this->assertStringContainsString('stroke="#f28c38"', $empty);
-        $this->assertStringContainsString('[stroke="#f28c38" i] { stroke: #b85f12; }', $this->source('assets/css/learner/announcements.css'));
+        // drawn in the page's own muted colour (at half strength), so light mode needs no rule of its own for it
+        $this->assertStringContainsString('stroke="currentColor"', $empty);
     }
 
     public function test_the_home_page_and_the_menu_link_already_used_a_bell(): void
@@ -98,7 +97,7 @@ final class LearnerAnnouncementsBellTest extends TestCase
     {
         // the service worker caches /assets/ by full URL: a changed file under an unchanged ?v= is never fetched again
         $php = $this->source('learner_dashboard.php');
-        foreach (['learner/mobile_menu.css?v=2.2', 'learner/mobile_menu.js?v=1.5', 'learner/announcements.js?v=9.6'] as $pinned) {
+        foreach (['learner/mobile_menu.css?v=2.2', 'learner/mobile_menu.js?v=1.5', 'learner/announcements.js?v=9.7'] as $pinned) {
             $this->assertStringContainsString($pinned, $php, "$pinned is not what the page links");
         }
     }
