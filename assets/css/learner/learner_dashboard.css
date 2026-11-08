@@ -396,9 +396,17 @@ body {
    parent (.main-content) must be the scroll container instead.
 ──────────────────────────────────────────────────────────────────────── */
 @media (max-width: 767px) {
+    /* Where the phone top bar ends. The bar is --lh-header-h tall (set on .main-header below, so a normal screen and a
+       detail screen are the same height) and sits env(safe-area-inset-top) from the top with the same amount again in
+       its own padding. The page area (#api-content-area) starts exactly here, so there is no strip between the two. */
+    :root {
+        --lh-header-h: 64px;
+        --lh-header-bottom: calc(var(--lh-header-h) + 2 * env(safe-area-inset-top, 0px));
+    }
+
     .main-content {
         overflow: visible;
-        padding-top: calc(68px + env(safe-area-inset-top, 0));
+        padding-top: var(--lh-header-bottom);
         min-height: 100vh;
         min-height: 100dvh;
         height: 100vh;
@@ -407,8 +415,8 @@ body {
     }
 
     #api-content-area {
-        height: calc(100vh - 68px - env(safe-area-inset-top, 0));
-        height: calc(100dvh - 68px - env(safe-area-inset-top, 0));
+        height: calc(100vh - var(--lh-header-bottom));
+        height: calc(100dvh - var(--lh-header-bottom));
         overflow-y: auto;
         overflow-x: hidden;
         -webkit-overflow-scrolling: touch;
@@ -2311,6 +2319,18 @@ iframe {
         border-bottom: 0.5px solid rgba(255, 255, 255, 0.15) !important;
         backdrop-filter: blur(10px) !important;
         -webkit-backdrop-filter: blur(10px) !important;
+    }
+}
+
+/* ── PHONE TOP BAR HEIGHT — phones only ───────────────────────────────────
+   The bar used to be as tall as its tallest part: 64px on a normal screen (the menu button is 47px) but 61px on a
+   detail screen (the back button replaces it), and #api-content-area started at a fixed 68px, so 4px (7px on a detail
+   screen) of empty space showed between them. The bar now has one height, --lh-header-h (defined with the page area's
+   offset above), and the page area starts at its bottom edge. Its parts are centred inside it as before.
+──────────────────────────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+    .main-header {
+        height: calc(var(--lh-header-h) + env(safe-area-inset-top, 0px));
     }
 }
 

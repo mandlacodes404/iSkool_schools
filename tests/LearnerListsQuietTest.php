@@ -237,7 +237,7 @@ final class LearnerListsQuietTest extends TestCase
     {
         // the service worker caches /assets/ by full URL: a changed file under an unchanged ?v= is never fetched again
         $php = $this->source('learner_dashboard.php');
-        foreach (['learner/assignments.css?v=4.4', 'learner/quiz.css?v=6.9', 'learner/assignments.js?v=10.5', 'learner/quiz.js?v=12.9'] as $pinned) {
+        foreach (['learner/assignments.css?v=4.4', 'learner/quiz.css?v=7.0', 'learner/assignments.js?v=10.5', 'learner/quiz.js?v=12.9'] as $pinned) {
             $this->assertStringContainsString($pinned, $php, "$pinned is not what the page links");
         }
     }
