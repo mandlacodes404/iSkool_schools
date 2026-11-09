@@ -198,102 +198,8 @@ function renderGrades(data) {
     window._grCurrentTerm = currentTerm;
     window._grTarget = targetEmail;
 
-    // ── BUILD MOBILE HTML (unchanged accordion) ──────────────────────────────
-    let mobileHtml = `<div class="grades-wrap">`;
-    mobileHtml += `
-        <div class="grades-header">
-            <div class="grades-header-right">
-                <div class="grades-mobile-search-wrap">
-                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none">
-                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                    </svg>
-                    <input type="text" class="grades-search" id="gradesSearch"
-                        placeholder="Search quiz..." oninput="gradesSearch(this.value)">
-                </div>
-                <button class="grades-report-btn" onclick="generateGradesReport('${targetEmail}')">
-                    <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
-                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                        <polyline points="14 2 14 8 20 8"/>
-                        <line x1="16" y1="13" x2="8" y2="13"/>
-                        <line x1="16" y1="17" x2="8" y2="17"/>
-                    </svg>
-                    Progress Report
-                </button>
-            </div>
-        </div>`;
-
-    if (groups.length === 0) {
-        mobileHtml += `
-            <div class="grades-mobile-empty">
-                <svg viewBox="0 0 24 24" width="48" height="48" stroke="#68d391" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="18" y1="20" x2="18" y2="10"/>
-                    <line x1="12" y1="20" x2="12" y2="4"/>
-                    <line x1="6"  y1="20" x2="6"  y2="14"/>
-                </svg>
-                <p class="grades-mobile-empty-title">No grades yet</p>
-                <p class="grades-mobile-empty-body">Your teachers haven't published any grades. Check back soon.</p>
-            </div>`;
-    } else {
-        groups.forEach((group, gi) => {
-            const quizzes = group.quizzes;
-            mobileHtml += `
-            <div class="subject-card" id="scard-${gi}">
-                <div class="subject-header subject-header--collapsed" onclick="toggleSubjectCard(${gi})">
-                    <div class="subject-name">
-                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#73746d" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-                        </svg>
-                        ${escHtml(group.group)}
-                        <span class="subject-count">${quizzes.length} assessment${quizzes.length !== 1 ? 's' : ''}</span>
-                    </div>
-                    <svg class="subject-chevron" id="scard-chev-${gi}"
-                         viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
-                        <polyline points="9 18 15 12 9 6"/>
-                    </svg>
-                </div>
-                <div id="scard-body-${gi}" style="display:none;">
-                    <div class="view-toggle-bar">
-                        <button class="view-toggle-btn active-view" id="vt-list-${gi}"
-                                onclick="switchGradesView(${gi},'list')">
-                            <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none">
-                                <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
-                                <line x1="8" y1="18" x2="21" y2="18"/>
-                                <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/>
-                                <line x1="3" y1="18" x2="3.01" y2="18"/>
-                            </svg>
-                            Quiz List
-                        </button>
-                        <button class="view-toggle-btn" id="vt-term-${gi}"
-                                onclick="switchGradesView(${gi},'term')">
-                            <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none">
-                                <rect x="4" y="2" width="16" height="20" rx="2"/>
-                                <line x1="8" y1="6" x2="16" y2="6"/>
-                                <line x1="8" y1="10" x2="16" y2="10"/>
-                                <line x1="8" y1="14" x2="16" y2="14"/>
-                            </svg>
-                            Term Marks
-                        </button>
-                    </div>
-                    <div class="quiz-list" id="view-list-${gi}">
-                        ${buildQuizList(quizzes, gi)}
-                    </div>
-                    <div class="term-marks-view" id="view-term-${gi}" style="display:none;">
-                        <div class="term-selector-wrap">
-                            <select class="term-selector" onchange="refreshTermTable(${gi}, this.value)">
-                                ${[1,2,3,4].map(t =>
-                                    `<option value="${t}" ${t === currentTerm ? 'selected' : ''}>Term ${t}</option>`
-                                ).join('')}
-                            </select>
-                        </div>
-                        <div id="term-table-wrap-${gi}">
-                            ${buildTermTable(quizzes, currentTerm)}
-                        </div>
-                    </div>
-                </div>
-            </div>`;
-        });
-    }
-    mobileHtml += `</div>`;
+    // ── BUILD MOBILE HTML (the quiet Grades; see PHONE LAYOUT below) ─────────
+    const mobileHtml = grqBuild(groups, currentTerm, targetEmail);
 
     // ── ASSEMBLE FULL HTML ───────────────────────────────────────────────────
     let html = '';
@@ -494,8 +400,8 @@ function grNote(q) {
     return 'Partially graded';
 }
 
-// Same weighting rules as buildTermTable (summative + published only; weights over 100 are
-// scaled down; no weights set = equal shares).
+// The term mark's weighting rules, used by the desktop detail and the phone's subject rows and Term mark tab
+// (summative + published only; weights over 100 are scaled down; no weights set = equal shares).
 function grCalc(quizzes) {
     const summative = quizzes.filter(q => q.is_summative);
     const published = summative.filter(q => Number(q.publish_marks) === 1);
@@ -847,175 +753,6 @@ window.selectDesktopGradeSubject = function (gi, term, keepOpen) {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// BUILD QUIZ LIST
-// ─────────────────────────────────────────────────────────────────────────────
-function buildOpenEndedGradingStatus(q) {
-    if (q.has_open_ended != 1) {
-        return { badge: '', details: '' };
-    }
-
-    if (q.publish_marks != 1) {
-        return {
-            badge: '<span class="quiz-grading-status pending">Pending</span>',
-            details: '<p><strong>Grading Status:</strong> Pending - awaiting teacher grading.</p>'
-        };
-    }
-
-    if (q.quiz_fully_graded === true || q.is_fully_graded === true) {
-        return {
-            badge: '<span class="quiz-grading-status done">Fully Graded</span>',
-            details: '<p><strong>Grading Status:</strong> <span class="grades-status-text--done">Fully Graded</span></p>'
-        };
-    }
-
-    return {
-        badge: '<span class="quiz-grading-status partial">Partially Graded</span>',
-        details: '<p><strong>Grading Status:</strong> <span class="grades-status-text--pending">Partially Graded</span></p>'
-    };
-}
-
-function buildQuizList(quizzes, gi) {
-    if (!quizzes || quizzes.length === 0) return '<p class="no-summative">No quizzes found.</p>';
-
-    return quizzes.map((q, qi) => {
-        const published  = q.publish_marks == 1;
-        const pct        = q.total > 0 ? Math.round((q.score / q.total) * 100) : 0;
-        const pillClass  = !published ? 'hidden-score' : pct >= 75 ? 'high' : pct >= 50 ? 'mid' : 'low';
-        const pillText   = published ? `${pct}%` : 'Pending';
-        const gradingStatus = buildOpenEndedGradingStatus(q);
-        const titleHtml  = published
-            ? `<span class="quiz-title-link" onclick="openQuizReview(${q.result_id}, event)">${escHtml(q.quiz_title)}</span>`
-            : escHtml(q.quiz_title);
-
-        const summBadge = q.is_summative
-            ? `<span class="summative-badge">
-                <svg viewBox="0 0 24 24" width="9" height="9" stroke="currentColor" stroke-width="2" fill="none">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                    <polyline points="22 4 12 14.01 9 11.01"/>
-                </svg>
-               </span>` : '';
-
-        const iconHtml = published
-            ? `<svg viewBox="0 0 24 24" width="16" height="16" stroke="#73746d" stroke-width="1.3" fill="none">
-                    <line x1="18" y1="20" x2="18" y2="10"/>
-                    <line x1="12" y1="20" x2="12" y2="4"/>
-                    <line x1="6"  y1="20" x2="6"  y2="14"/>
-               </svg>`
-            : `<svg viewBox="0 0 24 24" width="16" height="16" stroke="#73746d" stroke-width="1.3" fill="none">
-                    <rect x="3" y="11" width="18" height="11" rx="2"/>
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-               </svg>`;
-
-        const duration    = q.duration;
-        const timeTaken   = formatDuration(q.time_taken, duration * 60);
-        const submittedAt = formatDate(q.submitted_at);
-
-        const detailsHtml = `
-            <div class="quiz-row-details" id="qdetail-${gi}-${qi}">
-                ${published ? `
-                    <p><strong>Score:</strong> ${escHtml(String(q.score))} / ${escHtml(String(q.total))} &nbsp;·&nbsp; <strong>${pct}%</strong></p>
-                ` : `<p class="grades-unpublished-note">Marks not published yet.</p>`}
-                ${gradingStatus.details}
-                <p class="grades-detail-spaced"><strong>Duration:</strong> ${escHtml(String(duration))} min</p>
-                <p><strong>Time Taken:</strong> ${escHtml(timeTaken)}</p>
-                <p><strong>Taken on:</strong> ${escHtml(submittedAt)}</p>
-                ${published ? `<div class="grade-inline-stats loading" id="gstats-${gi}-${qi}" data-quiz-id="${q.quiz_id}">Loading performance overview...</div>` : ''}
-            </div>`;
-
-        return `
-        <div class="quiz-row ${published ? '' : 'quiz-unpublished'}"
-             data-title="${escAttr(q.quiz_title)}"
-             data-score="${published ? pct : 0}">
-            <div class="quiz-row-header" onclick="toggleQuizRow('qdetail-${gi}-${qi}', 'qexp-${gi}-${qi}', 'gstats-${gi}-${qi}')">
-                <div class="quiz-row-icon">${iconHtml}</div>
-                <div class="quiz-row-title">
-                    ${titleHtml}
-                    ${summBadge}
-                </div>
-                <span class="quiz-score-pill ${pillClass}">${pillText}</span>
-                <button class="quiz-expand-btn" id="qexp-${gi}-${qi}" type="button"
-                        onclick="event.stopPropagation(); toggleQuizRow('qdetail-${gi}-${qi}', 'qexp-${gi}-${qi}', 'gstats-${gi}-${qi}')">
-                    <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none">
-                        <polyline points="6 9 12 15 18 9"/>
-                    </svg>
-                </button>
-            </div>
-            ${detailsHtml}
-        </div>`;
-    }).join('');
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// BUILD TERM TABLE
-// ─────────────────────────────────────────────────────────────────────────────
-function buildTermTable(quizzes, selectedTerm) {
-    const summative = quizzes.filter(q =>
-        q.is_summative && q.term_number === parseInt(selectedTerm)
-    );
-
-    if (summative.length === 0) {
-        return `<p class="no-summative">No summative assessments in Term ${selectedTerm}.</p>`;
-    }
-
-    const published = summative.filter(q => q.publish_marks === 1);
-    let weights      = published.map(q => parseFloat(q.weight_percent) || 0);
-    let totalWeight  = weights.reduce((a, b) => a + b, 0);
-
-    if (totalWeight > 100) {
-        const factor = 100 / totalWeight;
-        weights = weights.map(w => w * factor);
-        totalWeight = 100;
-    } else if (totalWeight === 0 && published.length > 0) {
-        const equal = 100 / published.length;
-        weights = published.map(() => equal);
-        totalWeight = 100;
-    }
-
-    let pubIdx = 0;
-    let earnedTotal = 0;
-
-    let rows = summative.map(q => {
-        if (q.publish_marks !== 1) {
-            return `<tr>
-                <td>${escHtml(q.quiz_title)}</td>
-                <td>—</td><td>—</td><td>—</td>
-            </tr>`;
-        }
-        const w       = weights[pubIdx++];
-        const earned  = q.total > 0 ? (q.score / q.total) * w : 0;
-        earnedTotal  += earned;
-        return `<tr>
-            <td>${escHtml(q.quiz_title)}</td>
-            <td>${w.toFixed(1)}%</td>
-            <td>${escHtml(String(q.score))}/${escHtml(String(q.total))}</td>
-            <td class="term-table-earned">${earned.toFixed(1)}/${w.toFixed(1)}</td>
-        </tr>`;
-    }).join('');
-
-    const finalPct  = totalWeight > 0 ? Math.round((earnedTotal / totalWeight) * 100) : 0;
-    const remaining = 100 - totalWeight;
-
-    return `
-    <div class="term-table-wrap">
-        <table class="term-table">
-            <thead>
-                <tr><th>Quiz</th><th>Weight</th><th>Score</th><th>Earned</th></tr>
-            </thead>
-            <tbody>
-                ${rows}
-                <tr class="term-table-total">
-                    <td>TOTAL</td>
-                    <td>${totalWeight.toFixed(1)}%</td>
-                    <td>—</td>
-                    <td class="term-total-result">${earnedTotal.toFixed(1)}/${totalWeight.toFixed(1)} → ${finalPct}%</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-    ${remaining > 0 ? `<p class="term-still-pending">${remaining.toFixed(1)}% of term still to be assessed</p>` : ''}`;
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
 // UI INTERACTIONS
 // ─────────────────────────────────────────────────────────────────────────────
 function restoreGradesStateAfterRender() {
@@ -1040,34 +777,6 @@ function restoreGradesStateAfterRender() {
             }
         }
 
-        if (state.openSubjects) {
-            document.querySelectorAll('[id^="scard-body-"]').forEach(body => {
-                const gi = body.id.replace('scard-body-', '');
-                const open = state.openSubjects.includes(gi);
-                const chev = document.getElementById(`scard-chev-${gi}`);
-                const header = chev ? chev.closest('.subject-header') : null;
-                body.style.display = open ? 'block' : 'none';
-                if (chev) chev.classList.toggle('open', open);
-                if (header) header.classList.toggle('subject-header--collapsed', !open);
-            });
-        }
-
-        Object.keys(state.views).forEach(prefix => {
-            if (!String(prefix).startsWith('dt')) window.switchGradesView(prefix, state.views[prefix]);
-        });
-
-        Object.keys(state.terms).forEach(prefix => {
-            if (!String(prefix).startsWith('dt')) {
-                const selector = document.querySelector(`#view-term-${prefix} .term-selector`);
-                if (selector) selector.value = state.terms[prefix];
-                window.refreshTermTable(prefix, state.terms[prefix]);
-            }
-        });
-
-        (state.openRows || []).forEach(rowId => {
-            if (!String(rowId).startsWith('qdetail-dt')) openQuizRowByDetailId(rowId);
-        });
-
         if (state.desktopSelection && state.desktopSelection.type === 'subject' && apiArea?._gradesData) {
             const ds = state.desktopSelection;
             if (apiArea._gradesData.groups?.[ds.groupIndex]) {
@@ -1087,30 +796,14 @@ function restoreGradesStateAfterRender() {
     }
 }
 
-function openQuizRowByDetailId(detailId) {
-    const detail = document.getElementById(detailId);
-    if (!detail) return;
-    const suffix = detailId.replace('qdetail-', '');
-    const btn = document.getElementById(`qexp-${suffix}`);
-    const stats = document.getElementById(`gstats-${suffix}`);
-    detail.style.display = 'block';
-    if (btn) btn.classList.add('open');
-    if (stats) loadGradeStatsInline(stats.id);
-}
-
-function saveOpenQuizRows() {
-    const openRows = Array.from(document.querySelectorAll('.quiz-row-details'))
-        .filter(el => el.style.display === 'block')
-        .map(el => el.id);
-    saveGradesState({ openRows });
-}
-
 function wireGradesScrollState() {
     const mainContent = document.querySelector('.main-content');
     const panel = document.querySelector('.gr-body');
     if (mainContent && mainContent.dataset.gradesScrollState !== '1') {
         mainContent.dataset.gradesScrollState = '1';
         mainContent.addEventListener('scroll', () => {
+            // a subject screen (phone) has its own scroll; the list keeps the place it was left at
+            if (window._grqDetailGi !== null && window._grqDetailGi !== undefined) return;
             const state = getGradesState();
             saveGradesState({ scroll: Object.assign({}, state.scroll, { main: mainContent.scrollTop }) });
         }, { passive: true });
@@ -1140,224 +833,416 @@ function recheckMobileNavAfterToggle() {
     });
 }
 
-window.toggleSubjectCard = function (gi) {
-    const body = document.getElementById(`scard-body-${gi}`);
-    const chev = document.getElementById(`scard-chev-${gi}`);
-    const header = chev ? chev.closest('.subject-header') : null;
-    if (!body || !chev) return;
-    const open = chev.classList.contains('open');
-    body.style.display = open ? 'none' : 'block';
-    chev.classList.toggle('open', !open);
-    if (header) header.classList.toggle('subject-header--collapsed', open);
-    const openSubjects = Array.from(document.querySelectorAll('[id^="scard-chev-"].open'))
-        .map(el => el.id.replace('scard-chev-', ''));
-    saveGradesState({ openSubjects });
+// ───────────────────────────────────────────────────────────
+// PHONE LAYOUT (899px and narrower): the quiet Grades
+//
+// The same look as Quizzes, Assignments and Syllabus: a title with one line under it, three plain numbers, term chips,
+// the latest marks and the subjects as hairline rows with a progress ring, weights 400 and 600 only. A subject opens as
+// a screen of its own (header back button, Results and Term mark tabs); a result opens a sheet with the class
+// comparison. Marks follow the desktop rules (grCalc: summative and published only, weighted); the desktop layout and
+// the Progress Report are untouched.
+// ───────────────────────────────────────────────────────────
+function grqPct(q) {
+    return Number(q.publish_marks) === 1 && Number(q.total) > 0 ? Math.round((Number(q.score) / Number(q.total)) * 100) : null;
+}
 
-    // Opening/closing a subject card changes the page's actual scrollable
-    // height without firing a real 'scroll' event, so the bottom nav's
-    // background (and header) never got re-checked against the new
-    // height — it could stay stuck showing whatever state it was in
-    // before the card toggled.
-    recheckMobileNavAfterToggle();
-};
+function grqChevron() {
+    return '<svg class="ggq-chev" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>';
+}
 
-window.toggleQuizRow = function (detailId, btnId, statsId) {
-    const detail = document.getElementById(detailId);
-    const btn    = document.getElementById(btnId);
-    if (!detail) return;
-    const isOpen = detail.style.display === 'block';
-    detail.style.display = isOpen ? 'none' : 'block';
-    if (btn) btn.classList.toggle('open', !isOpen);
-    if (!isOpen && statsId) loadGradeStatsInline(statsId);
-    saveOpenQuizRows();
-
-    // Same reasoning as toggleSubjectCard above — expanding a quiz row's
-    // detail also changes scrollable height without a real scroll event.
-    recheckMobileNavAfterToggle();
-};
-
-// Works for both mobile (numeric gi) and desktop (string pfx like "dt0")
-window.switchGradesView = function (gi, view) {
-    const listEl  = document.getElementById(`view-list-${gi}`);
-    const termEl  = document.getElementById(`view-term-${gi}`);
-    const btnList = document.getElementById(`vt-list-${gi}`);
-    const btnTerm = document.getElementById(`vt-term-${gi}`);
-    if (!listEl || !termEl || !btnList || !btnTerm) return;
-    if (view === 'list') {
-        listEl.style.display = 'block';
-        termEl.style.display = 'none';
-        btnList.classList.add('active-view');
-        btnTerm.classList.remove('active-view');
-    } else {
-        listEl.style.display = 'none';
-        termEl.style.display = 'block';
-        btnList.classList.remove('active-view');
-        btnTerm.classList.add('active-view');
+// A 24px ring that fills to the mark; a dashed ring when there is no mark yet. Orange under 50%.
+function grqRing(pct, soon) {
+    if (pct === null) {
+        return '<span class="ggq-ring ggq-ring--none"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-dasharray="2 3.4"/></svg></span>';
     }
-    const state = getGradesState();
-    saveGradesState({ views: Object.assign({}, state.views, { [gi]: view }) });
+    const c = 57.8;
+    const d = (c * Math.max(0, Math.min(100, pct)) / 100).toFixed(1);
+    return `<span class="ggq-ring${soon ? ' ggq-ring--soon' : ''}"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" aria-hidden="true">
+        <circle class="ggq-ring-track" cx="12" cy="12" r="9.2" stroke-width="1.7"/>
+        <circle class="ggq-ring-fill" cx="12" cy="12" r="9.2" stroke-width="1.7" stroke-linecap="round" stroke-dasharray="${d} ${c}" transform="rotate(-90 12 12)"/>
+    </svg></span>`;
+}
+
+// Same thresholds as the Progress Report's status
+function grqStatus(avg) {
+    if (avg === null) return '';
+    return avg >= 60 ? 'On track' : avg >= 40 ? 'Needs improvement' : 'At risk';
+}
+
+function grqFullDate(v) {
+    const t = parseLearnerGradeTime(v);
+    return t ? new Date(t).toLocaleDateString('en-ZA', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
+}
+
+// The subjects that have results in a term, newest activity first (the groups are already in that order), with their
+// term mark. q is the lower-cased search text: a subject matches by its name or by the title of one of its results.
+function grqSubjects(term, q) {
+    const out = [];
+    (window._grGroups || []).forEach((g, gi) => {
+        const L = grQuizzes(gi, term);
+        if (!L.length) return;
+        const name = String(g.group || '');
+        if (q && !name.toLowerCase().includes(q) && !L.some(x => String(x.quiz_title || '').toLowerCase().includes(q))) return;
+        const done = L.filter(x => Number(x.publish_marks) === 1 && parseLearnerGradeTime(x.submitted_at));
+        done.sort((a, b) => parseLearnerGradeTime(b.submitted_at) - parseLearnerGradeTime(a.submitted_at));
+        out.push({
+            gi, name, n: L.length,
+            pend: L.filter(x => Number(x.publish_marks) !== 1).length,
+            pct: grCalc(L).pct,
+            latest: done.length ? done[0].submitted_at : ''
+        });
+    });
+    return out;
+}
+
+// The newest published results across the subjects (three; eight while searching)
+function grqLatest(term, q) {
+    const rows = [];
+    (window._grGroups || []).forEach((g, gi) => {
+        grQuizzes(gi, term).forEach(x => {
+            if (Number(x.publish_marks) !== 1) return;
+            if (q && !String(x.quiz_title || '').toLowerCase().includes(q) && !String(g.group || '').toLowerCase().includes(q)) return;
+            rows.push({ g, x, t: parseLearnerGradeTime(x.submitted_at) });
+        });
+    });
+    rows.sort((a, b) => b.t - a.t);
+    return rows.slice(0, q ? 8 : 3);
+}
+
+function grqFind(resultId) {
+    const groups = window._grGroups || [];
+    for (let gi = 0; gi < groups.length; gi++) {
+        const x = (groups[gi].quizzes || []).find(z => String(z.result_id) === String(resultId));
+        if (x) return { g: groups[gi], gi, x };
+    }
+    return null;
+}
+
+function grqTermChips() {
+    const cur = Number(window._grCurrentTerm) || 1;
+    return `<div class="ggq-chips" role="group" aria-label="Term">${grTerms().map(t => {
+        const on = t === window._grqTerm;
+        return `<button type="button" class="ggq-chip${on ? ' on' : ''}" aria-pressed="${on}" onclick="grqSetTerm(${t})">${t === cur ? '<i class="ggq-cd"></i>' : ''}Term ${t}</button>`;
+    }).join('')}</div>`;
+}
+
+function grqSubHtml(term, avg) {
+    const status = grqStatus(avg);
+    return `Term ${term}${status ? ` &middot; <b>${status}</b>` : ''}`;
+}
+
+// A result as a row: ring, title, one line of detail, the mark. It opens the sheet.
+function grqResultRow(g, x, opts) {
+    const pct = grqPct(x);
+    const soon = pct !== null && pct < 50;
+    // in the list a result names its subject; inside a subject it says whether it counts towards the term mark
+    const parts = opts && opts.subject ? [escHtml(g.group || '')] : (x.is_summative ? ['Summative'] : ['Quiz']);
+    const when = grShortDate(x.submitted_at);
+    if (when) parts.push(when);
+    if (pct === null && x.has_open_ended == 1) parts.push('Awaiting grading');
+    const trail = pct === null
+        ? '<span class="ggq-pc ggq-pc--none">Pending</span>'
+        : `<span class="ggq-pc${soon ? ' ggq-pc--soon' : ''}">${pct}%${opts && opts.score ? `<small>${escHtml(String(x.score))} / ${escHtml(String(x.total))}</small>` : ''}</span>`;
+    return `<button type="button" class="ggq-row ggq-row--ring" onclick="grqOpenMark('${escAttr(String(x.result_id))}')">
+        ${grqRing(pct, soon)}
+        <span class="ggq-rb"><span class="ggq-rt">${escHtml(x.quiz_title || 'Quiz')}</span><span class="ggq-rm">${parts.join(' &middot; ')}</span></span>
+        ${trail}${grqChevron()}
+    </button>`;
+}
+
+function grqSubjectRow(s) {
+    const soon = s.pct !== null && s.pct < 50;
+    let meta = `${s.n} result${s.n === 1 ? '' : 's'}`;
+    if (soon) meta += ' &middot; <span class="ggq-soon">Needs attention</span>';
+    else if (s.pct === null && s.pend) meta += ' &middot; Marks pending';
+    else if (s.latest) meta += ` &middot; Latest ${escHtml(grShortDate(s.latest))}`;
+    return `<button type="button" class="ggq-row ggq-row--ring" onclick="openGradesSubject(${s.gi})">
+        ${grqRing(s.pct, soon)}
+        <span class="ggq-rb"><span class="ggq-rt">${escHtml(s.name)}</span><span class="ggq-rm">${meta}</span></span>
+        <span class="ggq-pc${soon ? ' ggq-pc--soon' : ''}${s.pct === null ? ' ggq-pc--none' : ''}">${s.pct === null ? '&mdash;' : s.pct + '%'}</span>${grqChevron()}
+    </button>`;
+}
+
+// Everything under the search box: the three numbers, the term chips, Latest marks, Subjects
+function grqListBody(term, q, email) {
+    const all = grqSubjects(term, '');
+    const marks = all.map(s => s.pct).filter(p => p !== null);
+    const avg = marks.length ? Math.round(marks.reduce((a, b) => a + b, 0) / marks.length) : null;
+    const attn = marks.filter(p => p < 50).length;
+    const subjects = grqSubjects(term, q);
+    const latest = grqLatest(term, q);
+    const report = `<button type="button" class="ggq-link" onclick="generateGradesReport('${escAttr(email || '')}')">Progress report${grqChevron()}</button>`;
+
+    let html = `<div class="ggq-glance">
+        <div class="ggq-g"><div class="ggq-gn">${avg === null ? '&mdash;' : avg + '%'}</div><div class="ggq-gl">Term average</div></div>
+        <div class="ggq-g"><div class="ggq-gn">${all.length}</div><div class="ggq-gl">Subject${all.length === 1 ? '' : 's'}</div></div>
+        <div class="ggq-g"><div class="ggq-gn${attn ? ' ggq-gn--soon' : ''}">${attn}</div><div class="ggq-gl">Needs attention</div></div>
+    </div>`;
+    html += grqTermChips();
+
+    if (!all.length) {
+        return html + `<div class="ggq-empty"><p class="ggq-empty-title">No results in Term ${term} yet</p><p class="ggq-empty-body">Choose another term, or check back when your teachers publish marks.</p></div><div class="ggq-label ggq-label--end">${report}</div>`;
+    }
+    if (!subjects.length) {
+        return html + `<div class="ggq-empty"><p class="ggq-empty-title">Nothing matches</p><p class="ggq-empty-body">No subject or result in Term ${term} has &ldquo;${escHtml(window._grqSearchRaw || '')}&rdquo; in its name.</p></div>`;
+    }
+
+    let linkPlaced = false;
+    if (latest.length) {
+        linkPlaced = true;
+        html += `<div class="ggq-label"><span>${q ? 'Results' : 'Latest marks'}</span>${report}</div>`;
+        html += latest.map(r => grqResultRow(r.g, r.x, { subject: true })).join('');
+    }
+    html += `<div class="ggq-label"><span>Subjects</span>${linkPlaced ? `<span class="ggq-c">${subjects.length}</span>` : report}</div>`;
+    html += subjects.map(grqSubjectRow).join('');
+    return html;
+}
+
+function grqRender() {
+    const body = document.getElementById('ggq-body');
+    const sub = document.getElementById('ggq-sub');
+    if (!body) return;
+    const term = window._grqTerm;
+    const marks = grqSubjects(term, '').map(s => s.pct).filter(p => p !== null);
+    const avg = marks.length ? Math.round(marks.reduce((a, b) => a + b, 0) / marks.length) : null;
+    if (sub) sub.innerHTML = grqSubHtml(term, avg);
+    body.innerHTML = grqListBody(term, window._grqSearch || '', window._grqEmail);
+}
+
+// The phone list. Called by renderGrades(); the result goes inside .grades-mobile-layout.
+function grqBuild(groups, currentTerm, email) {
+    const terms = grTerms();
+    const saved = Number(getGradesState().mobileTerm);
+    window._grqEmail = email;
+    window._grqTerm = terms.includes(saved) ? saved : (terms.includes(Number(currentTerm)) ? Number(currentTerm) : terms[terms.length - 1]);
+    window._grqSearch = '';
+    window._grqSearchRaw = '';
+    window._grqTab = 'results';
+    window._grqDetailGi = null;
+
+    if (!groups.length) {
+        return `<div class="ggq" id="ggq">
+            <header class="ggq-head"><h1 class="ggq-title">Grades</h1></header>
+            <div class="ggq-empty"><p class="ggq-empty-title">No grades yet</p><p class="ggq-empty-body">Your teachers haven't published any grades. Check back soon.</p></div>
+        </div>`;
+    }
+    const marks = grqSubjects(window._grqTerm, '').map(s => s.pct).filter(p => p !== null);
+    const avg = marks.length ? Math.round(marks.reduce((a, b) => a + b, 0) / marks.length) : null;
+    return `<div class="ggq" id="ggq">
+        <header class="ggq-head"><h1 class="ggq-title">Grades</h1><p class="ggq-sub" id="ggq-sub">${grqSubHtml(window._grqTerm, avg)}</p></header>
+        <label class="ggq-search">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+            <input type="search" class="ggq-search-input" id="gradesSearch" placeholder="Search subjects or results" autocomplete="off" aria-label="Search subjects or results" oninput="gradesSearch(this.value)">
+        </label>
+        <div id="ggq-body">${grqListBody(window._grqTerm, '', email)}</div>
+    </div>`;
+}
+
+window.grqSetTerm = function (t) {
+    window._grqTerm = Number(t);
+    saveGradesState({ mobileTerm: Number(t) });
+    if (window._grqDetailGi !== null && window._grqDetailGi !== undefined) grqDetailRefresh();
+    else grqRender();
 };
 
-// gi = ID prefix (mobile subject-card index), term = selected term value
-// sourceGi param kept for signature compatibility but no longer passed by any caller
-window.refreshTermTable = function (gi, term, sourceGi) {
-    const apiArea = document.getElementById('api-content-area');
-    if (!apiArea || !apiArea._gradesData) return;
-    const groupIndex = sourceGi !== undefined ? sourceGi : gi;
-    const group = apiArea._gradesData.groups[groupIndex];
-    if (!group) return;
-    const tableWrap = document.getElementById(`term-table-wrap-${gi}`);
-    if (!tableWrap) return;
-    tableWrap.innerHTML = buildTermTable(group.quizzes, term);
-    const state = getGradesState();
-    saveGradesState({ terms: Object.assign({}, state.terms, { [gi]: String(term) }) });
-};
-
-// Mobile search
+// Mobile search (the list)
 window.gradesSearch = function (val) {
     const state = getGradesState();
     saveGradesState({ search: Object.assign({}, state.search, { mobile: val }) });
-    const term = val.toLowerCase();
-    document.querySelectorAll('.subject-card').forEach(card => {
-        const subjectName = card.querySelector('.subject-name').textContent.toLowerCase();
-        const rows        = card.querySelectorAll('.quiz-row');
-        let visible = 0;
-        rows.forEach(r => {
-            const title = (r.dataset.title || '').toLowerCase();
-            const show  = title.includes(term) || subjectName.includes(term);
-            r.style.display = show ? 'block' : 'none';
-            if (show) visible++;
+    window._grqSearchRaw = String(val || '').trim();
+    window._grqSearch = window._grqSearchRaw.toLowerCase();
+    grqRender();
+};
+
+// ── a subject, as a screen of its own ──
+function grqTermMarkHtml(L, term) {
+    const calc = grCalc(L);
+    const summative = L.filter(x => x.is_summative);
+    if (!summative.length) {
+        return `<div class="ggq-empty"><p class="ggq-empty-title">No term mark for Term ${term}</p><p class="ggq-empty-body">This subject has no summative assessments in the term, so there is nothing to weigh yet.</p></div>`;
+    }
+    const remaining = Math.max(0, 100 - calc.weight);
+    let html = `<div class="ggq-block">
+        <div class="ggq-eyebrow">Term ${term} &middot; Term mark so far</div>
+        <div class="ggq-big">${calc.pct === null ? '&mdash;' : calc.pct + '%'}</div>
+        <div class="ggq-block-s">${calc.nPub ? `${calc.earned.toFixed(1)} out of ${calc.weight.toFixed(1)} &middot; <b>${Math.round(calc.weight)}%</b> of the term assessed` : 'No marks published yet'}</div>
+        <div class="ggq-prog" aria-hidden="true"><i style="width:${Math.max(0, Math.min(100, calc.weight)).toFixed(1)}%"></i></div>
+    </div>
+    <div class="ggq-label"><span>Summative assessments</span><span class="ggq-c">Earned</span></div>`;
+    html += summative.map(x => {
+        const per = calc.per.get(x.result_id);
+        if (!per) {
+            const wp = parseFloat(x.weight_percent) || 0;
+            return `<div class="ggq-tm"><span class="ggq-rb"><span class="ggq-rt">${escHtml(x.quiz_title || 'Quiz')}</span><span class="ggq-rm">Not published yet${wp ? ` &middot; ${wp}% of term` : ''}</span></span><span class="ggq-ern ggq-ern--none">&mdash;</span></div>`;
+        }
+        return `<div class="ggq-tm"><span class="ggq-rb"><span class="ggq-rt">${escHtml(x.quiz_title || 'Quiz')}</span><span class="ggq-rm">${escHtml(String(x.score))} / ${escHtml(String(x.total))} &middot; ${per.w.toFixed(1)}% of term</span></span><span class="ggq-ern">${per.e.toFixed(1)}<small>of ${per.w.toFixed(1)}</small></span></div>`;
+    }).join('');
+    if (remaining > 0.05) html += `<p class="ggq-note">${remaining.toFixed(1)}% of the term is still to be assessed.</p>`;
+    return html;
+}
+
+function grqDetailHtml(gi) {
+    const g = (window._grGroups || [])[gi];
+    if (!g) return '';
+    const term = window._grqTerm;
+    const tab = window._grqTab === 'mark' ? 'mark' : 'results';
+    const L = grQuizzes(gi, term);
+    const calc = grCalc(L);
+    const sub = `Term ${term} &middot; ${calc.pct !== null ? `<b>${calc.pct}% term mark</b> &middot; ` : ''}${L.length} result${L.length === 1 ? '' : 's'}`;
+    let html = `<header class="ggq-head"><h1 class="ggq-title">${escHtml(g.group || '')}</h1><p class="ggq-sub">${sub}</p></header>
+        ${grqTermChips()}
+        <div class="ggq-tabs" role="tablist">
+            <button type="button" role="tab" class="ggq-tab${tab === 'results' ? ' on' : ''}" aria-selected="${tab === 'results'}" onclick="grqSetTab('results')">Results</button>
+            <button type="button" role="tab" class="ggq-tab${tab === 'mark' ? ' on' : ''}" aria-selected="${tab === 'mark'}" onclick="grqSetTab('mark')">Term mark</button>
+        </div>`;
+    if (!L.length) {
+        return html + `<div class="ggq-empty"><p class="ggq-empty-title">No results in Term ${term} yet</p><p class="ggq-empty-body">Choose another term, or check back when your teacher publishes marks.</p></div>`;
+    }
+    if (tab === 'mark') return html + grqTermMarkHtml(L, term);
+    html += `<div class="ggq-label"><span>Results</span><span class="ggq-c">${L.length}</span></div>`;
+    return html + L.map(x => grqResultRow(g, x, { score: true })).join('');
+}
+
+function grqDetailRefresh() {
+    const box = document.getElementById('ggq');
+    if (!box || window._grqDetailGi === null || window._grqDetailGi === undefined) return;
+    box.innerHTML = grqDetailHtml(window._grqDetailGi);
+    recheckMobileNavAfterToggle();
+}
+
+window.grqSetTab = function (tab) {
+    window._grqTab = tab === 'mark' ? 'mark' : 'results';
+    grqDetailRefresh();
+};
+
+window.openGradesSubject = function (gi) {
+    if (window.innerWidth > 899) return;
+    const g = (window._grGroups || [])[gi];
+    const apiArea = document.getElementById('api-content-area');
+    if (!g || !apiArea) return;
+
+    // Keep where the list was scrolled, then stop the scroll listener from saving the screen's scroll over it.
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent) saveGradesState({ scroll: Object.assign({}, getGradesState().scroll, { main: mainContent.scrollTop }) });
+    window._grqDetailGi = gi;
+    window._grqTab = 'results';
+
+    const iframe = document.getElementById('mainFrame');
+    const myClassContent = document.getElementById('myClassContent');
+    if (iframe) iframe.style.display = 'none';
+    apiArea.style.display = 'block';
+    if (myClassContent) myClassContent.classList.remove('active');
+
+    sessionStorage.setItem('lastLearnerPage', 'grades');
+    if (window.configureHeader) {
+        window.configureHeader({
+            title: g.group || 'Grades', mode: 'detail', detailType: 'Grades', backLabel: 'Grades',
+            backAction: () => window.fetchGrades(),
         });
-        card.style.display = visible || subjectName.includes(term) ? 'block' : 'none';
-    });
+    }
+    // detail mode hides the bottom nav; the phone detail screens keep it
+    const nav = document.getElementById('mobileBottomNav');
+    if (nav) nav.style.setProperty('display', 'flex', 'important');
+
+    apiArea.innerHTML = `<div class="grades-mobile-layout"><div class="ggq ggq-detail" id="ggq">${grqDetailHtml(gi)}</div></div>`;
+    if (mainContent) mainContent.scrollTop = 0;
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// INLINE PERFORMANCE OVERVIEW
-// ─────────────────────────────────────────────────────────────────────────────
-window.toggleDistTip = function(el) {
-    const wasActive = el.classList.contains('active');
-    el.parentElement.querySelectorAll('.dist-line.active, .dist-marker.active')
-        .forEach(sibling => sibling.classList.remove('active'));
-    if (!wasActive) el.classList.add('active');
-};
+// ── a result, as a sheet with the class comparison ──
+function grqScaleHtml(d, me) {
+    const clamp = v => Math.max(0, Math.min(100, Number(v) || 0));
+    const min = clamp(d.min), avg = clamp(d.avg), max = clamp(d.max);
+    return `<div class="ggq-scale">
+            <div class="ggq-scale-track"></div>
+            <div class="ggq-scale-range" style="left:${min}%;width:${Math.max(0, max - min)}%"></div>
+            <div class="ggq-scale-avg" style="left:${avg}%"></div>
+            <div class="ggq-scale-me" style="left:${clamp(me)}%"></div>
+            <span class="ggq-scale-lb" style="left:clamp(40px,${avg}%,calc(100% - 40px))">Class average</span>
+        </div>
+        <div class="ggq-scale-n"><span>0%</span><span>100%</span></div>`;
+}
 
-function renderGradeStatsBox(box, data) {
-    const pct    = data.user_score || 0;
-    const offset = 314 - (314 * (pct / 100));
+async function grqLoadClassStats(q, pct) {
+    const scale = document.getElementById('ggq-scale');
+    const set = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+    try {
+        let d = window.learnerGradeStatsCache[q.quiz_id];
+        if (!d) {
+            const res = await fetch(`get_quiz_stats.php?quiz_id=${encodeURIComponent(q.quiz_id)}`);
+            d = await res.json();
+            if (d.error) throw new Error(d.error);
+            window.learnerGradeStatsCache[q.quiz_id] = d;
+        }
+        if (!document.getElementById('ggq-scale')) return;       // the sheet was closed while it loaded
+        scale.innerHTML = grqScaleHtml(d, pct);
+        set('ggq-s-avg', `${Number(d.avg) || 0}%`);
+        set('ggq-s-range', `${Number(d.min) || 0}% · ${Number(d.max) || 0}%`);
+    } catch (e) {
+        if (scale) scale.innerHTML = '<p class="ggq-note ggq-note--flat">Could not load the class comparison.</p>';
+    }
+}
 
-    box.className = 'grade-inline-stats';
-    box.dataset.loaded = '1';
-    box.innerHTML = `
-        <div class="grade-inline-title">Performance Overview</div>
-        <div class="grade-inline-grid">
-            <div class="score-circle-wrap">
-                <svg viewBox="0 0 120 120">
-                    <circle class="sc-track" cx="60" cy="60" r="50"/>
-                    <circle class="sc-fill" cx="60" cy="60" r="50" style="stroke-dashoffset:${offset};"/>
-                </svg>
-                <div class="score-circle-text">${pct}%</div>
+function grqMarkHtml(g, q) {
+    const pct = grqPct(q);
+    const published = pct !== null;
+    const parts = [escHtml(g.group || '')];
+    if (q.is_summative) parts.push('Summative');
+    const when = grShortDate(q.submitted_at);
+    if (when) parts.push(when);
+    const taken = Number(q.time_taken) > 0 && Number(q.duration) > 0
+        ? `${formatDuration(Number(q.time_taken), Number(q.duration) * 60)} of ${escHtml(String(q.duration))} min` : '';
+    const on = grqFullDate(q.submitted_at);
+    const note = grNote(q);
+    return `<div class="ggq-sheet">
+        <div class="ggq-sh-t">${escHtml(q.quiz_title || 'Quiz')}</div>
+        <div class="ggq-sh-s">${parts.join(' &middot; ')}</div>
+        ${published
+            ? `<div class="ggq-sh-big"><b>${pct}%</b><span>${escHtml(String(q.score))} / ${escHtml(String(q.total))}</span></div>
+               <div id="ggq-scale"><p class="ggq-note ggq-note--flat">Loading the class comparison&hellip;</p></div>`
+            : `<div class="ggq-sh-big"><b class="ggq-sh-none">Pending</b></div>
+               <p class="ggq-note ggq-note--flat">${escHtml(note || 'Your marks have not been published yet.')}</p>`}
+        <div class="ggq-stats">
+            ${published ? `<div class="ggq-stat"><span>Your mark</span><span>${pct}%</span></div>
+            <div class="ggq-stat"><span>Class average</span><span id="ggq-s-avg">&mdash;</span></div>
+            <div class="ggq-stat"><span>Lowest &middot; Highest</span><span id="ggq-s-range">&mdash;</span></div>` : ''}
+            ${note && published ? `<div class="ggq-stat"><span>Grading</span><span>${escHtml(note)}</span></div>` : ''}
+            ${taken ? `<div class="ggq-stat"><span>Time taken</span><span>${taken}</span></div>` : ''}
+            ${on ? `<div class="ggq-stat"><span>Taken on</span><span>${escHtml(on)}</span></div>` : ''}
+        </div>
+        ${published ? `<button type="button" class="ggq-btn" onclick="grqReview('${escAttr(String(q.result_id))}')">Review my answers</button>` : ''}
+    </div>`;
+}
+
+window.grqOpenMark = function (resultId) {
+    const found = grqFind(resultId);
+    if (!found) return;
+    ensurePrStylesInjected();
+    let modal = document.getElementById('prReportModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'prReportModal';
+        document.body.appendChild(modal);
+    }
+    modal.className = 'pr-modal-overlay';
+    modal.innerHTML = `
+        <div class="pr-modal-sheet" onclick="event.stopPropagation()">
+            <div class="pr-modal-handle-row">
+                <div class="pr-modal-grabber"></div>
             </div>
-            <div class="grade-inline-dist-wrap">
-                <div class="score-out-of">You scored ${escHtml(String(data.score_out_of || ''))}</div>
-                <div class="dist-bar-wrap">
-                    <div class="dist-line low" style="left:${data.min || 0}%" onclick="toggleDistTip(this)">
-                        <span class="dist-tip">${data.min || 0}%</span>
-                    </div>
-                    <div class="dist-line avg" style="left:${data.avg || 0}%" onclick="toggleDistTip(this)">
-                        <span class="dist-tip">${data.avg || 0}%</span>
-                    </div>
-                    <div class="dist-line high" style="left:${data.max || 0}%" onclick="toggleDistTip(this)">
-                        <span class="dist-tip">${data.max || 0}%</span>
-                    </div>
-                    <div class="dist-marker me" style="left:${pct}%" onclick="toggleDistTip(this)">
-                        <span class="dist-tip">${pct}%</span>
-                    </div>
-                </div>
-                <div class="dist-labels"><span>0%</span><span>Class Distribution</span><span>100%</span></div>
-                <div class="dist-legend">
-                    <div><span class="dist-legend-dot--me">●</span> Your score</div>
-                    <div><span class="dist-legend-dot--low">|</span> Lowest in class</div>
-                    <div><span class="dist-legend-dot--avg">|</span> Class average</div>
-                    <div><span class="dist-legend-dot--high">|</span> Highest in class</div>
-                </div>
+            <div class="pr-modal-scroll">
+                ${grqMarkHtml(found.g, found.x)}
             </div>
         </div>`;
-}
+    wireSheetDragToClose(modal, () => prBackToGrades());
+    const pct = grqPct(found.x);
+    if (pct !== null) grqLoadClassStats(found.x, pct);
+};
 
-async function loadGradeStatsInline(statsId) {
-    const box = document.getElementById(statsId);
-    if (!box || box.dataset.loaded === '1' || box.dataset.loading === '1') return;
-
-    const quizId = box.dataset.quizId;
-    if (!quizId) return;
-
-    if (window.learnerGradeStatsCache[quizId]) {
-        renderGradeStatsBox(box, window.learnerGradeStatsCache[quizId]);
-        return;
-    }
-
-    box.dataset.loading = '1';
-    box.className = 'grade-inline-stats loading';
-    box.textContent = 'Loading performance overview...';
-
-    try {
-        const res  = await fetch(`get_quiz_stats.php?quiz_id=${quizId}`);
-        const data = await res.json();
-        if (data.error) throw new Error(data.error);
-        window.learnerGradeStatsCache[quizId] = data;
-        renderGradeStatsBox(box, data);
-        const pct    = data.user_score || 0;
-        const offset = 314 - (314 * (pct / 100));
-
-        box.className = 'grade-inline-stats';
-        box.dataset.loaded = '1';
-        box.innerHTML = `
-            <div class="grade-inline-title">Performance Overview</div>
-            <div class="grade-inline-grid">
-                <div class="score-circle-wrap">
-                    <svg viewBox="0 0 120 120">
-                        <circle class="sc-track" cx="60" cy="60" r="50"/>
-                        <circle class="sc-fill" cx="60" cy="60" r="50" style="stroke-dashoffset:${offset};"/>
-                    </svg>
-                    <div class="score-circle-text">${pct}%</div>
-                </div>
-                <div class="grade-inline-dist-wrap">
-                    <div class="score-out-of">You scored ${escHtml(String(data.score_out_of || ''))}</div>
-                    <div class="dist-bar-wrap">
-                        <div class="dist-line low" style="left:${data.min || 0}%" onclick="toggleDistTip(this)">
-                            <span class="dist-tip">${data.min || 0}%</span>
-                        </div>
-                        <div class="dist-line avg" style="left:${data.avg || 0}%" onclick="toggleDistTip(this)">
-                            <span class="dist-tip">${data.avg || 0}%</span>
-                        </div>
-                        <div class="dist-line high" style="left:${data.max || 0}%" onclick="toggleDistTip(this)">
-                            <span class="dist-tip">${data.max || 0}%</span>
-                        </div>
-                        <div class="dist-marker me" style="left:${pct}%" onclick="toggleDistTip(this)">
-                            <span class="dist-tip">${pct}%</span>
-                        </div>
-                    </div>
-                    <div class="dist-labels"><span>0%</span><span>Class Distribution</span><span>100%</span></div>
-                    <div class="dist-legend">
-                        <div><span class="dist-legend-dot--me">●</span> Your score</div>
-                        <div><span class="dist-legend-dot--low">|</span> Lowest in class</div>
-                        <div><span class="dist-legend-dot--avg">|</span> Class average</div>
-                        <div><span class="dist-legend-dot--high">|</span> Highest in class</div>
-                    </div>
-                </div>
-            </div>`;
-    } catch (e) {
-        box.className = 'grade-inline-stats error';
-        box.textContent = 'Could not load class performance.';
-    } finally {
-        box.dataset.loading = '0';
-    }
-}
-
-window.openGradeStats = function (quizId) {
-    const box = document.querySelector(`.grade-inline-stats[data-quiz-id="${quizId}"]`);
-    if (box) loadGradeStatsInline(box.id);
+// "Review my answers": close this sheet properly, then open the review (which is a sheet of its own)
+window.grqReview = function (resultId) {
+    const modal = document.getElementById('prReportModal');
+    if (modal) modal.remove();
+    setTimeout(() => window.openQuizReview(resultId), 0);
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -2411,13 +2296,29 @@ function wireSheetDragToClose(modal, onClose) {
     const handle = modal.querySelector('.pr-modal-handle-row');
     if (!sheet || !handle) return;
 
+    // A sheet that is still open (the modal element is reused) gives the bar back before this one takes it
+    if (typeof modal._restoreSheetBar === 'function') modal._restoreSheetBar();
+
     openSheetAnimated(sheet);
     const savedBrowserBar = darkenBrowserBarForSheet();
     // Wrap the real close so every path that ends the sheet -- tapping
     // outside, dragging past the threshold, or the caller's own close
     // function -- restores the browser bar exactly once, in one place.
-    const closeAndRestore = () => {
+    let barRestored = false;
+    let watcher = null;
+    const restoreOnce = () => {
+        if (barRestored) return;
+        barRestored = true;
+        if (watcher) watcher.disconnect();
+        modal._restoreSheetBar = null;
         restoreBrowserBarAfterSheet(savedBrowserBar);
+    };
+    modal._restoreSheetBar = restoreOnce;
+    // The phone Back button removes the sheet without going through a tap or a drag: give the bar back then too
+    watcher = new MutationObserver(() => { if (!modal.isConnected) restoreOnce(); });
+    watcher.observe(document.body, { childList: true });
+    const closeAndRestore = () => {
+        restoreOnce();
         onClose();
     };
     modal.onclick = closeAndRestore;
