@@ -781,7 +781,7 @@ function sylQuietStyle() {
             /* the dot that marks the current term */
             .syl-mobile-cd { display: inline-block; width: 6px; height: 6px; margin-right: 6px; border-radius: 50%; background: currentColor; vertical-align: 1px; }
 
-            /* a row: book, subject, one line of detail, arrow. The hairline starts under the title, not under the book. */
+            /* a row: the subject's icon in a soft tile, the subject, one line of detail, arrow. The hairline starts under the title, not under the tile. */
             .syl-mobile-row {
                 display: flex;
                 align-items: center;
@@ -797,7 +797,7 @@ function sylQuietStyle() {
                 content: '';
                 position: absolute;
                 top: 0;
-                left: 58px;
+                left: 74px;
                 right: 0;
                 height: 1px;
                 background: var(--qm-line);
@@ -805,8 +805,18 @@ function sylQuietStyle() {
             .syl-mobile-row--first::before { display: none; }
             .syl-mobile-row:active { background: var(--qm-press); }
             .syl-mobile-row:focus-visible { outline: 2px solid var(--qm-chipline); outline-offset: -2px; }
-            .syl-mobile-row-icon { flex: none; width: 24px; height: 24px; display: inline-flex; color: var(--qm-ring); }
-            .syl-mobile-row-icon svg { width: 24px; height: 24px; }
+            .syl-mobile-row-icon {
+                flex: none;
+                width: 40px;
+                height: 40px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 12px;
+                background: var(--qm-surf);
+                color: var(--qm-body);
+            }
+            .syl-mobile-row-icon svg { width: 20px; height: 20px; }
             .syl-mobile-row-body { flex: 1; min-width: 0; }
             .syl-mobile-row-title {
                 margin: 0;
@@ -975,7 +985,56 @@ function sylMobileSummary(active, cur, shown, total, term) {
     return `<b>Term ${active}</b> · ${active === cur ? 'Current · ' : ''}${count}`;
 }
 
-// One subject: a book, the subject, then the teacher and how many topics. Tapping opens it.
+// The little picture for a subject, chosen from the name the teacher typed. Anything not recognised (a name the school
+// writes differently, or a teacher's own name typed where the subject goes) keeps the plain book. All are 24px line
+// drawings in the same stroke, so a row never looks louder than the next.
+const SYL_ICONS = {
+    math:   '<line x1="9" x2="9" y1="4" y2="20"/><path d="M4 7c0-1.7 1.3-3 3-3h13"/><path d="M18 20c-1.7 0-3-1.3-3-3V4"/>',
+    lang:   '<path d="M4 6h8"/><path d="M8 4v2"/><path d="M5.5 6c.6 3 2.4 5.2 5 6.5"/><path d="M11 6c-.6 3-2.8 5.4-6 7"/><path d="m13 20 4-9 4 9"/><path d="M14.5 17h5"/>',
+    life:   '<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>',
+    phys:   '<circle cx="12" cy="12" r="1"/><path d="M20.2 20.2c2.04-2.03.02-7.36-4.5-11.9-4.54-4.52-9.87-6.54-11.9-4.5-2.04 2.03-.02 7.36 4.5 11.9 4.54 4.52 9.87 6.54 11.9 4.5Z"/><path d="M15.7 15.7c4.52-4.54 6.54-9.87 4.5-11.9-2.03-2.04-7.36-.02-11.9 4.5-4.52 4.54-6.54 9.87-4.5 11.9 2.03 2.04 7.36.02 11.9-4.5Z"/>',
+    geo:    '<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>',
+    hist:   '<line x1="3" x2="21" y1="22" y2="22"/><line x1="6" x2="6" y1="18" y2="11"/><line x1="10" x2="10" y1="18" y2="11"/><line x1="14" x2="14" y1="18" y2="11"/><line x1="18" x2="18" y1="18" y2="11"/><polygon points="12 2 20 7 4 7"/>',
+    acc:    '<rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><path d="M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/>',
+    orient: '<circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>',
+    biz:    '<path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect width="20" height="14" x="2" y="6" rx="2"/>',
+    econ:   '<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>',
+    tech:   '<rect width="18" height="12" x="3" y="4" rx="2"/><line x1="2" x2="22" y1="20" y2="20"/>',
+    arts:   '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+    agri:   '<path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-10"/><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z"/><path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"/>',
+    book:   '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
+};
+// First match wins, so the more specific names come first ("Life Orientation" before "Life Sciences").
+const SYL_ICON_RULES = [
+    ['orient', /orientation/],
+    ['agri',   /agricult|farming/],
+    ['acc',    /account|bookkeep/],
+    ['math',   /math/],
+    ['life',   /life sci|biolog/],
+    ['phys',   /physic|chemis|natural sci/],
+    ['geo',    /geograph/],
+    ['hist',   /histor/],
+    ['econ',   /econom/],
+    ['biz',    /business|entrepreneur/],
+    ['tech',   /technolog|computer|\bcat\b|\bit\b|coding/],
+    ['arts',   /music|dance|drama|\barts?\b|creative/],
+    ['lang',   /english|afrikaans|isizulu|isixhosa|sesotho|sepedi|setswana|tshivenda|xitsonga|isindebele|siswati|\bzulu\b|\bxhosa\b|language|literature/],
+];
+function sylSubjectIconKey(subject, teacher) {
+    const name = String(subject == null ? '' : subject).toLowerCase();
+    // a teacher's own name typed where the subject goes keeps the book, whatever the name happens to contain
+    const people = String(teacher == null ? '' : teacher).toLowerCase().split(/[\s.]+/)
+        .map(w => w.replace(/[^a-z]/g, ''))
+        .filter(w => w.length > 2 && !/^(mr|mrs|ms|miss|dr|prof)$/.test(w));
+    if (people.some(w => new RegExp('(^|[^a-z])' + w + '([^a-z]|$)').test(name))) return 'book';
+    const hit = SYL_ICON_RULES.find(([, rx]) => rx.test(name));
+    return hit ? hit[0] : 'book';
+}
+function sylSubjectIcon(subject, teacher) {
+    return `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision" aria-hidden="true">${SYL_ICONS[sylSubjectIconKey(subject, teacher)]}</svg>`;
+}
+
+// One subject: its icon in a soft tile, the subject, then the teacher and how many topics. Tapping opens it.
 function sylMobileRowHtml(b, idx) {
     const topics = Array.isArray(b.topics) ? b.topics : [];
     const meta = [b.teacher ? sylEsc(b.teacher) : '', topics.length ? `${topics.length} topic${topics.length === 1 ? '' : 's'}` : 'No topics yet']
@@ -984,11 +1043,7 @@ function sylMobileRowHtml(b, idx) {
                 <div class="syl-mobile-row" role="button" tabindex="0" data-idx="${idx}" data-term="${sylEsc(b.term)}"
                     onclick="openMobileSyllabusBrief(${idx})"
                     onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openMobileSyllabusBrief(${idx}); }">
-                    <div class="syl-mobile-row-icon">
-                        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="shape-rendering:geometricPrecision" aria-hidden="true">
-                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-                        </svg>
-                    </div>
+                    <div class="syl-mobile-row-icon">${sylSubjectIcon(b.subject, b.teacher)}</div>
                     <div class="syl-mobile-row-body">
                         <div class="syl-mobile-row-title">${sylEsc(b.subject)}</div>
                         <div class="syl-mobile-row-meta">${meta}</div>
