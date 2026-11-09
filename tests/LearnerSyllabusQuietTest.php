@@ -3,7 +3,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Guards for the "quiet list" on the learner phone Syllabus page: a title with a counts line, a search box, term chips,
- * then one plain row per subject (a book, the subject, the teacher and how many topics); tapping a row opens the subject
+ * then one plain row per subject (the subject's own icon in a soft tile, the subject, the teacher and how many topics); tapping a row opens the subject
  * on its own screen in the same look as the assignment detail (term and Current tag, a 26px title, who teaches it, the
  * teacher's note, the numbered topics and the assessment weighting). It replaces the old page of cards, tabs and coloured
  * bars. Everything uses the weights the phone pages already had (400 for text, 600 for titles and names), so nothing in
@@ -107,11 +107,12 @@ final class LearnerSyllabusQuietTest extends TestCase
         $this->assertStringContainsString('No topics yet', $row);
     }
 
-    public function test_rows_use_the_same_inset_and_hairline_as_the_other_quiet_lists(): void
+    public function test_rows_use_the_same_inset_as_the_other_quiet_lists_and_the_hairline_starts_after_the_icon_tile(): void
     {
         $css = $this->phoneCss();
         $this->assertMatchesRegularExpression('/\.syl-mobile-row \{[^}]*padding: 11px 20px;/s', $css);
-        $this->assertMatchesRegularExpression('/\.syl-mobile-row::before \{[^}]*left: 58px;/s', $css);
+        // 20px inset + 40px tile + 14px gap = 74px, so the line starts under the title, not under the tile
+        $this->assertMatchesRegularExpression('/\.syl-mobile-row::before \{[^}]*left: 74px;/s', $css);
         $this->assertStringContainsString('.syl-mobile-row--first::before', $css);
         $this->assertMatchesRegularExpression('/\.syl-mobile-row:active \{[^}]*var\(--qm-press\)/s', $css);
     }
@@ -298,11 +299,71 @@ final class LearnerSyllabusQuietTest extends TestCase
         }
     }
 
+    // ── subject icons ────────────────────────────────────────────────────────────────────────────
+
+    public function test_every_row_shows_an_icon_picked_from_the_subject_in_a_soft_tile(): void
+    {
+        $row = $this->between($this->phoneScript(), 'function sylMobileRowHtml(', "\n}\n");
+        $this->assertStringContainsString('<div class="syl-mobile-row-icon">${sylSubjectIcon(b.subject, b.teacher)}</div>', $row);
+        $css = $this->phoneCss();
+        $this->assertMatchesRegularExpression('/\.syl-mobile-row-icon \{[^}]*width: 40px;[^}]*height: 40px;/s', $css);
+        $this->assertMatchesRegularExpression('/\.syl-mobile-row-icon \{[^}]*border-radius: 12px;/s', $css);
+        $this->assertMatchesRegularExpression('/\.syl-mobile-row-icon \{[^}]*background: var\(--qm-surf\);/s', $css);
+        $this->assertMatchesRegularExpression('/\.syl-mobile-row-icon \{[^}]*color: var\(--qm-body\);/s', $css);
+        $this->assertMatchesRegularExpression('/\.syl-mobile-row-icon svg \{ width: 20px; height: 20px; \}/', $css);
+    }
+
+    public function test_the_icons_are_line_drawings_in_one_stroke_and_cover_the_usual_school_subjects(): void
+    {
+        $js = $this->js();
+        $icons = $this->between($js, 'const SYL_ICONS = {', "\n};\n");
+        foreach (['math', 'lang', 'life', 'phys', 'geo', 'hist', 'acc', 'orient', 'biz', 'econ', 'tech', 'arts', 'agri', 'book'] as $key) {
+            $this->assertMatchesRegularExpression('/\n\s+' . $key . ':\s+\'</', $icons, "no icon drawn for $key");
+        }
+        $svg = $this->between($js, 'function sylSubjectIcon(subject, teacher) {', "\n}\n");
+        $this->assertStringContainsString('stroke="currentColor" stroke-width="1.6"', $svg, 'one stroke weight for every icon');
+        $this->assertStringContainsString('aria-hidden="true"', $svg, 'the icon is decoration, the subject name is the label');
+        $this->assertStringNotContainsString('fill="#', $svg);
+    }
+
+    public function test_the_picker_knows_the_south_african_subject_names_and_falls_back_to_the_book(): void
+    {
+        $js = $this->js();
+        $rules = $this->between($js, 'const SYL_ICON_RULES = [', "\n];\n");
+        foreach (['math', 'account', 'life sci', 'physic', 'geograph', 'histor', 'econom', 'business', 'technolog', 'orientation', 'agricult',
+                  'english', 'afrikaans', 'isizulu', 'isixhosa', 'sesotho', 'setswana', 'tshivenda', 'xitsonga'] as $word) {
+            $this->assertStringContainsString($word, $rules, "$word is not recognised");
+        }
+        // "Life Orientation" has to be tried before "Life Sciences" can claim it, and first match wins
+        $this->assertLessThan(strpos($rules, "'life'"), strpos($rules, "'orient'"));
+        $key = $this->between($js, 'function sylSubjectIconKey(subject, teacher) {', "\n}\n");
+        $this->assertStringContainsString("return hit ? hit[0] : 'book';", $key, 'an unknown subject keeps the book');
+        $this->assertStringContainsString("return 'book';", $key);
+    }
+
+    public function test_a_teachers_own_name_typed_as_the_subject_keeps_the_book(): void
+    {
+        $key = $this->between($this->js(), 'function sylSubjectIconKey(subject, teacher) {', "\n}\n");
+        $this->assertStringContainsString('people.some(', $key);
+        $this->assertStringContainsString('(mr|mrs|ms|miss|dr|prof)', $key, 'a title like "Mrs" alone is not treated as a name');
+        $this->assertStringContainsString('w.length > 2', $key, 'one or two letter initials are not treated as a name');
+        // the check runs before the subject words are looked for
+        $this->assertLessThan(strpos($key, 'SYL_ICON_RULES.find'), strpos($key, 'people.some('));
+    }
+
+    public function test_the_icon_picker_is_only_used_by_the_phone_rows_and_the_desktop_list_is_untouched(): void
+    {
+        $js = $this->js();
+        $this->assertSame(1, substr_count($js, 'sylSubjectIcon(b.subject, b.teacher)'), 'only the phone row draws these icons');
+        $desktop = $this->between($js, 'window.sylRenderDesktopList = function', "\n};\n");
+        $this->assertStringNotContainsString('sylSubjectIcon', $desktop);
+    }
+
     // ── versions ─────────────────────────────────────────────────────────────────────────────────
 
     public function test_the_dashboard_loads_the_new_script_with_a_fresh_version_number(): void
     {
-        $this->assertStringContainsString('syllabus.js?v=4.7', $this->source('learner_dashboard.php'));
-        $this->assertStringNotContainsString('syllabus.js?v=4.6', $this->source('learner_dashboard.php'));
+        $this->assertStringContainsString('syllabus.js?v=4.8', $this->source('learner_dashboard.php'));
+        $this->assertStringNotContainsString('syllabus.js?v=4.7', $this->source('learner_dashboard.php'));
     }
 }

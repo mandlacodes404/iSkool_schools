@@ -94,7 +94,7 @@ final class LearnerDetailPagesPaddingTest extends TestCase
             'assets/css/learner/announcements.css?v=4.4',
             'assets/css/learner/assignments.css?v=4.4',
             'assets/css/learner/evaluations.css?v=5.7',
-               'assets/js/learner/syllabus.js?v=4.7',
+               'assets/js/learner/syllabus.js?v=4.8',
         ] as $versioned) {
             $this->assertStringContainsString($versioned, $php);
         }
