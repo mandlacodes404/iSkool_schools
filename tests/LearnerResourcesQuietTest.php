@@ -395,5 +395,12 @@ final class LearnerResourcesQuietTest extends TestCase
         $this->assertStringContainsString('resources.js?v=9.0', $php);
         $this->assertStringNotContainsString('resources.css?v=3.3', $php);
         $this->assertStringNotContainsString('resources.js?v=8.9', $php);
+        // The light-mode gate (mobile_light.css) and its marker list (mobile_theme.js) were changed to know the open file. A phone
+        // that kept the old copies of those two draws the file screen's light colours on a page that stays dark, so the title and
+        // the rows vanish. Both need a new number whenever a marker is added.
+        $this->assertStringContainsString('learner/mobile_light.css?v=2.2', $php);
+        $this->assertStringNotContainsString('learner/mobile_light.css?v=2.1', $php);
+        $this->assertStringContainsString('learner/mobile_theme.js?v=1.9', $php);
+        $this->assertStringNotContainsString('learner/mobile_theme.js?v=1.8', $php);
     }
 }
