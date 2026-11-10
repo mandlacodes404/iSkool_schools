@@ -4,12 +4,11 @@
    neutral file tiles and a quiet preview canvas.
    Colour tokens are literal values taken from teacher_desktop_menu.css so nothing
    here depends on which --dm-* variables the learner shell defines.
-   The mobile styles further down are unchanged. */
+   The phone styles (the quiet list and the file screen) are further down. */
 
 @media (min-width: 900px) {
     .lrs-desktop-layout { display: flex !important; }
-    .lrs-mobile-list    { display: none !important; }
-    .lrs-mobile-search-wrap { display: none !important; }
+    .lrs-mobile-head, .lrs-mobile-search-wrap, .lrs-mobile-chips, .lrs-mobile-list, .lrs-mobile-detail { display: none !important; }
 }
 @media (max-width: 899px) {
     .lrs-desktop-layout { display: none !important; }
@@ -362,53 +361,43 @@
 .lrs-rail h4.lrs-rail-sub { margin: 28px 0 4px; }
 
 
-/* ── MOBILE VIDEO STYLES ── */
-.lrs-mobile-video-wrap {
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    background: #000;
-    border-radius: 10px;
-    overflow: hidden;
-    margin-top: 4px;
-}
-.lrs-mobile-video-wrap iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-    display: block;
-}
-.lrs-mobile-video-card {
-    background: transparent;
-    border-bottom: 0;
-    padding: 13px 18px;
-    position: relative;
-}
-.lrs-mobile-video-card::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: rgba(255,255,255,0.06);
-}
-.lrs-mobile-video-card:last-child::after { display: none; }
-.lrs-mobile-video-title {
-    font-size: 16px;
-    font-weight: var(--lrs-w-medium, 600);
-    color: #e2e8f0;
-    margin: 0 0 3px;
-}
-.lrs-mobile-video-meta {
-    font-size: 12px;
-    color: #8E8E93;
-    margin: 0 0 10px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
+/* ── MOBILE LIST: the quiet list (phones, and the 769–899px range that still shows the phone layout) ──
+   The same calm column as the learner Assignments, Quiz, Announcements and Syllabus pages: a title with a counts line,
+   a search box, type chips, then a plain label for each teacher with a tile, a title and one line of detail per file.
+   A tile shows the file type (PDF, DOCX, PNG ...) or a play mark for a video. Weights stay at 400 (text) and 600
+   (titles and names). The colours are the --qm-* tokens below, so light mode only has to change the tokens (see the
+   light blocks at the end of this file). */
+.lrs-mobile-head,
+.lrs-mobile-search-wrap,
+.lrs-mobile-chips,
+.lrs-mobile-list,
+.lrs-mobile-detail {
+    --qm-title: #ecece9;
+    --qm-body: #c2c3b7;
+    --qm-muted: #8b8b87;
+    --qm-faint: #5f605a;
+    --qm-line: rgba(255,255,255,0.07);
+    --qm-press: rgba(255,255,255,0.04);
+    --qm-surf: #272726;
+    --qm-ring: #73746d;
+    --qm-chipline: rgba(255,255,255,0.12);
+    --qm-chipon: #ecece9;
+    --qm-chipon-text: #20201f;
 }
 
-/* ── MOBILE LIST STYLES (flat, no card wrapper) ── */
+.lrs-mobile-head { padding: 4px 2px 0; }
+.lrs-mobile-title {
+    margin: 0;
+    font-family: inherit;
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.2px;
+    color: var(--qm-title);
+}
+.lrs-mobile-sub { margin: 5px 0 0; font-size: 14px; line-height: 1.4; font-weight: 400; color: var(--qm-muted); }
+.lrs-mobile-sub b { font-weight: 600; color: var(--qm-title); }
+
 .lrs-mobile-list {
     background: transparent;
     border-radius: 0;
@@ -421,133 +410,271 @@
         margin-right: -18px;
     }
 }
+
+/* search */
+.lrs-mobile-search-wrap { display: block; position: relative; margin: 14px 0 0; }
+.lrs-mobile-search-wrap svg {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--qm-muted);
+}
+.lrs-mobile-search {
+    width: 100%;
+    box-sizing: border-box;
+    height: 42px;
+    padding: 0 14px 0 42px;
+    border: 0;
+    border-radius: 12px;
+    background: var(--qm-surf);
+    color: var(--qm-title);
+    font: inherit;
+    font-size: 16px; /* 16px stops iOS zooming the page when the box is focused */
+    font-weight: 400;
+    -webkit-appearance: none;
+    appearance: none;
+}
+.lrs-mobile-search:focus { outline: none; box-shadow: inset 0 0 0 1px var(--qm-chipline); }
+.lrs-mobile-search::placeholder { color: var(--qm-muted); opacity: 1; }
+
+/* type chips */
+.lrs-mobile-chips {
+    display: flex;
+    gap: 6px;
+    margin: 12px 0 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.lrs-mobile-chips::-webkit-scrollbar { display: none; }
+.lrs-mobile-chip {
+    flex: none;
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 999px;
+    border: 1px solid var(--qm-chipline);
+    background: transparent;
+    color: var(--qm-body);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 400;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+.lrs-mobile-chip.on { background: var(--qm-chipon); border-color: var(--qm-chipon); color: var(--qm-chipon-text); }
+/* on the narrowest phones the four chips would just run past the edge, so they sit a little closer */
+@media (max-width: 340px) {
+    .lrs-mobile-chip { padding: 0 9px; }
+}
+
+/* a teacher's label: name, how many files, fold arrow */
 .lrs-mobile-folder-header {
     display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 16px 18px;
+    align-items: baseline;
+    gap: 8px;
+    padding: 20px 20px 4px;
     background: transparent;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
     cursor: pointer;
     user-select: none;
-    transition: background 0.2s;
+    -webkit-tap-highlight-color: transparent;
 }
-.lrs-mobile-folder-header:active { background: rgba(255,255,255,0.03); }
-.lrs-mobile-folder-header:not(.lrs-mobile-folder-header--collapsed) {
-    background: rgba(255,255,255,0.05);
-}
-.lrs-mobile-folder-icon { flex-shrink: 0; }
+.lrs-mobile-folder-header:focus-visible { outline: 2px solid var(--qm-chipline); outline-offset: -2px; }
 .lrs-mobile-folder-name {
-    flex: 1;
-    font-size: 16px;
+    flex: 0 1 auto;
+    min-width: 0;
+    font-size: 14px;
     font-weight: 600;
-    color: #e2e8f0;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    color: var(--qm-body);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
-.lrs-mobile-folder-count {
-    font-size: 12px;
-    color: #8b949e;
-    font-weight: 600;
-    background: rgba(255,255,255,0.05);
-    padding: 2px 8px;
-    border-radius: 20px;
-    flex-shrink: 0;
-}
+.lrs-mobile-folder-count { flex: none; margin-left: auto; font-size: 13px; font-weight: 400; color: var(--qm-muted); }
 .lrs-mobile-folder-chevron {
-    flex-shrink: 0;
-    color: #73746d;
-    transition: transform 0.3s ease;
+    flex: none;
+    align-self: center;
+    color: var(--qm-muted);
+    transition: transform 0.2s ease;
 }
-.lrs-mobile-folder-chevron.open { transform: rotate(90deg); }
+.lrs-mobile-folder-header--collapsed .lrs-mobile-folder-chevron { transform: rotate(-90deg); }
 .lrs-mobile-folder-body { display: block; }
 .lrs-mobile-folder-body.collapsed { display: none; }
+/* while a search or chip is on, every group that has a match shows open and nothing is saved */
+.lrs-mobile-list.is-filtering .lrs-mobile-folder-body.collapsed { display: block; }
+.lrs-mobile-list.is-filtering .lrs-mobile-folder-header--collapsed .lrs-mobile-folder-chevron { transform: none; }
+
+/* a row: the type tile, title, one line of detail, arrow. The hairline starts under the title, not under the tile. */
 .lrs-mobile-row {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 13px 18px;
+    gap: 14px;
+    padding: 11px 20px;
     background: transparent;
-    border-bottom: 0;
-    border-radius: 0;
-    border-left: 0;
-    border-right: 0;
     cursor: pointer;
     transition: background 0.15s;
     position: relative;
+    -webkit-tap-highlight-color: transparent;
 }
-.lrs-mobile-row::after {
+.lrs-mobile-row::before {
     content: '';
     position: absolute;
-    bottom: 0;
-    left: 0;
+    top: 0;
+    left: 74px;
     right: 0;
     height: 1px;
-    background: rgba(255,255,255,0.06);
+    background: var(--qm-line);
 }
-.lrs-mobile-row:last-child::after { display: none; }
-.lrs-mobile-row:active { background: rgba(255,255,255,0.03); }
+.lrs-mobile-row--first::before { display: none; }
+.lrs-mobile-row:active { background: var(--qm-press); }
+.lrs-mobile-row:focus-visible { outline: 2px solid var(--qm-chipline); outline-offset: -2px; }
 .lrs-mobile-row-icon {
-    width: 32px;
-    height: 32px;
+    flex: none;
+    width: 40px;
+    height: 40px;
+    box-sizing: border-box;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
+    overflow: hidden;
+    border-radius: 12px;
+    background: var(--qm-surf);
+    color: var(--qm-body);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: 0.5px;
 }
+.lrs-mobile-row-icon svg { width: 18px; height: 18px; }
 .lrs-mobile-row-body { flex: 1; min-width: 0; }
 .lrs-mobile-row-title {
-    font-size: 15px;
-    font-weight: 600;
-    color: #e2e8f0;
     margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--qm-title);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
-.lrs-mobile-row-size {
-    font-size: 12px;
-    color: #8E8E93;
-    margin-top: 2px;
+.lrs-mobile-row-meta {
+    margin-top: 3px;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.3;
+    color: var(--qm-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
-.lrs-mobile-row-chevron {
-    flex-shrink: 0;
-    color: #73746d;
+.lrs-mobile-row-chevron { flex: none; color: var(--qm-faint); }
+
+/* ── MOBILE EMPTY STATES (no resources / no search or chip matches) ── */
+.lrs-mobile-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+    color: var(--qm-muted);
+    min-height: 46vh;
+}
+.lrs-mobile-empty svg { opacity: 0.5; margin-bottom: 14px; }
+.lrs-mobile-empty-title {
+    color: var(--qm-title);
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 6px;
+}
+.lrs-mobile-empty-body {
+    color: var(--qm-muted);
+    font-size: 14px;
+    font-weight: 400;
+    margin: 0;
+    line-height: 1.5;
 }
 
-/* ── MOBILE SEARCH BAR ── */
+/* ── MOBILE: RESOURCE DETAIL VIEW ── */
+/* Same look as the assignment and announcement detail: what it is, the title, when it was uploaded, then (for a video)
+   the player, who it is from and how big it is, one primary button and one quiet one, and more from the same teacher.
+   Colours are the --qm-* tokens defined with the list above. */
+.lrs-mobile-detail {
+    /* 20px at the sides, the same inset as .lrs-mobile-row (the margin below cancels the container's 18px) */
+    padding: 8px 20px 96px;
+}
 @media (max-width: 899px) {
-    .lrs-mobile-search-wrap {
-        display: block;
-        margin-bottom: 10px;
-        position: relative;
+    .lrs-mobile-detail {
+        margin-left: -18px;
+        margin-right: -18px;
     }
-    .lrs-mobile-search-wrap svg {
-        position: absolute;
-        left: 12px;
-        top: 50%;
-        transform: translateY(-50%);
-        pointer-events: none;
-        opacity: 0.4;
-    }
-    .lrs-mobile-search {
-        width: 100%;
-        box-sizing: border-box;
-        padding: 9px 14px 9px 36px;
-        border-radius: 10px;
-        background: rgba(255,255,255,0.05);
-        border: none;
-        color: #e2e8f0;
-        font-size: 15px;
-        font-family: 'Nunito', sans-serif;
-        transition: background 0.2s;
-    }
-    .lrs-mobile-search:focus { outline: none; background: rgba(255,255,255,0.08); }
-    .lrs-mobile-search::placeholder { color: #555e6a; }
+}
+.lrs-mobile-detail-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.lrs-mobile-detail-eyebrow {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.9px;
+    text-transform: uppercase;
+    color: var(--qm-muted);
+}
+.lrs-mobile-detail-title {
+    margin: 12px 0 0;
+    color: var(--qm-title);
+    font-family: inherit;
+    font-size: 26px;
+    line-height: 1.2;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+    overflow-wrap: anywhere;
+}
+.lrs-mobile-detail-posted { margin-top: 6px; font-size: 13px; font-weight: 400; color: var(--qm-muted); }
+.lrs-mobile-player {
+    margin-top: 18px;
+    aspect-ratio: 16 / 9;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #161616;
+}
+.lrs-mobile-player iframe { display: block; width: 100%; height: 100%; border: 0; }
+.lrs-mobile-detail-facts {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    margin-top: 18px;
+    background: var(--qm-surf);
+    border-radius: 18px;
+}
+.lrs-mobile-detail-fact { padding: 14px 16px 15px; min-width: 0; }
+.lrs-mobile-detail-fact + .lrs-mobile-detail-fact { border-left: 1px solid var(--qm-line); }
+.lrs-mobile-detail-fact-label { font-size: 13px; font-weight: 400; color: var(--qm-muted); }
+.lrs-mobile-detail-fact-value { margin: 8px 0 3px; font-size: 16px; font-weight: 600; line-height: 1.25; color: var(--qm-title); overflow-wrap: anywhere; }
+.lrs-mobile-detail-fact-note { font-size: 13px; font-weight: 400; color: var(--qm-muted); }
+.lrs-mobile-detail-actions { display: flex; flex-direction: column; gap: 10px; margin: 22px 0 4px; }
+.lrs-mobile-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 48px;
+    border-radius: 14px;
+    border: 0;
+    box-sizing: border-box;
+    background: var(--qm-surf);
+    color: var(--qm-title);
+    font: inherit;
+    font-size: 16px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+.lrs-mobile-btn:active { background: var(--qm-press); }
+.lrs-mobile-btn--pri { background: var(--qm-chipon); color: var(--qm-chipon-text); }
+.lrs-mobile-btn--pri:active { background: var(--qm-chipon); opacity: 0.9; }
+.lrs-mobile-detail-label { margin: 26px 0 8px 2px; font-size: 13.5px; font-weight: 600; color: var(--qm-muted); }
+/* the rows of "more from this teacher" run edge to edge inside the padded detail */
+.lrs-mobile-more { margin: 0 -20px; }
+@media (min-width: 900px) {
+    .lrs-mobile-detail { display: none; }
 }
 
 /* ── SHARED UTILITIES ── */
@@ -558,13 +685,6 @@
    on the desktop search icon) */
 .lrs-icon-crisp {
     shape-rendering: geometricPrecision;
-}
-
-/* Muted bullet separator in the mobile video meta row (was: inline
-   style="color:#30363d;" on the <span>&bull;</span> between VIDEO and
-   the upload date) */
-.lrs-bullet-muted {
-    color: #30363d;
 }
 
 /* Fetch error / empty states (was: inline style="" on <p> tags built
@@ -581,38 +701,13 @@
     margin-top: 60px;
 }
 
-/* ── MOBILE EMPTY STATE (no resources / no search matches) ── */
-.lrs-mobile-empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 24px;
-    color: #555e6a;
-    min-height: calc(100vh - 280px);
-}
-.lrs-mobile-empty svg { opacity: 0.35; margin-bottom: 14px; }
-.lrs-mobile-empty-title {
-    color: #c9d1d9;
-    font-size: 15px;
-    font-weight: 700;
-    margin: 0 0 6px;
-}
-.lrs-mobile-empty-body {
-    color: #8b949e;
-    font-size: 13px;
-    margin: 0;
-    line-height: 1.5;
-}
-.lrs-mobile-search-empty svg { opacity: 0.5; }
 /* ═══ Light mode: learner Resources (desktop) ══════════════════════════════════════════════════════════════
    The desktop Resources page is driven by the --lrs-* variables above, so most of light mode is the variable
    block below, the same way the Home page does it with --lhd-*, the Quiz page with --lqz-*, Assignments with
    --las-* and Evaluations with --lev-*. The rest fixes the colours that are hard-coded: the search box,
    scrollbars, resize handle, the primary button, the file tiles, the preview canvas, the status colours
-   resources.js writes inline on icons, and the phone-style list shown between 769px and 899px (folders, file
-   rows, inline video cards), plus the fetch error. Same palette as the Home page, the sidebar, Quiz, Assignments
+   resources.js writes inline on icons, and the phone-style list and file screen shown between 769px and 899px (token
+   values only), plus the fetch error. Same palette as the Home page, the sidebar, Quiz, Assignments
    and Evaluations.
    Applies only when <html data-learner-theme="light"> on 769px and wider. Dark mode and phones are untouched, and
    resources.js needs no change. To remove it, delete this block. */
@@ -668,35 +763,25 @@ html[data-learner-theme="light"] .lrs-pvw { background: rgba(38,39,35,.04); }
 /* empty-pane icon: resources.js draws it with an inline teal stroke */
 html[data-learner-theme="light"] .lrs-panel-empty svg[stroke="#4fd1c5" i] { stroke: #187a72; }
 
-/* ── Phone-style list: below 900px the desktop layout is hidden and this is what shows.
-      Its colours are hard-coded for a dark page. ── */
-html[data-learner-theme="light"] .lrs-mobile-folder-header { border-bottom-color: #dfded8; }
-html[data-learner-theme="light"] .lrs-mobile-folder-header:active,
-html[data-learner-theme="light"] .lrs-mobile-folder-header:not(.lrs-mobile-folder-header--collapsed) { background: rgba(38,39,35,.04); }
-html[data-learner-theme="light"] .lrs-mobile-folder-name,
-html[data-learner-theme="light"] .lrs-mobile-row-title,
-html[data-learner-theme="light"] .lrs-mobile-video-title { color: #282924; }
-html[data-learner-theme="light"] .lrs-mobile-folder-count { color: #73746d; background: rgba(38,39,35,.06); }
-html[data-learner-theme="light"] .lrs-mobile-folder-chevron,
-html[data-learner-theme="light"] .lrs-mobile-row-chevron { color: #8b8b83; }
-html[data-learner-theme="light"] .lrs-mobile-row::after,
-html[data-learner-theme="light"] .lrs-mobile-video-card::after { background: #ebeae5; }
-html[data-learner-theme="light"] .lrs-mobile-row:active { background: rgba(38,39,35,.04); }
-html[data-learner-theme="light"] .lrs-mobile-row-size,
-html[data-learner-theme="light"] .lrs-mobile-video-meta { color: #73746d; }
-html[data-learner-theme="light"] .lrs-bullet-muted { color: #bdbcb4; }
-html[data-learner-theme="light"] .lrs-mobile-search-wrap svg { color: #282924; }
-html[data-learner-theme="light"] .lrs-mobile-search { background: #ffffff; border: 1px solid #dfded8; color: #282924; }
-html[data-learner-theme="light"] .lrs-mobile-search:focus { border-color: #bdbcb4; }
-html[data-learner-theme="light"] .lrs-mobile-search::placeholder { color: #8b8b83; }
-html[data-learner-theme="light"] .lrs-mobile-empty-title { color: #282924; }
-html[data-learner-theme="light"] .lrs-mobile-empty-body { color: #73746d; }
-
-/* the orange accent (#f28c38) on the folder, file and empty-state icons, and the red YouTube mark on video cards,
-   darkened so they read on a light page (same orange as the Quiz status text) */
-html[data-learner-theme="light"] .lrs-mobile-list [stroke="#f28c38" i] { stroke: #b85f12; }
-html[data-learner-theme="light"] .lrs-mobile-list [fill="#f28c38" i] { fill: #b85f12; }
-html[data-learner-theme="light"] .lrs-mobile-video-meta [fill="#ff4444" i] { fill: #dc2626; }
+/* ── 769px to 899px: the split layout starts at 900px, so until then the phone-style list and file screen are what show.
+      They are drawn from the --qm-* tokens set with the list above, so light mode is just the token values. ── */
+html[data-learner-theme="light"] .lrs-mobile-head,
+html[data-learner-theme="light"] .lrs-mobile-search-wrap,
+html[data-learner-theme="light"] .lrs-mobile-chips,
+html[data-learner-theme="light"] .lrs-mobile-list,
+html[data-learner-theme="light"] .lrs-mobile-detail {
+    --qm-title: #282924;
+    --qm-body: #4a4b44;
+    --qm-muted: #73746d;
+    --qm-faint: #a3a39a;
+    --qm-line: rgba(40,41,36,.09);
+    --qm-press: rgba(38,39,35,.04);
+    --qm-surf: #f1efe8;
+    --qm-ring: #a3a39a;
+    --qm-chipline: rgba(40,41,36,.16);
+    --qm-chipon: #252624;
+    --qm-chipon-text: #faf9f5;
+}
 
 /* fetch error state */
 html[data-learner-theme="light"] .lrs-error-state { color: #bd4a43; }
@@ -706,40 +791,30 @@ html[data-learner-theme="light"] .lrs-error-state { color: #bd4a43; }
 
 /* ── Phones (768px and narrower): light mode ───────────────────────────────────────────────────────────
    Applies only when <html data-learner-mobile-theme="light"> (mobile_theme.js, Settings > Appearance) and only while
-   the resources list or its error state is on screen (the gate in mobile_light.css). Dark mode and 769px and wider
-   are untouched. Same rules and palette as the 769-899px block above, which already restyles this phone-style list
-   for the desktop light mode; resources.js needs no change. The page background, header and bottom nav are in
+   the resources list, an open file or the error state is on screen (the gate in mobile_light.css). Dark mode and 769px and wider
+   are untouched. The list and the file screen are drawn from the --qm-* tokens, so this block only gives them their light values, the same as
+   the Assignments, Quiz, Announcements and Syllabus pages. The page background, header and bottom nav are in
    mobile_light.css. Not here: the file viewer that opens when a file is tapped, which stays dark for now.
    To remove it, delete this block. */
 @media (max-width: 768px) {
 
-html[data-learner-mobile-theme="light"] .lrs-mobile-folder-header { border-bottom-color: #dfded8; }
-html[data-learner-mobile-theme="light"] .lrs-mobile-folder-header:active,
-html[data-learner-mobile-theme="light"] .lrs-mobile-folder-header:not(.lrs-mobile-folder-header--collapsed) { background: rgba(38,39,35,.04); }
-html[data-learner-mobile-theme="light"] .lrs-mobile-folder-name,
-html[data-learner-mobile-theme="light"] .lrs-mobile-row-title,
-html[data-learner-mobile-theme="light"] .lrs-mobile-video-title { color: #282924; }
-html[data-learner-mobile-theme="light"] .lrs-mobile-folder-count { color: #73746d; background: rgba(38,39,35,.06); }
-html[data-learner-mobile-theme="light"] .lrs-mobile-folder-chevron,
-html[data-learner-mobile-theme="light"] .lrs-mobile-row-chevron { color: #73746d; }
-html[data-learner-mobile-theme="light"] .lrs-mobile-row::after,
-html[data-learner-mobile-theme="light"] .lrs-mobile-video-card::after { background: #ebeae5; }
-html[data-learner-mobile-theme="light"] .lrs-mobile-row:active { background: rgba(38,39,35,.04); }
-html[data-learner-mobile-theme="light"] .lrs-mobile-row-size,
-html[data-learner-mobile-theme="light"] .lrs-mobile-video-meta { color: #73746d; }
-html[data-learner-mobile-theme="light"] .lrs-bullet-muted { color: #bdbcb4; }
-html[data-learner-mobile-theme="light"] .lrs-mobile-search-wrap svg { color: #282924; }
-html[data-learner-mobile-theme="light"] .lrs-mobile-search { background: #ffffff; border: 1px solid #dfded8; color: #282924; }
-html[data-learner-mobile-theme="light"] .lrs-mobile-search:focus { border-color: #bdbcb4; }
-html[data-learner-mobile-theme="light"] .lrs-mobile-search::placeholder { color: #8b8b83; }
-html[data-learner-mobile-theme="light"] .lrs-mobile-empty-title { color: #282924; }
-html[data-learner-mobile-theme="light"] .lrs-mobile-empty-body { color: #73746d; }
-
-/* the orange accent (#f28c38) on the folder, file and empty-state icons, and the red YouTube mark on video cards,
-   darkened so they read on a light page (same orange as the Quiz status text) */
-html[data-learner-mobile-theme="light"] .lrs-mobile-list [stroke="#f28c38" i] { stroke: #b85f12; }
-html[data-learner-mobile-theme="light"] .lrs-mobile-list [fill="#f28c38" i] { fill: #b85f12; }
-html[data-learner-mobile-theme="light"] .lrs-mobile-video-meta [fill="#ff4444" i] { fill: #dc2626; }
+html[data-learner-mobile-theme="light"] .lrs-mobile-head,
+html[data-learner-mobile-theme="light"] .lrs-mobile-search-wrap,
+html[data-learner-mobile-theme="light"] .lrs-mobile-chips,
+html[data-learner-mobile-theme="light"] .lrs-mobile-list,
+html[data-learner-mobile-theme="light"] .lrs-mobile-detail {
+    --qm-title: #282924;
+    --qm-body: #4a4b44;
+    --qm-muted: #73746d;
+    --qm-faint: #a3a39a;
+    --qm-line: rgba(40,41,36,.09);
+    --qm-press: rgba(38,39,35,.04);
+    --qm-surf: #f1efe8;
+    --qm-ring: #a3a39a;
+    --qm-chipline: rgba(40,41,36,.16);
+    --qm-chipon: #252624;
+    --qm-chipon-text: #faf9f5;
+}
 
 /* fetch error state */
 html[data-learner-mobile-theme="light"] .lrs-error-state { color: #bd4a43; }
