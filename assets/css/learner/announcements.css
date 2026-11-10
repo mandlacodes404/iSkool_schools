@@ -507,7 +507,7 @@
 .lan-mobile-list.is-filtering .lan-mobile-folder-body.collapsed { display: block; }
 .lan-mobile-list.is-filtering .lan-mobile-folder-header--collapsed .lan-mobile-folder-chevron { transform: none; }
 
-/* a row: bell, title, one line of detail, arrow. The hairline starts under the title, not under the bell. */
+/* a row: bell in a soft tile, title, one line of detail, arrow. The hairline starts under the title, not under the tile. */
 .lan-mobile-row {
     display: flex;
     align-items: center;
@@ -523,7 +523,7 @@
     content: '';
     position: absolute;
     top: 0;
-    left: 58px;
+    left: 74px; /* 20px inset + 40px tile + 14px gap */
     right: 0;
     height: 1px;
     background: var(--qm-line);
@@ -531,14 +531,28 @@
 .lan-mobile-row--first::before { display: none; }
 .lan-mobile-row:active { background: var(--qm-press); }
 .lan-mobile-row:focus-visible { outline: 2px solid var(--qm-chipline); outline-offset: -2px; }
-.lan-mobile-row-icon { flex: none; position: relative; width: 24px; height: 24px; display: inline-flex; color: var(--qm-ring); }
-.lan-mobile-row-icon svg { width: 24px; height: 24px; }
+/* the bell sits in a soft 40px tile, the same tile as the Resources and Syllabus rows; muted when read, orange when unread */
+.lan-mobile-row-icon {
+    flex: none;
+    position: relative;
+    width: 40px;
+    height: 40px;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: var(--qm-surf);
+    color: var(--qm-muted);
+}
+.lan-mobile-row-icon svg { width: 20px; height: 20px; }
 .lan-mobile-row-icon--unread { color: var(--qm-new); }
+/* the unread dot sits in the tile's top-right corner */
 .lan-mobile-row-icon--unread::after {
     content: '';
     position: absolute;
-    top: 0;
-    right: -1px;
+    top: 6px;
+    right: 6px;
     width: 7px;
     height: 7px;
     border-radius: 50%;

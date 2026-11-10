@@ -421,10 +421,10 @@ function lanMobileSummary(unread, total) {
     return unread === 0 ? 'All caught up' : `<b>${unread} unread</b> · ${total} in all`;
 }
 
-// The bell at the start of each row. It draws in currentColor, so the colour comes from the
+// The bell at the start of each row, 20px inside a soft 40px tile. It draws in currentColor, so the colour comes from the
 // .lan-mobile-row-icon classes (muted when read, orange when unread) and follows light and dark mode with no extra rules.
 function lanMobileBell() {
-    return '<svg class="lan-icon-crisp" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>';
+    return '<svg class="lan-icon-crisp" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>';
 }
 
 // The one line under a row's title: the state word where there is one, then when it was posted, then "Edited".
