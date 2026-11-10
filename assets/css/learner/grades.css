@@ -1341,3 +1341,190 @@ html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mo
 html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .pr-info-modal-box [style*="rgb(85, 94, 106)" i] { color: #73746d !important; }
 
 }
+/* ═══ Learner Grades on phones (899px and narrower): the quiet look ═══════════════════════════════════
+   The same look as Quizzes, Assignments and Syllabus: a title with one line under it, three plain numbers, outlined
+   term chips, hairline rows with a 24px progress ring, one orange for "needs attention", no cards, no pills, weights
+   400 and 600 only. Built by grqBuild() in grades.js; a subject opens as a screen of its own (.ggq-detail) and a result
+   as a sheet (.ggq-sheet inside #prReportModal). The desktop split layout (900px and up) and the Progress Report are
+   not touched. The old accordion rules above are no longer used by the phone layout.
+   Dark is the default; light is switched on below (phones: data-learner-mobile-theme, 769-899px: data-learner-theme).
+   To remove it, delete this block and the old phone markup comes back only if the previous grades.js is restored. */
+.ggq,
+.ggq-sheet {
+    --g-title: #ecece9;
+    --g-body: #c2c3b7;
+    --g-muted: #8b8b87;
+    --g-faint: #5f605a;
+    --g-line: rgba(255,255,255,.07);
+    --g-press: rgba(255,255,255,.04);
+    --g-surf: #272726;
+    --g-ring: #73746d;
+    --g-track: rgba(255,255,255,.13);
+    --g-soon: #f28c38;
+    --g-chipline: rgba(255,255,255,.12);
+    --g-chipon: #ecece9;
+    --g-chipon-text: #20201f;
+    --g-sheet: #20201f;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 400;
+    color: var(--g-title);
+    box-sizing: border-box;
+}
+.ggq *,
+.ggq-sheet * { box-sizing: border-box; }
+.ggq { padding-bottom: 24px; }
+.ggq b,
+.ggq strong,
+.ggq-sheet b,
+.ggq-sheet strong { font-weight: 600; }
+
+.ggq-head { padding: 4px 20px 0; }
+.ggq-title { margin: 0; font-family: inherit; font-size: 28px; font-weight: 600; line-height: 1.15; letter-spacing: -0.2px; color: var(--g-title); }
+.ggq-sub { margin: 5px 0 0; font-size: 14px; line-height: 1.4; font-weight: 400; color: var(--g-muted); }
+.ggq-sub b { color: var(--g-body); }
+
+/* search */
+.ggq-search { display: flex; align-items: center; gap: 10px; height: 44px; margin: 16px 20px 0; padding: 0 14px; border-radius: 12px; background: var(--g-surf); color: var(--g-muted); }
+.ggq-search svg { flex: none; }
+.ggq-search-input { flex: 1; min-width: 0; height: 100%; padding: 0; border: 0; outline: 0; background: transparent; color: var(--g-title); font: inherit; font-size: 16px; -webkit-appearance: none; appearance: none; }
+.ggq-search-input::placeholder { color: var(--g-muted); opacity: 1; }
+.ggq-search-input::-webkit-search-cancel-button,
+.ggq-search-input::-webkit-search-decoration { -webkit-appearance: none; appearance: none; display: none; }
+
+/* three plain numbers */
+.ggq-glance { display: flex; margin: 20px 0 0; padding: 0 20px; }
+.ggq-g { flex: 1; min-width: 0; padding: 2px 0 2px 16px; border-left: 1px solid var(--g-line); }
+.ggq-g:first-child { padding-left: 0; border-left: 0; }
+.ggq-gn { font-size: 28px; font-weight: 600; line-height: 1.1; color: var(--g-title); }
+.ggq-gn--soon { color: var(--g-soon); }
+.ggq-gl { margin-top: 3px; font-size: 13px; color: var(--g-muted); }
+
+/* term chips */
+.ggq-chips { display: flex; gap: 8px; padding: 12px 20px 0; overflow-x: auto; scrollbar-width: none; }
+.ggq-chips::-webkit-scrollbar { display: none; }
+.ggq-chip { flex: none; display: inline-flex; align-items: center; height: 32px; padding: 0 14px; margin: 0; border-radius: 16px; border: 1px solid var(--g-chipline); background: transparent; color: var(--g-body); font: inherit; font-size: 14px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.ggq-chip.on { background: var(--g-chipon); border-color: var(--g-chipon); color: var(--g-chipon-text); }
+.ggq-cd { display: block; width: 6px; height: 6px; margin-right: 6px; border-radius: 50%; background: currentColor; }
+
+/* section labels */
+.ggq-label { display: flex; align-items: baseline; gap: 8px; padding: 26px 20px 4px; }
+.ggq-label > span:first-child { font-size: 14px; font-weight: 600; color: var(--g-body); }
+.ggq-label--end { padding-top: 8px; justify-content: flex-end; }
+.ggq-c { margin-left: auto; font-size: 13px; color: var(--g-muted); }
+.ggq-link { margin: -8px 0 -8px auto; padding: 8px 0 8px 10px; display: inline-flex; align-items: center; border: 0; background: transparent; color: var(--g-muted); font: inherit; font-size: 13px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.ggq-link .ggq-chev { width: 14px; height: 14px; margin: 0 -2px 0 2px; }
+
+/* rows */
+.ggq-row { position: relative; display: flex; align-items: center; gap: 14px; width: 100%; margin: 0; padding: 11px 20px; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.ggq-row:active { background: var(--g-press); }
+.ggq-row + .ggq-row::before { content: ''; position: absolute; top: 0; left: 58px; right: 0; height: 1px; background: var(--g-line); }
+.ggq-ring { flex: none; display: inline-flex; width: 24px; height: 24px; color: var(--g-ring); }
+.ggq-ring--soon { color: var(--g-soon); }
+.ggq-ring-track { fill: none; stroke: var(--g-track); }
+.ggq-ring-fill { fill: none; stroke: var(--g-body); }
+.ggq-ring--soon .ggq-ring-fill { stroke: var(--g-soon); }
+.ggq-ring--none svg { opacity: .8; }
+.ggq-rb { flex: 1; min-width: 0; }
+.ggq-rt { display: block; font-size: 16px; font-weight: 600; line-height: 1.25; color: var(--g-title); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ggq-rm { display: block; margin-top: 3px; font-size: 13px; color: var(--g-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ggq-soon { color: var(--g-soon); }
+.ggq-pc { flex: none; text-align: right; font-size: 17px; font-weight: 600; color: var(--g-title); font-variant-numeric: tabular-nums; }
+.ggq-pc small { display: block; margin-top: 1px; font-size: 12px; font-weight: 400; color: var(--g-muted); }
+.ggq-pc--soon { color: var(--g-soon); }
+.ggq-pc--none { font-size: 15px; font-weight: 400; color: var(--g-muted); }
+.ggq-chev { flex: none; margin-left: -4px; color: var(--g-faint); }
+
+/* nothing to show */
+.ggq-empty { padding: 44px 28px 12px; text-align: center; }
+.ggq-empty-title { margin: 0; font-size: 16px; font-weight: 600; color: var(--g-title); }
+.ggq-empty-body { margin: 6px auto 0; max-width: 300px; font-size: 14px; line-height: 1.45; color: var(--g-muted); }
+
+/* a subject: tabs and the term mark */
+.ggq-tabs { display: flex; gap: 22px; margin: 0; padding: 14px 20px 0; border-bottom: 1px solid var(--g-line); }
+.ggq-tab { position: relative; margin: 0; padding: 8px 0 10px; border: 0; background: transparent; color: var(--g-muted); font: inherit; font-size: 15px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.ggq-tab.on { color: var(--g-title); font-weight: 600; }
+.ggq-tab.on::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; border-radius: 1px; background: var(--g-title); }
+.ggq-block { padding: 20px 20px 0; }
+.ggq-eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .9px; text-transform: uppercase; color: var(--g-muted); }
+.ggq-big { margin-top: 6px; font-size: 40px; font-weight: 600; line-height: 1.1; letter-spacing: -.5px; color: var(--g-title); }
+.ggq-block-s { margin-top: 6px; font-size: 14px; color: var(--g-body); }
+.ggq-prog { height: 4px; margin: 12px 0 0; border-radius: 2px; background: var(--g-track); overflow: hidden; }
+.ggq-prog i { display: block; height: 100%; border-radius: 2px; background: var(--g-body); }
+.ggq-tm { position: relative; display: flex; align-items: center; gap: 14px; padding: 11px 20px; }
+.ggq-tm + .ggq-tm::before { content: ''; position: absolute; top: 0; left: 20px; right: 0; height: 1px; background: var(--g-line); }
+.ggq-ern { flex: none; text-align: right; font-size: 15px; font-weight: 600; color: var(--g-title); font-variant-numeric: tabular-nums; }
+.ggq-ern small { display: block; margin-top: 1px; font-size: 12px; font-weight: 400; color: var(--g-muted); }
+.ggq-ern--none { font-weight: 400; color: var(--g-muted); }
+.ggq-note { margin: 0; padding: 14px 20px 0; font-size: 13px; line-height: 1.45; color: var(--g-muted); }
+.ggq-note--flat { padding: 14px 0 0; }
+
+/* a result: the sheet with the class comparison */
+.ggq-sheet { max-width: 560px; margin: 0 auto; padding: 6px 20px calc(30px + env(safe-area-inset-bottom, 0px)); }
+.ggq-sh-t { font-size: 20px; font-weight: 600; line-height: 1.25; color: var(--g-title); }
+.ggq-sh-s { margin-top: 3px; font-size: 14px; color: var(--g-muted); }
+.ggq-sh-big { display: flex; align-items: baseline; gap: 10px; margin-top: 16px; }
+.ggq-sh-big b { font-size: 44px; font-weight: 600; line-height: 1; letter-spacing: -.5px; color: var(--g-title); }
+.ggq-sh-big b.ggq-sh-none { font-size: 28px; letter-spacing: 0; color: var(--g-muted); font-weight: 400; }
+.ggq-sh-big span { font-size: 15px; color: var(--g-muted); }
+.ggq-scale { position: relative; height: 46px; margin: 22px 10px 0; }
+.ggq-scale-track,
+.ggq-scale-range { position: absolute; top: 26px; height: 4px; border-radius: 2px; }
+.ggq-scale-track { left: 0; right: 0; background: var(--g-track); }
+.ggq-scale-range { background: var(--g-faint); }
+.ggq-scale-avg { position: absolute; top: 22px; width: 2px; height: 12px; border-radius: 1px; background: var(--g-body); transform: translateX(-1px); }
+.ggq-scale-me { position: absolute; top: 18px; width: 20px; height: 20px; border-radius: 50%; background: var(--g-title); transform: translateX(-10px); box-shadow: 0 0 0 4px var(--g-sheet); }
+.ggq-scale-lb { position: absolute; top: 0; font-size: 11px; color: var(--g-muted); transform: translateX(-50%); white-space: nowrap; }
+.ggq-scale-n { display: flex; justify-content: space-between; margin: 0 10px; font-size: 12px; color: var(--g-faint); }
+.ggq-stats { margin-top: 12px; }
+.ggq-stat { position: relative; display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 11px 0; font-size: 15px; color: var(--g-body); }
+.ggq-stat + .ggq-stat::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: var(--g-line); }
+.ggq-stat span:first-child { flex: none; }
+.ggq-stat span:last-child { text-align: right; font-weight: 600; color: var(--g-title); font-variant-numeric: tabular-nums; }
+.ggq-btn { display: flex; align-items: center; justify-content: center; width: 100%; height: 46px; margin: 14px 0 0; padding: 0; border-radius: 14px; border: 1px solid var(--g-chipline); background: transparent; color: var(--g-title); font: inherit; font-size: 16px; font-weight: 600; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.ggq-btn:active { background: var(--g-press); }
+
+/* 769px to 899px: a centred column instead of full width */
+@media (min-width: 769px) and (max-width: 899px) {
+    .ggq { max-width: 640px; margin: 0 auto; }
+}
+
+/* Light, 769-899px: <html data-learner-theme="light"> */
+@media (min-width: 769px) and (max-width: 899px) {
+    html[data-learner-theme="light"] .ggq {
+        --g-title: #282924;
+        --g-body: #4a4b44;
+        --g-muted: #73746d;
+        --g-faint: #a3a39a;
+        --g-line: rgba(40,41,36,.09);
+        --g-press: rgba(38,39,35,.04);
+        --g-surf: #f1efe8;
+        --g-ring: #a3a39a;
+        --g-track: rgba(40,41,36,.12);
+        --g-soon: #b85f12;
+        --g-chipline: rgba(40,41,36,.16);
+        --g-chipon: #252624;
+        --g-chipon-text: #faf9f5;
+    }
+}
+
+/* Light, phones: <html data-learner-mobile-theme="light">. The sheet follows only when the Grades page is under it
+   (same condition as the other Grades sheets below: phones, light, .grades-mobile-layout in the page). */
+@media (max-width: 768px) {
+    html[data-learner-mobile-theme="light"] .ggq,
+    html[data-learner-mobile-theme="light"]:has(:where(#api-content-area) .grades-mobile-layout) .ggq-sheet {
+        --g-title: #282924;
+        --g-body: #4a4b44;
+        --g-muted: #73746d;
+        --g-faint: #a3a39a;
+        --g-line: rgba(40,41,36,.09);
+        --g-press: rgba(38,39,35,.04);
+        --g-surf: #f1efe8;
+        --g-ring: #a3a39a;
+        --g-track: rgba(40,41,36,.12);
+        --g-soon: #b85f12;
+        --g-chipline: rgba(40,41,36,.16);
+        --g-chipon: #252624;
+        --g-chipon-text: #faf9f5;
+        --g-sheet: #faf9f5;
+    }
+}

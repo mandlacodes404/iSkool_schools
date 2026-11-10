@@ -230,7 +230,7 @@ $parentLink = ((int)$parentCount > 0); // true when at least one parent is linke
     <link rel="stylesheet" href="assets/css/learner/announcements.css?v=4.4">
     <link rel="stylesheet" href="assets/css/learner/assignments.css?v=4.4">
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
-    <link rel="stylesheet" href="assets/css/learner/grades.css?v=4.4">
+    <link rel="stylesheet" href="assets/css/learner/grades.css?v=4.5">
     <link rel="stylesheet" href="assets/css/learner/resources.css?v=3.4">
      <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=5.7">
      <!-- The phone back button's regular-weight Nunito (see @font-face 'iSkool Back Label' in learner_dashboard.css), fetched
@@ -3981,7 +3981,7 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/assignments.js?v=10.5"></script>
 <script src="assets/js/learner/resources.js?v=9.0"></script>
 <script src="assets/js/learner/announcements.js?v=9.7"></script>
-<script src="assets/js/learner/grades.js?v=10.6"></script>
+<script src="assets/js/learner/grades.js?v=10.7"></script>
 <script src="assets/js/learner/evaluations.js?v=7.6"></script>
 <script src="assets/js/learner/discussions.js?v=11.2"></script>
 <script src="assets/js/learner/syllabus.js?v=4.8"></script>
