@@ -111,6 +111,31 @@ final class LearnerAnnouncementsQuietTest extends TestCase
         $this->assertStringContainsString('.lan-mobile-row-icon--unread { color: var(--qm-new); }', $this->css());
     }
 
+    public function test_the_bell_sits_in_the_same_soft_tile_as_the_resources_and_syllabus_rows(): void
+    {
+        $css = $this->css();
+        // 40px tile, 12px corners, the soft surface colour, the bell centred at 20px
+        $this->assertMatchesRegularExpression('/\.lan-mobile-row-icon \{[^}]*width: 40px;[^}]*height: 40px;/s', $css);
+        $this->assertMatchesRegularExpression('/\.lan-mobile-row-icon \{[^}]*border-radius: 12px;/s', $css);
+        $this->assertMatchesRegularExpression('/\.lan-mobile-row-icon \{[^}]*background: var\(--qm-surf\);/s', $css);
+        $this->assertMatchesRegularExpression('/\.lan-mobile-row-icon \{[^}]*align-items: center;[^}]*justify-content: center;/s', $css);
+        $this->assertStringContainsString('.lan-mobile-row-icon svg { width: 20px; height: 20px; }', $css);
+        // 20px inset + 40px tile + 14px gap = 74px, so the hairline starts under the title, not under the tile
+        $this->assertMatchesRegularExpression('/\.lan-mobile-row::before \{[^}]*left: 74px;/s', $css);
+        $this->assertDoesNotMatchRegularExpression('/\.lan-mobile-row::before \{[^}]*left: 58px;/s', $css);
+        // the unread dot moved with the bell: it sits inside the tile's top-right corner and stays orange
+        $this->assertMatchesRegularExpression('/\.lan-mobile-row-icon--unread::after \{[^}]*top: 6px;[^}]*right: 6px;[^}]*background: var\(--qm-new\);/s', $css);
+        // read is muted, unread is orange, both still only colours (light mode changes the tokens, not these rules)
+        $this->assertMatchesRegularExpression('/\.lan-mobile-row-icon \{[^}]*color: var\(--qm-muted\);/s', $css);
+        $this->assertStringContainsString('.lan-mobile-row-icon--unread { color: var(--qm-new); }', $css);
+        // the markup still puts the bell in that tile and the read/unread switch still toggles the same class
+        $js = $this->js();
+        $this->assertStringContainsString('<div class="lan-mobile-row-icon${unread ? \' lan-mobile-row-icon--unread\' : \'\'}">${lanMobileBell()}</div>', $js);
+        $this->assertStringContainsString("icon.classList.toggle('lan-mobile-row-icon--unread', unread)", $js);
+        // the tile only exists on the phone list: the desktop pane does not use these classes
+        $this->assertStringNotContainsString('lan-mobile-row-icon', $this->between($js, 'window.lanRenderDesktopList = function', "\n};\n"));
+    }
+
     public function test_unread_comes_from_the_same_read_list_the_desktop_pane_keeps(): void
     {
         $js = $this->js();
@@ -233,7 +258,7 @@ final class LearnerAnnouncementsQuietTest extends TestCase
     {
         // the service worker caches /assets/ by full URL: a changed file under an unchanged ?v= is never fetched again
         $php = $this->source('learner_dashboard.php');
-        foreach (['learner/announcements.css?v=4.4', 'learner/announcements.js?v=9.7'] as $pinned) {
+        foreach (['learner/announcements.css?v=4.5', 'learner/announcements.js?v=9.8'] as $pinned) {
             $this->assertStringContainsString($pinned, $php, "$pinned is not what the page links");
         }
     }

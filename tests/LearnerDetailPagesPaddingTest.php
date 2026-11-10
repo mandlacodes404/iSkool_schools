@@ -104,7 +104,7 @@ final class LearnerDetailPagesPaddingTest extends TestCase
         // The browser and the installed app keep files by full URL, so a changed file needs a new ?v= number
         $php = $this->source('learner_dashboard.php');
         foreach ([
-            'assets/css/learner/announcements.css?v=4.4',
+            'assets/css/learner/announcements.css?v=4.5',
             'assets/css/learner/assignments.css?v=4.4',
             'assets/css/learner/evaluations.css?v=5.7',
                'assets/js/learner/syllabus.js?v=4.8',
