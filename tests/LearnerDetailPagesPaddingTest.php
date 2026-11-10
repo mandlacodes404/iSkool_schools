@@ -3,7 +3,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Guards for the side padding of the learner's phone detail screens (an open assignment, announcement and evaluation,
- * and the syllabus page). On a phone #api-content-area pads 18px (quiz.css). The lists cancel that with -18px side
+ * the syllabus page and an open resource). On a phone #api-content-area pads 18px (quiz.css). The lists cancel that with -18px side
  * margins and inset their rows by 18px, so the detail screens must do the same, or their text sits closer to the screen
  * edge than the list it came from (16px) or much further in (34px and 32px). These checks read the sources for the
  * things a later edit could quietly undo. How the screens look was checked in a phone-sized browser with the real
@@ -86,6 +86,19 @@ final class LearnerDetailPagesPaddingTest extends TestCase
         $this->assertSame(1, preg_match('/\.syl-mobile-row \{[^}]*padding: 11px 20px;/s', $js));
     }
 
+    public function test_the_resources_phone_list_and_file_screen_sit_at_the_same_side_inset_as_the_other_quiet_lists(): void
+    {
+        $css = $this->source('assets/css/learner/resources.css');
+        // the list and the file screen cancel the content area's 18px (phones and the 769-899px range) and inset their text by 20px
+        $this->assertSame(1, preg_match('/@media \(max-width: 899px\) \{\s*\.lrs-mobile-list \{\s*margin-left: -18px;\s*margin-right: -18px;/s', $css), 'the list cancels the 18px of #api-content-area');
+        $this->assertSame(1, preg_match('/@media \(max-width: 899px\) \{\s*\.lrs-mobile-detail \{\s*margin-left: -18px;\s*margin-right: -18px;/s', $css), 'the file screen cancels the 18px of #api-content-area');
+        $this->assertSame(1, preg_match('/\.lrs-mobile-detail \{\s*\/\*[^*]*\*\/\s*padding: 8px 20px 96px;/s', $css));
+        $this->assertSame(1, preg_match('/\.lrs-mobile-row \{[^}]*padding: 11px 20px;/s', $css));
+        $this->assertSame(1, preg_match('/\.lrs-mobile-folder-header \{[^}]*padding: 20px 20px 4px;/s', $css));
+        // "more from this teacher" rows run edge to edge inside the padded file screen
+        $this->assertSame(1, preg_match('/\.lrs-mobile-more \{ margin: 0 -20px; \}/', $css));
+    }
+
     public function test_the_dashboard_loads_the_changed_files_with_a_fresh_version_number(): void
     {
         // The browser and the installed app keep files by full URL, so a changed file needs a new ?v= number
@@ -95,6 +108,8 @@ final class LearnerDetailPagesPaddingTest extends TestCase
             'assets/css/learner/assignments.css?v=4.4',
             'assets/css/learner/evaluations.css?v=5.7',
                'assets/js/learner/syllabus.js?v=4.8',
+            'assets/css/learner/resources.css?v=3.4',
+            'assets/js/learner/resources.js?v=9.0',
         ] as $versioned) {
             $this->assertStringContainsString($versioned, $php);
         }

@@ -81,6 +81,8 @@ window.fetchResources = async function() {
 // STATE PERSISTENCE (sessionStorage)
 // ─────────────────────────────────────────────
 function saveResourcePageState() {
+    // while a phone file screen is open the page is not the list, so its scroll must not overwrite the list's
+    if (window._lrsMobDetail) return;
     const sidebar = document.querySelector('.lrs-sidebar-scroll');
     const mainContent = document.querySelector('.main-content');
     const panel = document.getElementById('lrs-main-panel');
@@ -92,6 +94,7 @@ function saveResourcePageState() {
         mainScroll:    mainContent ? mainContent.scrollTop : 0,
         panelScroll:   (document.querySelector('.lrs-pvw') || {}).scrollTop || 0,
         mobileSearch: document.getElementById('lrsMobileSearch')?.value || '',
+        mobileFilter: window._lrsMobFilter || 'all',
         openFolders: Array.from(document.querySelectorAll('.lrs-mobile-folder-body:not(.collapsed)')).map(el => el.id),
         // Desktop teacher groups the learner has folded away (open is the default)
         collapsedTeachers: Array.from(window._lrsCollapsed || []),
@@ -129,14 +132,11 @@ function restoreResourcePageState() {
                     window.lrsMobileSearch(state.mobileSearch);
                 }
             }
+            if (state.mobileFilter && state.mobileFilter !== 'all') window.lrsMobileSetFilter(state.mobileFilter);
             if (Array.isArray(state.openFolders)) {
                 document.querySelectorAll('.lrs-mobile-folder-body').forEach(body => {
-                    const open = state.openFolders.includes(body.id);
-                    body.classList.toggle('collapsed', !open);
                     const header = body.previousElementSibling;
-                    if (header) header.classList.toggle('lrs-mobile-folder-header--collapsed', !open);
-                    const chev = header?.querySelector('.lrs-mobile-folder-chevron');
-                    if (chev) chev.classList.toggle('open', open);
+                    if (header) lrsMobileSetFolder(header, body, state.openFolders.includes(body.id));
                 });
             }
             if (Array.isArray(state.collapsedTeachers)) {
@@ -190,7 +190,12 @@ function renderResourceCards(data) {
     const apiArea = document.getElementById('api-content-area');
     if (!apiArea) return;
 
+    window._lrsMobDetail = false;
+    window._lrsMobFilter = 'all';
+    window._lrsMobTerm = '';
+
     if (Object.keys(data).length === 0) {
+        window._allLearnerResourcesFlat = [];
         apiArea.innerHTML = `
             <!-- ═══ DESKTOP EMPTY ═══ -->
             <div class="lrs-desktop-layout lqz-flat-layout" id="lrs-desktop-layout">
@@ -220,16 +225,10 @@ function renderResourceCards(data) {
             </div>
 
             <!-- ═══ MOBILE EMPTY ═══ -->
-            <div class="lrs-mobile-search-wrap">
-                <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none">
-                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-                </svg>
-                <input type="text" class="lrs-mobile-search" id="lrsMobileSearch"
-                    placeholder="Search resources..." oninput="lrsMobileSearch(this.value)">
-            </div>
+            <div class="lrs-mobile-head"><h1 class="lrs-mobile-title">Resources</h1></div>
             <div class="lrs-mobile-list">
                 <div class="lrs-mobile-empty">
-                    <svg viewBox="0 0 24 24" width="48" height="48" stroke="#f28c38" stroke-width="1.5" fill="none">
+                    <svg viewBox="0 0 24 24" width="48" height="48" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lrs-icon-crisp" aria-hidden="true">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                         <polyline points="14 2 14 8 20 8"></polyline>
                         <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -288,87 +287,57 @@ function renderResourceCards(data) {
 
         <!-- ═══ MOBILE LIST ═══ -->`;
 
+    // ── Phone: title and counts, search, type chips, then the teacher groups ──
+    // (the desktop layout above is a separate tree; the phone tree below is hidden from 900px up)
+    const flatAll = window._allLearnerResourcesFlat;
+    const catCounts = { all: flatAll.length, doc: 0, vid: 0, img: 0 };
+    flatAll.forEach(file => { catCounts[lrsCat(lrsKind(file))]++; });
+
+    html += lrsMobileHeadHtml(lrsMobileSummary(flatAll.length, flatAll.length, teacherEntries.length, false));
+    html += lrsMobileSearchHtml();
+    html += `<div class="lrs-mobile-chips" role="group" aria-label="Filter resources by type">${
+        [['all', 'All'], ['doc', 'Docs'], ['vid', 'Videos'], ['img', 'Images']]
+            .map(([k, label]) => `<button type="button" class="lrs-mobile-chip${k === 'all' ? ' on' : ''}" data-filter="${k}" aria-pressed="${k === 'all'}" onclick="lrsMobileSetFilter('${k}')">${label} ${catCounts[k]}</button>`)
+            .join('')
+    }</div>`;
+
+    html += `<div class="lrs-mobile-list" id="lrsMobileList">`;
+
+    // Zero-results state: hidden by default, shown by lrsMobileApply() when a search or chip matches nothing.
     html += `
-        <div class="lrs-mobile-search-wrap">
-            <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none">
+        <div class="lrs-mobile-empty lrs-mobile-search-empty" id="lrsMobileSearchEmpty" style="display:none;">
+            <svg viewBox="0 0 24 24" width="40" height="40" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lrs-icon-crisp" aria-hidden="true">
                 <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
-            <input type="text" class="lrs-mobile-search" id="lrsMobileSearch"
-                placeholder="Search resources..." oninput="lrsMobileSearch(this.value)">
+            <p class="lrs-mobile-empty-title" id="lrsMobileSearchEmptyText">No matches</p>
+            <p class="lrs-mobile-empty-body" id="lrsMobileSearchEmptyBody">Try a different word or teacher.</p>
         </div>`;
 
-    html += `<div class="lrs-mobile-list">`;
-
-    let mobileGroupIdx = 0;
-    for (const { teacher, files } of teacherEntries) {
-        const gid = `lrs-mg-${mobileGroupIdx}`;
+    // The flat list is the teachers in order with their files in order, so a group's rows are consecutive indexes into it.
+    // The first group starts open so the page is never just a column of folded labels; a learner's own choice
+    // (saved page state) wins over this, see restoreResourcePageState().
+    let flatCursor = 0;
+    teacherEntries.forEach(({ teacher, files }, gi) => {
+        const gid = `lrs-mg-${gi}`;
+        const open = gi === 0;
         html += `
-            <div class="lrs-mobile-folder-header lrs-mobile-folder-header--collapsed" onclick="toggleLrsMobileFolder('${gid}', this)">
-                <div class="lrs-mobile-folder-icon">
-                    <svg viewBox="0 0 24 24" width="24" height="24" stroke="#73746d" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-                    </svg>
-                </div>
-                <span class="lrs-mobile-folder-name">${teacher}</span>
-                <span class="lrs-mobile-folder-count">${files.length} file${files.length !== 1 ? 's' : ''}</span>
-                <svg class="lrs-mobile-folder-chevron" viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none">
-                    <polyline points="9 18 15 12 9 6"/>
+            <div class="lrs-mobile-folder-header${open ? '' : ' lrs-mobile-folder-header--collapsed'}" role="button" tabindex="0"
+                aria-expanded="${open}" aria-controls="${gid}"
+                onclick="toggleLrsMobileFolder('${gid}', this)"
+                onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggleLrsMobileFolder('${gid}', this); }">
+                <span class="lrs-mobile-folder-name">${escapeResourceHtml(teacher)}</span>
+                <span class="lrs-mobile-folder-count">${files.length}</span>
+                <svg class="lrs-mobile-folder-chevron lrs-icon-crisp" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="m6 9 6 6 6-6"/>
                 </svg>
             </div>
-            <div class="lrs-mobile-folder-body collapsed" id="${gid}">`;
-        mobileGroupIdx++;
-        files.forEach(file => {
-            const isVideo = file.resource_type === 'video';
-
-            if (isVideo) {
-                // ── Mobile: inline video embed ──
-                html += `
-                    <div class="lrs-mobile-video-card" data-resource-id="${file.id}">
-                        <div class="lrs-mobile-video-title">${file.title}</div>
-                        <div class="lrs-mobile-video-meta">
-                            <svg viewBox="0 0 24 24" width="12" height="12" fill="#ff4444" stroke="none">
-                                <path d="M23 7s-.3-2-1.2-2.8c-1.1-1.2-2.4-1.2-3-1.3C16.2 2.8 12 2.8 12 2.8s-4.2 0-6.8.1c-.6.1-1.9.1-3 1.3C1.3 5 1 7 1 7S.7 9.1.7 11.2v2c0 2.1.3 4.2.3 4.2s.3 2 1.2 2.8c1.1 1.2 2.6 1.1 3.3 1.2C7.5 21.6 12 21.6 12 21.6s4.2 0 6.8-.2c.6-.1 1.9-.1 3-1.3.9-.8 1.2-2.8 1.2-2.8s.3-2.1.3-4.2v-2C23.3 9.1 23 7 23 7zM9.7 15.5V8.4l8.1 3.6-8.1 3.5z"/>
-                            </svg>
-                            <span>VIDEO</span>
-                            <span class="lrs-bullet-muted">&bull;</span>
-                            <span>${file.uploaded_at}</span>
-                        </div>
-                        <div class="lrs-mobile-video-wrap">
-                            <iframe
-                                src="${file.video_url}"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowfullscreen
-                                title="${file.title}">
-                            </iframe>
-                        </div>
-                    </div>`;
-            } else {
-                // ── Mobile: regular file row ──
-                const icon = getFileIconThin(file.ext, false);
-                const fileMeta = [file.size, file.uploaded_at]
-                    .filter(Boolean)
-                    .map(escapeResourceHtml)
-                    .join(' <span class="lrs-bullet-muted">&bull;</span> ');
-                html += `
-                    <div class="lrs-mobile-row"
-                         data-resource-id="${file.id}"
-                         data-title="${file.title.toLowerCase()}"
-                         onclick="viewDocument('${file.path}', '${file.title.replace(/'/g, "\\'")}')">
-                        <div class="lrs-mobile-row-icon">${icon}</div>
-                        <div class="lrs-mobile-row-body">
-                            <div class="lrs-mobile-row-title">${file.title}</div>
-                            ${fileMeta ? `<div class="lrs-mobile-row-size">${fileMeta}</div>` : ''}
-                        </div>
-                        <div class="lrs-mobile-row-chevron">
-                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
-                                <polyline points="9 18 15 12 9 6"></polyline>
-                            </svg>
-                        </div>
-                    </div>`;
-            }
+            <div class="lrs-mobile-folder-body${open ? '' : ' collapsed'}" id="${gid}">`;
+        files.forEach((file, rowIdx) => {
+            html += lrsMobileRowHtml(flatAll[flatCursor], flatCursor, rowIdx === 0);
+            flatCursor++;
         });
         html += `</div>`; // close .lrs-mobile-folder-body
-    }
+    });
 
     html += `</div>`; // close .lrs-mobile-list
 
@@ -397,24 +366,6 @@ function recheckMobileNavAfterToggle() {
         setTimeout(() => window.recalcMobileScrollUI(), delay);
     });
 }
-
-window.toggleLrsMobileFolder = function(id, headerEl) {
-    const body = document.getElementById(id);
-    if (!body) return;
-    const chevron = headerEl.querySelector('.lrs-mobile-folder-chevron');
-    const isOpen = !body.classList.contains('collapsed');
-    body.classList.toggle('collapsed', isOpen);
-    headerEl.classList.toggle('lrs-mobile-folder-header--collapsed', isOpen);
-    if (chevron) chevron.classList.toggle('open', !isOpen);
-    saveResourcePageState();
-
-    // Opening/closing a folder changes the page's actual scrollable
-    // height without firing a real 'scroll' event, so the bottom nav's
-    // background (and header) never got re-checked against the new
-    // height — it could stay stuck showing whatever state it was in
-    // before the folder toggled.
-    recheckMobileNavAfterToggle();
-};
 
 // ─────────────────────────────────────────────
 // DESKTOP LIST: folding teacher groups, type chips, search
@@ -720,65 +671,273 @@ window.selectDesktopLearnerResource = function(flatIdx) {
     if (window.learnerPageState) wireResourceScrollState();
 };
 
-window.lrsMobileSearch = function(val) {
-    if (window.learnerPageState) window.learnerPageState.update('resources', { mobileSearch: val });
-    const term = val.toLowerCase().trim();
-    document.querySelectorAll('.lrs-mobile-folder-body').forEach(body => {
-        const header = body.previousElementSibling;
-        const folderName = header ? header.querySelector('.lrs-mobile-folder-name').textContent.toLowerCase() : '';
-        const rows = body.querySelectorAll('.lrs-mobile-row, .lrs-mobile-video-card');
-        let visible = 0;
-        rows.forEach(row => {
-            const titleEl = row.querySelector('.lrs-mobile-row-title, .lrs-mobile-video-title');
-            const title = (row.dataset.title || (titleEl ? titleEl.textContent : '')).toLowerCase();
-            const show = !term || title.includes(term) || folderName.includes(term);
-            row.style.display = show ? '' : 'none';
-            if (show) visible++;
-        });
-        if (header) header.style.display = (visible || !term || folderName.includes(term)) ? '' : 'none';
-        body.style.display = (visible || !term || folderName.includes(term)) ? '' : 'none';
-        if (term && visible) {
-            body.classList.remove('collapsed');
-            if (header) header.classList.remove('lrs-mobile-folder-header--collapsed');
-            const chev = header ? header.querySelector('.lrs-mobile-folder-chevron') : null;
-            if (chev) chev.classList.add('open');
-        }
-    });
+// ─────────────────────────────────────────────
+// PHONE LIST: title and counts, search, type chips, teacher groups, and the open file
+// ─────────────────────────────────────────────
+window._lrsMobFilter = 'all';
+window._lrsMobTerm = '';
+window._lrsMobDetail = false;
 
-    // Filtering rows/folders in/out of view changes the page's scrollable
-    // height just like expanding/collapsing a folder does, but without a
-    // real scroll event — same recalculation fix as the folder toggle.
+// The line under the title: how many files and how many teachers, or how many of them match while searching.
+function lrsMobileSummary(shown, total, teachers, filtering) {
+    const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
+    const files = filtering ? `${shown} of ${plural(total, 'file')}` : plural(total, 'file');
+    // nothing matching leaves no teachers to count
+    return teachers > 0 ? `<b>${files}</b> · ${plural(teachers, 'teacher')}` : `<b>${files}</b>`;
+}
+
+function lrsMobileHeadHtml(sub) {
+    return `
+        <div class="lrs-mobile-head">
+            <h1 class="lrs-mobile-title">Resources</h1>
+            <p class="lrs-mobile-sub" id="lrsMobileSub">${sub}</p>
+        </div>`;
+}
+
+function lrsMobileSearchHtml() {
+    return `
+        <div class="lrs-mobile-search-wrap">
+            <svg viewBox="0 0 24 24" width="17" height="17" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" class="lrs-icon-crisp" aria-hidden="true">
+                <circle cx="11" cy="11" r="7.5"/><line x1="20.5" y1="20.5" x2="16.3" y2="16.3"/>
+            </svg>
+            <input type="text" class="lrs-mobile-search" id="lrsMobileSearch"
+                placeholder="Search resources" aria-label="Search resources" oninput="lrsMobileSearch(this.value)">
+        </div>`;
+}
+
+// The server writes sizes with two decimals ("2.10 MB", "2.00 MB"); the page shows "2.1 MB" and "2 MB".
+function lrsMobileSize(size) {
+    return String(size == null ? '' : size).trim().replace(/\.00 /, ' ').replace(/(\.\d)0 /, '$1 ');
+}
+
+// The little play mark that stands in for the file type on a video's tile.
+const LRS_PLAY_ICON = '<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><polygon points="8 5 19 12 8 19"/></svg>';
+
+// One file: its type in a soft tile (PDF, DOCX, PNG ... or a play mark for a video), the title, then size and date.
+// Tapping opens the file's own screen. data-resource-id is what the Home screen uses to find a file.
+function lrsMobileRowHtml(file, idx, first) {
+    const kind = lrsKind(file);
+    const isVid = kind === 'vid';
+    const meta = [isVid ? 'YouTube' : lrsMobileSize(file.size), lrsShortDate(file)].filter(Boolean).map(escapeResourceHtml).join(' · ');
+    return `
+                <div class="lrs-mobile-row${first ? ' lrs-mobile-row--first' : ''}" role="button" tabindex="0"
+                    data-idx="${idx}" data-resource-id="${escapeResourceHtml(file.id)}" data-cat="${lrsCat(kind)}"
+                    onclick="openMobileLearnerResource(${idx})"
+                    onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openMobileLearnerResource(${idx}); }">
+                    <div class="lrs-mobile-row-icon">${isVid ? LRS_PLAY_ICON : escapeResourceHtml(lrsTag(file, kind))}</div>
+                    <div class="lrs-mobile-row-body">
+                        <div class="lrs-mobile-row-title">${escapeResourceHtml(file.title || 'Untitled')}</div>
+                        <div class="lrs-mobile-row-meta">${meta}</div>
+                    </div>
+                    <svg class="lrs-mobile-row-chevron lrs-icon-crisp" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="1.9" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="m9 18 6-6-6-6"></path>
+                    </svg>
+                </div>`;
+}
+
+function lrsMobileSetFolder(header, body, open) {
+    body.classList.toggle('collapsed', !open);
+    header.classList.toggle('lrs-mobile-folder-header--collapsed', !open);
+    header.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+
+window.toggleLrsMobileFolder = function(id, headerEl) {
+    const body = document.getElementById(id);
+    if (!body || !headerEl) return;
+    // while a search or a type is chosen every group that has a match shows open, so there is nothing to fold
+    if (body.closest('.lrs-mobile-list')?.classList.contains('is-filtering')) return;
+    lrsMobileSetFolder(headerEl, body, body.classList.contains('collapsed'));
+    saveResourcePageState();
+
+    // Opening/closing a group changes the page's actual scrollable height without firing a real 'scroll' event,
+    // so the bottom nav and header are re-checked (see recheckMobileNavAfterToggle).
     recheckMobileNavAfterToggle();
 };
 
-function getFileIcon(ext, isVideo = false) {
-    const color = "#f28c38";
+// Shows the files that match the chosen type and the search box, hides groups with nothing in them, and keeps the
+// counts line, the group counts and the empty state in step.
+function lrsMobileApply() {
+    const list = document.getElementById('lrsMobileList');
+    if (!list) return;
+    const flat = window._allLearnerResourcesFlat || [];
+    const filter = window._lrsMobFilter || 'all';
+    const term = window._lrsMobTerm || '';
+    const filtering = filter !== 'all' || !!term;
+    list.classList.toggle('is-filtering', filtering);
 
-    // Video icon (YouTube red play button style)
-    if (isVideo) {
-        return `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="${color}" stroke-width="2">
-            <rect x="2" y="4" width="20" height="16" rx="3" ry="3"></rect>
-            <polygon points="10 9 16 12 10 15" fill="${color}" stroke="none"></polygon>
-        </svg>`;
+    let shown = 0, teachers = 0;
+    list.querySelectorAll('.lrs-mobile-folder-body').forEach(body => {
+        const header = body.previousElementSibling;
+        const rows = body.querySelectorAll('.lrs-mobile-row');
+        let here = 0;
+        rows.forEach(row => {
+            const file = flat[Number(row.dataset.idx)];
+            if (!file) return;
+            const kind = lrsKind(file);
+            const hay = `${file.title || ''} ${file.teacher || ''} ${file.ext || ''} ${lrsTypeLabel(kind)}`.toLowerCase();
+            const show = (filter === 'all' || lrsCat(kind) === filter) && (!term || hay.includes(term));
+            row.style.display = show ? '' : 'none';
+            row.classList.toggle('lrs-mobile-row--first', show && here === 0);
+            if (show) here++;
+        });
+        const any = here > 0;
+        if (header) {
+            header.style.display = any ? '' : 'none';
+            const count = header.querySelector('.lrs-mobile-folder-count');
+            if (count) count.textContent = String(here);
+        }
+        body.style.display = any ? '' : 'none';
+        shown += here;
+        if (any) teachers++;
+    });
+
+    const sub = document.getElementById('lrsMobileSub');
+    if (sub) sub.innerHTML = lrsMobileSummary(shown, flat.length, filtering ? teachers : list.querySelectorAll('.lrs-mobile-folder-body').length, filtering);
+
+    const empty = document.getElementById('lrsMobileSearchEmpty');
+    if (empty) {
+        const none = filtering && shown === 0;
+        empty.style.display = none ? 'flex' : 'none';
+        const label = document.getElementById('lrsMobileSearchEmptyText');
+        const body = document.getElementById('lrsMobileSearchEmptyBody');
+        if (none && label && body) {
+            if (term) {
+                label.textContent = `No matches for "${(document.getElementById('lrsMobileSearch')?.value || '').trim()}"`;
+                body.textContent = filter === 'all' ? 'Try a different word or teacher.' : 'Try a different word, or another type.';
+            } else {
+                label.textContent = `No ${({ doc: 'documents', vid: 'videos', img: 'images' })[filter] || 'files'} yet`;
+                body.textContent = 'Try another type.';
+            }
+        }
     }
-    // PDF Icon
-    if (ext === 'pdf') {
-        return `<svg viewBox="0 0 24 24" width="20" height="20" stroke="${color}" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="M9 15h3a2 2 0 0 1 0 4h-3V15z"></path></svg>`;
-    }
-    // Image Icon
-    if (['jpg', 'jpeg', 'png'].includes(ext)) {
-        return `<svg viewBox="0 0 24 24" width="20" height="20" stroke="${color}" stroke-width="2" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>`;
-    }
-    // Word/Doc/Default Icon
-    return `<svg viewBox="0 0 24 24" width="20" height="20" stroke="${color}" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`;
+
+    // Rows and groups coming and going change the scrollable height without a real scroll event.
+    recheckMobileNavAfterToggle();
 }
 
-// Mobile row-list only — thinner stroke and the neutral list-icon grey (#73746d) for the folder-row icon.
-// Desktop sidebar item and the preview-fallback panel keep the original
-// weight via getFileIcon() above; don't repoint them at this helper.
-function getFileIconThin(ext, isVideo = false) {
-    return getFileIcon(ext, isVideo).replace('stroke-width="2"', 'stroke-width="1.3"').replace(/#f28c38/gi, '#73746d');
+window.lrsMobileSearch = function(val) {
+    if (window.learnerPageState) window.learnerPageState.update('resources', { mobileSearch: val });
+    window._lrsMobTerm = String(val || '').toLowerCase().trim();
+    lrsMobileApply();
+};
+
+window.lrsMobileSetFilter = function(kind) {
+    window._lrsMobFilter = ['doc', 'vid', 'img'].includes(kind) ? kind : 'all';
+    if (window.learnerPageState) window.learnerPageState.update('resources', { mobileFilter: window._lrsMobFilter });
+    document.querySelectorAll('.lrs-mobile-chip').forEach(chip => {
+        const on = chip.dataset.filter === window._lrsMobFilter;
+        chip.classList.toggle('on', on);
+        chip.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    lrsMobileApply();
+};
+
+// The video id is the only part of a video's address the page trusts: the player and the YouTube link are both built
+// from it, never from the stored address itself.
+function lrsYoutubeId(file) {
+    const m = String(file.video_url || '').match(/embed\/([A-Za-z0-9_-]{11})/);
+    return m ? m[1] : '';
 }
+
+// One open file: what it is, the title, when it was uploaded, (for a video) the player, who it is from and how big it
+// is, one main button and one quiet one, then more from the same teacher.
+function lrsMobileDetailHtml(file, idx) {
+    const flat = window._allLearnerResourcesFlat || [];
+    const kind = lrsKind(file);
+    const isVid = kind === 'vid';
+    const ytId = isVid ? lrsYoutubeId(file) : '';
+    const title = escapeResourceHtml(file.title || 'Untitled');
+    const uploaded = file.uploaded_at || lrsShortDate(file);
+
+    let player = '';
+    let actions = '';
+    if (isVid) {
+        if (ytId) {
+            player = `<div class="lrs-mobile-player"><iframe src="https://www.youtube.com/embed/${ytId}?rel=0&amp;modestbranding=1"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen title="${title}"></iframe></div>`;
+            actions = `<a class="lrs-mobile-btn lrs-mobile-btn--pri" href="https://www.youtube.com/watch?v=${ytId}" target="_blank" rel="noopener">Open in YouTube</a>`;
+        } else {
+            player = `<div class="lrs-mobile-detail-posted">This video's link isn't available.</div>`;
+        }
+    } else if (file.path) {
+        actions = `<button type="button" class="lrs-mobile-btn lrs-mobile-btn--pri" onclick="lrsMobileOpenFile(${idx})">Open</button>` +
+                  `<a class="lrs-mobile-btn" href="${escapeResourceHtml(file.path)}" download>Download</a>`;
+    }
+
+    const more = flat
+        .map((f, i) => ({ f, i }))
+        .filter(({ f, i }) => i !== idx && f.teacher === file.teacher)
+        .slice(0, 3)
+        .map(({ f, i }, n) => lrsMobileRowHtml(f, i, n === 0))
+        .join('');
+
+    return `
+        <article class="lrs-mobile-detail">
+            <div class="lrs-mobile-detail-top">
+                <span class="lrs-mobile-detail-eyebrow">${escapeResourceHtml(lrsTypeLabel(kind))}</span>
+            </div>
+            <h1 class="lrs-mobile-detail-title">${title}</h1>
+            ${uploaded ? `<div class="lrs-mobile-detail-posted">Uploaded ${escapeResourceHtml(uploaded)}</div>` : ''}
+            ${player}
+            <div class="lrs-mobile-detail-facts">
+                <div class="lrs-mobile-detail-fact">
+                    <div class="lrs-mobile-detail-fact-label">From</div>
+                    <div class="lrs-mobile-detail-fact-value">${escapeResourceHtml(file.teacher || '')}</div>
+                </div>
+                <div class="lrs-mobile-detail-fact">
+                    <div class="lrs-mobile-detail-fact-label">${isVid ? 'Source' : 'Size'}</div>
+                    <div class="lrs-mobile-detail-fact-value">${isVid ? 'YouTube' : (escapeResourceHtml(lrsMobileSize(file.size)) || 'N/A')}</div>
+                </div>
+            </div>
+            ${actions ? `<div class="lrs-mobile-detail-actions">${actions}</div>` : ''}
+            ${more ? `<div class="lrs-mobile-detail-label">More from ${escapeResourceHtml(file.teacher || '')}</div><div class="lrs-mobile-more">${more}</div>` : ''}
+        </article>`;
+}
+
+// "Open" on a file's screen: the same viewer the app uses everywhere (PDFs and pictures show inline, the rest offer a download)
+window.lrsMobileOpenFile = function(idx) {
+    const file = (window._allLearnerResourcesFlat || [])[idx];
+    if (file && file.path && typeof window.viewDocument === 'function') window.viewDocument(file.path, file.title || '');
+};
+
+window.openMobileLearnerResource = function(idx) {
+    if (window.innerWidth > 899) return;
+    const file = (window._allLearnerResourcesFlat || [])[idx];
+    const apiArea = document.getElementById('api-content-area');
+    if (!file || !apiArea) return;
+
+    // Keep where the list was scrolled, then stop the scroll listener from saving this screen's scroll over it.
+    saveResourcePageState();
+    window._lrsMobDetail = true;
+
+    const iframe = document.getElementById('mainFrame');
+    const myClassContent = document.getElementById('myClassContent');
+    const mainContent = document.querySelector('.main-content');
+    if (iframe) iframe.style.display = 'none';
+    apiArea.style.display = 'block';
+    if (myClassContent) myClassContent.classList.remove('active');
+
+    sessionStorage.setItem('lastLearnerPage', 'resource_list.php');
+    if (window.configureHeader) {
+        window.configureHeader({
+            title: file.title || 'Resources', mode: 'detail', detailType: 'Resource', backLabel: 'Resources',
+            backAction: () => window.fetchResources(),
+        });
+    }
+    // detail mode hides the bottom nav; the phone detail screens keep it
+    const nav = document.getElementById('mobileBottomNav');
+    if (nav) nav.style.setProperty('display', 'flex', 'important');
+
+    apiArea.innerHTML = lrsMobileDetailHtml(file, idx);
+    if (mainContent) mainContent.scrollTop = 0;
+};
+
+// Opens a file's screen by its id (not used by the list itself)
+window.openMobileLearnerResourceById = function(id) {
+    const idx = (window._allLearnerResourcesFlat || []).findIndex(f => String(f.id) === String(id));
+    if (idx >= 0) window.openMobileLearnerResource(idx);
+};
 
 function escapeResourceHtml(value) {
     return String(value ?? '').replace(/[&<>"']/g, char => ({
