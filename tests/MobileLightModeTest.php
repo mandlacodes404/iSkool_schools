@@ -84,6 +84,7 @@ final class MobileLightModeTest extends TestCase
             'inst-container'       => 'assets/js/learner/quiz.js',
             'lqz-retry-btn'        => 'assets/js/learner/quiz.js',
             'lrs-mobile-list'      => 'assets/js/learner/resources.js',
+            'lrs-mobile-detail'    => 'assets/js/learner/resources.js',
             'lrs-error-state'      => 'assets/js/learner/resources.js',
             'lan-mobile-list'      => 'assets/js/learner/announcements.js',
             'lan-mobile-detail'    => 'assets/js/learner/announcements.js',
@@ -111,7 +112,7 @@ final class MobileLightModeTest extends TestCase
     public function test_quiz_resources_and_home_phone_light_blocks_only_apply_to_phones_in_light(): void
     {
         foreach (['assets/css/learner/quiz.css' => ['.lqz-mobile-list', '.inst-container .start-btn', '.lqz-retry-btn'],
-                  'assets/css/learner/resources.css' => ['.lrs-mobile-row-title', '.lrs-mobile-video-title', '.lrs-error-state'],
+                  'assets/css/learner/resources.css' => ['.lrs-mobile-head', '.lrs-mobile-list', '.lrs-mobile-detail', '.lrs-error-state'],
                   'assets/css/learner/manual.css' => ['.lh-row-title', '.lh-carousel-card', '.lh-home-error']] as $file => $selectors) {
             $css = $this->source($file);
             // the phone block is the last @media (max-width: 768px) in the file, and every rule inside it is for light
