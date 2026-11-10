@@ -3,7 +3,7 @@
  * Shared application version helpers.
  */
 
-const ISKOOL_APP_VERSION = '1.3.3';
+const ISKOOL_APP_VERSION = '1.3.4';
 
 function iskool_app_version(): string
 {
