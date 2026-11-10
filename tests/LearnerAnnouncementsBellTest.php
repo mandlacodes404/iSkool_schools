@@ -97,7 +97,7 @@ final class LearnerAnnouncementsBellTest extends TestCase
     {
         // the service worker caches /assets/ by full URL: a changed file under an unchanged ?v= is never fetched again
         $php = $this->source('learner_dashboard.php');
-        foreach (['learner/mobile_menu.css?v=2.2', 'learner/mobile_menu.js?v=1.5', 'learner/announcements.js?v=9.8'] as $pinned) {
+        foreach (['learner/mobile_menu.css?v=2.3', 'learner/mobile_menu.js?v=1.5', 'learner/announcements.js?v=9.8'] as $pinned) {
             $this->assertStringContainsString($pinned, $php, "$pinned is not what the page links");
         }
     }

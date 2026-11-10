@@ -238,7 +238,7 @@ $parentLink = ((int)$parentCount > 0); // true when at least one parent is linke
     <link rel="preload" href="assets/fonts/nunito-latin-400.woff2" as="font" type="font/woff2" crossorigin media="(max-width: 768px)">
     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=14.7">
     <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=3.2">
-    <link rel="stylesheet" href="assets/css/learner/mobile_menu.css?v=2.2">
+    <link rel="stylesheet" href="assets/css/learner/mobile_menu.css?v=2.3">
     <link rel="stylesheet" href="assets/css/learner/mobile_settings.css?v=1.7">
     <link rel="stylesheet" href="assets/css/shared/pwa_prompts.css?v=1.0">
     <link rel="stylesheet" href="assets/css/shared/back_button.css?v=1.0">
