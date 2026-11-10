@@ -84,6 +84,7 @@ final class MobileLightModeTest extends TestCase
             'inst-container'       => 'assets/js/learner/quiz.js',
             'lqz-retry-btn'        => 'assets/js/learner/quiz.js',
             'lrs-mobile-list'      => 'assets/js/learner/resources.js',
+            'lrs-mobile-detail'    => 'assets/js/learner/resources.js',
             'lrs-error-state'      => 'assets/js/learner/resources.js',
             'lan-mobile-list'      => 'assets/js/learner/announcements.js',
             'lan-mobile-detail'    => 'assets/js/learner/announcements.js',
@@ -110,8 +111,8 @@ final class MobileLightModeTest extends TestCase
 
     public function test_quiz_resources_and_home_phone_light_blocks_only_apply_to_phones_in_light(): void
     {
-        foreach (['assets/css/learner/quiz.css' => ['.lqz-mobile-row-title', '.inst-container .start-btn', '.lqz-retry-btn'],
-                  'assets/css/learner/resources.css' => ['.lrs-mobile-row-title', '.lrs-mobile-video-title', '.lrs-error-state'],
+        foreach (['assets/css/learner/quiz.css' => ['.lqz-mobile-list', '.inst-container .start-btn', '.lqz-retry-btn'],
+                  'assets/css/learner/resources.css' => ['.lrs-mobile-head', '.lrs-mobile-list', '.lrs-mobile-detail', '.lrs-error-state'],
                   'assets/css/learner/manual.css' => ['.lh-row-title', '.lh-carousel-card', '.lh-home-error']] as $file => $selectors) {
             $css = $this->source($file);
             // the phone block is the last @media (max-width: 768px) in the file, and every rule inside it is for light
@@ -136,7 +137,7 @@ final class MobileLightModeTest extends TestCase
         preg_match_all('/^\s*(html\S*)/m', $m[1], $starts);
         $this->assertNotEmpty($starts[1]);
         $this->assertSame(['html[data-learner-mobile-theme="light"]'], array_values(array_unique($starts[1])), 'every rule in the Syllabus phone block must start with the light attribute');
-        foreach (['.syl-card', '.syl-tab-active', '.syl-assess-weight[style*="#34d399" i]'] as $sel) {
+        foreach (['.syl-mobile-head', '.syl-mobile-search-wrap', '.syl-mobile-chips', '.syl-mobile-list', '.syl-mobile-detail'] as $sel) {
             $this->assertStringContainsString('html[data-learner-mobile-theme="light"] ' . $sel, $m[1], 'the Syllabus phone block misses ' . $sel);
         }
     }

@@ -173,7 +173,7 @@
   /* ── Search ──────────────────────────────────────────────────────────── */
   var ICON = {
     'nav-home-sidebar': 'home', 'nav-quiz-sidebar': 'quiz', 'nav-assignments-sidebar': 'assign', 'nav-resources-sidebar': 'folder',
-    'nav-announcements-sidebar': 'megaphone', 'nav-discussions-sidebar': 'chat', 'nav-syllabus-sidebar': 'book',
+    'nav-announcements-sidebar': 'bell', 'nav-discussions-sidebar': 'chat', 'nav-syllabus-sidebar': 'book',
     'nav-grades-sidebar': 'chart', 'nav-evaluations-sidebar': 'star', 'nav-calendar-sidebar': 'calendar',
     'nav-myclass-sidebar': 'users', 'nav-joinclass-sidebar': 'plus'
   };

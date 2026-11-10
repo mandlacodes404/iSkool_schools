@@ -7,8 +7,9 @@
      animation, no blur), and mobile_menu.js lets a finger drag them.
    - Your curve is kept: #mobileOverlay still carries the 35px rounded edge. Change --dmm-curve to
      resize it. The two corner pieces below just keep the square page corner from showing.
-   - Same structure as the desktop menu: brand, search, Learning / Academics groups, My Class,
-     and the account at the bottom (it opens a sheet).
+   - Same structure as the desktop menu, arranged for a phone: the school row with a search button, the My class
+     card, School / Academics groups, and the account at the bottom (it opens a sheet). No colour accent: the
+     current page is a lifted row and counts are a neutral pill.
 
    To undo it all, remove the two include lines. Nothing in learner_dashboard.css was edited. */
 
@@ -22,7 +23,7 @@ html {
   --dm-i-folder: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z'/%3E%3C/svg%3E");
   --dm-i-book: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 7v14'/%3E%3Cpath d='M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z'/%3E%3C/svg%3E");
   --dm-i-chart: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 3v16a2 2 0 0 0 2 2h16'/%3E%3Cpath d='M18 17V9'/%3E%3Cpath d='M13 17V5'/%3E%3Cpath d='M8 17v-3'/%3E%3C/svg%3E");
-  --dm-i-megaphone: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3 11 18-5v12L3 14v-3z'/%3E%3Cpath d='M11.6 16.8a3 3 0 1 1-5.8-1.6'/%3E%3C/svg%3E");
+  --dm-i-bell: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9'/%3E%3Cpath d='M10.3 21a1.94 1.94 0 0 0 3.4 0'/%3E%3C/svg%3E");
   --dm-i-star: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolygon points='12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2'/%3E%3C/svg%3E");
   --dm-i-users: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='9' cy='7' r='4'/%3E%3Cpath d='M22 21v-2a4 4 0 0 0-3-3.87'/%3E%3Cpath d='M16 3.13a4 4 0 0 1 0 7.75'/%3E%3C/svg%3E");
   --dm-i-plus: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M8 12h8'/%3E%3Cpath d='M12 8v8'/%3E%3C/svg%3E");
@@ -37,13 +38,21 @@ html {
   --dm-i-logout: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4'/%3E%3Cpolyline points='16 17 21 12 16 7'/%3E%3Cline x1='21' x2='9' y1='12' y2='12'/%3E%3C/svg%3E");
   --dm-i-chat: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'/%3E%3C/svg%3E");
   --dm-i-calendar: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='18' height='18' x='3' y='4' rx='2'/%3E%3Cpath d='M16 2v4M8 2v4M3 10h18'/%3E%3C/svg%3E");
+  --dm-i-more: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='1'/%3E%3Ccircle cx='19' cy='12' r='1'/%3E%3Ccircle cx='5' cy='12' r='1'/%3E%3C/svg%3E");
+  --dm-i-chev: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 18 6-6-6-6'/%3E%3C/svg%3E");
   --dmm-w: min(79vw, 340px);       /* drawer width, unchanged from before */
   --dmm-curve: 35px;               /* your curve */
   --dmm-dim: .18;                  /* how dark the page gets while the menu is open (was .4) */
   --dmm-dur: .32s;
   --dmm-ease: cubic-bezier(.22, .8, .24, 1);
-  --dm-bg: #121211;                /* drawer colour: one token, change it here (deeper than the app's #20201f) */
+  --dm-bg: #161615;                /* drawer colour: one token, change it here (a lower layer than the app's #20201f) */
   --dm-raise: #20201f;             /* account sheet: a raised layer, same as the app */
+  --dm-card: #20201f;              /* My class card: the app's own colour, lifted off the drawer */
+  --dm-card-line: rgba(255,255,255,.075);
+  --dm-chip: #2a2a28;              /* the small tile behind the My class icon */
+  --dm-chip-ico: #cfcfcb;
+  --dm-badge-bg: #ecece9;          /* counts are neutral: a light pill, no colour accent */
+  --dm-badge-text: #1a1a19;
   --dm-hover: rgba(255,255,255,.055);
   --dm-active: rgba(255,255,255,.09);
   --dm-line: rgba(255,255,255,.08);
@@ -51,7 +60,7 @@ html {
   --dm-soft: #b9b9b5;
   --dm-muted: #8b8b87;
   --dm-faint: #62625f;
-  --dm-accent: #4fd1c5;
+  --dm-accent: var(--dm-text);     /* no colour accent: focus rings and the join select read this name too, so they follow the text colour */
   --dm-font: 'Geist', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 
@@ -124,7 +133,7 @@ html.dmm-drag body #mobileOverlay {
 /* -- Brand ----------------------------------------------------------------- */
 html body .sidebar.dm-menu .dm-brand {
   order: 1; flex: none; display: flex; align-items: center; gap: 12px;
-  height: auto; margin: 0; padding: 10px 18px 14px; border: 0;
+  height: auto; margin: 0; padding: 10px 66px 14px 18px; border: 0;   /* right padding leaves room for the search button */
 }
 html body .sidebar.dm-menu .dm-mark { box-sizing: border-box; width: 46px; height: 46px; border-radius: 12px; object-fit: cover; flex: none; }
 html body .sidebar.dm-menu .dm-mark--initials {
@@ -140,15 +149,17 @@ html body .sidebar.dm-menu .dm-brand-sub { color: var(--dm-muted); font: 400 12.
 html body .sidebar.dm-menu .dm-toggle, html body .sidebar.dm-menu .dm-kbd { display: none !important; }
 
 /* -- Search ---------------------------------------------------------------- */
+/* A 44px icon button at the right of the school row (it was a full-width field). Same button, same click handler. */
 html body .sidebar.dm-menu .dm-search {
-  order: 2; flex: none; display: flex; align-items: center; gap: 10px; box-sizing: border-box;
-  width: calc(100% - 28px) !important; height: 44px; min-height: 0; margin: 0 14px 28px !important; padding: 0 12px !important;
-  border: 1px solid var(--dm-line); border-radius: 12px !important; background: rgba(255,255,255,.05);
-  color: var(--dm-muted); font: 450 16px/1 var(--dm-font); font-size: 16px !important; font-weight: 450 !important;
-  text-align: left; text-transform: none; cursor: pointer;
+  position: absolute; top: calc(env(safe-area-inset-top, 0px) + 17px); right: 14px; z-index: 1;
+  display: grid; place-items: center; box-sizing: border-box;
+  width: 44px !important; height: 44px; min-height: 0; margin: 0 !important; padding: 0 !important;
+  border: 0; border-radius: 12px !important; background: none;
+  color: var(--dm-soft); font-size: 0 !important; text-transform: none; cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
-html body .sidebar.dm-menu .dm-search:active { background: rgba(255,255,255,.08); }
+html body .sidebar.dm-menu .dm-search .dm-label { display: none; }
+html body .sidebar.dm-menu .dm-search:active { background: var(--dm-hover); }
 
 /* -- Shared mask icons (colour follows the text colour) -------------------- */
 html body .sidebar.dm-menu .dm-item::before, html body .sidebar.dm-menu .dm-search::before,
@@ -159,7 +170,7 @@ html body .sidebar.dm-menu .dm-item::before, html body .sidebar.dm-menu .dm-sear
   -webkit-mask-size: contain; mask-size: contain;
 }
 html body .sidebar.dm-menu .dm-search { --dm-ico: var(--dm-i-search); }
-html body .sidebar.dm-menu .dm-search::before { width: 20px; height: 20px; }
+html body .sidebar.dm-menu .dm-search::before { width: 22px; height: 22px; }
 
 /* -- Navigation ------------------------------------------------------------ */
 html body .sidebar.dm-menu .sidebar-links {
@@ -180,7 +191,7 @@ html body .sidebar.dm-menu .dm-item {
 html body .sidebar.dm-menu .dm-item > svg { display: none; }
 html body .sidebar.dm-menu .dm-item:active { background: var(--dm-hover); }
 html body .sidebar.dm-menu .dm-item.active { background: var(--dm-active); color: var(--dm-text); font-weight: 500 !important; }
-html body .sidebar.dm-menu .dm-item.active::before { background: var(--dm-accent); }
+/* The current page is the lifted row with the brighter text and icon: no colour accent. */
 html body .sidebar.dm-menu .dm-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 html body .sidebar.dm-menu .dm-meta {
   display: block; flex: none; max-width: 110px; overflow: hidden; text-overflow: ellipsis;
@@ -194,30 +205,64 @@ html body .sidebar.dm-menu .dm-item.desktop-only { display: none; }
 #nav-quiz-sidebar { order: 20; --dm-ico: var(--dm-i-quiz); }
 #nav-assignments-sidebar { order: 30; --dm-ico: var(--dm-i-assign); }
 #nav-resources-sidebar { order: 40; --dm-ico: var(--dm-i-folder); }
-#nav-announcements-sidebar { order: 50; --dm-ico: var(--dm-i-megaphone); }
+#nav-announcements-sidebar { order: 50; --dm-ico: var(--dm-i-bell); }
 #nav-discussions-sidebar { order: 55; --dm-ico: var(--dm-i-chat); }
 html body .sidebar.dm-menu .dm-sep--a { order: 58; }
-#nav-syllabus-sidebar { order: 60; --dm-ico: var(--dm-i-book); }
-#nav-grades-sidebar { order: 70; --dm-ico: var(--dm-i-chart); }
+#nav-grades-sidebar { order: 60; --dm-ico: var(--dm-i-chart); }
+#nav-syllabus-sidebar { order: 70; --dm-ico: var(--dm-i-book); }
 #nav-evaluations-sidebar { order: 80; --dm-ico: var(--dm-i-star); }
-#nav-calendar-sidebar { order: 85; --dm-ico: var(--dm-i-calendar); }
+#nav-calendar-sidebar { order: 52; --dm-ico: var(--dm-i-calendar); }
 html body .sidebar.dm-menu .dm-sep--b { order: 88; }
-#nav-myclass-sidebar { order: 90; --dm-ico: var(--dm-i-users); }
-#nav-joinclass-sidebar { order: 90; --dm-ico: var(--dm-i-plus); }
-html body .sidebar.dm-menu .join-class-form, html body .sidebar.dm-menu .join-status { order: 91; }
-html body .sidebar.dm-menu .sidebar-links::before { content: 'Learning'; order: 15; }
+/* My class (or Join a class) is the card at the top, above the School group */
+#nav-myclass-sidebar { order: 5; --dm-ico: var(--dm-i-users); }
+#nav-joinclass-sidebar { order: 5; --dm-ico: var(--dm-i-plus); }
+html body .sidebar.dm-menu .join-class-form, html body .sidebar.dm-menu .join-status { order: 6; }
+html body .sidebar.dm-menu .sidebar-links::before { content: 'School'; order: 15; }
 html body .sidebar.dm-menu .dm-sep--a::before { content: 'Academics'; }
 html body .sidebar.dm-menu .sidebar-links::before, html body .sidebar.dm-menu .dm-sep--a {
-  flex: none; display: block; height: auto; margin: 16px 0 6px; padding: 0 12px; background: none;
+  flex: none; display: block; height: auto; margin: 20px 0 6px; padding: 0 12px; background: none;
   color: var(--dm-muted); font: 500 12.5px/1 var(--dm-font); letter-spacing: .01em; white-space: nowrap; user-select: none;
 }
-html body .sidebar.dm-menu .dm-sep--b { display: block; flex: none; height: 1px; margin: 10px 6px; background: var(--dm-line); }
-html body .sidebar.dm-menu .dm-sep--c, html body .sidebar.dm-menu .footer { display: none; }
+html body .sidebar.dm-menu .dm-sep--b, html body .sidebar.dm-menu .dm-sep--c, html body .sidebar.dm-menu .footer { display: none; }
+
+/* -- My class card ---------------------------------------------------------- */
+/* Same button and markup as before (the class name is .dm-meta, "My Class" is .dm-label); only the layout changes.
+   The tile behind the icon is drawn by .dm-label::before so the icon mask above it can stay as it is. */
+html body .sidebar.dm-menu #nav-myclass-sidebar, html body .sidebar.dm-menu #nav-joinclass-sidebar {
+  order: 5; isolation: isolate;
+  display: grid; grid-template-columns: 38px minmax(0, 1fr) 20px; grid-template-areas: "ico name chev";
+  align-items: center; column-gap: 12px;
+  width: auto !important; height: 68px; margin: 12px 2px 0 !important; padding: 0 14px 0 12px !important;
+  border: 1px solid var(--dm-card-line); border-radius: 16px !important; background: var(--dm-card);
+}
+html body .sidebar.dm-menu #nav-myclass-sidebar.active, html body .sidebar.dm-menu #nav-joinclass-sidebar.active { background: var(--dm-active); }
+html body .sidebar.dm-menu #nav-myclass-sidebar::before, html body .sidebar.dm-menu #nav-joinclass-sidebar::before {
+  grid-area: ico; justify-self: center; background: var(--dm-chip-ico);
+}
+html body .sidebar.dm-menu #nav-myclass-sidebar::after, html body .sidebar.dm-menu #nav-joinclass-sidebar::after {
+  content: ''; grid-area: chev; width: 20px; height: 20px; background: var(--dm-faint);
+  -webkit-mask-image: var(--dm-i-chev); mask-image: var(--dm-i-chev);
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; -webkit-mask-position: center; mask-position: center;
+  -webkit-mask-size: contain; mask-size: contain;
+}
+html body .sidebar.dm-menu #nav-myclass-sidebar .dm-label::before, html body .sidebar.dm-menu #nav-joinclass-sidebar .dm-label::before {
+  content: ''; position: absolute; z-index: -1; left: 12px; top: 50%; width: 38px; height: 38px; margin-top: -19px;
+  border-radius: 11px; background: var(--dm-chip);
+}
+html body .sidebar.dm-menu #nav-myclass-sidebar .dm-label, html body .sidebar.dm-menu #nav-joinclass-sidebar .dm-label {
+  grid-area: name; color: var(--dm-text); font: 500 16.5px/1.15 var(--dm-font);
+}
+/* With a class name: the name on top, "My Class" under it */
+html body .sidebar.dm-menu #nav-myclass-sidebar:has(.dm-meta) { grid-template-areas: "ico name chev" "ico sub chev"; align-content: center; row-gap: 3px; }
+html body .sidebar.dm-menu #nav-myclass-sidebar:has(.dm-meta) .dm-label { grid-area: sub; color: var(--dm-muted); font: 400 12.5px/1.15 var(--dm-font); }
+html body .sidebar.dm-menu #nav-myclass-sidebar .dm-meta {
+  grid-area: name; max-width: none; color: var(--dm-text); font: 500 16.5px/1.15 var(--dm-font);
+}
 
 /* -- Account row at the bottom (opens the sheet) --------------------------- */
 html body .sidebar.dm-menu .dm-account-root {
   order: 99; flex: none; box-sizing: border-box;
-  display: grid; grid-template-columns: 36px minmax(0, 1fr) 20px; grid-template-areas: "av name chev";
+  display: grid; grid-template-columns: 36px minmax(0, 1fr) 20px; grid-template-areas: "av name chev" "av role chev"; align-content: center;
   column-gap: 12px; align-items: center; height: 56px;
   margin: 0 10px calc(34px + env(safe-area-inset-bottom, 0px)); padding: 0 12px 0 10px;
   border-radius: 14px; background: rgba(255,255,255,.045); cursor: pointer; -webkit-tap-highlight-color: transparent;
@@ -225,7 +270,7 @@ html body .sidebar.dm-menu .dm-account-root {
 html body .sidebar.dm-menu .dm-account-root:active { background: rgba(255,255,255,.08); }
 html body .sidebar.dm-menu .dm-account-root::after {
   content: ''; grid-area: chev; width: 20px; height: 20px; background: var(--dm-muted);
-  -webkit-mask-image: var(--dm-i-updown); mask-image: var(--dm-i-updown);
+  -webkit-mask-image: var(--dm-i-more); mask-image: var(--dm-i-more);   /* it opens a sheet, so no up/down arrows */
   -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; -webkit-mask-position: center; mask-position: center;
   -webkit-mask-size: contain; mask-size: contain;
 }
@@ -237,6 +282,12 @@ html body .sidebar.dm-menu .dm-account-root img.learner-avatar { display: block;
 html body .sidebar.dm-menu .learner-name {
   grid-area: name; margin: 0; max-height: none !important; opacity: 1;
   color: var(--dm-text); font: 500 16px/1.25 var(--dm-font); font-size: 16px !important; font-weight: 500 !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+/* The name with the role ("Learner") under it, like the parent app */
+html body .sidebar.dm-menu .learner-role {
+  grid-area: role; margin: 1px 0 0;
+  color: var(--dm-muted); font: 400 13px/1.25 var(--dm-font);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 html body .sidebar.dm-menu .learner-email { display: none; }
 
@@ -300,13 +351,13 @@ html body .dm-pop .dm-pop-sep { height: 1px; margin: 6px 12px; background: var(-
 }
 .dmm-s-row:active { background: var(--dm-hover); }
 .dmm-s-row .t { margin-left: auto; color: var(--dm-muted); font-size: 13px; }
-.dmm-s-row b { color: var(--dm-accent); font-weight: 500; }
+.dmm-s-row b { color: var(--dm-text); font-weight: 600; }
 .dmm-s-empty { padding: 28px 16px; color: var(--dm-muted); font: 400 15px/1.5 var(--dm-font); text-align: center; }
 
 /* -- Badges: window.dmSetBadge(pageKey, count) ----------------------------- */
 .dmm-badge {
-  flex: none; min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; border-radius: 10px;
-  background: var(--dm-accent); color: #06201d; font: 600 12px/20px var(--dm-font); text-align: center;
+  flex: none; min-width: 22px; height: 22px; padding: 0 7px; box-sizing: border-box; border-radius: 11px;
+  background: var(--dm-badge-bg); color: var(--dm-badge-text); font: 600 12px/22px var(--dm-font); text-align: center;
 }
 html body .sidebar.dm-menu .dm-item .dmm-badge { margin-left: auto; }
 #mobileBottomNav [data-page] { position: relative; }
@@ -331,7 +382,9 @@ html body .sidebar.dm-menu .dm-item .dmm-badge { margin-left: auto; }
 html[data-learner-mobile-theme="light"] {
   --dm-bg: #f4f3ee; --dm-raise: #ffffff;
   --dm-hover: rgba(38,39,35,.055); --dm-active: rgba(38,39,35,.075); --dm-line: #dfded8;
-  --dm-text: #282924; --dm-soft: #53544e; --dm-muted: #73746d; --dm-faint: #8b8b83; --dm-accent: #187a72;
+  --dm-text: #282924; --dm-soft: #53544e; --dm-muted: #73746d; --dm-faint: #8b8b83; --dm-accent: var(--dm-text);
+  --dm-card: #ffffff; --dm-card-line: #e3e2db; --dm-chip: #efeee8; --dm-chip-ico: #53544e;
+  --dm-badge-bg: #282924; --dm-badge-text: #faf9f5;
 }
 
 /* the curved edge of the dim, the corner gaps follow --dm-bg */
@@ -340,8 +393,6 @@ html[data-learner-mobile-theme="light"] body .sidebar.active ~ #mobileOverlay { 
 
 /* drawer */
 html[data-learner-mobile-theme="light"] body .sidebar.dm-menu .dm-mark--initials { background: #ffffff; color: #53544e; }
-html[data-learner-mobile-theme="light"] body .sidebar.dm-menu .dm-search { background: #ffffff; }
-html[data-learner-mobile-theme="light"] body .sidebar.dm-menu .dm-search:active { background: rgba(38,39,35,.06); }
 html[data-learner-mobile-theme="light"] body .sidebar.dm-menu .dm-account-root { background: rgba(38,39,35,.045); }
 html[data-learner-mobile-theme="light"] body .sidebar.dm-menu .dm-account-root:active { background: rgba(38,39,35,.075); }
 
@@ -353,7 +404,6 @@ html[data-learner-mobile-theme="light"] body .dm-pop .dm-pop-item.is-danger { co
 html[data-learner-mobile-theme="light"] .dmm-s-field { background: #ffffff; }
 html[data-learner-mobile-theme="light"] .dmm-s-field input { color-scheme: light; }
 
-/* badge: white text on the darker accent */
-html[data-learner-mobile-theme="light"] .dmm-badge { color: #ffffff; }
+/* badge: the dark pill with light text comes from --dm-badge-bg / --dm-badge-text above */
 
 }

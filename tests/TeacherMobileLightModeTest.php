@@ -227,7 +227,7 @@ final class TeacherMobileLightModeTest extends TestCase
         // the three had no marker the page would flash dark between the list and the marks.
         $js = $this->source('assets/js/teacher/grades.js');
         $this->assertSame(2, substr_count($js, '<div class="gr-panel-empty gr-mobile-detail">'), 'the loading and the error screen must carry the marker');
-        $this->assertSame(2, substr_count($js, '<div class="gr-panel-content gr-mobile-detail">'), 'both phone detail views must carry the marker');
+        $this->assertSame(2, substr_count($js, '<div class="gr-mobile-detail td-detail td-detail--grade">'), 'both phone detail views must carry the marker');
         $this->assertStringContainsString('class="gr-mobile-list"', $js);
         $this->assertStringContainsString('class="gr-error-message"', $js);
 

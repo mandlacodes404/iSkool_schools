@@ -225,27 +225,32 @@ $parentLink = ((int)$parentCount > 0); // true when at least one parent is linke
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dashboard - <?= htmlspecialchars($schoolName) ?></title>
     <link rel="icon" type="image/svg+xml" href="/icon.svg?v=1.4">
-    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=6.7">
-    <link rel="stylesheet" href="assets/css/learner/manual.css?v=8.7">
-    <link rel="stylesheet" href="assets/css/learner/announcements.css?v=4.2">
-    <link rel="stylesheet" href="assets/css/learner/assignments.css?v=4.2">
+    <link rel="stylesheet" href="assets/css/learner/quiz.css?v=7.0">
+    <link rel="stylesheet" href="assets/css/learner/manual.css?v=8.8">
+    <link rel="stylesheet" href="assets/css/learner/announcements.css?v=4.5">
+    <link rel="stylesheet" href="assets/css/learner/assignments.css?v=4.4">
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
-    <link rel="stylesheet" href="assets/css/learner/grades.css?v=4.4">
-    <link rel="stylesheet" href="assets/css/learner/resources.css?v=3.3">
-     <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=5.5">
-     <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=14.3">
-    <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=3.1">
-    <link rel="stylesheet" href="assets/css/learner/mobile_menu.css?v=2.0">
+    <link rel="stylesheet" href="assets/css/learner/grades.css?v=4.5">
+    <link rel="stylesheet" href="assets/css/learner/resources.css?v=3.4">
+     <link rel="stylesheet" href="assets/css/learner/evaluations.css?v=5.7">
+     <!-- The phone back button's regular-weight Nunito (see @font-face 'iSkool Back Label' in learner_dashboard.css), fetched
+         early so the label does not flash in another font the first time a detail page opens. Phones only. -->
+    <link rel="preload" href="assets/fonts/nunito-latin-400.woff2" as="font" type="font/woff2" crossorigin media="(max-width: 768px)">
+    <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=14.7">
+    <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=3.2">
+    <link rel="stylesheet" href="assets/css/learner/mobile_menu.css?v=2.3">
     <link rel="stylesheet" href="assets/css/learner/mobile_settings.css?v=1.7">
     <link rel="stylesheet" href="assets/css/shared/pwa_prompts.css?v=1.0">
     <link rel="stylesheet" href="assets/css/shared/back_button.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/learner/logo_pop.css?v=1.0">
     <link rel="stylesheet" href="assets/css/learner/mobile_class.css?v=1.1">
     <link rel="stylesheet" href="assets/css/learner/parent_invite.css?v=1.0">
     <link rel="stylesheet" href="assets/css/learner/desktop_settings.css?v=1.5S">   <!-- new -->
-    <link rel="stylesheet" href="assets/css/learner/mobile_light.css?v=2.1">
+    <link rel="stylesheet" href="assets/css/learner/mobile_light.css?v=2.2">
     <link rel="stylesheet" href="assets/css/learner/desktop_settings.css?v=1.4">   <!-- new -->
-    <link rel="stylesheet" href="assets/css/learner/mobile_light.css?v=2.1">
+    <link rel="stylesheet" href="assets/css/learner/mobile_light.css?v=2.2">
     <link rel="stylesheet" href="assets/css/splash_light.css?v=<?= (int) @filemtime(__DIR__ . '/assets/css/splash_light.css') ?>">
+    <link rel="stylesheet" href="assets/css/shared/net_status.css?v=1.0">
     <script>
     // Desktop sidebar: restore the saved collapsed state BEFORE first paint (no flash).
     // With no saved choice, screens narrower than 1100px start as a rail.
@@ -278,7 +283,7 @@ $parentLink = ((int)$parentCount > 0); // true when at least one parent is linke
     <meta name="msapplication-navbutton-color" content="#20201f">
     <!-- Phone light / dark: sets <html data-learner-mobile-theme> and the status bar colour before first paint, so the
          splash below starts in the right theme (see mobile_theme.js). It used to load at the end of <body>. -->
-    <script src="assets/js/learner/mobile_theme.js?v=1.8"></script>
+    <script src="assets/js/learner/mobile_theme.js?v=1.9"></script>
     <!-- Phone canvas: the colour behind the page, there from the very first frame (when the app opens, and in the
          instant between two pages) so a white or wrong-coloured edge never shows. Dark phone mode only: in light
          mode the page colour is decided page by page (mobile_light.css), so <html> is left alone and takes whatever
@@ -479,6 +484,7 @@ if (!empty($joinedClassIds)) {
     </div>
 
     <div class="learner-name"><?= htmlspecialchars($learnerFullName) ?></div>  
+    <div class="learner-role">Learner</div>
     <div class="learner-email"><?= htmlspecialchars($learnerEmail ?: '') ?></div>
     </div>
 
@@ -639,16 +645,19 @@ if (!empty($joinedClassIds)) {
     </svg>
 </button>
 
-        <button id="headerBackBtn" type="button" style="display: none; background: none; border: none; color: inherit; cursor: pointer; padding: 5px;" onclick="return window.handleHeaderBack(event)">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <button id="headerBackBtn" type="button" style="display: none; background: none; border: none; color: inherit; cursor: pointer;" onclick="return window.handleHeaderBack(event)">
+            <svg class="hb-arrow" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="19" y1="12" x2="5" y2="12"></line>
                 <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            <svg class="hb-chevron" xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                <polyline points="15 18 9 12 15 6"></polyline>
             </svg>
             <span id="headerBackLabel"></span>
         </button>
     </div>
 
-    <div class="logo-container" style="flex: 2; display: flex; justify-content: center; align-items: center; gap: 10px;">
+    <div class="logo-container" data-school-name="<?= htmlspecialchars($schoolName) ?>" style="flex: 2; display: flex; justify-content: center; align-items: center; gap: 10px;">
         <?php if ($schoolLogo): ?>
             <img id="headerLogo" src="<?= htmlspecialchars($schoolLogo) ?>"
                  alt="School Logo"
@@ -3541,6 +3550,9 @@ if (!title || title === 'Home' || title === 'partials/manual.html' || title === 
         : null;
     const backLabel = config.backLabel || window.learnerHeaderCurrentTitle || '';
     if (backLabelEl) backLabelEl.innerText = backLabel;
+    // The same text goes on the (invisible) right side, so the header can keep the title centred on a phone: see the
+    // #headerRight::before rule in learner_dashboard.css.
+    if (rightSide) rightSide.setAttribute('data-back-label', backLabel);
     if (mainHeader && window.innerWidth <= 768) {
         mainHeader.classList.add('mobile-detail-mode');
         if (mainContent && mainContent.scrollTop > 28) {
@@ -3569,6 +3581,7 @@ if (!title || title === 'Home' || title === 'partials/manual.html' || title === 
         window.learnerHeaderBackAction = null;
         window.learnerHeaderCurrentTitle = title;
         if (backLabelEl) backLabelEl.innerText = '';
+        if (rightSide) rightSide.removeAttribute('data-back-label');
         if (mainHeader) mainHeader.classList.remove('mobile-detail-mode', 'detail-title-collapsed');
         // --- STANDARD MODE: EXPLORATION ---
         // On mobile, this will show the nav. On desktop, your CSS still keeps it hidden.
@@ -3964,25 +3977,28 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 <script src="assets/js/learner/main.js?v=1.2"></script>
-<script src="assets/js/learner/manual.js?v=12.0"></script>
-<script src="assets/js/learner/quiz.js?v=12.7"></script>
-<script src="assets/js/learner/assignments.js?v=10.4"></script>
-<script src="assets/js/learner/resources.js?v=8.9"></script>
-<script src="assets/js/learner/announcements.js?v=9.5"></script>
-<script src="assets/js/learner/grades.js?v=10.6"></script>
-<script src="assets/js/learner/evaluations.js?v=7.5"></script>
+<script src="assets/js/learner/manual.js?v=12.2"></script>
+<script src="assets/js/learner/quiz.js?v=12.9"></script>
+<script src="assets/js/learner/assignments.js?v=10.5"></script>
+<script src="assets/js/learner/resources.js?v=9.0"></script>
+<script src="assets/js/learner/announcements.js?v=9.8"></script>
+<script src="assets/js/learner/grades.js?v=10.7"></script>
+<script src="assets/js/learner/evaluations.js?v=7.6"></script>
 <script src="assets/js/learner/discussions.js?v=11.2"></script>
-<script src="assets/js/learner/syllabus.js?v=4.5"></script>
+<script src="assets/js/learner/syllabus.js?v=4.8"></script>
 <script src="assets/js/learner/learner_calendar.js?v=2.5"></script>
+<script src="assets/js/shared/net_status.js?v=1.1"></script>
+<script src="assets/js/learner/learner_net_status.js?v=1.0"></script>
 <script src="assets/js/learner/desktop_menu.js?v=1.4"></script>
-<script src="assets/js/learner/mobile_menu.js?v=1.4"></script>
+<script src="assets/js/learner/mobile_menu.js?v=1.5"></script>
 <script src="assets/js/learner/mobile_settings.js?v=1.7"></script>
 <script src="assets/js/learner/parent_invite.js?v=1.0"></script>
 <script src="assets/js/learner/mobile_class.js?v=1.2"></script>
 <script src="assets/js/learner/desktop_settings.js?v=1.4"></script>
 <script src="assets/js/shared/pwa_prompts.js?v=1.0"></script>
 <script src="assets/js/shared/back_button.js?v=1.0"></script>
-<script src="assets/js/learner/learner_back_button.js?v=1.0"></script>
+<script src="assets/js/learner/learner_back_button.js?v=1.1"></script>
+<script src="assets/js/learner/logo_pop.js?v=1.0"></script>
 <script>window.ISKOOL_SETTINGS = { sendResetUrl: 'auth/password/send_reset_link.php' };</script>
 <?php include 'includes/global_viewer.php'; ?>
 </body>

@@ -1,9 +1,9 @@
 /*
  * iSkool connection status: the "You're offline" strip and the news about saves that waited on the phone.
  *
- * Why it exists. A teacher marking in a classroom often has no signal. The service worker (service-worker.js) keeps a
- * mark saved without signal on the phone and sends it when the phone is back online. This file is the part the
- * teacher sees:
+ * Why it exists. A teacher marking in a classroom often has no signal, and a learner may have none when they finish a
+ * quiz. The service worker (service-worker.js) keeps a mark (or a quiz, an assignment, an evaluation) saved without
+ * signal on the phone and sends it when the phone is back online. This file is the part the person sees:
  *   - a slim strip above the bottom bar while the phone is offline, and while saves are still waiting to be sent;
  *   - a short note when saved marks have been sent, and a note that stays until it is dismissed when a saved mark
  *     could NOT be applied (the marks changed meanwhile, or the server refused them);
@@ -13,11 +13,14 @@
  *
  * Public API (window.iskoolNetStatus):
  *   init(options)   start; call once. Options:
- *       urlPrefix   only saves to URLs under this path are announced, e.g. '/api/teacher/'
+ *       urlPrefix   only saves to URLs under this path are announced, e.g. '/api/teacher/' (or a list of paths)
+ *       role        whose waiting saves the service worker counts: 'teacher' (the default) or 'learner'
  *       user        function returning the signed-in user's email: only that user's waiting saves are counted
  *       describe    optional function(kind, detail) returning the sentence for 'synced' | 'conflict' | 'failed'
  *                   (kind) so a page can name the learner and quiz; a generic sentence is used otherwise
  *       offlineHint what to tell an offline user who has nothing waiting yet
+ *       idleStrip   false: no "Offline" strip while nothing is waiting (the strip then shows only for saved work)
+ *       nouns       [one, many] for what is counted, default ['change', 'changes']
  *   waiting()       how many saves of the signed-in user are waiting on this phone
  *   replayNow()     ask the service worker to send them now
  *
@@ -57,6 +60,20 @@
     function isOffline() { return navigator.onLine === false; }
 
     function plural(n, one, many) { return n + ' ' + (n === 1 ? one : many); }
+
+    function noun() {
+        var pair = options && options.nouns;
+        return pair && pair.length === 2 ? pair : ['change', 'changes'];
+    }
+
+    // Is this URL one whose saves this page announces?
+    function ownsUrl(path) {
+        var prefix = options && options.urlPrefix;
+        if (!prefix) return true;
+        var list = Array.isArray(prefix) ? prefix : [prefix];
+        for (var i = 0; i < list.length; i++) if (path.indexOf(list[i]) === 0) return true;
+        return false;
+    }
 
     function currentUser() {
         try { return options && options.user ? String(options.user() || '') : ''; } catch (e) { return ''; }
@@ -132,14 +149,16 @@
 
     function render() {
         clearTimeout(backOnlineTimer);
-        if (isOffline()) {
+        if (isOffline() && waitingCount === 0 && options && options.idleStrip === false) {
+            removeStrip();                                  // offline with nothing saved: this page has nothing to say
+        } else if (isOffline()) {
             wasShowing = true;
             setStrip('offline', waitingCount > 0
-                ? 'Offline · ' + plural(waitingCount, 'change', 'changes') + ' saved on this phone'
+                ? 'Offline · ' + plural(waitingCount, noun()[0], noun()[1]) + ' saved on this phone'
                 : 'Offline · ' + ((options && options.offlineHint) || 'what you save stays on this phone'), false);
         } else if (waitingCount > 0) {
             wasShowing = true;
-            setStrip('sending', 'Sending ' + plural(waitingCount, 'saved change', 'saved changes') + '…', true);
+            setStrip('sending', 'Sending ' + plural(waitingCount, 'saved ' + noun()[0], 'saved ' + noun()[1]) + '…', true);
         } else if (wasShowing) {
             wasShowing = false;
             setStrip('online', 'Back online', false);
@@ -203,7 +222,7 @@
         var batch = syncedBatch;
         syncedBatch = [];
         if (!batch.length) return;
-        note('synced', batch.length === 1 ? batch[0] : plural(batch.length, 'saved change', 'saved changes') + ' sent.', false);
+        note('synced', batch.length === 1 ? batch[0] : plural(batch.length, 'saved ' + noun()[0], 'saved ' + noun()[1]) + ' sent.', false);
     }
 
     function settled(kind, detail) {
@@ -228,14 +247,14 @@
         if (!data || typeof data.type !== 'string') return;
         if (data.type === 'offline-queue-status') {
             var mine = currentUser();
-            waitingCount = (mine && data.teacher && data.teacher[mine]) || 0;
+            var role = (options && options.role) || 'teacher';
+            waitingCount = (mine && data[role] && data[role][mine]) || 0;
             render();
             return;
         }
-        var prefix = (options && options.urlPrefix) || '';
         var path = '';
         try { path = new URL(data.url, location.href).pathname; } catch (e) { path = ''; }
-        if (prefix && path.indexOf(prefix) !== 0) return;     // somebody else's save (the learner app, in another tab)
+        if (!ownsUrl(path)) return;     // somebody else's save (the other app, in another tab)
         if (data.type === 'offline-write-synced') settled('synced', data);
         else if (data.type === 'offline-write-conflict') settled('conflict', data);
         else if (data.type === 'offline-write-failed') settled('failed', data);

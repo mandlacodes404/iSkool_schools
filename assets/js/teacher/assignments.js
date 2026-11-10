@@ -331,53 +331,9 @@ function escapeTeacherAssignmentHtml(value) {
     }[char]));
 }
 
-/**
- * Builds the <tr> rows of the learner submissions table for one
- * assignment. Shared by the desktop panel (selectDesktopAssignment)
- * and the mobile detail view (openMobileTeacherAssignment) so this
- * table's markup only exists in one place instead of being kept in
- * sync by hand in two.
- * @param {Array} submissions - assignment.submissions
- * @param {string} audioClass - extra class for the <audio> element,
- *   since desktop and the old mobile card used slightly different
- *   sizing (as-sub-audio--panel vs as-sub-audio). Pass '' for the
- *   plain .as-sub-audio sizing.
- * @returns {string}
- */
-function buildTeacherSubmissionsTableRows(submissions, audioClass) {
-    let tableRows = '';
-    (submissions || []).forEach(sub => {
-        const statusBadge = sub.submitted
-            ? `<span class="teacher-sub-badge submitted">Submitted</span>
-               <div class="as-sub-timestamp">${sub.submitted_at}</div>`
-            : `<span class="teacher-sub-badge not-submitted">Not Submitted</span>`;
-
-        let subContent = '—';
-        if (sub.submitted) {
-            if (sub.submission_type === 'file' && sub.file_url) {
-                subContent = `<a href="${sub.file_url}" target="_blank" class="teacher-sub-file-link">View File</a>`;
-            } else if (sub.submission_type === 'text' && sub.text_answer) {
-                subContent = `<div class="teacher-sub-text">${sub.text_answer.replace(/\n/g, '<br>')}</div>`;
-            } else if (sub.submission_type === 'audio' && sub.audio_url) {
-                subContent = `<audio controls class="as-sub-audio ${audioClass || ''}"><source src="${sub.audio_url}" type="audio/mpeg"></audio>`;
-            }
-        }
-
-        tableRows += `
-            <tr>
-                <td>${sub.name}</td>
-                <td>${statusBadge}</td>
-                <td class="as-sub-type-cell">${sub.submission_type || '—'}</td>
-                <td>${subContent}</td>
-            </tr>`;
-    });
-    return tableRows;
-}
-
 // ─────────────────────────────────────────────
 // DESKTOP PANEL HELPERS
-// (desktop only: the mobile detail page keeps using
-//  buildTeacherSubmissionsTableRows above)
+// (desktop only: the phone detail page is built in openMobileTeacherAssignment)
 // ─────────────────────────────────────────────
 
 /** Small inline stroke icon, same 24x24 / 1.75 stroke family as the sidebar. */
@@ -738,75 +694,97 @@ window.openMobileTeacherAssignment = function(index) {
         color: '#a78bfa'
     });
 
-    const { percent: subPercent, color: progressColor, submitted: subCount, total: totalCount } =
-        getTeacherAssignmentProgress(assignment);
+    const T = window.tdUi;
+    const { percent: subPercent, submitted: subCount, total: totalCount } = getTeacherAssignmentProgress(assignment);
+    // Traffic light for the detail page: every learner in = green, half or more = orange, fewer = blue ("waiting on
+    // submissions"). The list keeps its own colours (getTeacherAssignmentProgress).
+    const tone = totalCount > 0 && subCount >= totalCount ? 'green' : subPercent >= 50 ? 'orange' : 'blue';
+    const submissions = assignment.submissions || [];
 
-    const tableRows = buildTeacherSubmissionsTableRows(assignment.submissions, '');
+    // One block per learner: initials, name, when and how they handed in, a pill, and what they handed in underneath.
+    const learnerHtml = submissions.map(sub => {
+        const kind = sub.submission_type ? String(sub.submission_type).charAt(0).toUpperCase() + String(sub.submission_type).slice(1) : '';
+        const detail = sub.submitted
+            ? [sub.submitted_at, kind].filter(Boolean).map(part => `<i class="td-nw">${T.esc(part)}</i>`).join('<i class="td-dot">&bull;</i>')
+            : 'Nothing handed in yet';
 
-    apiArea.innerHTML = `
-        <article class="as-mobile-detail">
-            <h1 class="as-mobile-detail-title">${escapeTeacherAssignmentHtml(assignment.title)}</h1>
-            <div class="as-mobile-detail-meta">
-                <span>${escapeTeacherAssignmentHtml(assignment.class_name)}</span>
-                <span>&bull;</span>
-                <span>Due ${escapeTeacherAssignmentHtml(assignment.due_date)}</span>
-            </div>
+        let work = '';
+        if (sub.submitted) {
+            if (sub.submission_type === 'file' && sub.file_url) {
+                work = `<a class="td-link" href="${T.esc(sub.file_url)}" target="_blank" rel="noopener">${T.icon('clip')}View file</a>`;
+            } else if (sub.submission_type === 'text' && sub.text_answer) {
+                work = `<div class="td-answer">${T.multiline(sub.text_answer)}</div>`;
+            } else if (sub.submission_type === 'audio' && sub.audio_url) {
+                work = `<audio controls class="td-audio"><source src="${T.esc(sub.audio_url)}" type="audio/mpeg"></audio>`;
+            }
+        }
 
-            <div class="as-mobile-detail-progress-row">
-                <div class="as-mobile-detail-progress-bar">
-                    <div class="as-mobile-detail-progress-fill"
-                        style="--as-progress-width:${subPercent}%;--as-progress-color:${progressColor};"></div>
+        return `
+            <div class="td-learner">
+                <div class="td-row td-row--tile">
+                    <div class="td-tile">${T.esc(T.initials(sub.name))}</div>
+                    <div class="td-main"><b>${T.esc(sub.name)}</b><span>${detail}</span></div>
+                    ${T.pill(sub.submitted ? 'Submitted' : 'Not submitted', sub.submitted ? 'green' : 'grey')}
                 </div>
-                <span class="as-mobile-detail-progress-label" style="--as-progress-color:${progressColor};">
-                    ${subCount}/${totalCount} submitted
-                </span>
+                ${work ? `<div class="td-learner-work">${work}</div>` : ''}
+            </div>`;
+    }).join('');
+
+    // The look is teacher_detail.css. The delete sheet uses the id and class names the desktop page's handlers look
+    // for (deleteAssignmentModal, .as-delete-confirm-btn): the one the list draws is not on the page while a detail is open.
+    apiArea.innerHTML = `
+        <article class="as-mobile-detail td-detail td-detail--assign">
+            <div class="td-top">
+                <span class="td-eyebrow">Assignment</span>
+                ${T.pill(`${subCount}/${totalCount} submitted`, tone)}
+            </div>
+            <div class="td-title">${T.esc(assignment.title)}</div>
+            <p class="td-sub">${T.esc(assignment.class_name)}<span class="td-dot">&bull;</span>Due ${T.esc(assignment.due_date)}</p>
+
+            <div class="td-panel td-gap">
+                <div class="td-w">
+                    <div class="td-w-top"><span>Submitted</span><b>${subCount} of ${totalCount}</b></div>
+                    <div class="td-track"><i style="width:${subPercent}%;--td-fill:var(--td-${tone})"></i></div>
+                </div>
             </div>
 
-            <div class="as-mobile-detail-actions">
+            <div class="td-gt">Instructions</div>
+            <div class="td-panel"><div class="td-note">${assignment.description ? T.multiline(assignment.description) : '<span class="td-mute">No description provided.</span>'}</div></div>
+
+            <div class="td-gt">Files</div>
+            <div class="td-panel">
                 ${assignment.file_url ? `
-                    <a class="as-mobile-detail-link" href="${assignment.file_url}" target="_blank">
-                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
-                        </svg>
-                        Attachment
-                    </a>` : ''}
-                <button class="as-mobile-detail-link" onclick="downloadSubmissions(${assignment.id})">
-                    <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="7 10 12 15 17 10"></polyline>
-                        <line x1="12" y1="15" x2="12" y2="3"></line>
-                    </svg>
-                    Download All
-                </button>
-                <button class="as-mobile-detail-delete-btn" onclick="confirmDeleteAssignment(${assignment.id})">
-                    <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="3 6 5 6 21 6"></polyline>
-                        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
-                        <path d="M10 11v6"></path>
-                        <path d="M14 11v6"></path>
-                        <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
-                    </svg>
-                    Delete
+                <a class="td-row td-row--icon" href="${T.esc(assignment.file_url)}" target="_blank" rel="noopener">
+                    ${T.icon('clip')}
+                    <div class="td-main"><b>Attachment</b><span>Open the file you attached.</span></div>
+                    ${T.icon('chev', 'td-chev', 2)}
+                </a>` : ''}
+                <button type="button" class="td-row td-row--icon" onclick="downloadSubmissions(${Number(assignment.id)})">
+                    ${T.icon('download')}
+                    <div class="td-main"><b>Download all submissions</b><span>Every file in one download.</span></div>
+                    ${T.icon('chev', 'td-chev', 2)}
                 </button>
             </div>
 
-            <div class="as-mobile-detail-desc">
-                ${assignment.description ? assignment.description.replace(/\n/g, '<br>') : 'No description provided.'}
+            <div class="td-gt">Learners &middot; ${submissions.length}</div>
+            <div class="td-panel">${submissions.length ? learnerHtml : '<div class="td-empty">No learners in this class.</div>'}</div>
+
+            <div class="td-panel td-danger-gap">
+                <button type="button" class="td-row td-row--danger" onclick="confirmDeleteAssignment(${Number(assignment.id)})">
+                    ${T.icon('trash')}
+                    <div class="td-main"><b>Delete assignment</b></div>
+                </button>
             </div>
 
-            <div class="as-mobile-detail-table-wrapper teacher-grades-table-wrapper">
-                <table class="teacher-grades-table">
-                    <thead>
-                        <tr>
-                            <th>Learner</th>
-                            <th>Status</th>
-                            <th>Type</th>
-                            <th>Submission</th>
-                        </tr>
-                    </thead>
-                    <tbody>${tableRows}</tbody>
-                </table>
-            </div>
+            ${T.confirmSheet({
+                id: 'deleteAssignmentModal',
+                closeCall: 'closeDeleteAssignmentModal()',
+                title: 'Delete assignment',
+                body: `Delete <b>${T.esc(assignment.title)}</b>? What learners handed in goes with it, and this can't be undone.`,
+                confirmClass: 'as-delete-confirm-btn',
+                confirmAttrs: 'onclick="executeDeleteAssignment()"',
+                confirmLabel: 'Delete assignment'
+            })}
         </article>`;
 
     apiArea.scrollTop = 0;

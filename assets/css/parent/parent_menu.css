@@ -87,6 +87,16 @@ html[data-theme="dark"] {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+/* The academic year under the school name, as in the learner menu */
+.pa-brand-sub {
+    margin-top: 1px;
+    font-size: 12px;
+    line-height: 1.2;
+    color: var(--pa-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
 /* Mask icons: the colour follows the text colour */
 .pa-search::before, .pa-toggle::before, .pa-menu-item::before, .pa-pico, .pa-palette-field::before, .pa-s-field::before,
@@ -407,7 +417,7 @@ html[data-theme="dark"] .pa-menu-item[data-ico="theme"] { --pa-ico: var(--pa-i-s
         cursor: pointer;
     }
     #paPaletteList li[role="option"][aria-selected="true"] { background: var(--pa-active); color: var(--pa-text); }
-    #paPaletteList li[aria-selected="true"] .pa-pico { background: var(--pa-accent); }
+    #paPaletteList li[aria-selected="true"] .pa-pico { background: var(--pa-ac); }
     .pa-pico { width: 18px; height: 18px; }
     .pa-plabel { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .pa-ptag { color: var(--pa-muted); font-size: 12px; }
@@ -511,7 +521,12 @@ html[data-theme="dark"] .pa-menu-item[data-ico="theme"] { --pa-ico: var(--pa-i-s
 
     /* The page, the header and the bottom tabs are pushed aside together with the menu. They only move while it is open;
        at rest nothing about them changes. */
-    .pa-top, .pa-content, .pa-tabs { transition: transform var(--pa-dur) var(--pa-ease); }
+    .pa-top, .pa-content { transition: transform var(--pa-dur) var(--pa-ease); }
+    /* The bottom tabs also fade between clear and glass (DYNAMIC BOTTOM TABS in parent_app.css), so they list those too */
+    .pa-tabs {
+        transition: transform var(--pa-dur) var(--pa-ease), background .28s ease, border-color .28s ease, box-shadow .28s ease,
+                    backdrop-filter .28s ease, -webkit-backdrop-filter .28s ease;
+    }
     html.pa-menu-open .pa-top, html.pa-menu-open .pa-content, html.pa-menu-open .pa-tabs { transform: translate3d(var(--pa-dw), 0, 0); }
     html.pa-menu-open .pa-tabs { pointer-events: none; }
     html.pa-menu-open, html.pa-drag { overflow: hidden; }
@@ -552,6 +567,8 @@ html[data-theme="dark"] .pa-menu-item[data-ico="theme"] { --pa-ico: var(--pa-i-s
     /* While a finger is dragging (parent_menu.js): no transitions, and everything is lifted out exactly as when it is open */
     html.pa-drag .pa-drawer { visibility: visible; transition: none; will-change: transform; }
     html.pa-drag .pa-top, html.pa-drag .pa-content, html.pa-drag .pa-tabs { transition: none; will-change: transform; }
+    /* A page change snaps the bar to its final look instead of fading through the wrong one (set by parent_bottom_nav.js) */
+    html.pa-tabs-snap .pa-tabs { transition: transform var(--pa-dur) var(--pa-ease); }
     html.pa-drag .pa-tabs { pointer-events: none; }
     html.pa-drag .pa-overlay { transition: none; will-change: transform, opacity; pointer-events: none; visibility: visible; }
 
@@ -561,6 +578,7 @@ html[data-theme="dark"] .pa-menu-item[data-ico="theme"] { --pa-ico: var(--pa-i-s
     .pa-drawer .pa-mark--initials { font-size: 17px; }
     .pa-drawer .pa-brand-text { gap: 2px; }
     .pa-drawer .pa-brand-name { font-size: 17px; line-height: 1.15; }
+    .pa-drawer .pa-brand-sub { font-size: 12.5px; }
 
     /* Search */
     .pa-drawer .pa-search {
@@ -587,7 +605,7 @@ html[data-theme="dark"] .pa-menu-item[data-ico="theme"] { --pa-ico: var(--pa-i-s
     .pa-drawer .pa-nav-link:hover { background: none; color: var(--pa-soft); }
     .pa-drawer .pa-nav-link:active { background: var(--pa-hover); }
     .pa-drawer .pa-nav-link[aria-current="page"] { background: var(--pa-active); color: var(--pa-text); font-weight: 500; }
-    .pa-drawer .pa-nav-link[aria-current="page"] svg { color: var(--pa-accent); }
+    .pa-drawer .pa-nav-link[aria-current="page"] svg { color: var(--pa-ac); }
 
     /* Bottom: the account row, a tinted rounded row. Tapping it opens the account sheet. */
     .pa-drawer-account {
@@ -604,7 +622,8 @@ html[data-theme="dark"] .pa-menu-item[data-ico="theme"] { --pa-ico: var(--pa-i-s
     }
     .pa-drawer-account:hover { background: var(--pa-row); }
     .pa-drawer-account:active, .pa-drawer-account[aria-expanded="true"] { background: var(--pa-active); }
-    .pa-drawer-account .pa-avatar { width: 36px; height: 36px; font-size: 13px; }
+    /* Same avatar as the learner and teacher phone menus, in light and dark: a translucent dark circle, pale bold initials */
+    .pa-drawer-account .pa-avatar { width: 36px; height: 36px; font-family: 'Nunito', system-ui, sans-serif; font-size: 13px; font-weight: 800; background: rgba(0, 0, 0, .35); color: #f4e4e4; }
     .pa-drawer-account .pa-account-name { font-size: 16px; }
     .pa-drawer-account .pa-account-role { font-size: 13px; }
     .pa-drawer-account .pa-account-chev { width: 20px; height: 20px; background: var(--pa-muted); }
@@ -728,6 +747,7 @@ html[data-theme="dark"] .pa-menu-item[data-ico="theme"] { --pa-ico: var(--pa-i-s
 
 @media (prefers-reduced-motion: reduce) {
     :root { --pa-dur: .01s; }
-    .pa-side, .pa-drawer, .pa-overlay, .pa-sheet, .pa-sheet-bg, .pa-s, .pa-top, .pa-content, .pa-tabs, .pa-tip, .pa-nav-link { transition-duration: .01s !important; }
+    .pa-side, .pa-drawer, .pa-overlay, .pa-sheet, .pa-sheet-bg, .pa-s, .pa-top, .pa-content, .pa-tip, .pa-nav-link { transition-duration: .01s !important; }
+    .pa-tabs { transition-duration: .01s !important; }
     .pa-menu, .pa-palette, .pa-palette-panel, .pa-keys, .pa-keys-panel { animation: none !important; }
 }

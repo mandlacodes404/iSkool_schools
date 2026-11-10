@@ -540,63 +540,64 @@ window.openMobileTeacherSBO = function(flatIndex) {
         color: '#a67c52'
     });
 
-    const topicCount  = brief.topics?.length || 0;
+    const T = window.tdUi;
+    const topics      = brief.topics || [];
+    const assessments = brief.assessments || [];
     const updatedDate = brief.updated_at
         ? parseSBODate(brief.updated_at).toLocaleDateString('en-ZA', { day:'numeric', month:'short', year:'numeric' })
         : '';
 
-    const topicsHtml = topicCount
-        ? brief.topics.map(t => `<span class="sbo-topic-chip">${t}</span>`).join('')
-        : '<span class="sbo-topics-empty-text">No topics listed.</span>';
+    const topicsHtml = topics.length
+        ? `<div class="td-chips">${topics.map(t => `<span class="td-chip">${T.esc(t)}</span>`).join('')}</div>`
+        : `<div class="td-panel"><div class="td-empty">No topics listed.</div></div>`;
 
-    const assessHtml = brief.assessments?.length
-        ? brief.assessments.map(a => `
-            <div class="sbo-assess-row">
-                <span class="sbo-assess-row-type">${a.type}</span>
-                <span class="sbo-assess-row-weight">${a.weight}%</span>
-            </div>`).join('')
-        : '<p class="sbo-assess-empty-text">No assessments listed.</p>';
+    const assessHtml = assessments.length
+        ? `<div class="td-panel">${assessments.map(a => {
+            const weight = Math.max(0, Math.min(100, Number(a.weight) || 0));
+            return `<div class="td-w">
+                <div class="td-w-top"><span>${T.esc(a.type)}</span><b>${T.esc(a.weight)}%</b></div>
+                <div class="td-track"><i style="width:${weight}%"></i></div>
+            </div>`;
+        }).join('')}</div>`
+        : `<div class="td-panel"><div class="td-empty">No assessments listed.</div></div>`;
 
+    // The look is teacher_detail.css. The delete sheet uses the same id and class names the desktop page's
+    // handlers look for (deleteSBOModal, .sbo-delete-confirm-btn), so confirmDeleteSBO / executeDeleteSBO work here.
     apiArea.innerHTML = `
-        <article class="sbo-mobile-detail">
-            <div class="sbo-panel-header">
-                <div>
-                    <div class="sbo-panel-title">${brief.subject}</div>
-                    <div class="sbo-panel-meta">
-                        <span>${brief.class_name}</span>
-                        ${updatedDate ? `<span>&bull;</span><span>Updated ${updatedDate}</span>` : ''}
-                    </div>
-                </div>
-                <div class="sbo-panel-actions">
-                    <span class="sbo-term-badge">Term ${brief.term}</span>
-                    <button class="sbo-panel-delete-btn" onclick="confirmDeleteSBO(${brief.id})">
-                        <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none">
-                            <polyline points="3 6 5 6 21 6"></polyline>
-                            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
-                            <path d="M10 11v6"></path>
-                            <path d="M14 11v6"></path>
-                            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
-                        </svg>
-                        Delete
-                    </button>
-                </div>
+        <article class="sbo-mobile-detail td-detail td-detail--syl">
+            <div class="td-top">
+                <span class="td-eyebrow">Syllabus</span>
+                ${T.pill(`Term ${brief.term}`, '')}
             </div>
+            <div class="td-title">${T.esc(brief.subject)}</div>
+            <p class="td-sub">${T.esc(brief.class_name)}${updatedDate ? `<span class="td-dot">&bull;</span>Updated ${T.esc(updatedDate)}` : ''}</p>
 
-            <div class="sbo-topics-section">
-                <div class="sbo-section-label">Topics (${topicCount})</div>
-                <div class="sbo-topics-wrap">${topicsHtml}</div>
-            </div>
+            <div class="td-gt">Topics &middot; ${topics.length}</div>
+            ${topicsHtml}
 
-            <div>
-                <div class="sbo-section-label">Assessment Weighting</div>
-                ${assessHtml}
-            </div>
+            <div class="td-gt">Assessment weighting</div>
+            ${assessHtml}
 
             ${brief.notes ? `
-            <div class="sbo-notes-block">
-                <div class="sbo-section-label">Notes</div>
-                ${brief.notes}
-            </div>` : ''}
+            <div class="td-gt">Notes</div>
+            <div class="td-panel"><div class="td-note">${T.multiline(brief.notes)}</div></div>` : ''}
+
+            <div class="td-panel td-danger-gap">
+                <button type="button" class="td-row td-row--danger" onclick="confirmDeleteSBO(${Number(brief.id)})">
+                    ${T.icon('trash')}
+                    <div class="td-main"><b>Delete syllabus</b></div>
+                </button>
+            </div>
+
+            ${T.confirmSheet({
+                id: 'deleteSBOModal',
+                closeCall: 'closeDeleteSBOModal()',
+                title: 'Delete syllabus',
+                body: `Delete the <b>${T.esc(brief.subject)}</b> syllabus for ${T.esc(brief.class_name)}? This can't be undone.`,
+                confirmClass: 'sbo-delete-confirm-btn',
+                confirmAttrs: 'onclick="executeDeleteSBO()"',
+                confirmLabel: 'Delete syllabus'
+            })}
         </article>`;
 
     apiArea.scrollTop = 0;

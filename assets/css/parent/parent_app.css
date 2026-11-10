@@ -26,6 +26,7 @@ html[data-theme="light"] {
     --pa-bar: #5e5d59;
     --pa-bar-bg: #ebeae5;
     --pa-accent: #187a72;
+    --pa-ac: #5e5d59;           /* the dull warm grey of a selected icon; same value as --dm-ac in the learner menu */
     --pa-up: #15803d;
     --pa-down: #a63f38;
     --pa-flat: #6a6b64;
@@ -41,6 +42,10 @@ html[data-theme="light"] {
     --pa-pop-shadow: 0 12px 32px rgba(31, 32, 29, .12), 0 2px 6px rgba(31, 32, 29, .05);
     --pa-sheet-shadow: 0 -10px 40px rgba(31, 32, 29, .18);
     --pa-dim: rgba(20, 20, 19, .35);
+    /* Phone bottom tabs, glass state (see DYNAMIC BOTTOM TABS below) */
+    --pa-tabs-glass: rgba(250, 249, 245, .62);
+    --pa-tabs-glass-line: rgba(223, 222, 216, .9);
+    --pa-tabs-glass-shadow: 0 -4px 24px rgba(31, 32, 29, .10), inset 0 1px 0 rgba(255, 255, 255, .55);
     --pa-c1: #187a72;
     --pa-c2: #6b4fc7;
     --pa-c3: #d97706;
@@ -67,6 +72,7 @@ html[data-theme="dark"] {
     --pa-bar: #c2c3b7;
     --pa-bar-bg: rgba(255, 255, 255, .10);
     --pa-accent: #4fd1c5;
+    --pa-ac: #d4d1c8;           /* the dull warm grey of a selected icon; same value as --dm-ac in the learner menu */
     --pa-up: #4ade80;
     --pa-down: #f28b82;
     --pa-flat: #9b9c92;
@@ -82,6 +88,9 @@ html[data-theme="dark"] {
     --pa-pop-shadow: 0 16px 40px rgba(0, 0, 0, .55);
     --pa-sheet-shadow: 0 -10px 40px rgba(0, 0, 0, .5);
     --pa-dim: rgba(0, 0, 0, .5);
+    --pa-tabs-glass: rgba(32, 32, 31, .55);
+    --pa-tabs-glass-line: rgba(255, 255, 255, .14);
+    --pa-tabs-glass-shadow: 0 -4px 24px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .05);
     --pa-c1: #4fd1c5;
     --pa-c2: #a78bfa;
     --pa-c3: #f28c38;
@@ -208,6 +217,89 @@ html[data-theme="dark"] .pa-chip[aria-pressed="true"] .pa-chip-av { background: 
     cursor: pointer;
 }
 .pa-loading { padding: 8px 2px; }
+
+/* ── Loaders (phones): the learner app's ───────────────────────────────────────────────────────────────────
+   The blue arc over the page while a screen with nothing to show yet waits for the server (#loaderOverlay and .loader
+   in learner_dashboard.css: same scrim, same 36px arc). Unlike the learner's it lets taps through, so a slow
+   connection never leaves the parent stuck behind it. parent_app.js adds .is-on after a short moment. */
+.pa-loader { display: none; }
+@media (max-width: 768px) {
+    .pa-loader {
+        position: fixed;
+        top: 0; right: 0; bottom: 0; left: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.55);
+        -webkit-backdrop-filter: blur(3px);
+        backdrop-filter: blur(3px);
+        z-index: 8000;
+        pointer-events: none;
+    }
+    .pa-loader.is-on { display: flex; }
+    .pa-loader-ring {
+        width: 36px;
+        height: 36px;
+        box-sizing: border-box;
+        border-radius: 50%;
+        border: 3.5px solid rgba(255, 255, 255, 0.15);
+        border-top-color: #4c8bf5;
+        animation: pa-loader-spin 0.75s linear infinite;
+    }
+}
+@keyframes pa-loader-spin { to { transform: rotate(360deg); } }
+
+/* Home while it loads: grey blocks where the page will be (the learner's Home placeholder) */
+.pa-sk-home { padding: 10px 2px 120px; }
+.pa-sk { background: var(--pa-chip); border-radius: 8px; animation: pa-sk-pulse 1.5s ease-in-out infinite; }
+.pa-sk-chip { height: 24px; width: 120px; border-radius: 999px; margin: 4px 0 14px; }
+.pa-sk-title { height: 34px; width: 78%; margin-bottom: 10px; }
+.pa-sk-line { height: 14px; width: 92%; margin-bottom: 20px; }
+.pa-sk-hero { height: 96px; border-radius: 16px; margin-bottom: 26px; background: var(--pa-row); }
+.pa-sk-label { height: 16px; width: 92px; margin-bottom: 12px; }
+.pa-sk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 26px; background: none; animation: none; }
+.pa-sk-grid .pa-sk { height: 70px; border-radius: 14px; background: var(--pa-row); }
+.pa-sk-row { height: 60px; border-radius: 16px; margin-bottom: 8px; background: var(--pa-row); }
+@keyframes pa-sk-pulse { 50% { opacity: .55; } }
+@media (prefers-reduced-motion: reduce) {
+    .pa-sk { animation: none; }
+    .pa-loader-ring { animation-duration: 1.6s; }
+}
+
+/* The button with the learner's pill spinner (assets/css/pill-loader.css) */
+.pa-btn.btn-loadable { display: inline-flex; }
+.pa-btn .btn-spinner span { background: var(--pa-on-ink); }
+
+/* ── "No connection" note: the page on show is the last copy this phone saw ─────────────────────────────── */
+.pa-offline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding: 10px 12px 10px 14px;
+    border: 1px solid var(--pa-line);
+    border-radius: 14px;
+    background: var(--pa-card);
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--pa-soft);
+}
+.pa-offline[hidden] { display: none; }
+.pa-offline::before { content: ''; flex: none; width: 9px; height: 9px; border-radius: 50%; background: #d9922b; }
+.pa-offline-text { flex: 1 1 auto; min-width: 0; }
+.pa-offline-btn {
+    flex: none;
+    min-height: 36px;
+    padding: 0 14px;
+    border: 1px solid var(--pa-line-strong);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--pa-text);
+    font: inherit;
+    font-weight: var(--pa-w-bold);
+    cursor: pointer;
+    touch-action: manipulation;
+}
 
 /* ── Add a child ────────────────────────────────────────────────────────────────────────────────────────── */
 .pa-add-form { display: flex; flex-direction: column; align-items: flex-start; max-width: 520px; margin-top: 18px; }
@@ -501,17 +593,29 @@ html[data-theme="dark"] .pa-chip[aria-pressed="true"] .pa-chip-av { background: 
         --pa-w-bold: 700;
     }
 
-    .pa { display: block; }
+    /* The page itself is locked to one screen, exactly like the learner phone app (body in learner_dashboard.css):
+       height 100dvh and overflow hidden, so the document cannot be scrolled or dragged at all. Only .pa-content scrolls.
+       Why it matters: 100vh is the height with the browser's address bar tucked away, which is taller than what you can
+       see while the bar is showing. A min-height of 100vh made the document a little taller than the screen, so a drag
+       on the header (or a bounce at the top) moved the whole page, header included. dvh is the visible height. */
+    html { overscroll-behavior: none; touch-action: manipulation; }
+    /* the colour behind the page from the very first frame, and in the moment between two pages, so no white edge shows (the learner's phone canvas) */
+    html { background-color: var(--pa-page); }
+    body { height: 100vh; height: 100dvh; overflow: hidden; overscroll-behavior: none; }
+    .pa { display: block; min-height: 0; height: 100vh; height: 100dvh; }
     .pa-side { display: none; }
-    .pa-body { min-height: 100vh; }
+    /* The header and the bottom tabs stay where they are and only .pa-content (the area under the header) scrolls, like
+       #api-content-area in the learner and teacher phone apps. That is what lets pull to refresh move only the content.
+       The padding at the bottom of .pa-content keeps the last row above the tabs. */
+    .pa-body { height: 100vh; height: 100dvh; min-height: 0; }
 
     /* Header: menu, school logo, profile (same structure as the learner app) */
     .pa-top {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        position: sticky;
-        top: 0;
+        position: relative;
+        flex: none;
         z-index: 40;
         min-height: calc(56px + env(safe-area-inset-top, 0px));
         padding: calc(8px + env(safe-area-inset-top, 0px)) calc(10px + env(safe-area-inset-right, 0px)) 8px calc(10px + env(safe-area-inset-left, 0px));
@@ -563,9 +667,27 @@ html[data-theme="dark"] .pa-chip[aria-pressed="true"] .pa-chip-av { background: 
         cursor: pointer;
     }
     .pa-avatar-btn .pa-avatar { width: 36px; height: 36px; font-size: 13px; font-weight: 800; }
+    /* Same as the learner and teacher top bars: a translucent dark circle with pale initials in dark mode. Light mode
+       keeps the cream circle, which is already the same colour as theirs. */
+    html[data-theme="dark"] .pa-avatar-btn .pa-avatar { background: rgba(0, 0, 0, .35); color: #f4e4e4; }
 
-    .pa-content { max-width: none; padding: 20px 0 calc(var(--pa-tabs-h) + env(safe-area-inset-bottom, 0px) + 28px); }
+    /* The scrolling area. Pull to refresh (pull_to_refresh.js) moves this element. "contain" keeps the browser's own
+       pull-to-refresh, which would reload the whole app, from also firing when it is pulled at the top. */
+    .pa-content {
+        flex: 1 1 auto;
+        min-height: 0;
+        max-width: none;
+        overflow-x: hidden;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-x: none;
+        overscroll-behavior-y: contain;
+        scrollbar-width: none;
+        padding: 20px 0 calc(var(--pa-tabs-h) + env(safe-area-inset-bottom, 0px) + 28px);
+    }
+    .pa-content::-webkit-scrollbar { display: none; }
     .pa-switcher { padding: 0 16px; margin-bottom: 8px; }
+    .pa-offline { margin: 0 16px 12px; }
 
     /* Flat, edge-to-edge sections like the learner phone pages */
     .pa-card { background: transparent; border: 0; border-radius: 0; }
@@ -649,7 +771,7 @@ html[data-theme="dark"] .pa-chip[aria-pressed="true"] .pa-chip-av { background: 
     .pa-ev-list .pa-section + .pa-section { margin-top: 0; }
     .pa-ev-row { min-height: 64px; padding: 10px 16px; }
 
-    /* Bottom tabs */
+    /* Bottom tabs. Glass by default; with parent_bottom_nav.js running they are dynamic (next block). */
     .pa-tabs {
         display: flex;
         position: fixed;
@@ -659,8 +781,25 @@ html[data-theme="dark"] .pa-chip[aria-pressed="true"] .pa-chip-av { background: 
         z-index: 40;
         height: calc(var(--pa-tabs-h) + env(safe-area-inset-bottom, 0px));
         padding-bottom: env(safe-area-inset-bottom, 0px);
-        background: var(--pa-side);
-        border-top: 1px solid var(--pa-line);
+        background: var(--pa-tabs-glass);
+        border-top: 1px solid var(--pa-tabs-glass-line);
+        box-shadow: var(--pa-tabs-glass-shadow);
+        -webkit-backdrop-filter: blur(28px) saturate(180%);
+        backdrop-filter: blur(28px) saturate(180%);
+    }
+
+    /* ── DYNAMIC BOTTOM TABS ────────────────────────────────────────────────────────────────────────────────
+       Same behaviour as the learner's bottom bar. At rest (the page scrolled to the bottom, or too short to scroll)
+       the bar is clear and the page shows through. Once the page is scrolled up, away from the bottom, the bar turns
+       to glass. parent_bottom_nav.js sets html.pa-dynamic-tabs when it is running and toggles .nav-scrolled on the
+       bar (the same class name the learner bar uses). Without the script the bar simply stays glass.
+       The transition list lives in parent_menu.css, next to the transform the bar needs to slide with the page. */
+    html.pa-dynamic-tabs .pa-tabs:not(.nav-scrolled) {
+        background: transparent;
+        border-top-color: transparent;
+        box-shadow: none;
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
     }
     .pa-tab {
         flex: 1 1 0;
@@ -714,10 +853,13 @@ html[data-theme="dark"] .pa-chip[aria-pressed="true"] .pa-chip-av { background: 
     .pax .pa-empty-row { padding: 14px 16px; border: 1px solid var(--pa-line); border-radius: 18px; background: var(--pa-card); font-size: 14px; color: var(--pa-muted); }
 
     /* subjects: two tiles per row */
-    .pax-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .pax-tile { display: block; padding: 12px 14px 14px; border-radius: 18px; border: 1px solid var(--pa-line); background: var(--pa-card); color: inherit; text-decoration: none; }
-    .pax-tile-name { display: block; font-size: 13px; font-weight: 600; color: var(--pa-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .pax-tile-mark { display: flex; align-items: baseline; gap: 8px; margin-top: 4px; }
+    /* minmax(0, 1fr): a plain 1fr cannot shrink below its longest word, so a long subject name (Afrikaans First
+       Additional Language, Computer Applications Technology) used to push a column off the screen. */
+    .pax-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .pax-tile { display: flex; flex-direction: column; min-width: 0; padding: 12px 14px 14px; border-radius: 18px; border: 1px solid var(--pa-line); background: var(--pa-card); color: inherit; text-decoration: none; }
+    /* A long name takes up to two lines; the mark and bar sit at the bottom so tiles in one row line up. */
+    .pax-tile-name { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; font-size: 13px; font-weight: 600; line-height: 1.3; color: var(--pa-muted); }
+    .pax-tile-mark { display: flex; align-items: baseline; gap: 8px; margin-top: auto; padding-top: 4px; }
     .pax-tile-mark b { font-size: 22px; font-weight: 800; line-height: 1.2; }
     .pax-tile-mark span { font-size: 13px; font-weight: 700; }
     .pax-bar { display: block; height: 4px; margin-top: 10px; border-radius: 2px; background: var(--pa-bar-bg); }

@@ -12,6 +12,8 @@
 
     var root = document.getElementById('parentApp');
     var view = document.getElementById('paView');
+    // On phones this is the area that scrolls (the header and the bottom tabs stay still); on desktop the page scrolls
+    var content = document.querySelector('.pa-content');
     var switcher = document.getElementById('paSwitcher');
 
     var ROUTES = {
@@ -41,7 +43,25 @@
     // Screens that cover all the children at once (or none in particular), so the child switcher is hidden on them
     var ALL_CHILDREN = { news: true, events: true, 'add-child': true };
     var cache = {};
+    // The last answer the server gave for each screen. Unlike `cache` (a minute, so a quick tap back does not ask
+    // again) it is kept for as long as the app stays open, and on the phone for the next visit (see "Saved copies").
+    // A screen with a copy is drawn from it at once while the server is asked again; it is also what shows when the
+    // server cannot be reached.
+    var lastSeen = {};
     var renderId = 0;
+    // When the screen on show was drawn from lastSeen (no connection), the time that copy was fetched; otherwise null
+    var viewCopy = null;
+    var errorOnScreen = false;
+    // Requests on their way, by key: asking again for the same thing joins the first request
+    var inflight = {};
+    var revalidating = {};
+    // Goes up when the copies are thrown away, so an answer that was already on its way cannot bring an old one back
+    var generation = 0;
+    // Set by cached() while a screen has nothing to draw yet and must wait for the server; render() then shows the loader
+    var waiting = false;
+    // Set while a refresh runs: cached() asks the server instead of drawing the copy
+    var forcing = false;
+    var readyAnnounced = false;
 
     // ── Small helpers ──────────────────────────────────────────────────────────────────────────────────────
 
@@ -104,6 +124,7 @@
     // ── Talking to the server ──────────────────────────────────────────────────────────────────────────────
 
     function toLogin() {
+        forgetSaved();   // the session is over: the copy kept on this phone goes with it
         window.location.href = 'index.php?session=expired';
     }
 
@@ -185,14 +206,196 @@
         });
     }
 
-    function cached(path, params) {
-        var key = path + '?' + JSON.stringify(params || {});
-        var hit = cache[key];
-        if (hit && Date.now() - hit.at < CACHE_MS) return Promise.resolve(hit.data);
-        return api(path, params).then(function (data) {
-            cache[key] = { at: Date.now(), data: data };
-            return data;
+    // ── Saved copies ───────────────────────────────────────────────────────────────────────────────────────
+    // Like the learner app, which draws Home from what it saw last time while it asks again, the app keeps the last
+    // answer for each screen (and the list of children) on this phone, under this parent's email. Opening the app, or
+    // a screen not opened for a minute, draws that copy at once and the server is asked in the background; the screen
+    // is drawn again only when the answer is different. The copy holds what the screens show (the marks), so it is
+    // removed when the parent signs out or the session ends, a copy that belongs to another parent is removed when
+    // the app opens, and none is used after 30 days.
+    var SAVED_PREFIX = 'parentApp.saved.';
+    var SAVED_KEY = state.parent.email ? SAVED_PREFIX + state.parent.email : '';
+    var SAVED_MAX_AGE = 30 * 24 * 60 * 60 * 1000;
+    var SAVED_MAX_SCREENS = 24;
+    var savedChildren = null;       // { at, data }: the list of children from the last visit
+    var savedTimer = 0;
+    var savedOff = false;           // signed out: nothing may be written any more
+
+    function readSaved() {
+        if (!SAVED_KEY) return;
+        var saved = null;
+        try { saved = JSON.parse(storeGet(SAVED_KEY)); } catch (e) { saved = null; }
+        if (!saved || saved.v !== 1) return;
+        var usable = function (entry) {
+            return !!entry && typeof entry.at === 'number' && !!entry.data && Date.now() - entry.at < SAVED_MAX_AGE;
+        };
+        if (usable(saved.children)) savedChildren = saved.children;
+        Object.keys(saved.screens || {}).forEach(function (key) {
+            if (usable(saved.screens[key])) lastSeen[key] = saved.screens[key];
         });
+    }
+
+    function writeSaved() {
+        if (!SAVED_KEY || savedOff) return;
+        var keys = Object.keys(lastSeen).sort(function (a, b) { return lastSeen[b].at - lastSeen[a].at; }).slice(0, SAVED_MAX_SCREENS);
+        var screens = {};
+        keys.forEach(function (key) { screens[key] = lastSeen[key]; });
+        try {
+            localStorage.setItem(SAVED_KEY, JSON.stringify({ v: 1, children: savedChildren, screens: screens }));
+        } catch (e) { /* full, or private mode: the app just opens without a copy next time */ }
+    }
+
+    function saveSoon() {
+        clearTimeout(savedTimer);
+        savedTimer = setTimeout(writeSaved, 500);
+    }
+
+    /** Removes the copy kept on this phone (signing out, or the session ending). */
+    function forgetSaved() {
+        savedOff = true;
+        clearTimeout(savedTimer);
+        savedChildren = null;
+        try { if (SAVED_KEY) localStorage.removeItem(SAVED_KEY); } catch (e) { /* nothing to remove */ }
+    }
+
+    /** The copy of another parent, left by an earlier sign-in on this browser. */
+    function dropOtherSaved() {
+        try {
+            var others = [];
+            for (var i = 0; i < localStorage.length; i++) {
+                var name = localStorage.key(i);
+                if (name && name.indexOf(SAVED_PREFIX) === 0 && name !== SAVED_KEY) others.push(name);
+            }
+            others.forEach(function (name) { localStorage.removeItem(name); });
+        } catch (e) { /* storage blocked: nothing was kept */ }
+    }
+
+    /** Throws the copies away: the list of children changed, so a screen drawn from one could show the wrong children. */
+    function forgetCopies() {
+        generation++;
+        cache = {};
+        lastSeen = {};
+        inflight = {};
+        saveSoon();
+    }
+
+    function keyOf(path, params) {
+        return path + '?' + JSON.stringify(params || {});
+    }
+
+    function sameData(a, b) {
+        try { return JSON.stringify(a) === JSON.stringify(b); } catch (e) { return false; }
+    }
+
+    /** Asks the server and keeps the answer. Asking again for the same thing while a request is on its way shares it. */
+    function fetchInto(key, path, params) {
+        if (inflight[key]) return inflight[key];
+        var mine = generation;
+        var request = api(path, params).then(function (data) {
+            if (inflight[key] === request) delete inflight[key];
+            if (mine === generation) {
+                var entry = { at: Date.now(), data: data };
+                cache[key] = entry;
+                lastSeen[key] = entry;
+                saveSoon();
+            }
+            return data;
+        }, function (err) {
+            if (inflight[key] === request) delete inflight[key];
+            throw err;
+        });
+        inflight[key] = request;
+        return request;
+    }
+
+    /**
+     * The answer for a screen, as fast as it can be had:
+     *   - asked for less than a minute ago: that answer, no request;
+     *   - a copy from earlier in this visit, or from the last one: the copy now, and the server is asked in the
+     *     background (revalidate), drawing the screen again if the answer is different;
+     *   - nothing yet: wait for the server (`waiting` tells render() to show the loader).
+     * A refresh (`forcing`) always asks the server, and falls back to the copy only when it cannot be reached.
+     */
+    function cached(path, params) {
+        var key = keyOf(path, params);
+        var hit = cache[key];
+        var drawing = renderId;     // the screen being drawn now; a late answer must not label a newer screen
+        if (hit && Date.now() - hit.at < CACHE_MS) return Promise.resolve(hit.data);
+
+        var older = lastSeen[key];
+        if (older && !forcing) {
+            revalidate(key, path, params, older, drawing);
+            return Promise.resolve(older.data);
+        }
+
+        if (!forcing) waiting = true;
+        return fetchInto(key, path, params).then(null, function (err) {
+            // No connection, or the server is having a bad moment: show what this phone last saw, and say so (the
+            // note above the page). Anything else (signed out, child no longer linked, no school year) is not that.
+            var seen = lastSeen[key];
+            if (seen && err && (err.code === 'network' || err.code === 'server')) {
+                if (drawing === renderId) viewCopy = seen.at;
+                return seen.data;
+            }
+            throw err;
+        });
+    }
+
+    /** Asks the server again for a screen that was drawn from a copy, and draws it again only if the answer changed. */
+    function revalidate(key, path, params, older, drawing) {
+        if (revalidating[key]) return;
+        revalidating[key] = true;
+        fetchInto(key, path, params).then(function (data) {
+            delete revalidating[key];
+            if (drawing !== renderId) return;                 // the parent has moved on; the new answer is kept for next time
+            if (!sameData(data, older.data)) render(false, true);
+        }, function (err) {
+            delete revalidating[key];
+            if (drawing !== renderId || !err) return;
+            if (err.code === 'network' || err.code === 'server') {
+                // The copy stays on screen, labelled as a copy
+                viewCopy = older.at;
+                syncOfflineNote();
+            } else if (err.code === 'notfound') {
+                childGone(drawing);
+            } else if (err.code === 'noyear') {
+                show(renderNoYear());
+            }
+        });
+    }
+
+    // ── "No connection" note ───────────────────────────────────────────────────────────────────────────────
+
+    function pad2(n) { return (n < 10 ? '0' : '') + n; }
+
+    /** "today at 07:30", "yesterday at 07:30" or "27 Oct at 07:30". */
+    function savedAtText(ms) {
+        var d = new Date(ms);
+        var now = new Date();
+        var time = pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+        var sameDay = function (a, b) { return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); };
+        if (sameDay(d, now)) return 'today at ' + time;
+        var yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+        if (sameDay(d, yesterday)) return 'yesterday at ' + time;
+        var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        return d.getDate() + ' ' + months[d.getMonth()] + ' at ' + time;
+    }
+
+    /** Shows or hides the note that tells a parent the page is the last copy this phone saw, not live. */
+    function syncOfflineNote() {
+        var box = document.getElementById('paOffline');
+        if (!box) return;
+        clear(box);
+        if (viewCopy === null) {
+            box.hidden = true;
+            return;
+        }
+        var lead = navigator.onLine === false ? 'You are offline. ' : 'We could not update this page just now. ';
+        var retry = el('button', 'pa-offline-btn', 'Try again');
+        retry.type = 'button';
+        retry.addEventListener('click', function () { refreshPage(); });
+        append(box, el('span', 'pa-offline-text', lead + 'Showing what you last saw ' + savedAtText(viewCopy) + '.'), retry);
+        box.hidden = false;
     }
 
     // ── Child switcher ─────────────────────────────────────────────────────────────────────────────────────
@@ -229,6 +432,7 @@
                 storeSet('parentApp.child', String(c.id));
                 renderSwitcher();
                 render();
+                kickOffPrefetches(800);      // the other screens of this child, quietly, so they open at once too
             });
             switcher.appendChild(chip);
         });
@@ -241,6 +445,12 @@
         return ROUTES[name] ? name : 'home';
     }
 
+    /** Opens a page. On phones parent_menu.js replaces the history entry instead of adding one (see paGo there). */
+    function go(route) {
+        if (window.paGo) window.paGo(route);
+        else window.location.hash = '#/' + route;
+    }
+
     function markActiveLinks(route) {
         var links = document.querySelectorAll('[data-route]');
         for (var i = 0; i < links.length; i++) {
@@ -250,20 +460,80 @@
     }
 
     function show(node) {
+        hideLoader();
         clear(view);
         view.appendChild(node);
         view.removeAttribute('aria-busy');
+        syncOfflineNote();
+    }
+
+    // ── Loaders ────────────────────────────────────────────────────────────────────────────────────────────
+    // Phones get the learner app's: a placeholder shaped like Home while Home loads, and the blue arc over the page
+    // while a screen with nothing to show yet waits for the server. The arc comes up only if the wait lasts more
+    // than a moment, so an answer that arrives at once never flashes it, and never while the splash is covering
+    // the page. Desktop keeps the plain "Loading…" line.
+    var LOADER_DELAY_MS = 150;
+    var loaderEl = document.getElementById('paLoader');
+    var loaderTimer = 0;
+
+    function splashUp() {
+        var splash = document.getElementById('pa-splash');
+        return !!splash && splash.style.display !== 'none' && !splash.classList.contains('pa-splash-hidden');
+    }
+
+    function showLoader() {
+        if (!loaderEl) return;
+        clearTimeout(loaderTimer);
+        loaderTimer = setTimeout(function () {
+            if (!splashUp()) loaderEl.classList.add('is-on');
+        }, LOADER_DELAY_MS);
+    }
+
+    function hideLoader() {
+        clearTimeout(loaderTimer);
+        if (loaderEl) loaderEl.classList.remove('is-on');
+    }
+
+    /** Grey blocks where Home will be, like the learner's Home placeholder. */
+    function homeSkeleton() {
+        var box = el('div', 'pa-sk-home');
+        box.setAttribute('aria-hidden', 'true');
+        ['pa-sk-chip', 'pa-sk-title', 'pa-sk-line', 'pa-sk-hero', 'pa-sk-label', 'pa-sk-grid', 'pa-sk-label', 'pa-sk-row', 'pa-sk-row'].forEach(function (cls) {
+            var block = el('div', 'pa-sk ' + cls);
+            if (cls === 'pa-sk-grid') {
+                for (var i = 0; i < 4; i++) block.appendChild(el('span', 'pa-sk'));
+            }
+            box.appendChild(block);
+        });
+        return box;
     }
 
     function showLoading() {
         clear(view);
-        view.appendChild(el('p', 'pa-muted pa-loading', 'Loading…'));
         view.setAttribute('aria-busy', 'true');
+        viewCopy = null;
+        syncOfflineNote();
+        if (isPhone()) {
+            if (currentRoute() === 'home') view.appendChild(homeSkeleton());
+            showLoader();
+        } else {
+            view.appendChild(el('p', 'pa-muted pa-loading', 'Loading…'));
+        }
     }
 
-    function render(afterNavigation) {
+    /**
+     * Draws the current screen. `quiet` keeps what is on screen until the new data arrives (a refresh), instead of
+     * clearing it to "Loading…". Returns a promise that settles once the screen has been drawn.
+     */
+    function render(afterNavigation, quiet) {
         var route = currentRoute();
         var id = ++renderId;
+        window.paRoute = route;     // the page on show (parent_menu.js paGo and parent_back_button.js read it)
+        var done = Promise.resolve();
+        viewCopy = null;
+        errorOnScreen = false;
+        waiting = false;
+        hideLoader();
         markActiveLinks(route);
         syncSwitcher(route);
 
@@ -282,22 +552,14 @@
             var build = ROUTES[route];
             var result = build(id);
             if (result && typeof result.then === 'function') {
-                showLoading();
-                result.then(function (built) {
+                // Only a screen with nothing to draw yet shows a loader. With an answer at hand the page on show
+                // simply stays until the new one is drawn a moment later, so nothing flashes.
+                if (!quiet && waiting) showLoading();
+                done = result.then(function (built) {
                     if (id === renderId && built) show(built);
                 }, function (err) {
                     if (id !== renderId) return;
-                    if (err && err.code === 'notfound') {
-                        // The child is no longer linked: refresh the list once and draw again
-                        cache = {};
-                        loadChildren().then(function () {
-                            renderSwitcher();
-                            if (id === renderId) render();
-                        }, function () {
-                            if (id === renderId) show(renderError());
-                        });
-                        return;
-                    }
+                    if (err && err.code === 'notfound') return childGone(id);
                     show(err && err.code === 'noyear' ? renderNoYear() : renderError());
                 });
             } else if (result) {
@@ -307,8 +569,21 @@
 
         if (afterNavigation) {
             window.scrollTo(0, 0);
+            if (content) content.scrollTop = 0;
             try { view.focus({ preventScroll: true }); } catch (e) { view.focus(); }
         }
+        return done;
+    }
+
+    /** The child on show is no longer linked: forget the copies, ask for the list of children again, and draw again. */
+    function childGone(id) {
+        forgetCopies();
+        return loadChildren().then(function () {
+            renderSwitcher();
+            if (id === renderId) return render();
+        }, function () {
+            if (id === renderId) show(renderError());
+        });
     }
 
     // (parent_menu.js listens for the same change and puts the menus away)
@@ -343,14 +618,16 @@
             'No children linked yet',
             'Ask your child to create a parent link in their iSkool app (My Class). Paste that link here and your child appears on this page.',
             'Add a child',
-            function () { window.location.hash = '#/add-child'; }
+            function () { go('add-child'); }
         );
     }
 
     function renderError() {
+        errorOnScreen = true;
+        var offline = navigator.onLine === false;
         return stateCard(
-            'We could not load this page',
-            'Please check your connection and try again.',
+            offline ? 'You are offline' : 'We could not load this page',
+            offline ? 'This page could not be loaded without a connection. It will load when you are back online.' : 'Please check your connection and try again.',
             'Try again',
             function () {
                 cache = {};
@@ -1242,8 +1519,18 @@
         msg.setAttribute('aria-live', 'polite');
         msg.hidden = true;
 
-        var button = el('button', 'pa-btn', 'Link my child');
+        // The learner's button with the pill spinner: the label is replaced by the ring while the link is checked
+        var button = el('button', 'pa-btn btn-loadable');
         button.type = 'submit';
+        var buttonLabel = el('span', 'btn-label', 'Link my child');
+        var spinner = el('span', 'btn-spinner');
+        spinner.setAttribute('aria-hidden', 'true');
+        for (var dot = 0; dot < 8; dot++) spinner.appendChild(document.createElement('span'));
+        append(button, buttonLabel, spinner);
+        function busy(on) {
+            button.disabled = on;
+            button.classList.toggle('is-loading', on);
+        }
 
         var note = el('p', 'pa-form-note', 'A link works once and expires after 48 hours. If it does not work, ask your child to make a new one.');
 
@@ -1270,8 +1557,7 @@
                 return;
             }
 
-            button.disabled = true;
-            button.textContent = 'Linking…';
+            busy(true);
             msg.hidden = true;
 
             redeemInvite(code).then(function (result) {
@@ -1281,8 +1567,7 @@
                         text += ' This link is for a different address than this app, so it may belong to another school.';
                     }
                     say(text);
-                    button.disabled = false;
-                    button.textContent = 'Link my child';
+                    busy(false);
                     input.focus();
                     return;
                 }
@@ -1290,8 +1575,7 @@
             }).then(null, function (err) {
                 if (err && err.code === 'auth') return;
                 say('We could not reach iSkool. Check your connection and try again.');
-                button.disabled = false;
-                button.textContent = 'Link my child';
+                busy(false);
             });
         });
     }
@@ -1299,7 +1583,7 @@
     /** The child is linked: refresh the list, make the new child the one on show, and confirm. */
     function finishAddChild(root, result) {
         var before = state.children.map(function (c) { return c.id; });
-        cache = {};
+        forgetCopies();    // the screens that cover every child must not come back from a copy that lacks the new one
         return loadChildren().then(function () {
             var added = state.children.filter(function (c) { return before.indexOf(c.id) === -1; })[0];
             if (added) {
@@ -1327,11 +1611,11 @@
         home.type = 'button';
         home.addEventListener('click', function () {
             if (needsReload) {
-                window.location.hash = '#/home';
+                go('home');
                 window.location.reload();
                 return;
             }
-            window.location.hash = '#/home';
+            go('home');
         });
         var another = el('button', 'pa-btn is-ghost', 'Add another child');
         another.type = 'button';
@@ -1343,31 +1627,211 @@
 
     // ── Start ──────────────────────────────────────────────────────────────────────────────────────────────
 
+    function applyChildren(data) {
+        state.parent = { name: data.parent.name, email: data.parent.email };
+        state.children = data.children;
+        state.childrenStatus = 'ready';
+        chooseChild();
+        if (window.paMenu) window.paMenu.setParent(state.parent);
+    }
+
+    /** Asks for the list of children. Resolves true when it is different from the list kept from before. */
     function loadChildren() {
         return api('api/parent/get_children.php').then(function (data) {
-            state.parent = { name: data.parent.name, email: data.parent.email };
-            state.children = data.children;
-            state.childrenStatus = 'ready';
-            chooseChild();
-            if (window.paMenu) window.paMenu.setParent(state.parent);
+            var changed = !savedChildren || !sameData(data, savedChildren.data);
+            savedChildren = { at: Date.now(), data: data };
+            if (!savedOff) saveSoon();
+            applyChildren(data);
+            return changed;
         });
     }
+
+    // The five screens and what they ask for. The same list serves the quiet requests below, so the keys always match
+    // the ones the screens use (see renderHome, renderReport and the others).
+    var SCREENS = {
+        home:     { path: 'api/parent/get_home.php',     child: true },
+        report:   { path: 'api/parent/get_report.php',   child: true, term: true },
+        syllabus: { path: 'api/parent/get_syllabus.php', child: true },
+        news:     { path: 'api/parent/get_news.php' },
+        events:   { path: 'api/parent/get_events.php' }
+    };
+
+    function screenParams(name, childId) {
+        var spec = SCREENS[name];
+        if (!spec.child) return null;
+        var params = { child: childId };
+        if (spec.term && state.reportTerm) params.term = state.reportTerm;
+        return params;
+    }
+
+    /** The very first visit has no copy, so the first screen is asked for together with the list of children. */
+    function warmUp() {
+        var name = currentRoute();
+        var spec = SCREENS[name];
+        var guess = parseInt(storeGet('parentApp.child'), 10);   // the child this phone showed last time
+        if (!spec || (spec.child && !guess)) return;
+        var params = screenParams(name, guess);
+        fetchInto(keyOf(spec.path, params), spec.path, params).then(null, function () { /* the screen asks again when it is drawn */ });
+    }
+
+    // ── Quiet requests for the other screens (like the learner app's prefetch) ──────────────────────────────
+
+    var prefetchTimers = [];
+
+    function prefetchScreen(name) {
+        var spec = SCREENS[name];
+        var child = currentChild();
+        if (!spec || name === currentRoute() || navigator.onLine === false) return;
+        if (spec.child && !child) return;
+        var params = screenParams(name, child ? child.id : 0);
+        var key = keyOf(spec.path, params);
+        var hit = cache[key];
+        if (hit && Date.now() - hit.at < CACHE_MS) return;
+        fetchInto(key, spec.path, params).then(null, function () { /* quiet: the screen asks again when it is opened */ });
+    }
+
+    /**
+     * Once the first screen is up, the others are asked for in the background, a few at a time so they never compete
+     * with what the parent is looking at, the way the learner app does after Home. Tapping a tab then draws from
+     * what is already here. Not on a phone set to save data.
+     */
+    function kickOffPrefetches(first) {
+        if (navigator.connection && navigator.connection.saveData) return;
+        prefetchTimers.forEach(clearTimeout);
+        var base = first || 1500;
+        prefetchTimers = [
+            setTimeout(function () { prefetchScreen('home'); prefetchScreen('report'); }, base),
+            setTimeout(function () { prefetchScreen('news'); prefetchScreen('events'); }, base * 2),
+            setTimeout(function () { prefetchScreen('syllabus'); }, Math.round(base * 3.4))
+        ];
+    }
+
+    /** The first screen is on the page (or has failed): the splash can go, and the quiet requests can start. */
+    function announceReady() {
+        if (readyAnnounced) return;
+        readyAnnounced = true;
+        try { window.dispatchEvent(new CustomEvent('iskool:home-ready')); } catch (e) { /* old browser: the splash's own time limit applies */ }
+        kickOffPrefetches();
+    }
+
+    // ── Start ──────────────────────────────────────────────────────────────────────────────────────────────
 
     /** First load, and "Try again" after a failed first load. */
     function start() {
+        // The list of children from the last visit: draw the first screen from it straight away and ask again in the
+        // background, instead of waiting for the list before anything else can be asked.
+        if (savedChildren) {
+            applyChildren(savedChildren.data);
+            renderSwitcher();
+            var first = render();
+            loadChildren().then(function (changed) {
+                if (!changed) return;
+                renderSwitcher();
+                return render(false, true);
+            }, function () { /* no signal: the saved list stays, and the screens say so if they are copies */ });
+            return first.then(announceReady);
+        }
+
         state.childrenStatus = 'loading';
         showLoading();
+        warmUp();
 
-        loadChildren().then(function () {
+        return loadChildren().then(function () {
             renderSwitcher();
-            render();
+            return render();
         }, function (err) {
             if (err && err.code === 'auth') return;
             state.childrenStatus = 'failed';
-            render(); // Home and Report show the error card, the "coming soon" pages still open
+            return render(); // Home and Report show the error card, the "coming soon" pages still open
+        }).then(announceReady);
+    }
+
+    // ── Refresh ────────────────────────────────────────────────────────────────────────────────────────────
+
+    /** Draws the screen on show again in place, asking the server for it (not drawing from a copy first). */
+    function renderFresh() {
+        forcing = true;
+        try {
+            return render(false, true);
+        } finally {
+            forcing = false;
+        }
+    }
+
+    /**
+     * Asks the server again for the screen on show and draws it in place (nothing flashes to "Loading…", and the
+     * parent stays where they were on the page). The list of children is fetched again too: a child linked since
+     * the page opened appears, one that was unlinked goes away. With no connection the last copy stays on screen.
+     * Used by pull to refresh, the "Try again" in the note, when the phone comes back online, and when the app comes
+     * back to the front after a while.
+     */
+    function refreshPage() {
+        var route = currentRoute();
+        if (!ROUTES[route] || route === 'add-child') return Promise.resolve();
+        if (state.childrenStatus === 'loading') return Promise.resolve();     // the first load is still on its way
+        cache = {};
+        if (state.childrenStatus !== 'ready') return start();                 // the first load failed: all of it again
+        return loadChildren().then(function () {
+            renderSwitcher();
+            return renderFresh();
+        }, function (err) {
+            if (err && err.code === 'auth') return;
+            return renderFresh();                                    // no signal: redraw from the last copy
         });
     }
 
+    // Back online (or back in the app with a connection) while the page shows an old copy or an error: update it
+    function updateIfStale() {
+        if (navigator.onLine === false) return;
+        if (viewCopy !== null || errorOnScreen) refreshPage();
+    }
+
+    // Back in the app after a while (the phone was locked, another app was open): what is on the page may be hours
+    // old, so update it quietly, as the learner's pages do when they are opened again
+    var RESUME_MS = 5 * 60 * 1000;
+    var hiddenAt = 0;
+    window.addEventListener('online', updateIfStale);
+    document.addEventListener('visibilitychange', function () {
+        if (document.visibilityState === 'hidden') {
+            hiddenAt = Date.now();
+            return;
+        }
+        var away = hiddenAt ? Date.now() - hiddenAt : 0;
+        hiddenAt = 0;
+        if (away > RESUME_MS && navigator.onLine !== false) refreshPage();
+        else updateIfStale();
+    });
+
+    // ── Pull to refresh (phones) ───────────────────────────────────────────────────────────────────────────
+
+    function pullAllowed() {
+        var route = currentRoute();
+        if (!ROUTES[route] || route === 'add-child') return false;                 // the form would lose what was typed
+        if (content && content.scrollTop > 0) return false;                        // only from the very top
+        if (root.classList.contains('pa-menu-open')) return false;                 // the phone menu is open
+        if (document.querySelector('[data-pa-menu]:not(.pa-sheet):not([hidden]), .pa-sheet.is-open')) return false;   // an account menu is open
+        return true;
+    }
+
+    if (window.iskoolPullToRefresh) {
+        window.iskoolPullToRefresh.init({
+            scroller: '.pa-content',
+            ignoreSelector: 'input, textarea, select, [contenteditable="true"], [role="dialog"], [role="menu"]',
+            canPull: pullAllowed,
+            refresh: refreshPage
+        });
+    }
+
+    // Signing out removes the copy kept on this phone (the menu's Sign out is a link to logout.php; the quick search
+    // action goes through paData.forget)
+    document.addEventListener('click', function (ev) {
+        var link = ev.target && ev.target.closest ? ev.target.closest('a[href]') : null;
+        if (link && /(^|\/)logout\.php(\?|#|$)/.test(link.getAttribute('href') || '')) forgetSaved();
+    }, true);
+    window.paData = { forget: forgetSaved };
+
+    readSaved();
+    dropOtherSaved();
     markActiveLinks(currentRoute());
     start();
 }());

@@ -396,9 +396,17 @@ body {
    parent (.main-content) must be the scroll container instead.
 ──────────────────────────────────────────────────────────────────────── */
 @media (max-width: 767px) {
+    /* Where the phone top bar ends. The bar is --lh-header-h tall (set on .main-header below, so a normal screen and a
+       detail screen are the same height) and sits env(safe-area-inset-top) from the top with the same amount again in
+       its own padding. The page area (#api-content-area) starts exactly here, so there is no strip between the two. */
+    :root {
+        --lh-header-h: 64px;
+        --lh-header-bottom: calc(var(--lh-header-h) + 2 * env(safe-area-inset-top, 0px));
+    }
+
     .main-content {
         overflow: visible;
-        padding-top: calc(68px + env(safe-area-inset-top, 0));
+        padding-top: var(--lh-header-bottom);
         min-height: 100vh;
         min-height: 100dvh;
         height: 100vh;
@@ -407,8 +415,8 @@ body {
     }
 
     #api-content-area {
-        height: calc(100vh - 68px - env(safe-area-inset-top, 0));
-        height: calc(100dvh - 68px - env(safe-area-inset-top, 0));
+        height: calc(100vh - var(--lh-header-bottom));
+        height: calc(100dvh - var(--lh-header-bottom));
         overflow-y: auto;
         overflow-x: hidden;
         -webkit-overflow-scrolling: touch;
@@ -665,6 +673,23 @@ iframe {
     background: rgba(248,81,73,0.08);
 }
 
+/* Regular-weight Nunito for the phone back button's label. The page only loads Nunito at weight 600 from Google Fonts
+   (see the <link> in learner_dashboard.php), and every other Nunito text here relies on that, so a regular weight cannot
+   be added to that link without thinning the whole app. This is a tiny self-hosted copy under a family name of its own,
+   used by the back button only. The licence (SIL OFL 1.1) is next to the file. */
+@font-face {
+    font-family: 'iSkool Back Label';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('../../fonts/nunito-latin-400.woff2') format('woff2');
+}
+
+/* Back button on detail screens. Desktop shows the arrow; phones show the chevron (see the phone block below). The
+   padding lives here, not in the markup's style attribute, so the phone block can change it. */
+#headerBackBtn { padding: 5px; }
+#headerBackBtn .hb-chevron { display: none; }
+
 @media (max-width: 768px) {
     /* The avatar dropdown was using #161b22 (a leftover mismatched dark
        slate colour) instead of the app's actual dark theme colour
@@ -678,15 +703,55 @@ iframe {
         border: none;
     }
 
+    /* Back button: the same one the teacher app shows on its detail pages (#teacherHeaderBackBtn in
+       teacher_dashboard.css): a thin 30px chevron and the name of the page you came from, 17px regular, with a 44px tall
+       touch area. The same font rule is on #headerRight::before further down, which has to measure the same text. */
+    .main-header {
+        /* The longest the label may be: 140px, and never more than what leaves the header's two equal halves (the
+           button on the left, its invisible mirror on the right) room inside the screen on a small phone. "Announcements"
+           is about 126px. */
+        --hb-label-max: min(140px, calc(50vw - 50px));
+    }
+
+    #headerBackBtn,
+    .main-header.mobile-detail-mode #headerRight::before {
+        font: 400 17px/1 'iSkool Back Label', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        letter-spacing: .1px;
+    }
+
     #headerBackBtn {
         align-items: center;
-        gap: 4px;
+        gap: 0;
         min-width: 0;
-        max-width: 126px;
+        max-width: calc(42px + var(--hb-label-max));   /* chevron 30 - 2 + label + right padding 14 */
+        min-height: 44px;
+        padding: 0 14px 0 0;
+        margin-left: -8px;         /* the header pads 16px and the chevron's box has about 10px of empty space inside it
+                                      to the left of the stroke, so the chevron itself starts 18px from the screen edge,
+                                      the same as the page content below */
+        border-radius: 12px;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    #headerBackBtn:active {
+        opacity: 0.55;
     }
 
     #headerBackBtn svg {
         flex-shrink: 0;
+    }
+
+    #headerBackBtn .hb-arrow {
+        display: none;
+    }
+
+    /* The size and stroke are set here as well as in the markup because `.main-header button svg` (20px) would win over
+       the width and height attributes */
+    #headerBackBtn .hb-chevron {
+        display: block;
+        width: 30px;
+        height: 30px;
+        stroke-width: 2.1;
     }
 
     .main-header {
@@ -705,17 +770,50 @@ iframe {
     #headerBackLabel {
         display: inline-block;
         min-width: 0;
-        max-width: 92px;
+        max-width: var(--hb-label-max);
+        margin-left: -2px;         /* the chevron's box has empty space on its right too */
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-        font-size: 14px;
-        font-weight: 600;
-        line-height: 1;
+        font: inherit;
+    }
+
+    /* The back button is now wider than the quarter of the header the left side used to get, so on a detail screen
+       the left side is as wide as the button and the title takes what is left. The right side is empty, but it is
+       given the same width as the button (an invisible copy of the label, plus the chevron and padding), so the
+       title stays centred on the screen and can never run under the button. */
+    .main-header.mobile-detail-mode #headerLeft,
+    .main-header.mobile-detail-mode #headerRight {
+        flex: 0 0 auto !important;
+    }
+
+    .main-header.mobile-detail-mode .logo-container {
+        flex: 1 1 0 !important;
+    }
+
+    /* The button is 44px tall, taller than the title, and the header top-aligns its contents, so centre them on a
+       detail screen. The top and bottom padding is a little smaller so the bar stays the height it was. */
+    .main-header.mobile-detail-mode {
+        align-items: center;
+        padding-top: calc(5px + env(safe-area-inset-top, 0));
+        padding-bottom: 5px;
+    }
+
+    .main-header.mobile-detail-mode #headerRight::before {
+        content: attr(data-back-label);
+        display: block;
+        box-sizing: content-box;
+        max-width: var(--hb-label-max);   /* same cap as #headerBackLabel */
+        padding: 0 14px 0 20px;    /* the button's width without its label: 30 - 2 + 14, less its -8px left margin */
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        visibility: hidden;
     }
 
     .main-header.mobile-detail-mode .logo-container {
         min-width: 0;
+        container-type: inline-size;
     }
 
     .main-header.mobile-detail-mode #headerTitle {
@@ -733,7 +831,7 @@ iframe {
     }
 
     .main-header.mobile-detail-mode #headerBackBtn {
-        color: #ffffff !important;
+        color: #f3f2ee !important;     /* the teacher back button's colour; light mode paints its own in mobile_light.css */
     }
 
     .main-header.mobile-detail-mode.detail-title-collapsed #headerTitle {
@@ -745,6 +843,16 @@ iframe {
     .main-header.mobile-detail-mode #settingsBtn,
     .main-header.mobile-detail-mode .top-nav-avatar-btn {
         display: none !important;
+    }
+
+    /* With a long label ("Announcements") on a small phone there is hardly any room left between the button and its
+       mirror, and a title squeezed to two letters and an ellipsis is worse than none. The page's own heading is
+       still on screen, so below 72px the small title is left out. (This has to come after the
+       `display: block !important` rule for #headerTitle above, which it has the same weight as.) */
+    @container (max-width: 71px) {
+        .main-header.mobile-detail-mode #headerTitle {
+            display: none !important;
+        }
     }
 }
 
@@ -1226,11 +1334,11 @@ iframe {
    NOTE on index.css's cascade (so these values aren't "fixed" back to the
    wrong ones later): index.css has a `@media (max-width: 480px)` block
    that sets #splash-brand-wordmark to 120px, but a *later* rule at
-   `@media (max-width: 899px)` sets it to 145px (bottom: -12px) and also
+   `@media (max-width: 899px)` sets it to 125px (bottom: -12px) and also
    sets the page background to #20201f. Because that 899px block comes
    after the 480px block in the file, it wins the cascade on every phone
    width (not just 480–899px) — so on every real mobile device the login
-   splash's footer wordmark is 145px tall on a #20201f background, never
+   splash's footer wordmark is 125px tall on a #20201f background, never
    120px/106px on #0a0a0a. The values below match that actual rendered
    result, not the 480px/360px block in isolation.
    Sits above #loaderOverlay (max z-index 8000 on mobile) so it always
@@ -1260,7 +1368,7 @@ iframe {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 14px;
+    gap: 3px;
     transform: translateX(-20px);
 }
 
@@ -1292,7 +1400,7 @@ iframe {
    shrink at this breakpoint (unlike the footer wordmark/background above). */
 @media (max-width: 480px) {
     #dash-splash-logo {
-        gap: 10px;
+        gap: 2px;
     }
     #dash-splash-logo img {
         width: 68px;
@@ -1305,7 +1413,7 @@ iframe {
 
 @media (max-width: 360px) {
     #dash-splash-logo {
-        gap: 8px;
+        gap: 2px;
     }
     #dash-splash-logo img {
         width: 60px;
@@ -1318,16 +1426,17 @@ iframe {
 
 /* Matches index.css's real mobile result: background #20201f, applied at
    the same 899px breakpoint index.css uses, so #dash-splash tracks it
-   exactly instead of an invented one. Footer wordmark is bumped to 145px
-   and nudged down slightly (bottom: -12px) on mobile only (desktop keeps
-   the base 118px/1px above) per Thomas's request — mirrors the same
-   mobile-only changes on #splash-brand-wordmark in index.css. */
+   exactly instead of an invented one. Footer wordmark is 125px (made
+   slightly smaller than the 145px it was) and nudged down slightly
+   (bottom: -12px) on mobile only (desktop keeps the base 118px/1px
+   above) — mirrors the same mobile-only changes on
+   #splash-brand-wordmark in index.css. */
 @media (max-width: 899px) {
     #dash-splash {
         background: #20201f;
     }
     #dash-splash-brand-wordmark {
-        height: 145px;
+        height: 125px;
         bottom: -12px;
     }
 }
@@ -2210,6 +2319,18 @@ iframe {
         border-bottom: 0.5px solid rgba(255, 255, 255, 0.15) !important;
         backdrop-filter: blur(10px) !important;
         -webkit-backdrop-filter: blur(10px) !important;
+    }
+}
+
+/* ── PHONE TOP BAR HEIGHT — phones only ───────────────────────────────────
+   The bar used to be as tall as its tallest part: 64px on a normal screen (the menu button is 47px) but 61px on a
+   detail screen (the back button replaces it), and #api-content-area started at a fixed 68px, so 4px (7px on a detail
+   screen) of empty space showed between them. The bar now has one height, --lh-header-h (defined with the page area's
+   offset above), and the page area starts at its bottom edge. Its parts are centred inside it as before.
+──────────────────────────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+    .main-header {
+        height: calc(var(--lh-header-h) + env(safe-area-inset-top, 0px));
     }
 }
 

@@ -207,11 +207,7 @@
     font-size: 14px;
 }
 
-.lev-mobile-detail {
-    display: none;
-}
-
-/* ── MOBILE ── */
+/* ── MOBILE ── (the phone list and detail screen are in the quiet-list block further down) */
 @media (max-width: 899px) {
     .eval-container {
         padding: 0;
@@ -257,107 +253,6 @@
         margin: 20px 16px 0;
         width: calc(100% - 32px);
     }
-
-    .lev-mobile-detail {
-        display: block;
-        min-height: calc(100vh - 74px);
-        padding: 18px 16px 96px;
-    }
-
-    .lev-mobile-detail-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 4px 9px;
-        border-radius: 6px;
-        color: #4fa8fd;
-        border: 1px solid rgba(79,168,253,0.35);
-        background: rgba(79,168,253,0.1);
-        font-size: 10px;
-        font-weight: 800;
-        letter-spacing: 0.6px;
-        text-transform: uppercase;
-        margin-bottom: 12px;
-    }
-
-    .lev-mobile-detail-title {
-        margin: 0 0 18px;
-        color: #e2e8f0;
-        font-size: 28px;
-        line-height: 1.28;
-        font-weight: 800;
-        letter-spacing: 0;
-        overflow-wrap: anywhere;
-        padding-bottom: 18px;
-        border-bottom: 1px solid rgba(255,255,255,0.07);
-    }
-
-    .lev-mobile-detail-author-row {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 18px;
-    }
-
-    .lev-mobile-detail-avatar {
-        flex: 0 0 auto;
-        width: 44px;
-        height: 44px;
-        border-radius: 50%;
-        border: 1px solid rgba(79,168,253,0.35);
-        background: rgba(79,168,253,0.1);
-        color: #4fa8fd;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 15px;
-        font-weight: 800;
-        letter-spacing: 0.2px;
-    }
-
-    .lev-mobile-detail-author-info { min-width: 0; }
-
-    .lev-mobile-detail-author-name {
-        color: #e2e8f0;
-        font-size: 16px;
-        font-weight: 700;
-        line-height: 1.3;
-        overflow-wrap: anywhere;
-    }
-
-    .lev-mobile-detail-author-role {
-        color: #8b949e;
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: 0.6px;
-        text-transform: uppercase;
-        margin-top: 2px;
-    }
-
-    .lev-mobile-detail-role-badge { color: #4fa8fd; }
-    .lev-mobile-detail-role-sep { color: #5a6472; margin: 0 6px; }
-
-    .lev-mobile-detail-posted {
-        color: #8b949e;
-        font-size: 12px;
-        margin-top: 4px;
-    }
-
-    .lev-mobile-detail .eval-description {
-        margin-bottom: 20px;
-    }
-
-    .lev-mobile-detail .question-box {
-        margin-bottom: 22px;
-    }
-
-    .lev-comments-field {
-        margin-top: 30px;
-    }
-
-    .lev-comments-field textarea {
-        border-radius: 10px;
-    }
 }
 /* ══════════════════════════════════════════════════════ */
 /* The rules below were extracted from an inline <style>   */
@@ -371,6 +266,9 @@
     .lev-desktop-layout { display: flex !important; }
     .lev-mobile-list    { display: none !important; }
     .lev-mobile-search-wrap { display: none !important; }
+    .lev-mobile-head    { display: none !important; }
+    .lev-mobile-chips   { display: none !important; }
+    .lev-mobile-detail  { display: none; }
 }
 @media (max-width: 899px) {
     .lev-desktop-layout { display: none !important; }
@@ -742,7 +640,44 @@
 .lev-rail h4.lev-rail-sub { margin: 28px 0 4px; }
 
 
-/* ── MOBILE LIST STYLES (flat, no card wrapper) ── */
+/* ── MOBILE LIST: the quiet list (phones, and the 769–899px range that still shows the phone layout) ──
+   The same look as the learner Assignments and Quizzes lists: one calm column with a title and a counts line, a search
+   box, filter chips, then a label for each teacher with a status ring, a title and one line of detail per row.
+   Weights stay at 400 (text) and 600 (titles and names), the same as the rest of the phone pages. The colours are the
+   --qm-* tokens below, so light mode only has to change the tokens (see the light blocks at the end of this file). */
+.lev-mobile-head,
+.lev-mobile-search-wrap,
+.lev-mobile-chips,
+.lev-mobile-list,
+.lev-mobile-detail {
+    --qm-title: #ecece9;
+    --qm-body: #c2c3b7;
+    --qm-muted: #8b8b87;
+    --qm-faint: #5f605a;
+    --qm-line: rgba(255,255,255,0.07);
+    --qm-press: rgba(255,255,255,0.04);
+    --qm-surf: #272726;
+    --qm-field: #20201f;
+    --qm-ring: #73746d;
+    --qm-soon: #f28c38;
+    --qm-ok: #4dbb85;
+    --qm-chipline: rgba(255,255,255,0.12);
+    --qm-chipon: #ecece9;
+    --qm-chipon-text: #20201f;
+}
+
+.lev-mobile-head { padding: 4px 2px 0; }
+.lev-mobile-title {
+    margin: 0;
+    font-family: inherit;
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.2px;
+    color: var(--qm-title);
+}
+.lev-mobile-sub { margin: 5px 0 0; font-size: 14px; line-height: 1.4; font-weight: 400; color: var(--qm-muted); }
+
 .lev-mobile-list {
     background: transparent;
     border-radius: 0;
@@ -755,143 +690,363 @@
         margin-right: -18px;
     }
 }
+
+/* search */
+.lev-mobile-search-wrap { display: block; position: relative; margin: 14px 0 0; }
+.lev-mobile-search-wrap svg {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--qm-muted);
+}
+.lev-mobile-search {
+    width: 100%;
+    box-sizing: border-box;
+    height: 42px;
+    padding: 0 14px 0 42px;
+    border: 0;
+    border-radius: 12px;
+    background: var(--qm-surf);
+    color: var(--qm-title);
+    font: inherit;
+    font-size: 16px; /* 16px stops iOS zooming the page when the box is focused */
+    font-weight: 400;
+    -webkit-appearance: none;
+    appearance: none;
+}
+.lev-mobile-search:focus { outline: none; box-shadow: inset 0 0 0 1px var(--qm-chipline); }
+.lev-mobile-search::placeholder { color: var(--qm-muted); opacity: 1; }
+
+/* filter chips */
+.lev-mobile-chips {
+    display: flex;
+    gap: 6px;
+    margin: 12px 0 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.lev-mobile-chips::-webkit-scrollbar { display: none; }
+.lev-mobile-chip {
+    flex: none;
+    height: 32px;
+    padding: 0 10px;
+    border-radius: 16px;
+    border: 1px solid var(--qm-chipline);
+    background: transparent;
+    color: var(--qm-muted);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 400;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+.lev-mobile-chip.on { background: var(--qm-chipon); border-color: var(--qm-chipon); color: var(--qm-chipon-text); }
+
+/* a teacher's label: name, how many, fold arrow */
 .lev-mobile-folder-header {
     display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 16px 18px;
+    align-items: baseline;
+    gap: 8px;
+    padding: 20px 20px 4px;
     background: transparent;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
     cursor: pointer;
     user-select: none;
-    transition: background 0.2s;
+    -webkit-tap-highlight-color: transparent;
 }
-.lev-mobile-folder-header:active { background: rgba(255,255,255,0.03); }
-.lev-mobile-folder-header:not(.lev-mobile-folder-header--collapsed) {
-    background: rgba(255,255,255,0.05);
-}
-.lev-mobile-folder-icon { flex-shrink: 0; }
+.lev-mobile-folder-header:focus-visible { outline: 2px solid var(--qm-chipline); outline-offset: -2px; }
 .lev-mobile-folder-name {
-    flex: 1;
-    font-size: 16px;
+    flex: 0 1 auto;
+    min-width: 0;
+    font-size: 14px;
     font-weight: 600;
-    color: #e2e8f0;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    color: var(--qm-body);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
-.lev-mobile-folder-count {
-    font-size: 12px;
-    color: #8b949e;
-    font-weight: 600;
-    background: rgba(255,255,255,0.05);
-    padding: 2px 8px;
-    border-radius: 20px;
-    flex-shrink: 0;
-}
+.lev-mobile-folder-count { flex: none; margin-left: auto; font-size: 13px; font-weight: 400; color: var(--qm-muted); }
 .lev-mobile-folder-chevron {
-    flex-shrink: 0;
-    color: #73746d;
-    transition: transform 0.3s ease;
+    flex: none;
+    align-self: center;
+    color: var(--qm-muted);
+    transition: transform 0.2s ease;
 }
-.lev-mobile-folder-chevron.open { transform: rotate(90deg); }
+.lev-mobile-folder-header--collapsed .lev-mobile-folder-chevron { transform: rotate(-90deg); }
 .lev-mobile-folder-body { display: block; }
 .lev-mobile-folder-body.collapsed { display: none; }
+/* while a search or filter is on, every group that has a match shows open and nothing is saved */
+.lev-mobile-list.is-filtering .lev-mobile-folder-body.collapsed { display: block; }
+.lev-mobile-list.is-filtering .lev-mobile-folder-header--collapsed .lev-mobile-folder-chevron { transform: none; }
+
+/* a row: ring, title, one line of detail, arrow. The hairline starts under the title, not under the ring. */
 .lev-mobile-row {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 13px 18px;
+    gap: 14px;
+    padding: 11px 20px;
     background: transparent;
-    border-bottom: 0;
-    border-radius: 0;
-    border-left: 0;
-    border-right: 0;
     cursor: pointer;
     transition: background 0.15s;
     position: relative;
+    -webkit-tap-highlight-color: transparent;
 }
-.lev-mobile-row::after {
+.lev-mobile-row::before {
     content: '';
     position: absolute;
-    bottom: 0;
-    left: 0;
+    top: 0;
+    left: 58px;
     right: 0;
     height: 1px;
-    background: rgba(255,255,255,0.06);
+    background: var(--qm-line);
 }
-.lev-mobile-row:last-child::after { display: none; }
-.lev-mobile-row:active { background: rgba(255,255,255,0.03); }
-.lev-mobile-row-icon {
-    width: 32px;
-    height: 32px;
+.lev-mobile-row--first::before { display: none; }
+.lev-mobile-row:active { background: var(--qm-press); }
+.lev-mobile-row:focus-visible { outline: 2px solid var(--qm-chipline); outline-offset: -2px; }
+.lev-mobile-row-icon { flex: none; width: 24px; height: 24px; display: inline-flex; color: var(--qm-ring); }
+.lev-mobile-row-icon svg { width: 24px; height: 24px; }
+.lev-mobile-row-icon--done { color: var(--qm-ok); }
+.lev-mobile-row-body { flex: 1; min-width: 0; }
+.lev-mobile-row-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--qm-title);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.lev-mobile-row-title-text { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lev-mobile-row-meta {
+    margin-top: 3px;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.3;
+    color: var(--qm-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.lev-mobile-st--ok { color: var(--qm-ok); }
+.lev-mobile-row-chevron { flex: none; color: var(--qm-faint); }
+
+/* ── MOBILE EMPTY STATES (no evaluations / no search or filter matches) ── */
+.lev-mobile-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px;
+    color: var(--qm-muted);
+    min-height: 46vh;
+}
+.lev-mobile-empty svg { opacity: 0.5; margin-bottom: 14px; }
+.lev-mobile-empty-title {
+    color: var(--qm-title);
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 6px;
+}
+.lev-mobile-empty-body {
+    color: var(--qm-muted);
+    font-size: 14px;
+    font-weight: 400;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* ── MOBILE: EVALUATION DETAIL VIEW ── */
+/* Same look as the assignment detail: what it is and where it stands, the title, who it is from, the description, then
+   the statements and the button. Colours are the --qm-* tokens defined with the list above. */
+.lev-mobile-detail {
+    /* 20px at the sides, the same inset as .lev-mobile-row (the margin below cancels the container's 18px) */
+    padding: 8px 20px 96px;
+}
+@media (max-width: 899px) {
+    .lev-mobile-detail {
+        margin-left: -18px;
+        margin-right: -18px;
+    }
+}
+.lev-mobile-detail-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+.lev-mobile-detail-eyebrow {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.9px;
+    text-transform: uppercase;
+    color: var(--qm-muted);
+}
+.lev-mobile-detail-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--qm-muted);
+    border: 1px solid var(--qm-chipline);
+}
+.lev-mobile-detail-status--ok { color: var(--qm-ok); border-color: color-mix(in srgb, var(--qm-ok) 40%, transparent); background: color-mix(in srgb, var(--qm-ok) 11%, transparent); }
+.lev-mobile-detail-title {
+    margin: 12px 0 0;
+    color: var(--qm-title);
+    font-family: inherit;
+    font-size: 26px;
+    line-height: 1.2;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+    overflow-wrap: anywhere;
+}
+.lev-mobile-detail-posted { margin-top: 6px; font-size: 13px; font-weight: 400; color: var(--qm-muted); }
+.lev-mobile-detail-facts {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    margin-top: 18px;
+    background: var(--qm-surf);
+    border-radius: 18px;
+}
+.lev-mobile-detail-fact { padding: 14px 16px 15px; min-width: 0; }
+.lev-mobile-detail-fact + .lev-mobile-detail-fact { border-left: 1px solid var(--qm-line); }
+.lev-mobile-detail-fact-label { font-size: 13px; font-weight: 400; color: var(--qm-muted); }
+.lev-mobile-detail-fact-value { margin: 6px 0 3px; font-size: 20px; font-weight: 600; line-height: 1.15; color: var(--qm-title); overflow-wrap: anywhere; }
+.lev-mobile-detail-fact-value--name { margin-top: 8px; font-size: 16px; line-height: 1.25; }
+.lev-mobile-detail-fact-note { font-size: 13px; font-weight: 400; color: var(--qm-muted); }
+.lev-mobile-detail-label { margin: 24px 0 8px 2px; font-size: 13.5px; font-weight: 600; color: var(--qm-muted); }
+.lev-mobile-detail-desc {
+    color: var(--qm-body);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+/* the statements: its number, the statement, then the five answers as one quiet list */
+.lev-mobile-q { margin-top: 26px; }
+.lev-mobile-q-n { font-size: 12px; font-weight: 600; letter-spacing: 0.9px; text-transform: uppercase; color: var(--qm-muted); }
+.lev-mobile-q-text { margin: 6px 0 12px; font-size: 17px; font-weight: 600; line-height: 1.4; color: var(--qm-title); overflow-wrap: anywhere; }
+.lev-mobile-scale { background: var(--qm-surf); border-radius: 16px; overflow: hidden; }
+.lev-mobile-opt {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-height: 48px;
+    padding: 0 16px;
+    box-sizing: border-box;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+.lev-mobile-opt + .lev-mobile-opt::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 52px;
+    right: 0;
+    height: 1px;
+    background: var(--qm-line);
+}
+.lev-mobile-opt:active { background: var(--qm-press); }
+/* the real radio stays in the page, just not visible, so the browser can point at it when an answer is missing */
+.lev-mobile-opt input {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+.lev-mobile-opt-dot {
+    flex: none;
+    box-sizing: border-box;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1.7px solid var(--qm-ring);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
+    transition: background 0.15s, border-color 0.15s;
 }
-.lev-mobile-row-body { flex: 1; min-width: 0; }
-.lev-mobile-row-title {
-    font-size: 15px;
-    font-weight: 600;
-    color: #e2e8f0;
-    margin: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+.lev-mobile-opt-dot::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--qm-chipon-text);
+    transform: scale(0);
+    transition: transform 0.15s;
+}
+.lev-mobile-opt input:checked + .lev-mobile-opt-dot { background: var(--qm-chipon); border-color: var(--qm-chipon); }
+.lev-mobile-opt input:checked + .lev-mobile-opt-dot::after { transform: scale(1); }
+.lev-mobile-opt input:focus-visible + .lev-mobile-opt-dot { outline: 2px solid var(--qm-chipline); outline-offset: 2px; }
+.lev-mobile-opt-label { font-size: 16px; font-weight: 400; color: var(--qm-body); }
+.lev-mobile-opt input:checked ~ .lev-mobile-opt-label { font-weight: 600; color: var(--qm-title); }
+
+.lev-mobile-comments { margin-top: 28px; }
+.lev-mobile-comments label { display: block; margin: 0 0 8px 2px; font-size: 13.5px; font-weight: 600; color: var(--qm-muted); }
+.lev-mobile-comments label span { font-weight: 400; }
+.lev-mobile-comments textarea {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 120px;
+    padding: 12px;
+    border: 1px solid var(--qm-chipline);
+    border-radius: 12px;
+    background: var(--qm-field);
+    color: var(--qm-title);
+    font: inherit;
+    font-size: 16px; /* 16px stops iOS zooming the page when the box is focused */
+    font-weight: 400;
+    line-height: 1.5;
+    resize: vertical;
+}
+.lev-mobile-comments textarea:focus { outline: none; border-color: var(--qm-muted); }
+
+/* the main button: light on the dark page, dark on the light one */
+.lev-mobile-detail-action {
     display: flex;
     align-items: center;
-    gap: 6px;
-}
-.lev-mobile-row-title-text {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-.lev-mobile-row-meta {
-    font-size: 11px;
-    color: #8E8E93;
-    margin-top: 2px;
-}
-.lev-mobile-row-chevron {
-    flex-shrink: 0;
-    color: #73746d;
+    justify-content: center;
+    width: 100%;
+    min-height: 48px;
+    margin-top: 22px;
+    border-radius: 14px;
+    border: 0;
+    box-sizing: border-box;
+    background: var(--qm-chipon);
+    color: var(--qm-chipon-text);
+    font: inherit;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
 }
 
-/* ── MOBILE SEARCH BAR ── */
-@media (max-width: 899px) {
-    .lev-mobile-search-wrap {
-        display: block;
-        margin-bottom: 10px;
-        position: relative;
-    }
-    .lev-mobile-search-wrap svg {
-        position: absolute;
-        left: 12px;
-        top: 50%;
-        transform: translateY(-50%);
-        pointer-events: none;
-        opacity: 0.4;
-    }
-    .lev-mobile-search {
-        width: 100%;
-        box-sizing: border-box;
-        padding: 9px 14px 9px 36px;
-        border-radius: 10px;
-        background: rgba(255,255,255,0.05);
-        border: none;
-        color: #e2e8f0;
-        font-size: 15px;
-        font-family: 'Nunito', sans-serif;
-        transition: background 0.2s;
-    }
-    .lev-mobile-search:focus { outline: none; background: rgba(255,255,255,0.08); }
-    .lev-mobile-search::placeholder { color: #555e6a; }
+/* an evaluation that is already submitted */
+.lev-mobile-done {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-top: 24px;
+    padding: 28px 20px;
+    border-radius: 18px;
+    background: var(--qm-surf);
+    color: var(--qm-ok);
 }
+.lev-mobile-done-title { margin-top: 12px; font-size: 17px; font-weight: 600; color: var(--qm-title); }
+.lev-mobile-done-copy { margin-top: 4px; font-size: 14px; font-weight: 400; line-height: 1.5; color: var(--qm-muted); }
+
 
 /* ── SHARED UTILITIES ── */
 /* (was: inline style="" attributes scattered through renderEvaluationsUI,
@@ -908,42 +1063,12 @@
     text-align: center;
 }
 
-/* ── MOBILE EMPTY STATE (no evaluations / no search matches) ── */
-.lev-mobile-empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 24px;
-    color: #555e6a;
-    min-height: calc(100vh - 280px);
-}
-.lev-mobile-empty svg { opacity: 0.35; margin-bottom: 14px; }
-.lev-mobile-empty-title {
-    color: #c9d1d9;
-    font-size: 15px;
-    font-weight: 700;
-    margin: 0 0 6px;
-}
-.lev-mobile-empty-body {
-    color: #8b949e;
-    font-size: 13px;
-    margin: 0;
-    line-height: 1.5;
-}
-.lev-mobile-search-empty svg { opacity: 0.5; }
-
 /* Crisp SVG stroke rendering (was: style="shape-rendering:geometricPrecision"
    on the desktop and mobile search icons, and the mobile folder chevron) */
 .lev-icon-crisp {
     shape-rendering: geometricPrecision;
 }
 
-/* Mobile row statuses are part of the supporting metadata, so they use the
-   same muted colour as the date rather than a state-specific accent. */
-.lev-mobile-row-status--done,
-.lev-mobile-row-status--pending { color: inherit; }
 /* ═══ Light mode: learner Evaluations (desktop) ════════════════════════════════════════════════════════════
    The desktop Evaluations page is driven by the --lev-* variables above, so most of light mode is the variable
    block below, the same way the Home page does it with --lhd-*, the Quiz page with --lqz-* and Assignments with
@@ -1020,61 +1145,28 @@ html[data-learner-theme="light"] .lev-cmt textarea:focus { border-color: #187a72
 html[data-learner-theme="light"] .lev-fin svg { stroke: #16a34a; }
 html[data-learner-theme="light"] .lev-panel-empty svg[stroke="#4fd1c5" i] { stroke: #187a72; }
 
-/* ── Phone-style list and detail form: below 900px the desktop layout is hidden and these are what show.
-      Their colours are hard-coded for a dark page. ── */
-html[data-learner-theme="light"] .lev-mobile-folder-header { border-bottom-color: #dfded8; }
-html[data-learner-theme="light"] .lev-mobile-folder-header:active,
-html[data-learner-theme="light"] .lev-mobile-folder-header:not(.lev-mobile-folder-header--collapsed) { background: rgba(38,39,35,.04); }
-html[data-learner-theme="light"] .lev-mobile-folder-name,
-html[data-learner-theme="light"] .lev-mobile-row-title { color: #282924; }
-html[data-learner-theme="light"] .lev-mobile-folder-count { color: #73746d; background: rgba(38,39,35,.06); }
-html[data-learner-theme="light"] .lev-mobile-folder-chevron,
-html[data-learner-theme="light"] .lev-mobile-row-chevron { color: #8b8b83; }
-html[data-learner-theme="light"] .lev-mobile-row::after { background: #ebeae5; }
-html[data-learner-theme="light"] .lev-mobile-row:active { background: rgba(38,39,35,.04); }
-html[data-learner-theme="light"] .lev-mobile-row-meta { color: #73746d; }
-html[data-learner-theme="light"] .lev-mobile-search-wrap svg { color: #282924; }
-html[data-learner-theme="light"] .lev-mobile-search { background: #ffffff; border: 1px solid #dfded8; color: #282924; }
-html[data-learner-theme="light"] .lev-mobile-search:focus { border-color: #bdbcb4; }
-html[data-learner-theme="light"] .lev-mobile-search::placeholder { color: #8b8b83; }
-html[data-learner-theme="light"] .lev-mobile-empty-title { color: #282924; }
-html[data-learner-theme="light"] .lev-mobile-empty-body { color: #73746d; }
-
-/* the blue accent (#4fa8fd) is used on the folder and row icons, the badge, the avatar, the description bar,
-   the statement bar and the selected option; it becomes a darker blue on light */
-html[data-learner-theme="light"] .lev-mobile-list [stroke="#4fa8fd" i],
-html[data-learner-theme="light"] .lev-mobile-detail [stroke="#4fa8fd" i] { stroke: #1d6fb8; }
-html[data-learner-theme="light"] .lev-mobile-detail-badge,
-html[data-learner-theme="light"] .lev-mobile-detail-avatar { color: #1d6fb8; border-color: rgba(29,111,184,.35); background: rgba(29,111,184,.08); }
-html[data-learner-theme="light"] .lev-mobile-detail-role-badge { color: #1d6fb8; }
-html[data-learner-theme="light"] .lev-mobile-detail-role-sep { color: #8b8b83; }
-html[data-learner-theme="light"] .lev-mobile-detail-title { color: #282924; border-bottom-color: #dfded8; }
-html[data-learner-theme="light"] .lev-mobile-detail-author-name { color: #282924; }
-html[data-learner-theme="light"] .lev-mobile-detail-author-role,
-html[data-learner-theme="light"] .lev-mobile-detail-posted { color: #73746d; }
-
-html[data-learner-theme="light"] .lev-mobile-detail .eval-description { background: rgba(38,39,35,.03); border-left-color: #1d6fb8; color: #53544e; }
-html[data-learner-theme="light"] .lev-mobile-detail .question-text { color: #282924; border-left-color: #1d6fb8; }
-html[data-learner-theme="light"] .lev-mobile-detail .option-label span { color: #53544e; background: #ffffff; border-color: #dfded8; }
-html[data-learner-theme="light"] .lev-mobile-detail .option-label span::before { border-color: #bdbcb4; }
-html[data-learner-theme="light"] .lev-mobile-detail .option-label:hover span { color: #282924; background: rgba(29,111,184,.05); border-color: rgba(29,111,184,.40); }
-html[data-learner-theme="light"] .lev-mobile-detail .option-label:hover span::before { border-color: #1d6fb8; }
-html[data-learner-theme="light"] .lev-mobile-detail .option-label input[type="radio"]:checked + span { color: #282924; background: rgba(29,111,184,.08); border-color: #1d6fb8; }
-html[data-learner-theme="light"] .lev-mobile-detail .option-label input[type="radio"]:checked + span::before {
-    background: #1d6fb8;
-    border-color: #1d6fb8;
-    box-shadow: 0 0 0 3px rgba(29,111,184,.15);
+/* ── 769px to 899px: the split layout starts at 900px, so until then the phone list and the open evaluation are what show.
+      Their colours are the --qm-* tokens (set for dark in the quiet list above), so light mode is just the light set of tokens. ── */
+html[data-learner-theme="light"] .lev-mobile-head,
+html[data-learner-theme="light"] .lev-mobile-search-wrap,
+html[data-learner-theme="light"] .lev-mobile-chips,
+html[data-learner-theme="light"] .lev-mobile-list,
+html[data-learner-theme="light"] .lev-mobile-detail {
+    --qm-title: #282924;
+    --qm-body: #4a4b44;
+    --qm-muted: #73746d;
+    --qm-faint: #a3a39a;
+    --qm-line: rgba(40,41,36,.09);
+    --qm-press: rgba(38,39,35,.04);
+    --qm-surf: #f1efe8;
+    --qm-field: #faf9f5;
+    --qm-ring: #a3a39a;
+    --qm-soon: #b85f12;
+    --qm-ok: #15803d;
+    --qm-chipline: rgba(40,41,36,.16);
+    --qm-chipon: #252624;
+    --qm-chipon-text: #faf9f5;
 }
-html[data-learner-theme="light"] .lev-mobile-detail .lev-comments-field label { color: #282924; }
-html[data-learner-theme="light"] .lev-mobile-detail .lev-comments-field textarea { color: #282924; background: #faf9f5; border-color: #d0cfc8; }
-html[data-learner-theme="light"] .lev-mobile-detail .lev-comments-field textarea:focus { outline: none; border-color: #187a72; box-shadow: 0 0 0 3px rgba(24,122,114,.14); }
-html[data-learner-theme="light"] .lev-mobile-detail .eval-submit-btn { background: #252624; color: #ffffff; }
-html[data-learner-theme="light"] .lev-mobile-detail .eval-submit-btn:hover { background: #3a3b37; }
-
-/* completed state (phone-style detail) */
-html[data-learner-theme="light"] .lev-completed-title { color: #15803d; }
-html[data-learner-theme="light"] .lev-completed-copy { color: #73746d; }
-html[data-learner-theme="light"] .lev-completed-state [stroke="#22c55e" i] { stroke: #16a34a; }
 
 /* fetch error state */
 html[data-learner-theme="light"] .eval-error-state { color: #bd4a43; }
@@ -1085,82 +1177,32 @@ html[data-learner-theme="light"] .eval-error-state { color: #bd4a43; }
    Phones only (max-width: 768px), switched on by <html data-learner-mobile-theme="light"> (mobile_theme.js).
    The page shell (page background, header, bottom nav, profile dropdown) is in mobile_light.css, which finds this page
    by its markup: .lev-mobile-list (the list and its empty states), .lev-mobile-detail (an open evaluation, its form
-   and the completed state) and .eval-error-state (the fetch error). This block colours what is inside the page: the
-   search box, the teacher folders, the evaluation rows, the detail header, the description and statement cards,
-   the answer options, the comments box, the Submit button, the completed state and the error. Same palette as the
-   desktop light block above and the other phone pages (Resources, Announcements, Assignments, Quiz).
-   Dark mode and desktop are untouched, and evaluations.js needs no change (the blue and green icon strokes it sets
-   are darkened here, the same way the 769px to 899px block does it).
+   and the completed state) and .eval-error-state (the fetch error). Inside the page every colour is a --qm-* token
+   (set for dark in the quiet list above), so light mode is the light set of tokens, the same as Assignments and Quizzes.
+   Dark mode and desktop are untouched, and evaluations.js needs no change.
    To remove it, delete this block, the three .lev-/.eval- markers in mobile_light.css and the same three in PAGE in mobile_theme.js. */
 @media (max-width: 768px) {
 
-/* search box */
-html[data-learner-mobile-theme="light"] .lev-mobile-search-wrap svg { color: #282924; }
-html[data-learner-mobile-theme="light"] .lev-mobile-search { background: #ffffff; border: 1px solid #dfded8; color: #282924; }
-html[data-learner-mobile-theme="light"] .lev-mobile-search:focus { border-color: #bdbcb4; }
-html[data-learner-mobile-theme="light"] .lev-mobile-search::placeholder { color: #8b8b83; }
-
-/* teacher folders */
-html[data-learner-mobile-theme="light"] .lev-mobile-folder-header { border-bottom-color: #dfded8; }
-html[data-learner-mobile-theme="light"] .lev-mobile-folder-header:active,
-html[data-learner-mobile-theme="light"] .lev-mobile-folder-header:not(.lev-mobile-folder-header--collapsed) { background: rgba(38,39,35,.04); }
-html[data-learner-mobile-theme="light"] .lev-mobile-folder-name { color: #282924; }
-html[data-learner-mobile-theme="light"] .lev-mobile-folder-count { color: #73746d; background: rgba(38,39,35,.06); }
-html[data-learner-mobile-theme="light"] .lev-mobile-folder-chevron,
-html[data-learner-mobile-theme="light"] .lev-mobile-row-chevron { color: #73746d; }
-
-/* evaluation rows */
-html[data-learner-mobile-theme="light"] .lev-mobile-row-title { color: #282924; }
-html[data-learner-mobile-theme="light"] .lev-mobile-row-meta { color: #73746d; }
-html[data-learner-mobile-theme="light"] .lev-mobile-row::after { background: #ebeae5; }
-html[data-learner-mobile-theme="light"] .lev-mobile-row:active { background: rgba(38,39,35,.04); }
-
-/* the blue accent (#4fa8fd) set as a stroke on the folder, row, empty-state and badge icons becomes a darker blue */
-html[data-learner-mobile-theme="light"] .lev-mobile-list [stroke="#4fa8fd" i],
-html[data-learner-mobile-theme="light"] .lev-mobile-detail [stroke="#4fa8fd" i] { stroke: #1d6fb8; }
-
-/* empty states ("No evaluations yet", "Not enrolled yet") */
-html[data-learner-mobile-theme="light"] .lev-mobile-empty { color: #8b8b83; }
-html[data-learner-mobile-theme="light"] .lev-mobile-empty-title { color: #282924; }
-html[data-learner-mobile-theme="light"] .lev-mobile-empty-body { color: #73746d; }
-
-/* an open evaluation: badge, author row and title */
-html[data-learner-mobile-theme="light"] .lev-mobile-detail-badge,
-html[data-learner-mobile-theme="light"] .lev-mobile-detail-avatar { color: #1d6fb8; border-color: rgba(29,111,184,.35); background: rgba(29,111,184,.08); }
-html[data-learner-mobile-theme="light"] .lev-mobile-detail-role-badge { color: #1d6fb8; }
-html[data-learner-mobile-theme="light"] .lev-mobile-detail-role-sep { color: #8b8b83; }
-html[data-learner-mobile-theme="light"] .lev-mobile-detail-title { color: #282924; border-bottom-color: #dfded8; }
-html[data-learner-mobile-theme="light"] .lev-mobile-detail-author-name { color: #282924; }
-html[data-learner-mobile-theme="light"] .lev-mobile-detail-author-role,
-html[data-learner-mobile-theme="light"] .lev-mobile-detail-posted { color: #73746d; }
-
-/* description and the statements */
-html[data-learner-mobile-theme="light"] .lev-mobile-detail .eval-description { background: rgba(38,39,35,.03); border-left-color: #1d6fb8; color: #53544e; }
-html[data-learner-mobile-theme="light"] .lev-mobile-detail .question-text { color: #282924; border-left-color: #1d6fb8; }
-
-/* answer options: white rows, a grey ring, and the darker blue when hovered or selected */
-html[data-learner-mobile-theme="light"] .lev-mobile-detail .option-label span { color: #53544e; background: #ffffff; border-color: #dfded8; }
-html[data-learner-mobile-theme="light"] .lev-mobile-detail .option-label span::before { border-color: #bdbcb4; }
-html[data-learner-mobile-theme="light"] .lev-mobile-detail .option-label:hover span { color: #282924; background: rgba(29,111,184,.05); border-color: rgba(29,111,184,.40); }
-html[data-learner-mobile-theme="light"] .lev-mobile-detail .option-label:hover span::before { border-color: #1d6fb8; }
-html[data-learner-mobile-theme="light"] .lev-mobile-detail .option-label input[type="radio"]:checked + span { color: #282924; background: rgba(29,111,184,.08); border-color: #1d6fb8; }
-html[data-learner-mobile-theme="light"] .lev-mobile-detail .option-label input[type="radio"]:checked + span::before {
-    background: #1d6fb8;
-    border-color: #1d6fb8;
-    box-shadow: 0 0 0 3px rgba(29,111,184,.15);
+html[data-learner-mobile-theme="light"] .lev-mobile-head,
+html[data-learner-mobile-theme="light"] .lev-mobile-search-wrap,
+html[data-learner-mobile-theme="light"] .lev-mobile-chips,
+html[data-learner-mobile-theme="light"] .lev-mobile-list,
+html[data-learner-mobile-theme="light"] .lev-mobile-detail {
+    --qm-title: #282924;
+    --qm-body: #4a4b44;
+    --qm-muted: #73746d;
+    --qm-faint: #a3a39a;
+    --qm-line: rgba(40,41,36,.09);
+    --qm-press: rgba(38,39,35,.04);
+    --qm-surf: #f1efe8;
+    --qm-field: #faf9f5;
+    --qm-ring: #a3a39a;
+    --qm-soon: #b85f12;
+    --qm-ok: #15803d;
+    --qm-chipline: rgba(40,41,36,.16);
+    --qm-chipon: #252624;
+    --qm-chipon-text: #faf9f5;
 }
-
-/* comments box and the Submit button (dark with white text, like the primary buttons on the other pages) */
-html[data-learner-mobile-theme="light"] .lev-mobile-detail .lev-comments-field label { color: #282924; }
-html[data-learner-mobile-theme="light"] .lev-mobile-detail .lev-comments-field textarea { color: #282924; background: #ffffff; border-color: #d0cfc8; }
-html[data-learner-mobile-theme="light"] .lev-mobile-detail .lev-comments-field textarea:focus { outline: none; border-color: #187a72; box-shadow: 0 0 0 3px rgba(24,122,114,.14); }
-html[data-learner-mobile-theme="light"] .lev-mobile-detail .eval-submit-btn { background: #252624; color: #ffffff; }
-html[data-learner-mobile-theme="light"] .lev-mobile-detail .eval-submit-btn:hover { background: #3a3b37; }
-
-/* completed state */
-html[data-learner-mobile-theme="light"] .lev-completed-title { color: #15803d; }
-html[data-learner-mobile-theme="light"] .lev-completed-copy { color: #73746d; }
-html[data-learner-mobile-theme="light"] .lev-completed-state [stroke="#22c55e" i] { stroke: #16a34a; }
 
 /* fetch error ("Error loading evaluations.") */
 html[data-learner-mobile-theme="light"] .eval-error-state { color: #bd4a43; }

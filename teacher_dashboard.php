@@ -76,6 +76,14 @@ foreach (array_slice($schoolNameWords, 0, 2) as $word) {
     $schoolInitials .= strtoupper(substr($word, 0, 1));
 }
 if ($schoolInitials === '') { $schoolInitials = '??'; }
+
+// The current academic year, shown under the school name in the menu (same query as learner_dashboard.php).
+// Empty when no year is marked as current: then the line is left out.
+$teacherYearName = '';
+$teacherYearResult = $conn->query("SELECT name FROM academic_years WHERE is_current = 1 LIMIT 1");
+if ($teacherYearResult && ($teacherYearRow = $teacherYearResult->fetch_assoc())) {
+    $teacherYearName = trim((string)($teacherYearRow['name'] ?? ''));
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -102,29 +110,30 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
     </style>
     <link rel="stylesheet" href="assets/css/teacher/dashboard.css?v=5.3">
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
-    <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=7.3">
-    <link rel="stylesheet" href="assets/css/teacher/assignments.css?v=3.4">
+    <link rel="stylesheet" href="assets/css/teacher/announcements.css?v=7.5">
+    <link rel="stylesheet" href="assets/css/teacher/assignments.css?v=3.5">
     <link rel="stylesheet" href="assets/css/teacher/resources.css?v=2.5">
-    <link rel="stylesheet" href="assets/css/teacher/sbo.css?v=2.3">
-    <link rel="stylesheet" href="assets/css/teacher/evaluations.css?v=3.1">
+    <link rel="stylesheet" href="assets/css/teacher/sbo.css?v=2.4">
+    <link rel="stylesheet" href="assets/css/teacher/evaluations.css?v=3.2">
     <link rel="stylesheet" href="assets/css/teacher/grades.css?v=3.2">
-    <link rel="stylesheet" href="assets/css/teacher/teacher_calendar.css?v=1.3">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_detail.css?v=1.2">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_calendar.css?v=1.4">
     <title>Dashboard - <?= htmlspecialchars($schoolName) ?></title>
     <link rel="manifest" href="/manifest.php?v=1.2">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600&family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Geist:wght@400..600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=14.0">
-    <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_menu.css?v=2.4">
-    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_menu.css?v=1.5">
-    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_settings.css?v=1.3">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_dashboard.css?v=14.3">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_menu.css?v=2.6">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_menu.css?v=1.8">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_settings.css?v=1.5">
     <link rel="stylesheet" href="assets/css/shared/pwa_prompts.css?v=1.0">
     <link rel="stylesheet" href="assets/css/shared/pull_to_refresh.css?v=1.0">
     <link rel="stylesheet" href="assets/css/shared/net_status.css?v=1.0">
     <link rel="stylesheet" href="assets/css/shared/back_button.css?v=1.0">
     <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_settings.css?v=1.4">
     <link rel="stylesheet" href="assets/css/teacher/teacher_desktop_light_mode.css?v=1.8">
-    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_light.css?v=1.5">
+    <link rel="stylesheet" href="assets/css/teacher/teacher_mobile_light.css?v=1.8">
     <link rel="stylesheet" href="assets/css/splash_light.css?v=<?= (int) @filemtime(__DIR__ . '/assets/css/splash_light.css') ?>">
     <script>
     // Desktop sidebar: restore the saved collapsed state BEFORE first paint (no flash).
@@ -151,7 +160,7 @@ if ($schoolInitials === '') { $schoolInitials = '??'; }
     </script>
     <!-- Phone light / dark: sets <html data-teacher-mobile-theme> and the status bar colour before first paint
          (see teacher_mobile_theme.js). Needs the theme-color <meta> tag above. -->
-    <script src="assets/js/teacher/teacher_mobile_theme.js?v=1.3"></script>
+    <script src="assets/js/teacher/teacher_mobile_theme.js?v=1.4"></script>
 <script>
 function getCsrfToken() {
     const meta = document.querySelector('meta[name="csrf-token"]');
@@ -165,7 +174,9 @@ function getCsrfToken() {
      from learner_dashboard.php. Deliberately uses the SAME colours as the
      learner splash: index.php shows one splash to every role before it
      knows who is logging in, so a role-specific colour here would create
-     the very flash this is meant to remove. -->
+     the very flash this is meant to remove. The one thing that does follow
+     the teacher is the phone light / dark choice: index.php reads the same
+     saved choice for a signed-in teacher, so both pages are light together. -->
 <style id="dash-splash-bg-override">
     /* Match body to the splash so the dashboard's own background never
        shows through around/under it during paint or fade-out. Removed
@@ -177,6 +188,10 @@ function getCsrfToken() {
     /* Desktop light mode (769px and up): the splash is light, see assets/css/splash_light.css */
     @media (min-width: 769px) {
         html[data-teacher-theme="light"] body { background-color: #faf9f5 !important; }
+    }
+    /* Phone light mode (768px and below): the splash is light too, see assets/css/splash_light.css */
+    @media (max-width: 768px) {
+        html[data-teacher-mobile-theme="light"] body { background-color: #faf9f5 !important; }
     }
 </style>
 <div id="dash-splash">
@@ -235,7 +250,8 @@ function getCsrfToken() {
     // the browser bar the same colour as the splash for the duration.
     window.suppressInitialLoader = true;
     root.classList.add('splash-handoff');
-    if (isMobile && themeMeta) themeMeta.setAttribute('content', '#20201f');
+    // (paper, the splash's colour, when the phone is in light mode, so the bar is not a dark strip above a light splash)
+    if (isMobile && themeMeta) themeMeta.setAttribute('content', root.getAttribute('data-teacher-mobile-theme') === 'light' ? '#faf9f5' : '#20201f');
 
     var MIN_SPLASH_MS = 1300;
     var MAX_SPLASH_MS = 6000;
@@ -293,7 +309,7 @@ if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.wasLockedAtLoad
         <?php endif; ?>
         <div class="dm-brand-text">
             <span class="dm-brand-name" title="<?= htmlspecialchars($schoolName) ?>"><?= htmlspecialchars($schoolName) ?></span>
-            <span class="dm-brand-sub">Teacher</span>
+            <?php if ($teacherYearName !== ''): ?><span class="dm-brand-sub"><?= htmlspecialchars($teacherYearName) ?></span><?php endif; ?>
         </div>
         <button type="button" class="dm-toggle" id="dmToggle" aria-controls="dmSidebar" aria-expanded="true" aria-label="Collapse sidebar"></button>
     </div>
@@ -326,6 +342,7 @@ if (window.iSkoolOrientationLock && window.iSkoolOrientationLock.wasLockedAtLoad
     </div>
 
     <div class="teacher-name"><?= htmlspecialchars($teacherFullName) ?></div>
+    <div class="teacher-role">Teacher</div>
     <div class="teacher-email"><?= htmlspecialchars($teacherEmail) ?></div>
     </div>
 
@@ -1600,24 +1617,25 @@ document.addEventListener('DOMContentLoaded', function () {
 
 <script src="assets/js/teacher/dashboard.js?v=13.8"></script>
 <script src="assets/js/teacher/class-picker.js?v=1.1"></script>
-<script src="assets/js/teacher/quizzes.js?v=8.6"></script>
-<script src="assets/js/teacher/announcements.js?v=6.2"></script>
-<script src="assets/js/teacher/evaluations.js?v=5.3"></script>
+<script src="assets/js/teacher/teacher_detail.js?v=1.1"></script>
+<script src="assets/js/teacher/quizzes.js?v=8.7"></script>
+<script src="assets/js/teacher/announcements.js?v=6.4"></script>
+<script src="assets/js/teacher/evaluations.js?v=5.4"></script>
 <script src="assets/js/teacher/resources.js?v=4.9"></script>
-<script src="assets/js/teacher/grades.js?v=5.4"></script>
-<script src="assets/js/teacher/assignments.js?v=5.5"></script>
-<script src="assets/js/teacher/sbo.js?v=5.1"></script>
+<script src="assets/js/teacher/grades.js?v=5.5"></script>
+<script src="assets/js/teacher/assignments.js?v=5.6"></script>
+<script src="assets/js/teacher/sbo.js?v=5.2"></script>
 <script src="assets/js/teacher/analytics.js?v=4.3"></script>
 <script src="assets/js/teacher/teacher_calendar.js?v=2.0"></script>
-<script src="assets/js/teacher/teacher_desktop_menu.js?v=1.0"></script>
-<script src="assets/js/teacher/teacher_mobile_menu.js?v=1.0"></script>
+<script src="assets/js/teacher/teacher_desktop_menu.js?v=1.1"></script>
+<script src="assets/js/teacher/teacher_mobile_menu.js?v=1.1"></script>
 <script>window.ISKOOL_TEACHER = <?= json_encode(['name'=>$teacherFullName,'email'=>$teacherEmail,'initials'=>$teacherInitials], JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?>;</script>
 <script src="assets/js/teacher/teacher_mobile_settings.js?v=1.1"></script>
 <script src="assets/js/teacher/teacher_desktop_settings.js?v=1.4"></script>
 <script src="assets/js/shared/pwa_prompts.js?v=1.0"></script>
 <script src="assets/js/shared/pull_to_refresh.js?v=1.0"></script>
 <script src="assets/js/teacher/teacher_pull_to_refresh.js?v=1.0"></script>
-<script src="assets/js/shared/net_status.js?v=1.0"></script>
+<script src="assets/js/shared/net_status.js?v=1.1"></script>
 <script src="assets/js/teacher/teacher_net_status.js?v=1.0"></script>
 <script src="assets/js/shared/back_button.js?v=1.0"></script>
 <script src="assets/js/teacher/teacher_back_button.js?v=1.0"></script>

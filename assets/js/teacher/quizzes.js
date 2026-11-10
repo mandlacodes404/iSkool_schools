@@ -1097,6 +1097,36 @@ function renderTeacherQuizzes(data) {
 // only the container changed (a full detail page instead of an inline
 // expand), not the action handlers.
 // ─────────────────────────────────────────────
+// Pill colour for a quiz status: Open is orange, Scheduled blue, Closed grey (the colours the list already uses)
+function qzStatusTone(status) {
+    return status === 'Open' ? 'orange' : status === 'Scheduled' ? 'blue' : 'grey';
+}
+
+// After the teacher publishes marks or closes/reopens a quiz on the phone detail page, patch the elements that
+// changed in place (the page stays where it is). `patch` is { published, status }; anything left out is read from
+// the cached quiz.
+window.qzMobileSync = function(quizId, patch) {
+    const T = window.tdUi;
+    const q = (window._allQuizzesFlat || []).find(item => String(item.id) === String(quizId)) || {};
+    const published = patch && patch.published !== undefined ? !!patch.published : Number(q.publish_marks) === 1;
+    const status = (patch && patch.status) || q.status || '';
+    const closed = status === 'Closed';
+    const view = Object.assign({}, q, { status: status, publish_marks: published ? 1 : 0 });
+
+    const set = (elId, fn) => { const el = document.getElementById(elId); if (el) fn(el); };
+    set(`qz-badge-${quizId}`, el => { el.textContent = status; el.className = `td-pill td-pill--${qzStatusTone(status)}`; });
+    set(`publish-label-${quizId}`, el => { el.textContent = published ? 'Published' : 'Hidden'; el.className = `td-pill td-pill--${published ? 'green' : 'grey'}`; });
+    set(`publish-copy-${quizId}`, el => { el.textContent = window.qz2MarksCopy(view); });
+    set(`publish-btn-${quizId}`, el => { el.textContent = published ? 'Unpublish marks' : 'Publish marks'; });
+    set(`status-title-${quizId}`, el => { el.textContent = closed ? 'Reopen quiz' : 'Close quiz'; });
+    set(`status-copy-${quizId}`, el => { el.textContent = window.qz2AccessCopy(view); });
+    set(`status-btn-${quizId}`, el => {
+        el.dataset.quizStatus = status;
+        const svg = el.querySelector('svg');
+        if (svg && T) svg.innerHTML = T.iconInner(closed ? 'unlock' : 'lock');
+    });
+};
+
 window.openMobileTeacherQuiz = function(flatIndex) {
     if (window.innerWidth > 899) return;
 
@@ -1120,137 +1150,101 @@ window.openMobileTeacherQuiz = function(flatIndex) {
         color: '#fdd663'
     });
 
-    const statusColor = quiz.status === 'Open' ? '#f28c38'
-        : quiz.status === 'Scheduled' ? '#1e90ff' : '#6b7280';
-    const publishLabel   = quiz.publish_marks ? 'Published' : 'Hidden';
-    const publishBtnText = quiz.publish_marks ? 'Unpublish Marks' : 'Publish Marks';
-    const statusBtnClass = quiz.status === 'Closed' ? 'reopen' : 'close';
-    const statusBtnText  = quiz.status === 'Closed' ? 'Reopen Quiz' : 'Close Quiz';
+    const T = window.tdUi;
+    const id = Number(quiz.id);
+    const published = Number(quiz.publish_marks) === 1;
+    const closed = quiz.status === 'Closed';
 
     // Edit Quiz / View Results stay excluded here too — they were already
     // desktop-only on mobile before this rebuild (qz-desktop-only-btn),
     // so this keeps that same existing behaviour, not a new restriction.
+    // The look is teacher_detail.css. The ids below (publish-btn-, publish-label-, status-btn-, ...) are the ones
+    // togglePublishMarks / toggleQuizStatus find, and qzMobileSync() patches the same elements after a change.
     apiArea.innerHTML = `
-        <article class="qz-mobile-detail teacher-quiz-card" data-quiz-id="${quiz.id}">
-            <div class="qz-mobile-detail-header">
-                <div class="qz-mobile-detail-title">${escapeHtml(quiz.title)}</div>
-                <span class="teacher-quiz-status-badge"
-                    style="background:${statusColor}20;color:${statusColor};border:1px solid ${statusColor}50;">
-                    ${escapeHtml(quiz.status)}
-                </span>
+        <article class="qz-mobile-detail td-detail td-detail--quiz" data-quiz-id="${id}">
+            <div class="td-top">
+                <span class="td-eyebrow">Quiz</span>
+                ${T.pill(quiz.status, qzStatusTone(quiz.status), `id="qz-badge-${id}"`)}
             </div>
-            <div class="qz-mobile-detail-meta">
-                <span>${escapeHtml(quiz.class_name)}</span>
-                <span>&bull;</span>
-                <span>${escapeHtml(quiz.duration)} min</span>
-                <span>&bull;</span>
-                <span>${escapeHtml(quiz.start_time)}</span>
+            <div class="td-title">${T.esc(quiz.title)}</div>
+
+            <div class="td-panel td-gap">
+                <div class="td-row td-kv"><span>Class</span><b>${T.esc(quiz.class_name)}</b></div>
+                <div class="td-row td-kv"><span>Duration</span><b>${T.esc(quiz.duration)} min</b></div>
+                <div class="td-row td-kv"><span>Starts</span><b>${T.esc(quiz.start_time)}</b></div>
             </div>
 
-            <div class="teacher-quiz-detail-row" style="margin-top:18px;">
-                <span class="teacher-quiz-detail-label">Marks</span>
-                <span class="teacher-quiz-publish-status ${quiz.publish_marks ? 'published' : 'hidden'}"
-                    id="publish-label-${quiz.id}">
-                    ${publishLabel}
-                </span>
+            <div class="td-gt">Results</div>
+            <div class="td-panel">
+                <div class="td-row">
+                    <div class="td-main"><b>Marks</b><span id="publish-copy-${id}">${T.esc(window.qz2MarksCopy(quiz))}</span></div>
+                    ${T.pill(published ? 'Published' : 'Hidden', published ? 'green' : 'grey', `id="publish-label-${id}"`)}
+                </div>
             </div>
+            <button type="button" class="td-btn" id="publish-btn-${id}" onclick="togglePublishMarks(${id})">${published ? 'Unpublish marks' : 'Publish marks'}</button>
 
-            <div class="teacher-quiz-actions">
-                <button class="teacher-quiz-action-btn publish"
-                    id="publish-btn-${quiz.id}"
-                    onclick="togglePublishMarks(${quiz.id})">
-                    ${publishBtnText}
-                </button>
-                <button class="teacher-quiz-action-btn ${statusBtnClass}"
-                    id="status-btn-${quiz.id}"
-                    data-quiz-id="${quiz.id}" data-quiz-status="${escapeHtml(quiz.status)}"
+            <div class="td-gt">Manage</div>
+            <div class="td-panel">
+                <button type="button" class="td-row td-row--icon" id="status-btn-${id}"
+                    data-quiz-id="${id}" data-quiz-status="${T.esc(quiz.status)}"
                     onclick="toggleQuizStatusFromElement(this)">
-                    ${statusBtnText}
+                    ${T.icon(closed ? 'unlock' : 'lock')}
+                    <div class="td-main"><b id="status-title-${id}">${closed ? 'Reopen quiz' : 'Close quiz'}</b><span id="status-copy-${id}">${T.esc(window.qz2AccessCopy(quiz))}</span></div>
+                    ${T.icon('chev', 'td-chev', 2)}
                 </button>
-                <button class="teacher-quiz-action-btn delete"
-                    data-action="delete-quiz"
-                    data-quiz-id="${quiz.id}" data-quiz-title="${escapeHtml(quiz.title)}">
-                    Delete Quiz
-                </button>
-                <button class="teacher-quiz-action-btn integrity"
-                    data-quiz-id="${quiz.id}" data-quiz-title="${escapeHtml(quiz.title)}"
+                <button type="button" class="td-row td-row--icon"
+                    data-quiz-id="${id}" data-quiz-title="${T.esc(quiz.title)}"
                     onclick="openIntegrityModalFromElement(this)">
-                    <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                    </svg>
-                    Integrity Report
+                    ${T.icon('shield')}
+                    <div class="td-main"><b>Integrity report</b><span>See where learners left the quiz.</span></div>
+                    ${T.icon('chev', 'td-chev', 2)}
                 </button>
             </div>
-        </article>
 
-        <div id="integrityModal" class="teacher-modal-overlay" style="display:none;">
-            <div class="teacher-modal-box" style="max-width:640px;max-height:85vh;overflow-y:auto;">
-                <div class="teacher-modal-header">
-                    <span id="integrityModalTitle">Integrity Report</span>
-                    <button onclick="closeIntegrityModal()" class="teacher-modal-close">&times;</button>
-                </div>
-                <div class="teacher-modal-body" id="integrityModalBody">
-                    <div id="integrityWarning">
-                        <div style="text-align:center;margin-bottom:24px;">
-    <svg viewBox="0 0 24 24" width="44" height="44" stroke="#4fd1c5" stroke-width="1.5" fill="none" style="margin-bottom:12px;">
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-    </svg>
-    <h3 style="color:#e2e8f0;margin:0 0 6px;letter-spacing:2px;font-size:16px;">INTEGRITY MONITOR</h3>
-    <p style="color:var(--dm-ac, #4fd1c5);font-size:12px;font-weight:700;letter-spacing:1px;margin:0;">POWERED BY AI INVIGILATOR</p>
-</div>
+            <div class="td-panel td-danger-gap">
+                <button type="button" class="td-row td-row--danger"
+                    data-action="delete-quiz" data-quiz-id="${id}" data-quiz-title="${T.esc(quiz.title)}">
+                    ${T.icon('trash')}
+                    <div class="td-main"><b>Delete quiz</b></div>
+                </button>
+            </div>
 
-<p style="line-height:1.8;color:#cbd5e0;font-size:14px;margin-bottom:20px;">
-    Every quiz session is recorded in real time. When a learner leaves the quiz environment — 
-    whether by switching tabs, minimizing the browser, or navigating away — the 
-    <strong style="color:#e2e8f0;">exact question they were on is logged and timestamped.</strong>
-</p>
-
-<div style="background:var(--dm-ac-bg-soft, rgba(79,209,197,0.05));border:1px solid var(--dm-ac-line, rgba(79,209,197,0.2));border-radius:12px;padding:16px;margin-bottom:20px;">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
-        <svg viewBox="0 0 24 24" width="16" height="16" stroke="#4fd1c5" stroke-width="2" fill="none">
-            <polyline points="20 6 9 17 4 12"></polyline>
-        </svg>
-        <span style="color:var(--dm-ac, #4fd1c5);font-size:12px;font-weight:800;letter-spacing:1px;">VERIFIED & TESTED</span>
-    </div>
-    <p style="margin:0;font-size:13px;color:#cbd5e0;line-height:1.7;">
-        This report shows you <strong style="color:#e2e8f0;">precisely where interruptions happened, 
-        question by question.</strong> No guesswork. No approximations. 
-        Each finding is backed by a timestamped session log.
-    </p>
-</div>
-
-<button class="teacher-modal-submit" style="width:100%;padding:15px;font-size:15px;letter-spacing:1px;"
-    id="decodeBtn" onclick="decodeIntegrity()">
-    VIEW SESSION REPORT
-</button>
+            <div id="integrityModal" class="td-overlay" style="display:none;" onclick="if(event.target===this){closeIntegrityModal();}">
+                <section class="td-sheet" role="dialog" aria-modal="true" aria-labelledby="integrityHeading">
+                    <div class="td-grab"></div>
+                    <div class="td-sheet-head">
+                        <div><h1 id="integrityHeading">Integrity report</h1><p id="integrityModalTitle"></p></div>
+                        <button type="button" class="td-x" onclick="closeIntegrityModal()" aria-label="Close">${T.icon('x', '', 2)}</button>
                     </div>
-                    <div id="integrityResults" style="display:none;"></div>
-                </div>
-                <div class="teacher-modal-footer" id="integrityFooter" style="display:none;">
-                    <button onclick="closeIntegrityModal()" class="teacher-modal-cancel">Dismiss</button>
-                </div>
+                    <div id="integrityBody">
+                        <div id="integrityWarning">
+                            <div class="td-ihero"><div class="td-tile">${T.icon('shield')}</div><div><b>Integrity monitor</b><span>Powered by AI invigilator</span></div></div>
+                            <p class="td-ptext">Every quiz session is recorded in real time. When a learner leaves the quiz environment, whether by switching tabs, minimising the browser or navigating away, <b>the exact question they were on is logged and timestamped.</b></p>
+                            <div class="td-verified">
+                                <h2>${T.icon('check', '', 2.2)}<span>Verified &amp; tested</span></h2>
+                                <p>This report shows you <b>precisely where interruptions happened, question by question.</b> No guesswork, no approximations. Each finding is backed by a timestamped session log.</p>
+                            </div>
+                            <button type="button" class="td-btn" id="decodeBtn" onclick="decodeIntegrity()">View session report</button>
+                        </div>
+                        <div id="integrityResults" style="display:none;"></div>
+                        <div id="integrityFooter" style="display:none;">
+                            <button type="button" class="td-btn td-btn--soft" onclick="closeIntegrityModal()">Dismiss</button>
+                        </div>
+                    </div>
+                </section>
             </div>
-        </div>
-        <div id="deleteQuizModal" class="teacher-modal-overlay" style="display:none;">
-            <div class="teacher-modal-box" style="max-width:420px;">
-                <div class="teacher-modal-header">
-                    <span>Delete Quiz</span>
-                    <button data-action="close-delete-quiz" class="teacher-modal-close">&times;</button>
-                </div>
-                <div class="teacher-modal-body">
-                    <p style="color:#cbd5e0;line-height:1.6;margin-top:0;">
-                        Delete <strong id="deleteQuizTitle" style="color:#e2e8f0;"></strong>?
-                    </p>
-                    <p style="color:#f85149;font-size:13px;margin-bottom:0;">This action cannot be undone.</p>
-                    <div id="deleteQuizError" style="color:#ff5555;font-size:14px;margin-top:12px;display:none;"></div>
-                </div>
-                <div class="teacher-modal-footer">
-                    <button data-action="close-delete-quiz" class="teacher-modal-cancel">Cancel</button>
-                    <button data-action="confirm-delete-quiz" class="teacher-modal-submit"
-                        style="background:#f85149;color:#fff;">Delete Quiz</button>
-                </div>
-            </div>
-        </div>`;
+
+            ${T.confirmSheet({
+                id: 'deleteQuizModal',
+                closeCall: 'closeDeleteQuizModal()',
+                title: 'Delete quiz',
+                body: `Delete <b id="deleteQuizTitle"></b>? This can't be undone.`,
+                errorId: 'deleteQuizError',
+                cancelAttrs: 'data-action="close-delete-quiz"',
+                confirmAttrs: 'data-action="confirm-delete-quiz"',
+                confirmLabel: 'Delete quiz'
+            })}
+        </article>`;
 
     apiArea.scrollTop = 0;
 };
@@ -1613,12 +1607,8 @@ window.togglePublishMarks = async function(quizId) {
                 if (q) window.qz2UpdateRail(q);
                 window.qz2Toast(published ? 'Marks published' : 'Marks hidden');
             } else {
-                const label = document.getElementById(`publish-label-${quizId}`);
-                if (label) {
-                    label.textContent = published ? 'Published' : 'Hidden';
-                    label.className   = `teacher-quiz-publish-status ${published ? 'published' : 'hidden'}`;
-                }
-                if (actionButton) actionButton.textContent = published ? 'Unpublish Marks' : 'Publish Marks';
+                // The phone detail page patches its own pill, copy and button (qzMobileSync, above)
+                window.qzMobileSync(quizId, { published });
             }
             window.teacherQuizzesCache = null;
         } else if (isDesktop) {
@@ -1659,10 +1649,6 @@ window.toggleQuizStatus = async function(quizId, currentStatus) {
 
         if (data.success) {
             const updatedStatus = data.newStatus || data.data?.newStatus || newStatus;
-            const statusColor = updatedStatus === 'Open'
-                ? '#f28c38' : updatedStatus === 'Scheduled'
-                ? '#1e90ff' : '#6b7280';
-
             // Update cached quiz data
             const q = (window._allQuizzesFlat || []).find(q => q.id == quizId);
             if (q) q.status = updatedStatus;
@@ -1673,21 +1659,7 @@ window.toggleQuizStatus = async function(quizId, currentStatus) {
                 }
                 window.qz2Toast(updatedStatus === 'Closed' ? 'Quiz closed' : 'Quiz reopened');
             } else {
-                const badge = document.querySelector(
-                    `.teacher-quiz-card[data-quiz-id="${quizId}"] .teacher-quiz-status-badge`
-                );
-                if (badge) {
-                    badge.textContent   = updatedStatus;
-                    badge.style.color   = statusColor;
-                    badge.style.background = `${statusColor}20`;
-                    badge.style.border  = `1px solid ${statusColor}50`;
-                }
-                if (actionButton) {
-                    actionButton.textContent = updatedStatus === 'Closed' ? 'Reopen Quiz' : 'Close Quiz';
-                    actionButton.className   = `teacher-quiz-action-btn ${updatedStatus === 'Closed' ? 'reopen' : 'close'}`;
-                    actionButton.dataset.quizStatus = updatedStatus;
-                    actionButton.onclick = () => toggleQuizStatus(quizId, updatedStatus);
-                }
+                window.qzMobileSync(quizId, { status: updatedStatus });
             }
             window.teacherQuizzesCache = null;
         } else if (isDesktop) {
@@ -3580,7 +3552,9 @@ let activeIntegrityQuizId = null;
 window.openIntegrityModal = function(quizId, quizTitle) {
     activeIntegrityQuizId = quizId;
 
-    document.getElementById('integrityModalTitle').textContent = `Integrity: ${quizTitle}`;
+    // The phone sheet (td-overlay) has "Integrity report" as its heading and the quiz title under it
+    const sheet = document.getElementById('integrityModal').classList.contains('td-overlay');
+    document.getElementById('integrityModalTitle').textContent = sheet ? quizTitle : `Integrity: ${quizTitle}`;
     document.getElementById('integrityWarning').style.display  = 'block';
     document.getElementById('integrityResults').style.display  = 'none';
     document.getElementById('integrityFooter').style.display   = 'none';
@@ -3595,12 +3569,36 @@ window.closeIntegrityModal = function() {
     document.getElementById('integrityModal').style.display = 'none';
 };
 
+// The phone sheet's results (class-based, teacher_detail.css). decodeIntegrity below draws these when the integrity
+// modal is the phone sheet (class td-overlay), and its original desktop markup otherwise.
+function tdIntegrityState(kind, text) {
+    const T = window.tdUi;
+    if (kind === 'loading') return `<div class="td-state td-state--spin">${T.icon('spinner', '', 2)}Scanning session logs…</div>`;
+    if (kind === 'clear')   return `<div class="td-state">${T.icon('check', '', 2)}${T.esc(text)}</div>`;
+    return `<div class="td-state td-state--bad">${T.esc(text)}</div>`;
+}
+
+function tdIntegrityList(rows) {
+    const T = window.tdUi;
+    return `
+        <div class="td-flag-head"><span>${T.esc(rows.length)} learner${rows.length !== 1 ? 's' : ''} flagged</span>${T.pill('AI invigilator', '')}</div>
+        <div class="td-panel">
+            ${rows.map(row => `
+                <div class="td-row">
+                    <span class="td-flag-dot"></span>
+                    <div class="td-main"><b>${T.esc(row.name)}</b></div>
+                    <span class="td-flag-q">Q ${T.esc(row.problem_questions)}</span>
+                </div>`).join('')}
+        </div>`;
+}
+
 window.decodeIntegrity = async function() {
     const resultsDiv = document.getElementById('integrityResults');
     const warning    = document.getElementById('integrityWarning');
     const footer     = document.getElementById('integrityFooter');
+    const phone      = document.getElementById('integrityModal').classList.contains('td-overlay');
 
-    resultsDiv.innerHTML = `
+    resultsDiv.innerHTML = phone ? tdIntegrityState('loading') : `
         <div style="text-align:center;padding:40px 0;">
             <svg viewBox="0 0 24 24" width="30" height="30" stroke="#4fd1c5" stroke-width="2" fill="none"
                 style="animation:spin 1s linear infinite;margin-bottom:15px;">
@@ -3616,7 +3614,11 @@ window.decodeIntegrity = async function() {
         const res  = await fetch(`api/teacher/fetch_integrity_report.php?quiz_id=${activeIntegrityQuizId}`);
         const data = await res.json();
 
-        if (!data || data.length === 0) {
+        if (phone) {
+            resultsDiv.innerHTML = (!data || data.length === 0)
+                ? tdIntegrityState('clear', 'No irregularities found for this quiz.')
+                : tdIntegrityList(data);
+        } else if (!data || data.length === 0) {
             resultsDiv.innerHTML = `
                 <div style="text-align:center;padding:30px;background:var(--dm-ac-bg-soft, rgba(79,209,197,0.05));border-radius:12px;border:1px var(--dm-ac-dash, dashed) var(--dm-ac, #4fd1c5);">
                     <svg viewBox="0 0 24 24" width="24" height="24" stroke="#4fd1c5" stroke-width="2" fill="none" style="margin-bottom:10px;">
@@ -3653,7 +3655,7 @@ window.decodeIntegrity = async function() {
 
         footer.style.display = 'flex';
     } catch (e) {
-        resultsDiv.innerHTML = `
+        resultsDiv.innerHTML = phone ? tdIntegrityState('bad', 'Could not load the session report. Try again.') : `
             <p style="color:#f85149;text-align:center;padding:20px;">
                 AI Engine failed to retrieve data.
             </p>`;

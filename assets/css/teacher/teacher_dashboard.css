@@ -474,7 +474,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 14px;
+            gap: 3px;
             transform: translateX(-20px);
         }
 
@@ -502,23 +502,23 @@
         }
 
         @media (max-width: 480px) {
-            #dash-splash-logo { gap: 10px; }
+            #dash-splash-logo { gap: 2px; }
             #dash-splash-logo img { width: 68px; height: 68px; }
             #dash-splash-wordmark { font-size: 30px; }
         }
 
         @media (max-width: 360px) {
-            #dash-splash-logo { gap: 8px; }
+            #dash-splash-logo { gap: 2px; }
             #dash-splash-logo img { width: 60px; height: 60px; }
             #dash-splash-wordmark { font-size: 26px; }
         }
 
         /* Same 899px breakpoint index.css uses — background #20201f and
-           the larger footer wordmark on mobile. */
+           the footer wordmark at 125px on mobile (same as index.css). */
         @media (max-width: 899px) {
             #dash-splash { background: #20201f; }
             #dash-splash-brand-wordmark {
-                height: 145px;
+                height: 125px;
                 bottom: -12px;
             }
         }
@@ -887,6 +887,36 @@
             .top-nav-wrapper.header-scrolled:not([data-page-color]) {
                 border-bottom: none !important;
             }
+        }
+
+        /* ── DETAIL-MODE BACK BUTTON — phone only ───────────────────────
+           The back button every teacher detail page shows (#teacherHeaderBackBtn, see configureTeacherHeader in
+           dashboard.js): a thin chevron and the name of the page it goes back to, at 17px regular, like the back
+           button of a normal app.
+           - The tap target is 44px high. The negative top and bottom margin keeps the header's own height at 60px
+             (the avatar sets it), so the content offset (--teacher-top-nav-height) does not change.
+           - The chevron lines up with the page content, 16px from the screen edge: the header pads 20px, the button
+             starts 14px to the left of that, and the icon has empty space around the chevron.
+           - Colour is the page's text colour; light mode paints it in teacher_mobile_light.css. */
+        @media (max-width: 768px) {
+            .top-nav-wrapper #teacherHeaderBackBtn {
+                min-height: 44px;
+                margin: -4px 0 -4px -14px;
+                padding: 0 14px 0 0;
+                gap: 0;
+                color: #f3f2ee;
+                font-family: 'Nunito', sans-serif;
+                -webkit-tap-highlight-color: transparent;
+            }
+            .top-nav-wrapper #teacherHeaderBackBtn svg { width: 30px; height: 30px; stroke-width: 2.1; }
+            .top-nav-wrapper #teacherHeaderBackLabel {
+                max-width: 62vw;
+                margin-left: -2px;
+                font-size: 17px;
+                font-weight: 400;
+                letter-spacing: .1px;
+            }
+            .top-nav-wrapper #teacherHeaderBackBtn:active { opacity: .55; }
         }
 
         /* ── DYNAMIC BOTTOM NAV — mobile only ───────────────────────────

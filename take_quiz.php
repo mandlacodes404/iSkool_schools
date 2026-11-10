@@ -190,6 +190,7 @@ function getCsrfToken() {
 <div class="spinner"></div>
 <form id="autoSubmitGate" action="submit_quiz.php" method="POST" style="display:none">
 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
+<input type="hidden" name="queue_user" value="<?= htmlspecialchars($userEmail) ?>">
 <input type="hidden" name="quiz_id" value="<?= $quizId ?>">
 <input type="hidden" name="start_time" value="<?= $startTime ?>">
 </form></div>

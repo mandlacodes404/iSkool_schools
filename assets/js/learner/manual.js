@@ -164,7 +164,10 @@ window.loadManual = async function(containerId = 'api-content-area') {
         const classData  = classRes.ok ? await classRes.json().catch(() => null) : null;
         if (classData) homeData.myClass = classData;
 
-        const manualStyleHref = 'assets/css/learner/manual.css?v=8.7';
+        // Same URL (and version) as the <link> in learner_dashboard.php, so there is one cached copy of the stylesheet.
+        // This copy is added last and wins ties, so an older version here would paint the old Home over the new one.
+        const pageManualStyle = document.querySelector('link[rel="stylesheet"][href*="learner/manual.css"]');
+        const manualStyleHref = pageManualStyle ? pageManualStyle.getAttribute('href') : 'assets/css/learner/manual.css?v=8.8';
         const existingManualStyle = document.getElementById('manual-style');
         if (existingManualStyle) {
             existingManualStyle.href = manualStyleHref;
@@ -707,15 +710,18 @@ function buildMobileClassCard(myClass) {
 }
 
 // ─────────────────────────────────────────────
-// MOBILE HOME ("Focus" layout)
-// Greeting, one "next up" hero card, the rest of the to-do list, a Mon–Sun
-// week strip, and what teachers posted. The hero only ever shows something the
-// learner has to act on; announcements and resources take it only when nothing
-// is left to do. Phones only: desktop keeps buildDesktopHome.
+// MOBILE HOME (the "quiet" Home)
+// The same look as the Quizzes, Assignments, Announcements and Evaluations lists: a greeting with a counts line, one
+// "Up next" block, then plain lists (a status ring for each thing to do, an icon for each thing from a teacher) and a
+// Mon–Sun week strip. Weights are 400 and 600 only. The "Up next" block only ever shows something the learner has to
+// act on; announcements and resources take it only when nothing is left to do. Phones only: desktop keeps buildDesktopHome.
 // ─────────────────────────────────────────────
 window.LHM = {
     labels: { quiz: 'Quiz', assignment: 'Assignment', evaluation: 'Evaluation', announcement: 'Announcement', resource: 'Resource' },
-    arrow: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+    // the status ring in front of each thing to do (half drawn while a quiz is in progress) and the arrow at the end of a row
+    ring: '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.2" stroke="currentColor" stroke-width="1.7"/></svg>',
+    ringHalf: '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.2" stroke="currentColor" stroke-width="1.7" opacity=".45"/><path d="M12 2.8a9.2 9.2 0 0 1 0 18.4" stroke="currentColor" stroke-width="1.9"/></svg>',
+    chevron: '<svg class="lhx-chev" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>',
 
     time(iso) { const d = window.LHD.date(iso); return d ? d.getTime() : NaN; },
 
@@ -745,23 +751,23 @@ window.LHM = {
         const scope = String(it.scope || '').replace(/[^a-z_]/gi, '');
         return `openLearnerHomeItem('${type}', ${Number(it.id) || 0}, '${scope}')`;
     },
-    initials(name) {
-        const w = String(name || '').trim().split(/\s+/).filter(Boolean);
-        return ((w[0] || '').charAt(0) + (w[1] || '').charAt(0)).toUpperCase();
-    },
     dayLabel(ymd) {
         const d = new Date(String(ymd).slice(0, 10) + 'T00:00:00');
         return isNaN(d) ? '' : `${window.LHD.days[d.getDay()]} ${d.getDate()} ${window.LHD.months[d.getMonth()]}`;
     },
 
-    heroChip(it) {
-        if (it.in_progress) return 'Quiz · In progress';
+    // "due today", "due tomorrow", "due in 4 days"
+    dueWords(n) { return n <= 0 ? 'due today' : n === 1 ? 'due tomorrow' : `due in ${n} days`; },
+
+    // What the "Up next" block says it is, in words: "Quiz in progress", "Assignment due tomorrow"
+    heroState(it) {
+        if (it.in_progress) return 'Quiz in progress';
         if (it.type === 'assignment') {
             const n = window.LHD.daysUntil(it.due_date);
-            return 'Assignment' + (n === null ? '' : ' · ' + (n <= 0 ? 'Due today' : n === 1 ? 'Due tomorrow' : `Due in ${n} days`));
+            return 'Assignment' + (n === null ? '' : ' ' + this.dueWords(n));
         }
-        if (it.type === 'quiz') return 'Quiz · Open';
-        return 'Evaluation · Pending';
+        if (it.type === 'quiz') return 'Quiz open';
+        return 'Evaluation to do';
     },
     heroSub(it) {
         const D = window.LHD, parts = [it.type === 'evaluation' ? it.meta : it.teacher];
@@ -770,51 +776,71 @@ window.LHM = {
         else if (it.type === 'quiz' && it.start_time) parts.push('Started ' + D.short(it.start_time));
         return parts.filter(Boolean).join(' · ');
     },
+    heroCta(it) {
+        if (it.in_progress) return 'Continue';
+        return it.type === 'assignment' ? 'Open assignment' : it.type === 'quiz' ? 'Open quiz' : 'Open evaluation';
+    },
 
+    // The one quiet block for what is next. The whole block opens the item; the button in it is the same tap, drawn.
     hero(it) {
         const e = window.LHD.esc, sub = this.heroSub(it);
         return `<button type="button" class="lhx-hero" onclick="${this.open(it)}">
-            <span class="lhx-chip-hero">${e(this.heroChip(it))}</span>
-            <span class="lhx-hero-row">
-                <span class="lhx-hero-text"><span class="lhx-hero-title">${e(it.title)}</span>${sub ? `<span class="lhx-hero-sub">${e(sub)}</span>` : ''}</span>
-                <span class="lhx-go" aria-hidden="true">${this.arrow}</span>
-            </span>
+            <span class="lhx-eyebrow">Up next · ${e(this.heroState(it))}</span>
+            <span class="lhx-hero-title">${e(it.title)}</span>
+            ${sub ? `<span class="lhx-hero-sub">${e(sub)}</span>` : ''}
+            <span class="lhx-cta">${this.heroCta(it)}</span>
         </button>`;
     },
-    // Calm card for when nothing needs doing (or the class is new / empty). Opens `it` when given.
-    calm(chip, title, sub, it) {
+    // The same block for when nothing needs doing (or the class is new / empty). Opens `it` when given.
+    calm(label, title, sub, it) {
         const e = window.LHD.esc;
-        const inner = `<span class="lhx-chip-hero">${e(chip)}</span>
-            <span class="lhx-hero-row">
-                <span class="lhx-hero-text"><span class="lhx-hero-title">${e(title)}</span>${sub ? `<span class="lhx-hero-sub">${e(sub)}</span>` : ''}</span>
-                ${it ? `<span class="lhx-go" aria-hidden="true">${this.arrow}</span>` : ''}
-            </span>`;
+        const inner = `<span class="lhx-eyebrow">${e(label)}</span>
+            <span class="lhx-hero-title">${e(title)}</span>
+            ${sub ? `<span class="lhx-hero-sub">${e(sub)}</span>` : ''}
+            ${it ? '<span class="lhx-cta">Open</span>' : ''}`;
         return it
-            ? `<button type="button" class="lhx-hero lhx-hero--calm" onclick="${this.open(it)}">${inner}</button>`
-            : `<div class="lhx-hero lhx-hero--calm lhx-hero--static">${inner}</div>`;
+            ? `<button type="button" class="lhx-hero" onclick="${this.open(it)}">${inner}</button>`
+            : `<div class="lhx-hero lhx-hero--static">${inner}</div>`;
+    },
+
+    // "5 to do · 1 due tomorrow": how much is waiting, and what is due today or tomorrow in the same words as the rows
+    counts(todo) {
+        if (!todo.length) return '';
+        const D = window.LHD;
+        let today = 0, tomorrow = 0;
+        todo.forEach(it => {
+            if (it.type !== 'assignment') return;
+            const n = D.daysUntil(it.due_date);
+            if (n === null) return;
+            if (n <= 0) today++; else if (n === 1) tomorrow++;
+        });
+        const parts = [`${todo.length} to do`];
+        if (today) parts.push(`<b>${today} due today</b>`);
+        if (tomorrow) parts.push(`<b>${tomorrow} due tomorrow</b>`);
+        return parts.join(' · ');
     },
 
     todoRow(it) {
-        const D = window.LHD, n = it.type === 'assignment' ? D.daysUntil(it.due_date) : null;
-        let chip = 'Pending', cls = '', meta;
-        if (it.in_progress)              { chip = 'Continue'; cls = ' lhx-chip--go'; meta = 'Quiz · In progress'; }
-        else if (it.type === 'quiz')     { chip = 'Open';     cls = ' lhx-chip--go'; meta = 'Quiz · ' + (it.start_time ? 'Started ' + D.short(it.start_time) : (it.teacher || 'Open')); }
+        const D = window.LHD, e = D.esc, n = it.type === 'assignment' ? D.daysUntil(it.due_date) : null;
+        const soon = n !== null && n <= 1;
+        let meta;
+        if (it.in_progress)                meta = 'Quiz · In progress';
+        else if (it.type === 'quiz')       meta = 'Quiz · Open' + (it.start_time ? ' · Started ' + e(D.short(it.start_time)) : '');
         else if (it.type === 'assignment') {
-            chip = n === null ? 'Due' : n <= 0 ? 'Due today' : n === 1 ? 'Tomorrow' : `In ${n} days`;
-            if (n !== null && n <= 1) cls = ' lhx-chip--soon';
-            meta = 'Assignment · ' + (it.teacher || (it.due_date ? 'Due ' + D.short(it.due_date) : ''));
-        } else                           { meta = 'Evaluation · ' + (it.meta || 'Pending'); }
+            const due = n === null ? '' : this.dueWords(n).replace(/^./, c => c.toUpperCase());
+            meta = 'Assignment' + (due ? ' · ' + (soon ? `<span class="lhx-soon">${due}</span>` : due) : '');
+        } else                             meta = 'Evaluation · ' + e(it.meta || 'To do');
         return `<button type="button" class="lhx-row" onclick="${this.open(it)}">
-            <span class="lhx-tile">${D.svg(it.type, 20)}</span>
-            <span class="lhx-rt"><span class="lhx-rt-title">${D.esc(it.title)}</span><span class="lhx-rt-meta">${D.esc(meta)}</span></span>
-            <span class="lhx-chip${cls}">${D.esc(chip)}</span>
+            <span class="lhx-ring${soon ? ' lhx-ring--soon' : ''}">${it.in_progress ? this.ringHalf : this.ring}</span>
+            <span class="lhx-rt"><span class="lhx-rt-title">${e(it.title)}</span><span class="lhx-rt-meta">${meta}</span></span>
+            ${this.chevron}
         </button>`;
     },
     alsoTodo(rest) {
         if (!rest.length) return '';
-        const more = rest.length - 3;
+        const more = rest.length - 4;
         return `<div class="lhx-st"><span class="lhx-st-title">Also to do</span><span class="lhx-st-meta">${rest.length}</span></div>
-            ${rest.slice(0, 3).map(it => this.todoRow(it)).join('')}
+            ${rest.slice(0, 4).map(it => this.todoRow(it)).join('')}
             ${more > 0 ? `<div class="lhx-more">+${more} more</div>` : ''}`;
     },
 
@@ -851,16 +877,17 @@ window.LHM = {
             </button>`;
     },
 
+    // What teachers posted. Each row starts with the icon for what it is (a bell for an announcement, a book for a
+    // resource), the same icons as the rest of the app, not the teacher's initials.
     feed(items) {
         if (!items.length) return '';
         const D = window.LHD;
         const rows = items.slice(0, 3).map(it => {
-            const tile = it.meta
-                ? `<span class="lhx-tile lhx-tile--round">${D.esc(this.initials(it.meta))}</span>`
-                : `<span class="lhx-tile">${D.svg(it.type, 20)}</span>`;
             const meta = [this.labels[it.type], it.meta, it.time_ago].filter(Boolean).join(' · ');
-            return `<button type="button" class="lhx-row" onclick="${this.open(it)}">${tile}
+            return `<button type="button" class="lhx-row" onclick="${this.open(it)}">
+                <span class="lhx-ico">${D.svg(it.type, 24)}</span>
                 <span class="lhx-rt"><span class="lhx-rt-title">${D.esc(it.title)}</span><span class="lhx-rt-meta">${D.esc(meta)}</span></span>
+                ${this.chevron}
             </button>`;
         }).join('');
         return `<div class="lhx-st"><span class="lhx-st-title">From your teachers</span></div>${rows}`;
@@ -877,7 +904,7 @@ function buildMobileHomeV2(data) {
     const todo   = M.sortTodo([...(data.resume || []).map(r => ({ ...r, type: 'quiz', in_progress: true })), ...(data.todo || [])]);
     const recent = data.recent || [];
 
-    let hero, rest = [], feed = recent, showWeek = true;
+    let hero, rest = [], feed = recent, showWeek = true, counts = '';
     if (data.no_class) {
         hero = M.calm('Not in a class yet', 'No class yet', 'Ask your school to add you to a class.');
         feed = []; showWeek = false;
@@ -887,6 +914,7 @@ function buildMobileHomeV2(data) {
     } else if (todo.length) {
         hero = M.hero(todo[0]);
         rest = todo.slice(1);
+        counts = M.counts(todo);
     } else if (recent.length) {
         const r = recent[0];
         hero = M.calm('All caught up', r.title, [M.labels[r.type], r.time_ago].filter(Boolean).join(' · '), r);
@@ -902,8 +930,8 @@ function buildMobileHomeV2(data) {
         <div class="lh-mobile-wrapper lhx">
             ${classLine ? `<div class="lhx-top"><span class="lhx-top-dot"></span><span class="lhx-top-text">${e(classLine)}</span></div>` : ''}
             <div class="lhx-greet">${first
-                ? `<div class="lhx-hello">${part}</div><div class="lhx-name">${e(first)}</div>`
-                : `<div class="lhx-name">${part}</div>`}</div>
+                ? `<div class="lhx-hello">${part}</div><h1 class="lhx-name">${e(first)}</h1>`
+                : `<h1 class="lhx-name">${part}</h1>`}${counts ? `<p class="lhx-sub">${counts}</p>` : ''}</div>
             ${hero}
             ${M.alsoTodo(rest)}
             ${showWeek ? M.week(data) : ''}

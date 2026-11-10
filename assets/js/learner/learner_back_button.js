@@ -5,7 +5,7 @@
  * how the learner would close it by hand. In this order, the first that applies wins:
  *   1. the account drop-down in the header, if it is open
  *   2. the file viewer (a PDF, a picture) that covers the page
- *   3. a pop-up or sheet that is open: the search, a Settings or "Parent link" sheet, the "Join a class" sheet, the
+ *   3. a pop-up or sheet that is open: the enlarged school logo, the search, a Settings or "Parent link" sheet, the "Join a class" sheet, the
  *      account sheet, the grade explainers, the progress report and the quiz review, a native dialog
  *   4. the assignment form that is open inside an assignment
  *   5. the menu, if it is open
@@ -59,6 +59,10 @@
 
     /* 3. ── pop-ups and sheets, the one on top first ──────────────────────────────────────────────────────────── */
     function closePopup() {
+        // The school logo, enlarged from the top bar: a tap on it closes it.
+        var logoPop = document.querySelector('#schoolLogoPop.on');
+        if (logoPop) { logoPop.click(); return true; }
+
         // The phone search.
         var search = document.querySelector('#dmmSearch.on .dmm-s-cancel');
         if (search) { search.click(); return true; }

@@ -65,7 +65,7 @@ html {
   --dm-i-folder: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z'/%3E%3C/svg%3E");
   --dm-i-book: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 7v14'/%3E%3Cpath d='M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z'/%3E%3C/svg%3E");
   --dm-i-chart: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 3v16a2 2 0 0 0 2 2h16'/%3E%3Cpath d='M18 17V9'/%3E%3Cpath d='M13 17V5'/%3E%3Cpath d='M8 17v-3'/%3E%3C/svg%3E");
-  --dm-i-megaphone: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3 11 18-5v12L3 14v-3z'/%3E%3Cpath d='M11.6 16.8a3 3 0 1 1-5.8-1.6'/%3E%3C/svg%3E");
+  --dm-i-bell: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9'/%3E%3Cpath d='M10.3 21a1.94 1.94 0 0 0 3.4 0'/%3E%3C/svg%3E");
   --dm-i-star: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolygon points='12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2'/%3E%3C/svg%3E");
   --dm-i-users: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='9' cy='7' r='4'/%3E%3Cpath d='M22 21v-2a4 4 0 0 0-3-3.87'/%3E%3Cpath d='M16 3.13a4 4 0 0 1 0 7.75'/%3E%3C/svg%3E");
   --dm-i-plus: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M8 12h8'/%3E%3Cpath d='M12 8v8'/%3E%3C/svg%3E");
@@ -256,7 +256,7 @@ html body .sidebar.dm-menu a[data-page="teacher_grades"]        { order: 60;  --
 html body .sidebar.dm-menu a[data-page="teacher_evaluations"]   { order: 70;  --dm-ico: var(--dm-i-star); }
 html body .sidebar.dm-menu a[data-page="teacher_analytics"]     { order: 80;  --dm-ico: var(--dm-i-pie); }
 html body .sidebar.dm-menu .dm-sep--b                           { order: 85; }
-html body .sidebar.dm-menu a[data-page="teacher_announcements"] { order: 90;  --dm-ico: var(--dm-i-megaphone); }
+html body .sidebar.dm-menu a[data-page="teacher_announcements"] { order: 90;  --dm-ico: var(--dm-i-bell); }
 html body .sidebar.dm-menu a[data-page="teacher_calendar"]      { order: 100; --dm-ico: var(--dm-i-calendar); }
 html body .sidebar.dm-menu .dm-sep--d                           { order: 105; }
 html body .sidebar.dm-menu a[data-page="teacher_settings"]      { order: 110; --dm-ico: var(--dm-i-sliders); }
@@ -265,7 +265,7 @@ html body .sidebar.dm-menu a[data-page="teacher_settings"]      { order: 110; --
 html body .sidebar.dm-menu .dm-account-root {
   order: 9; flex: none;
   display: grid; grid-template-columns: 32px minmax(0, 1fr) 16px;
-  grid-template-areas: "av name chev";
+  grid-template-areas: "av name chev" "av role chev"; align-content: center;
   column-gap: 10px; align-items: center;
   padding: 8px; border-radius: 10px; cursor: pointer;
   transition: background .12s ease;
@@ -288,7 +288,12 @@ html body .sidebar.dm-menu .teacher-name {
   color: var(--dm-text); font: 500 14px/1.25 var(--dm-font);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-/* The account block shows the name only. The email is still in the account menu. */
+/* The account block shows the name with the role ("Teacher") under it, like the parent app. The email is still in the account menu. */
+html body .sidebar.dm-menu .teacher-role {
+  grid-area: role; margin: 1px 0 0;
+  color: var(--dm-muted); font: 400 12px/1.25 var(--dm-font);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 html body .sidebar.dm-menu .teacher-email { display: none; }
 
 /* ── Focus ──────────────────────────────────────────────────────────────── */
@@ -319,7 +324,7 @@ html.dm-collapsed body .sidebar.dm-menu .dm-account-root {
   grid-template-columns: 32px; grid-template-areas: "av";
   justify-content: center; padding: 6px 0;
 }
-html.dm-collapsed body .sidebar.dm-menu .dm-account-root::after, html.dm-collapsed body .sidebar.dm-menu .teacher-name { display: none; }
+html.dm-collapsed body .sidebar.dm-menu .dm-account-root::after, html.dm-collapsed body .sidebar.dm-menu .teacher-name, html.dm-collapsed body .sidebar.dm-menu .teacher-role { display: none; }
 
 /* ── Tooltip (rail + toggle) ────────────────────────────────────────────── */
 .dm-tip {
