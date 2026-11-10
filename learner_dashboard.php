@@ -246,9 +246,9 @@ $parentLink = ((int)$parentCount > 0); // true when at least one parent is linke
     <link rel="stylesheet" href="assets/css/learner/mobile_class.css?v=1.1">
     <link rel="stylesheet" href="assets/css/learner/parent_invite.css?v=1.0">
     <link rel="stylesheet" href="assets/css/learner/desktop_settings.css?v=1.5S">   <!-- new -->
-    <link rel="stylesheet" href="assets/css/learner/mobile_light.css?v=2.1">
+    <link rel="stylesheet" href="assets/css/learner/mobile_light.css?v=2.2">
     <link rel="stylesheet" href="assets/css/learner/desktop_settings.css?v=1.4">   <!-- new -->
-    <link rel="stylesheet" href="assets/css/learner/mobile_light.css?v=2.1">
+    <link rel="stylesheet" href="assets/css/learner/mobile_light.css?v=2.2">
     <link rel="stylesheet" href="assets/css/splash_light.css?v=<?= (int) @filemtime(__DIR__ . '/assets/css/splash_light.css') ?>">
     <link rel="stylesheet" href="assets/css/shared/net_status.css?v=1.0">
     <script>
@@ -283,7 +283,7 @@ $parentLink = ((int)$parentCount > 0); // true when at least one parent is linke
     <meta name="msapplication-navbutton-color" content="#20201f">
     <!-- Phone light / dark: sets <html data-learner-mobile-theme> and the status bar colour before first paint, so the
          splash below starts in the right theme (see mobile_theme.js). It used to load at the end of <body>. -->
-    <script src="assets/js/learner/mobile_theme.js?v=1.8"></script>
+    <script src="assets/js/learner/mobile_theme.js?v=1.9"></script>
     <!-- Phone canvas: the colour behind the page, there from the very first frame (when the app opens, and in the
          instant between two pages) so a white or wrong-coloured edge never shows. Dark phone mode only: in light
          mode the page colour is decided page by page (mobile_light.css), so <html> is left alone and takes whatever
