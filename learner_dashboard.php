@@ -242,6 +242,7 @@ $parentLink = ((int)$parentCount > 0); // true when at least one parent is linke
     <link rel="stylesheet" href="assets/css/learner/mobile_settings.css?v=1.7">
     <link rel="stylesheet" href="assets/css/shared/pwa_prompts.css?v=1.0">
     <link rel="stylesheet" href="assets/css/shared/back_button.css?v=1.0">
+    <link rel="stylesheet" href="assets/css/learner/logo_pop.css?v=1.0">
     <link rel="stylesheet" href="assets/css/learner/mobile_class.css?v=1.1">
     <link rel="stylesheet" href="assets/css/learner/parent_invite.css?v=1.0">
     <link rel="stylesheet" href="assets/css/learner/desktop_settings.css?v=1.5S">   <!-- new -->
@@ -656,7 +657,7 @@ if (!empty($joinedClassIds)) {
         </button>
     </div>
 
-    <div class="logo-container" style="flex: 2; display: flex; justify-content: center; align-items: center; gap: 10px;">
+    <div class="logo-container" data-school-name="<?= htmlspecialchars($schoolName) ?>" style="flex: 2; display: flex; justify-content: center; align-items: center; gap: 10px;">
         <?php if ($schoolLogo): ?>
             <img id="headerLogo" src="<?= htmlspecialchars($schoolLogo) ?>"
                  alt="School Logo"
@@ -3996,7 +3997,8 @@ document.addEventListener("DOMContentLoaded", function () {
 <script src="assets/js/learner/desktop_settings.js?v=1.4"></script>
 <script src="assets/js/shared/pwa_prompts.js?v=1.0"></script>
 <script src="assets/js/shared/back_button.js?v=1.0"></script>
-<script src="assets/js/learner/learner_back_button.js?v=1.0"></script>
+<script src="assets/js/learner/learner_back_button.js?v=1.1"></script>
+<script src="assets/js/learner/logo_pop.js?v=1.0"></script>
 <script>window.ISKOOL_SETTINGS = { sendResetUrl: 'auth/password/send_reset_link.php' };</script>
 <?php include 'includes/global_viewer.php'; ?>
 </body>
