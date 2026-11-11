@@ -166,7 +166,9 @@ final class TeacherMobileLightModeTest extends TestCase
         $this->assertSame(1, preg_match('/^@media \(max-width: 768px\) \{/m', $css));
         $this->assertGreaterThan(strpos($css, '@media (max-width: 768px) {'), $pos);
         $this->assertStringContainsString('--dm-bg: #f4f3ee', $css);
-        $this->assertStringContainsString('--dm-accent: #187a72', $css);
+        // no colour accent: the name stays defined for the rules that read it, but follows the text colour
+        $this->assertStringContainsString('--dm-accent: var(--dm-text)', substr($css, $pos));
+        $this->assertStringNotContainsString('#187a72', $css);
         // the menu is light on every page, so its rules are not behind the page gate
         $this->assertStringNotContainsString(':has(:where(#api-content-area)', substr($css, $pos));
     }
