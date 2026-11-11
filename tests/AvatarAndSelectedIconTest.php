@@ -139,7 +139,7 @@ final class AvatarAndSelectedIconTest extends TestCase
         $this->assertStringContainsString('parent_menu.css?v=1.3', $parent);
 
         $teacher = $this->source('teacher_dashboard.php');
-        $this->assertStringContainsString('teacher_mobile_menu.css?v=1.8', $teacher);
+        $this->assertStringContainsString('teacher_mobile_menu.css?v=1.9', $teacher);
         $this->assertStringContainsString('teacher_mobile_settings.css?v=1.5', $teacher);
     }
 }

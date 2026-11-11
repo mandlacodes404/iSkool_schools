@@ -62,7 +62,7 @@ final class TeacherAnnouncementsBellTest extends TestCase
     {
         $php = $this->source('teacher_dashboard.php');
 
-        foreach (['teacher_desktop_menu.css?v=2.6', 'teacher_mobile_menu.css?v=1.8', 'teacher_desktop_menu.js?v=1.1', 'teacher_mobile_menu.js?v=1.1', 'announcements.js?v=6.4'] as $pinned) {
+        foreach (['teacher_desktop_menu.css?v=2.6', 'teacher_mobile_menu.css?v=1.9', 'teacher_desktop_menu.js?v=1.1', 'teacher_mobile_menu.js?v=1.1', 'announcements.js?v=6.4'] as $pinned) {
             $this->assertStringContainsString($pinned, $php, $pinned . ' is not what the page links');
         }
     }

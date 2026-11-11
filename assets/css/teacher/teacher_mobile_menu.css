@@ -2,7 +2,9 @@
    Mobile drawer for the teacher dashboard (max-width: 768px).
    Load it AFTER teacher_dashboard.css and teacher_desktop_menu.css, then teacher_mobile_menu.js.
 
-   Same drawer as the learner dashboard, built for the teacher page
+   Same drawer as the learner dashboard, built for the teacher page. The look is the learner's refined one: no colour accent
+   (the current page is a lifted row, counts are a neutral pill), search is an icon button in the school row, the account row
+   ends in dots because it opens a sheet. The drawer and page colours are the teacher app's own and are unchanged.
    - The drawer, the page, the bottom nav and the dim all move with transforms only (no `left`
      animation, no blur), and teacher_mobile_menu.js lets a finger drag them.
    - The curve is kept: #mobileOverlay still carries the 35px rounded edge with its rim. Change
@@ -39,6 +41,7 @@ html {
   --dm-i-logout: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4'/%3E%3Cpolyline points='16 17 21 12 16 7'/%3E%3Cline x1='21' x2='9' y1='12' y2='12'/%3E%3C/svg%3E");
   --dm-i-chat: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'/%3E%3C/svg%3E");
   --dm-i-calendar: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='18' height='18' x='3' y='4' rx='2'/%3E%3Cpath d='M16 2v4M8 2v4M3 10h18'/%3E%3C/svg%3E");
+  --dm-i-more: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='1'/%3E%3Ccircle cx='19' cy='12' r='1'/%3E%3Ccircle cx='5' cy='12' r='1'/%3E%3C/svg%3E");
   --dmm-w: min(79vw, 340px);       /* drawer width, unchanged from before */
   --dmm-curve: 35px;               /* your curve */
   --dmm-dim: .10;                  /* how dark the page gets while the menu is open (was .55) */
@@ -53,7 +56,9 @@ html {
   --dm-soft: #b1bac4;
   --dm-muted: #7d8590;
   --dm-faint: #545d68;
-  --dm-accent: #4fd1c5;
+  --dm-accent: var(--dm-text);     /* no colour accent: the focus rings and selects that read this name follow the text colour */
+  --dm-badge-bg: #e6edf3;          /* counts are neutral: a light pill, no colour accent */
+  --dm-badge-text: #0d1117;
   --dm-font: 'Geist', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 
@@ -138,7 +143,7 @@ html.dmm-drag body #mobileOverlay {
 /* -- Brand ----------------------------------------------------------------- */
 html body .sidebar.dm-menu .dm-brand {
   order: 1; flex: none; display: flex; align-items: center; gap: 12px;
-  height: auto; margin: 0; padding: 10px 18px 14px; border: 0;
+  height: auto; margin: 0; padding: 10px 66px 14px 18px; border: 0;   /* right padding leaves room for the search button */
 }
 html body .sidebar.dm-menu .dm-mark { box-sizing: border-box; width: 46px; height: 46px; border-radius: 12px; object-fit: cover; flex: none; }
 html body .sidebar.dm-menu .dm-mark--initials {
@@ -154,15 +159,17 @@ html body .sidebar.dm-menu .dm-brand-sub { color: var(--dm-muted); font: 400 12.
 html body .sidebar.dm-menu .dm-toggle, html body .sidebar.dm-menu .dm-kbd { display: none !important; }
 
 /* -- Search ---------------------------------------------------------------- */
+/* A 44px icon button at the right of the school row (it was a full-width field). Same button, same click handler. */
 html body .sidebar.dm-menu .dm-search {
-  order: 2; flex: none; display: flex; align-items: center; gap: 10px; box-sizing: border-box;
-  width: calc(100% - 28px) !important; height: 44px; min-height: 0; margin: 0 14px 28px !important; padding: 0 12px !important;
-  border: 1px solid var(--dm-line); border-radius: 12px !important; background: rgba(255,255,255,.05);
-  color: var(--dm-muted); font: 450 16px/1 var(--dm-font); font-size: 16px !important; font-weight: 450 !important;
-  text-align: left; text-transform: none; cursor: pointer;
+  position: absolute; top: calc(env(safe-area-inset-top, 0px) + 17px); right: 14px; z-index: 1;
+  display: grid; place-items: center; box-sizing: border-box;
+  width: 44px !important; height: 44px; min-height: 0; margin: 0 !important; padding: 0 !important;
+  border: 0; border-radius: 12px !important; background: none;
+  color: var(--dm-soft); font-size: 0 !important; text-transform: none; cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
-html body .sidebar.dm-menu .dm-search:active { background: rgba(255,255,255,.08); }
+html body .sidebar.dm-menu .dm-search .dm-label { display: none; }
+html body .sidebar.dm-menu .dm-search:active { background: var(--dm-hover); }
 
 /* -- Shared mask icons (colour follows the text colour) -------------------- */
 html body .sidebar.dm-menu .dm-item::before, html body .sidebar.dm-menu .dm-search::before,
@@ -173,7 +180,7 @@ html body .sidebar.dm-menu .dm-item::before, html body .sidebar.dm-menu .dm-sear
   -webkit-mask-size: contain; mask-size: contain;
 }
 html body .sidebar.dm-menu .dm-search { --dm-ico: var(--dm-i-search); }
-html body .sidebar.dm-menu .dm-search::before { width: 20px; height: 20px; }
+html body .sidebar.dm-menu .dm-search::before { width: 22px; height: 22px; }
 
 /* -- Navigation ------------------------------------------------------------ */
 html body .sidebar.dm-menu .sidebar-links {
@@ -194,7 +201,7 @@ html body .sidebar.dm-menu .dm-item {
 html body .sidebar.dm-menu .dm-item > svg { display: none; }
 html body .sidebar.dm-menu .dm-item:active { background: var(--dm-hover); }
 html body .sidebar.dm-menu .dm-item.active { background: var(--dm-active); color: var(--dm-text); font-weight: 500 !important; }
-html body .sidebar.dm-menu .dm-item.active::before { background: var(--dm-accent); }
+/* The current page is the lifted row with the brighter text and icon: no colour accent. */
 html body .sidebar.dm-menu .dm-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 html body .sidebar.dm-menu .dm-meta {
   display: block; flex: none; max-width: 110px; overflow: hidden; text-overflow: ellipsis;
@@ -221,9 +228,11 @@ html body .sidebar.dm-menu .dm-sep--b { order: 68; }
 html body .sidebar.dm-menu .sidebar-links::before { content: 'Teaching'; order: 15; }
 html body .sidebar.dm-menu .dm-sep--a::before { content: 'Academics'; }
 html body .sidebar.dm-menu .sidebar-links::before, html body .sidebar.dm-menu .dm-sep--a {
-  flex: none; display: block; height: auto; margin: 16px 0 6px; padding: 0 12px; background: none;
+  flex: none; display: block; height: auto; margin: 20px 0 6px; padding: 0 12px; background: none;
   color: var(--dm-muted); font: 500 12.5px/1 var(--dm-font); letter-spacing: .01em; white-space: nowrap; user-select: none;
 }
+/* the first heading sits closer to the school row; the search button no longer takes a row of its own */
+html body .sidebar.dm-menu .sidebar-links::before { margin-top: 10px; }
 html body .sidebar.dm-menu .dm-sep--b { display: block; flex: none; height: 1px; margin: 10px 6px; background: var(--dm-line); }
 html body .sidebar.dm-menu .dm-sep--c, html body .sidebar.dm-menu .dm-sep--d, html body .sidebar.dm-menu .footer { display: none; }
 
@@ -238,7 +247,7 @@ html body .sidebar.dm-menu .dm-account-root {
 html body .sidebar.dm-menu .dm-account-root:active { background: rgba(255,255,255,.08); }
 html body .sidebar.dm-menu .dm-account-root::after {
   content: ''; grid-area: chev; width: 20px; height: 20px; background: var(--dm-muted);
-  -webkit-mask-image: var(--dm-i-updown); mask-image: var(--dm-i-updown);
+  -webkit-mask-image: var(--dm-i-more); mask-image: var(--dm-i-more);   /* it opens a sheet, so no up/down arrows */
   -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; -webkit-mask-position: center; mask-position: center;
   -webkit-mask-size: contain; mask-size: contain;
 }
@@ -327,13 +336,13 @@ html body .dm-pop .dm-pop-sep { height: 1px; margin: 6px 12px; background: var(-
 }
 .dmm-s-row:active { background: var(--dm-hover); }
 .dmm-s-row .t { margin-left: auto; color: var(--dm-muted); font-size: 13px; }
-.dmm-s-row b { color: var(--dm-accent); font-weight: 500; }
+.dmm-s-row b { color: var(--dm-text); font-weight: 600; }
 .dmm-s-empty { padding: 28px 16px; color: var(--dm-muted); font: 400 15px/1.5 var(--dm-font); text-align: center; }
 
 /* -- Badges: window.dmSetBadge(pageKey, count) ----------------------------- */
 .dmm-badge {
-  flex: none; min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; border-radius: 10px;
-  background: var(--dm-accent); color: #06201d; font: 600 12px/20px var(--dm-font); text-align: center;
+  flex: none; min-width: 22px; height: 22px; padding: 0 7px; box-sizing: border-box; border-radius: 11px;
+  background: var(--dm-badge-bg); color: var(--dm-badge-text); font: 600 12px/22px var(--dm-font); text-align: center;
 }
 html body .sidebar.dm-menu .dm-item .dmm-badge { margin-left: auto; }
 #mobileBottomNav [data-page] { position: relative; }
@@ -349,13 +358,14 @@ html body .sidebar.dm-menu .dm-item .dmm-badge { margin-left: auto; }
    Applies when <html data-teacher-mobile-theme="light"> (teacher_mobile_theme.js, Settings > Appearance). Dark is untouched.
    The drawer, the search sheet and the account sheet all follow the --dm-* tokens, so most of it is just these tokens.
    The rest are the few places that had a dark colour written in. Same colours as the desktop light mode: drawer
-   #f4f3ee, cards and fields white, lines #dfded8, text #282924, accent #187a72.
+   #f4f3ee, cards and fields white, lines #dfded8, text #282924. No colour accent: the current page is a lifted row and counts are a neutral pill.
    The menu is light on every page, converted or not. Not here: the page, the header and the bottom bar, which are
    light page by page (teacher_mobile_light.css). */
 html[data-teacher-mobile-theme="light"] {
   --dm-bg: #f4f3ee; --dm-raise: #ffffff;
   --dm-hover: rgba(38,39,35,.055); --dm-active: rgba(38,39,35,.075); --dm-line: #dfded8;
-  --dm-text: #282924; --dm-soft: #53544e; --dm-muted: #73746d; --dm-faint: #8b8b83; --dm-accent: #187a72;
+  --dm-text: #282924; --dm-soft: #53544e; --dm-muted: #73746d; --dm-faint: #8b8b83; --dm-accent: var(--dm-text);
+  --dm-badge-bg: #282924; --dm-badge-text: #faf9f5;
 }
 
 /* the curved edge of the dim; the corner gaps already follow --dm-bg */
@@ -364,8 +374,6 @@ html[data-teacher-mobile-theme="light"] body .sidebar.active ~ #mobileOverlay { 
 
 /* drawer */
 html[data-teacher-mobile-theme="light"] body .sidebar.dm-menu .dm-mark--initials { background: #ffffff; color: #53544e; }
-html[data-teacher-mobile-theme="light"] body .sidebar.dm-menu .dm-search { background: #ffffff; }
-html[data-teacher-mobile-theme="light"] body .sidebar.dm-menu .dm-search:active { background: rgba(38,39,35,.06); }
 html[data-teacher-mobile-theme="light"] body .sidebar.dm-menu .dm-account-root { background: rgba(38,39,35,.045); }
 html[data-teacher-mobile-theme="light"] body .sidebar.dm-menu .dm-account-root:active { background: rgba(38,39,35,.075); }
 
@@ -377,7 +385,6 @@ html[data-teacher-mobile-theme="light"] body .dm-pop .dm-pop-item.is-danger { co
 html[data-teacher-mobile-theme="light"] .dmm-s-field { background: #ffffff; }
 html[data-teacher-mobile-theme="light"] .dmm-s-field input { color-scheme: light; }
 
-/* badge: white text on the darker accent */
-html[data-teacher-mobile-theme="light"] .dmm-badge { color: #ffffff; }
+/* badge: the dark pill with light text comes from --dm-badge-bg / --dm-badge-text above */
 
 }
