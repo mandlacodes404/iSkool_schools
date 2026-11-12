@@ -76,7 +76,7 @@ final class LearnerPhoneHeaderGapTest extends TestCase
     {
         // the service worker caches /assets/ by full URL: a changed file under an unchanged ?v= is never fetched again
         $php = $this->source('learner_dashboard.php');
-        $this->assertStringContainsString('learner/learner_dashboard.css?v=14.7', $php);
+        $this->assertStringContainsString('learner/learner_dashboard.css?v=14.8', $php);
         $this->assertStringContainsString('learner/quiz.css?v=7.0', $php);
     }
 }
