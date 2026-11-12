@@ -236,7 +236,7 @@ $parentLink = ((int)$parentCount > 0); // true when at least one parent is linke
      <!-- The phone back button's regular-weight Nunito (see @font-face 'iSkool Back Label' in learner_dashboard.css), fetched
          early so the label does not flash in another font the first time a detail page opens. Phones only. -->
     <link rel="preload" href="assets/fonts/nunito-latin-400.woff2" as="font" type="font/woff2" crossorigin media="(max-width: 768px)">
-    <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=14.7">
+    <link rel="stylesheet" href="assets/css/learner/learner_dashboard.css?v=14.8">
     <link rel="stylesheet" href="assets/css/learner/desktop_menu.css?v=3.2">
     <link rel="stylesheet" href="assets/css/learner/mobile_menu.css?v=2.3">
     <link rel="stylesheet" href="assets/css/learner/mobile_settings.css?v=1.7">

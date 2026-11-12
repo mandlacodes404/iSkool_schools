@@ -164,6 +164,6 @@ final class LearnerBackButtonStyleTest extends TestCase
     public function test_the_stylesheet_carries_a_new_version(): void
     {
         // the service worker caches /assets/ by full URL: a changed file under an unchanged ?v= is never fetched again
-        $this->assertStringContainsString('assets/css/learner/learner_dashboard.css?v=14.7', $this->source('learner_dashboard.php'));
+        $this->assertStringContainsString('assets/css/learner/learner_dashboard.css?v=14.8', $this->source('learner_dashboard.php'));
     }
 }
