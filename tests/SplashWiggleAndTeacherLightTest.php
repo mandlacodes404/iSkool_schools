@@ -3,9 +3,9 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Guards for two things on the phone splash screens:
- *  - the "wiggle" wordmark at the bottom is 125px (it was 145px) and sits at bottom -4px on phones (8px higher than the
- *    old -12px), the same on the login splash (index.php) and on the waiting screens that continue it (learner, teacher
- *    and parent dashboards), so it does not change size or position at the handoff;
+ *  - the "wiggle" wordmark at the bottom is 115px on phones (it was 145px, then 125px) and sits at bottom -4px (8px higher
+ *    than the old -12px), the same on the login splash (index.php) and on the waiting screens that continue it (learner,
+ *    teacher and parent dashboards), so it does not change size or position at the handoff;
  *  - the teacher waiting screen follows the teacher's phone light / dark choice like the learner's, and index.php reads
  *    the same saved choice for a signed-in teacher so the two pages are light together.
  * The pixels, colours and status bar were checked in a phone-sized browser with the real stylesheets and scripts.
@@ -41,7 +41,7 @@ final class SplashWiggleAndTeacherLightTest extends TestCase
         $this->fail($id . ' has no rule in any of the ' . $seen . ' 899px blocks');
     }
 
-    public function test_the_wiggle_wordmark_is_125px_and_8px_higher_on_the_login_splash_and_every_waiting_screen(): void
+    public function test_the_wiggle_wordmark_is_115px_and_8px_higher_on_the_login_splash_and_every_waiting_screen(): void
     {
         $rules = [
             'assets/css/index.css' => '#splash-brand-wordmark',
@@ -51,11 +51,12 @@ final class SplashWiggleAndTeacherLightTest extends TestCase
         ];
         foreach ($rules as $file => $id) {
             $rule = $this->phoneRule($this->source($file), $id);
-            $this->assertMatchesRegularExpression('/height:\s*125px/', $rule, $file . ' phone wordmark height');
+            $this->assertMatchesRegularExpression('/height:\s*115px/', $rule, $file . ' phone wordmark height (was 125px)');
             $this->assertMatchesRegularExpression('/bottom:\s*-4px/', $rule, $file . ' phone wordmark sits 8px higher than it did (bottom -4px, was -12px)');
         }
 
-        // the base (desktop) rule on the login splash keeps its old size and position; only the phone rules above moved
+        // the base rule on the login splash keeps its old size and position (the phone and desktop rules override it);
+        // only the phone rules above moved
         $this->assertMatchesRegularExpression('/#splash-brand-wordmark \{\s+position: absolute;\s+bottom: -12px;\s+height: 125px;/', $this->source('assets/css/index.css'));
         $this->assertStringNotContainsString('height: 145px', $this->source('assets/css/index.css'));
     }
@@ -101,11 +102,11 @@ final class SplashWiggleAndTeacherLightTest extends TestCase
 
     public function test_the_changed_files_have_new_cache_versions(): void
     {
-        $this->assertStringContainsString('assets/css/index.css?v=9.7', $this->source('index.php'));
-        $this->assertStringContainsString('learner/learner_dashboard.css?v=14.8', $this->source('learner_dashboard.php'));
-        $this->assertStringContainsString('teacher/teacher_dashboard.css?v=14.4', $this->source('teacher_dashboard.php'));
+        $this->assertStringContainsString('assets/css/index.css?v=9.8', $this->source('index.php'));
+        $this->assertStringContainsString('learner/learner_dashboard.css?v=14.9', $this->source('learner_dashboard.php'));
+        $this->assertStringContainsString('teacher/teacher_dashboard.css?v=14.5', $this->source('teacher_dashboard.php'));
         $this->assertStringContainsString('teacher_mobile_theme.js?v=1.4', $this->source('teacher_dashboard.php'));
-        $this->assertStringContainsString('parent/parent_splash.css?v=1.2', $this->source('parent_dashboard.php'));
+        $this->assertStringContainsString('parent/parent_splash.css?v=1.3', $this->source('parent_dashboard.php'));
         // splash_light.css is linked with its file time, so it never needs a manual bump
         $this->assertStringContainsString("filemtime(__DIR__ . '/assets/css/splash_light.css')", $this->source('teacher_dashboard.php'));
     }

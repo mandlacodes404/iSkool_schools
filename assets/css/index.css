@@ -700,11 +700,11 @@ body {
     .splash-version-footer {
         font-size: 15px;
     }
-    /* 125px (it was 145px: slightly smaller) and nudged up 8px (bottom -4px, it was -12px). The two dashboards'
-       waiting screens and the parent's must match this exactly, so the wordmark does not change size or position
-       when the login splash hands over. */
+    /* 115px (it was 145px, then 125px: slightly smaller each time) and nudged up 8px (bottom -4px, it was -12px).
+       The two dashboards' waiting screens and the parent's must match this exactly, so the wordmark does not
+       change size or position when the login splash hands over. */
     #splash-brand-wordmark {
-        height: 125px;
+        height: 115px;
         bottom: -4px;
     }
 

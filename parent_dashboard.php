@@ -149,7 +149,7 @@ function pa_account_row(string $initials, string $name): string
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Geist:wght@400;500;600&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/parent/parent_app.css?v=1.14">
     <link rel="stylesheet" href="assets/css/parent/parent_menu.css?v=1.3">
-    <link rel="stylesheet" href="assets/css/parent/parent_splash.css?v=1.2">
+    <link rel="stylesheet" href="assets/css/parent/parent_splash.css?v=1.3">
     <link rel="stylesheet" href="assets/css/pill-loader.css?v=1.0">
     <link rel="stylesheet" href="assets/css/shared/pull_to_refresh.css?v=1.0">
     <link rel="stylesheet" href="assets/css/shared/pwa_prompts.css?v=1.0">
