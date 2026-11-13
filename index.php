@@ -90,7 +90,7 @@ if ($result && $row = $result->fetch_assoc()) {
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/index.css?v=9.7">
+    <link rel="stylesheet" href="assets/css/index.css?v=9.8">
     <?php require __DIR__ . '/includes/login_theme_head.php'; ?>
     <?php
     // A teacher who is already signed in saves their phone theme under their own key (the one teacher_dashboard.php builds,
