@@ -1,5 +1,7 @@
 # iSkool Schools — AI Development Guide
 
+> **Writing or changing documentation?** Follow `docs/DOCUMENTATION_PLAYBOOK.md`. It sets the rules, templates and work plan, and some facts below are out of date until its Phase 1 is done: verify against the code before trusting them.
+
 ## Project Overview
 
 iSkool is a **multi-tenant school management platform** built in PHP. Each school gets its own
