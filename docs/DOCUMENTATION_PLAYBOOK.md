@@ -270,7 +270,7 @@ Agents add to this list instead of guessing. The owner answers in the pull reque
 Update this table in the pull request that completes the work.
 
 - [x] Phase 0: playbook
-- [ ] Phase 1: truth pass
+- [x] Phase 1: truth pass (2026-11-14). Done without waiting for the answers in section 9: every claim that could not be verified is marked `Unverified:` in the page it appears in. Once the owner answers, search for `Unverified` in `README.md`, `AGENTS.md` and `ARCHITECTURE.md` and resolve each one.
 - [ ] Phase 2: architecture pages
 - [ ] Phase 2: ops pages
 - [ ] Phase 3: headers for `api/learner`

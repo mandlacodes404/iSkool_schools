@@ -4,6 +4,10 @@
 > and where the known weaknesses are. It is written for developers and AI agents working
 > in this codebase. Read this before making any significant change.
 
+> **Status:** partly re-verified on 2026-11-14 against `dev` @ `259ff6c`. Parts that were checked
+> say so; anything marked **Unverified** was written in May 2026 and not re-checked. This file is
+> being split into pages under `docs/architecture/` (Phase 2 of `docs/DOCUMENTATION_PLAYBOOK.md`).
+
 ---
 
 ## Table of Contents
@@ -26,6 +30,8 @@
 
 iSkool is a **multi-tenant PHP/MySQL Learning Management System**. Each school runs against
 its own isolated database, selected at runtime by `config.php` based on the current subdomain.
+(Unverified: `config.php` is listed in `.gitignore` and is not in the repository, so this routing
+could not be re-checked.)
 
 This is **not an MVC framework application**. It is a procedural PHP application with
 role-based organisation. There are no formal controllers, models, or service layers.
@@ -33,7 +39,7 @@ SQL queries, authentication checks, business logic, and HTML rendering often liv
 in the same PHP file.
 
 **The architecture is workable at its current scale, but is approaching the point where
-shared helpers, a consistent auth guard, and schema discipline become necessary.**
+shared helpers, a consistent role check, and schema discipline become necessary.**
 
 ---
 
@@ -41,8 +47,9 @@ shared helpers, a consistent auth guard, and schema discipline become necessary.
 
 | System | Key Files |
 |--------|-----------|
-| Authentication | `index.php`, `auth/login_ajax.php`, `auth/register_ajax.php`, `auth/check_remember_me.php`, `auth/remember_me_functions.php` |
+| Authentication | `index.php`, `auth/login_ajax.php`, `auth/register_ajax.php`, `auth/check_remember_me.php`, `auth/remember_me_functions.php`, `auth/session_guard.php`, `auth/csrf_helper.php`, `auth/rate_limit_functions.php` |
 | Role Dashboards | `dashboard.php`, `learner_dashboard.php`, `teacher_dashboard.php`, `school_admin_dashboard.php`, `parent_dashboard.php` |
+| Parent App | `parent_dashboard.php`, `parent_link.php`, `api/parent/*`, `auth/parent_app_functions.php`, `auth/parent_invite_functions.php`, `auth/parent_invite_db.php`, `api/learner/create_parent_invite.php`, `assets/js/parent/*` |
 | Quizzes & Grading | `create_quiz.php`, `take_quiz.php`, `submit_quiz.php`, `review_quiz.php`, `api/learner/get_quizzes.php`, `api/teacher/get_quizzes.php` |
 | Assignments | `submit_assignment.php`, `download_submissions.php`, `api/teacher/create_assignment.php`, `api/learner/get_assignments.php` |
 | Resources | `api/teacher/upload_resource.php`, `api/learner/get_resources.php` |
@@ -78,7 +85,7 @@ shared helpers, a consistent auth guard, and schema discipline become necessary.
 ```
 Browser JS (e.g. assets/js/learner/quiz.js)
   → fetch('api/learner/get_quizzes.php')
-  → PHP: session_start() + config.php + role check
+  → PHP: auth/session_guard.php + config.php + role check
   → MySQL query via $conn (prepared statement)
   → json_encode() response
   → JS renders HTML directly into #api-content-area
@@ -135,7 +142,18 @@ Browser JS (e.g. assets/js/learner/quiz.js)
 
 ### How identity is maintained per request
 
-Every protected page and API endpoint checks the session directly:
+Session handling is shared. Protected pages and API endpoints start by requiring
+`auth/session_guard.php` (checked 2026-11-14: 98 of the 99 files under `api/` do; list the one that
+does not with `grep -L session_guard $(git ls-files 'api/*.php')`). The guard:
+- starts the session with a secure, HTTP-only, `SameSite=Strict` cookie
+- logs the user out after 1 hour of inactivity and redirects to `index.php?session=expired`
+- refreshes `$_SESSION['last_active']` while a user is signed in
+- creates `$_SESSION['csrf_token']` if there is none
+
+Other shared helpers in `auth/`: `csrf_helper.php` (`verify_csrf_token()`, called by endpoints
+that change data) and `rate_limit_functions.php` (attempt limiting; 2 files under `api/` use it).
+
+The **role check itself is still written out in each file**:
 ```php
 // Learner pages
 if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner') { exit; }
@@ -147,8 +165,8 @@ if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') { exit; }
 if (!isset($_SESSION['email']) || !in_array($_SESSION['role'], ['school_admin', 'admin'])) { exit; }
 ```
 
-There is no shared auth middleware. These checks are duplicated in nearly every file.
-This is a known weakness — see [Known Weaknesses](#known-weaknesses).
+Repeating that check is still a known weakness — see [Known Weaknesses](#known-weaknesses).
+(Unverified: the exact role names used by the parent app.)
 
 ### Remember-me
 
@@ -208,7 +226,11 @@ cPanel API and runs `iskool_new_school_template.sql` to provision the schema.
 | Communication | `announcements`, `class_discussions`, `discussion_replies`, `messages` |
 | Evaluations | `teacher_evaluations`, `evaluation_statements`, `evaluation_responses`, `evaluation_answers` |
 | Auth | `user_tokens`, `password_resets`, `user_subscriptions` |
-| Academic calendar | `academic_years`, `academic_terms`, `academic_events` |
+| Academic calendar | `academic_years`, `academic_terms`, `academic_events` (Unverified: `academic_terms` appears in neither the SQL template nor the code) |
+| Parent app | `parent_links`, `parent_invites` |
+
+Also in the template and used by code (checked 2026-11-14): `quiz_integrity_logs`, `teacher_reminders`,
+`top_achievers`. The rest of this table dates from May 2026 and was not re-checked.
 
 ### Relationship pattern
 
@@ -241,6 +263,12 @@ FK-constrained.
 > | `submissions.comment` | `text_answer` |
 > | `users.profile_picture` | `profile_pic` |
 >
+> **Checked 2026-11-14** (template against code): rows 1, 3, 4, 5 and 6 are consistent with the
+> code, which uses the right-hand name and not the template's column. Rows 2 and 7 are not
+> confirmed: `expires_at` is still used elsewhere, and code uses both `profile_picture` and
+> `profile_pic` in different files. The "live PHP code uses" column was inferred from code, not
+> from the live database.
+>
 > **Do not use the SQL template as the single source of truth.**
 > The real schema lives in the live database. If you need to make schema changes,
 > check the live database first, then update the template to match.
@@ -252,41 +280,57 @@ FK-constrained.
 ### Organisation
 
 ```
-/api/learner/    →  20+ endpoints for learner actions
-/api/teacher/    →  25+ endpoints for teacher actions
-/api/school/     →  19+ endpoints for school admin actions
+/api/learner/    →  endpoints for learner actions
+/api/teacher/    →  endpoints for teacher actions
+/api/school/     →  endpoints for school admin actions
+/api/parent/     →  endpoints for the parent app (home, children, report, syllabus, news, events, invite redemption)
 /api/            →  shared endpoints (set_typing.php, get_typing.php)
 ```
 
+Count the endpoints in a folder with `git ls-files 'api/<folder>/*.php' | wc -l` (on 2026-11-14:
+learner 28, teacher 43, school 19, parent 7, shared 2, so 99 in total).
+
 ### Standard endpoint pattern
 
-Every API file should follow this structure:
+Every API file follows this structure (checked against `api/teacher/create_assignment.php` and
+`api/learner/create_parent_invite.php` on 2026-11-14):
 ```php
 <?php
-session_start();
-require_once '../config.php';
+require_once __DIR__ . '/../../auth/session_guard.php';   // session, 1-hour timeout, CSRF token
+require_once __DIR__ . '/../../auth/csrf_helper.php';     // only for endpoints that change data
+require_once dirname(__DIR__, 2) . '/config.php';          // provides $conn
 header('Content-Type: application/json');
 
 // 1. Role check — always first
 if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'teacher') {
-    echo json_encode(['error' => 'Unauthorized']);
+    http_response_code(403);
+    echo json_encode(['success' => false, 'error' => 'Unauthorized']);
     exit;
 }
 
-// 2. Read input
+// 2. CSRF check — endpoints that change data
+verify_csrf_token();
+
+// 3. Read input
 $class_id = isset($_POST['class_id']) ? intval($_POST['class_id']) : 0;
 
-// 3. Prepared statement — always
+// 4. Prepared statement — always
 $stmt = $conn->prepare("SELECT * FROM assignments WHERE class_id = ?");
 $stmt->bind_param("i", $class_id);
 $stmt->execute();
-$result = $stmt->get_result();
+$rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
-// 4. Return JSON
+// 5. Return JSON
 echo json_encode(['success' => true, 'data' => $rows]);
 ```
 
+Older endpoints (for example `api/teacher/create_assignment.php`) return
+`['error' => 'Unauthorized']` with no HTTP status code; newer ones return a status code and
+`success: false`. Use the newer style in new code.
+
 ### Known inconsistencies in the API layer
+
+(Unverified: this list was written in May 2026 and not re-checked.)
 
 - `submit_quiz.php` and `submit_assignment.php` return **HTML**, not JSON — inconsistent
   with the rest of the API layer
@@ -316,17 +360,22 @@ JavaScript files then fetch JSON from the API and inject HTML strings into these
 ### JavaScript file organisation
 
 ```
-assets/js/learner/
-  main.js, quiz.js, assignments.js, resources.js,
-  announcements.js, grades.js, evaluations.js,
-  discussions.js, learner_calendar.js
-
-assets/js/teacher/
-  quizzes.js, assignments.js, ...
-
-assets/js/school/
-  ...
+assets/js/learner/   one file per screen (quiz.js, assignments.js, resources.js,
+                     announcements.js, grades.js, evaluations.js, discussions.js,
+                     syllabus.js, learner_calendar.js, ...) plus menu, settings,
+                     theme and back-button helpers
+assets/js/teacher/   one file per screen (quizzes.js, assignments.js, resources.js,
+                     announcements.js, grades.js, evaluations.js, analytics.js,
+                     sbo.js, teacher_calendar.js, ...) plus menu, settings,
+                     theme and back-button helpers
+assets/js/school/    analytics.js, announcements.js, classes.js, content.js,
+                     learners.js, settings.js, teachers.js
+assets/js/parent/    parent_app.js, parent_back_button.js, parent_bottom_nav.js,
+                     parent_menu.js, parent_pwa.js
+assets/js/shared/    back_button.js, net_status.js, pull_to_refresh.js, pwa_prompts.js
 ```
+
+(File names checked against the folders on 2026-11-14.)
 
 ### State management
 
@@ -368,6 +417,9 @@ Newer upload code uses `school_upload_helper.php` to derive a safe folder slug f
 folders — these have not been migrated.
 
 ### Upload validation — inconsistent
+
+(Unverified: the folder paths and the table below were written in May 2026 and not re-checked.
+For example, the folder in the repository is `assignment_uploads/` in lower case, not `assignment_Uploads/`.)
 
 | File | Max size | Allowed types | Validated? |
 |------|----------|---------------|------------|
@@ -433,17 +485,20 @@ Try push notification first
 | Branch | Environment | Trigger | Destination |
 |--------|------------|---------|-------------|
 | `main` | Production | push to main | `public_html/` |
-| `dev` | Sandbox/staging | push to dev | `sandbox.iskool.xyz/` |
+| `dev` | Sandbox/staging | push to dev | `sandbox.iskool.online/` |
 
 Both use `SamKirkland/FTP-Deploy-Action@v4.3.4` to sync files via FTP.
 
 ### What gets excluded from deployment
 
-```
-.git, .github, vendor/, node_modules/, .env,
-composer.lock, .gitignore, tests/ (dev only),
-sandbox folder (main only)
-```
+Checked against `.github/workflows/` on 2026-11-14. Both deploys skip: `.git*`, `.github*`,
+`node_modules/`, `vendor/`, `.env*`, `_archive/`, `*.sql`, `php_errors.log`, `composer.lock` and
+`.gitignore`. In addition:
+
+- production (`deploy-main.yml`) skips `sandbox.iskool.online/` and `cgi-bin/`
+- sandbox (`deploy-sandbox.yml`) skips `tests/` and `storage/logs/`
+
+The `exclude:` block in each workflow file is the source of truth; if it changes, this list is out of date.
 
 ### The deployment workflow does NOT:
 - Run `composer install`
@@ -459,6 +514,9 @@ sandbox folder (main only)
 > The safe fix: either commit `vendor/` (not recommended) or add
 > `composer install --no-dev` as a step in the GitHub Actions workflow.
 
+(Checked 2026-11-14: `vendor/` is listed in `.gitignore` but is tracked in git, and both
+workflows skip it when deploying. Neither workflow runs `composer install`, migrations or tests.)
+
 ---
 
 ## Known Weaknesses
@@ -466,11 +524,16 @@ sandbox folder (main only)
 These are existing architectural problems. Do not replicate these patterns in new code.
 They are documented here so agents and developers are aware before making changes.
 
+(Unverified: this section was written in May 2026 and was not re-checked, except for the
+auth-guard row and step 3 below, which were corrected on 2026-11-14. Some items may already be fixed.
+Because the repository can be publicly read, the owner may prefer to move this section to
+`docs/internal/`; see the open questions in `docs/DOCUMENTATION_PLAYBOOK.md`.)
+
 ### Critical
 
 | Issue | Location | Risk |
 |-------|----------|------|
-| Credentials in source code | `config.php`, `push_functions.php`, `superadmin/index.php` | Anyone with repo access has DB + API access |
+| Credentials in source code | `config.php` (not in the repository), `push_functions.php`, `superadmin/index.php` (Unverified) | Anyone with repo access has DB + API access |
 | Schema drift | `superadmin/iskool_new_school_template.sql` vs live DB | Template cannot be trusted as accurate |
 | No upload validation on submissions | `submit_assignment.php` | Any file type can be uploaded |
 | SQL interpolation in some endpoints | `api/school/get_teacher_profile.php` + others | SQL injection risk |
@@ -479,7 +542,7 @@ They are documented here so agents and developers are aware before making change
 
 | Issue | Impact |
 |-------|--------|
-| Auth checks duplicated in every file | Hard to change auth logic, easy to miss a file |
+| Role check written out in every file (session handling is shared through `auth/session_guard.php`) | Hard to change role rules, easy to miss a file |
 | No shared notification helper | Same push/email logic copy-pasted across 6+ files |
 | Stale SQL template | New school provisioning may differ from live schema |
 | No migration system | Schema changes cannot be tracked or rolled back |
@@ -500,11 +563,11 @@ Before adding major new features, the highest-value engineering task is:
 
 1. Reconcile `iskool_new_school_template.sql` with the real live database
 2. Move all credentials out of source code into environment variables
-3. Extract a shared auth guard function used by all protected files
+3. Extract a shared role-check function used by all protected files (the shared session guard `auth/session_guard.php` already exists)
 4. Add file validation to `submit_assignment.php`
 5. Add `composer install` to the GitHub Actions deployment workflow
 
 ---
 
-*Last updated: May 2026 — based on full codebase analysis*
+*Written May 2026 from a full codebase analysis; partly re-verified 2026-11-14 against `dev` @ `259ff6c` (see the status note at the top)*
 *This document should be updated whenever the architecture changes significantly*

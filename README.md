@@ -2,7 +2,7 @@
 
 > A cloud-based, multi-tenant Learning Management System built for African schools. Teachers create content, learners complete work and track progress, parents stay informed, and administrators oversee everything — all from any device, any browser.
 
-**Live:** https://iskool.xyz | **Version:** 1.1.2 | **License:** Proprietary © 2026 iSkool EdTech
+**Live:** https://iskool.xyz *(Unverified: confirm the current public domains)* | **Version:** see [CHANGELOG.md](CHANGELOG.md) | **License:** Proprietary © 2026 iSkool EdTech
 
 ---
 
@@ -11,7 +11,7 @@
 - [Overview](#overview)
 - [User Roles & Features](#user-roles--features)
 - [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
+- [Where things live](#where-things-live)
 - [Getting Started](#getting-started)
 - [Database](#database)
 - [Deployment](#deployment)
@@ -32,6 +32,8 @@ iSkool is built on a **multi-tenant architecture** — each school gets its own 
 - Fully responsive — desktop, tablet, and mobile
 - Each school has its own branding (logo, name)
 - New schools are onboarded automatically via the superadmin panel
+
+How the system works inside is described in [ARCHITECTURE.md](ARCHITECTURE.md). The index of all documentation is [docs/README.md](docs/README.md).
 
 ---
 
@@ -75,9 +77,10 @@ iSkool is built on a **multi-tenant architecture** — each school gets its own 
 - Manage SMTP, FTP, and API credentials
 
 ### Parent
-- View child's grades and progress reports
-- Read school announcements
-- Receive notifications on quiz results and teacher feedback
+- Home overview and progress report for each linked child (`api/parent/get_home.php`, `get_report.php`)
+- Read the child's syllabus, school news and events (`get_syllabus.php`, `get_news.php`, `get_events.php`)
+- Link a child through an invite link the learner creates (`api/learner/create_parent_invite.php`, `api/parent/redeem_parent_invite.php`)
+- Unverified: notifications to parents on quiz results and teacher feedback
 
 ---
 
@@ -98,68 +101,36 @@ iSkool is built on a **multi-tenant architecture** — each school gets its own 
 
 ---
 
-## Project Structure
+## Where things live
 
-```
-iskool_schools/
-│
-├── config.php                    # Database connection + environment detection
-├── index.php                     # Entry point — login/register page
-├── dashboard.php                 # Routes users to role-specific dashboard
-├── learner_dashboard.php         # Learner interface
-├── teacher_dashboard.php         # Teacher interface
-├── school_admin_dashboard.php    # School admin dashboard
-├── parent_dashboard.php          # Parent app shell (Home, Report; data from api/parent/)
-│
-├── /api/                         # 76 REST endpoints (return JSON)
-│   ├── /learner/                 # 20+ learner endpoints
-│   ├── /teacher/                 # 25+ teacher endpoints
-│   └── /school/                  # 19+ school admin endpoints
-│
-├── /auth/                        # Login, register, password reset
-│   ├── login_ajax.php
-│   ├── register_ajax.php
-│   ├── check_remember_me.php
-│   └── /password/
-│
-├── /assets/                      # Frontend — CSS and JS organised by role
-│   ├── /css/
-│   └── /js/
-│       ├── /learner/
-│       ├── /teacher/
-│       └── /school/
-│
-├── /uploads/                     # User-generated files
-│   ├── /assignment_submissions/
-│   ├── /assignment_uploads/
-│   ├── /quiz_images/
-│   ├── /question_uploads/
-│   └── /post_uploads/
-│
-├── /superadmin/                  # Multi-school management panel
-│   └── iskool_new_school_template.sql
-│
-├── /includes/                    # Shared UI components
-├── /tests/                       # PHPUnit tests (add new tests here)
-├── /migrations/                  # Empty — no migration system yet
-│
-├── /old_files/                   # DO NOT EDIT — archived legacy code
-├── /_archive/                    # DO NOT EDIT — database dumps and backups
-│   └── /db_dumps/iskowdbw_sandbox.sql
-│
-├── service-worker.js             # PWA offline support
-├── manifest.php                  # PWA web manifest
-├── composer.json                 # PHP dependencies
-└── .github/workflows/            # GitHub Actions CI/CD
-    ├── deploy-main.yml           # Production auto-deploy on main push
-    └── deploy-sandbox.yml        # Dev/sandbox deploy
-```
+| Path | What it holds |
+|------|---------------|
+| `index.php`, `dashboard.php` | The login and registration page, and the router that sends each role to its dashboard |
+| `learner_dashboard.php`, `teacher_dashboard.php`, `school_admin_dashboard.php`, `parent_dashboard.php` | The page shell for each role |
+| `api/` | JSON endpoints, one folder per role (`learner/`, `teacher/`, `school/`, `parent/`) plus two shared typing endpoints |
+| `auth/` | Login, registration, password reset, remember-me, the shared session guard, the CSRF check, rate limiting and parent invites |
+| `assets/` | CSS and JavaScript; the JavaScript is split into `js/learner/`, `js/teacher/`, `js/school/`, `js/parent/` and `js/shared/` |
+| `includes/` | Shared PHP: app version, theme heads, marks guard, multiple-answer scoring, global file viewer |
+| `uploads/`, `assignment_uploads/`, `assignment_submissions/`, `post_uploads/`, `question_uploads/`, `quiz_images/`, `resources/` | User-uploaded files |
+| `superadmin/` | The multi-school management panel, its own README and the new-school SQL template |
+| `migrations/` | Dated SQL files for schema changes (applied by hand; see [Known Issues](#known-issues)) |
+| `tests/` | PHPUnit tests |
+| `docs/`, `specs/` | Documentation and design proposals; start at [docs/README.md](docs/README.md) |
+| `tools/` | Email preview |
+| `service-worker.js`, `manifest.php` | PWA offline support and web manifest |
+| `.github/workflows/` | `deploy-main.yml` (production) and `deploy-sandbox.yml` (sandbox) |
+| `vendor/` | Composer packages. Listed in `.gitignore` but currently tracked in git; the deploy workflows skip it |
+| `old_files/`, `_archive/`, `react_test_manual/` | Do not edit: legacy code, old utilities and logs, an abandoned experiment |
+
+`config.php` (database connection and environment detection) is listed in `.gitignore` and is not in the repository.
+
+Unverified: what the marketing and demo folders (`website/`, `enthropy/`, `laura/`, `demo/`, `animations/`, `iskool_pdf/`) and the public `*.html` pages in the root are for.
 
 ---
 
 ## Getting Started
 
-The project supports both local development and live hosting. Use a PHP+MySQL stack locally (XAMPP/MAMP/WAMP or equivalent), then configure the environment from `.env`.
+Unverified: whether a full local environment is in use. `AGENTS.md` has said that development and testing happen on the dev server, which deploys whenever `dev` is pushed, while this section describes a local setup. Until the owner confirms (open question 1 in [docs/DOCUMENTATION_PLAYBOOK.md](docs/DOCUMENTATION_PLAYBOOK.md)), treat the steps below as the intended local setup, not a tested one.
 
 ### Prerequisites
 - PHP 8.2+ and MySQL / MariaDB
@@ -182,41 +153,24 @@ composer install
 ```
 
 **3. Configure the environment**
-Copy `.env.example` to `.env` and set your values:
-```env
-DB_HOST=
-DB_USER=
-DB_PASSWORD=
-DB_PREFIX=iskowdbw_
-SMTP_HOST=
-SMTP_USER=
-SMTP_PASSWORD=
-SMTP_PORT=465
-SMTP_FROM=
-VAPID_PUBLIC_KEY=
-VAPID_PRIVATE_KEY=
-SUPERADMIN_PASSWORD=
-CPANEL_USER=
-CPANEL_TOKEN=
-```
+Copy `.env.example` to `.env` and fill in the keys it lists (database, SMTP, push keys, superadmin password, cPanel access).
 
-`config.php` loads these values automatically at runtime.
-
-For local testing, use `localhost`, `127.0.0.1`, or `iskool.test`. For live hosting, the school database name is built from `DB_PREFIX` plus the subdomain.
+`config.php` is listed in `.gitignore` and is not in the repository, so a fresh clone does not have it. Unverified: how to create it, and whether it reads the `.env` keys (`AGENTS.md` says it does). This is open question 1 in the playbook.
 
 **4. Set up a school database**
 
-Use the schema template:
+Import the new-school template into an empty database:
 ```bash
-mysql -u [user] -p [new_database_name] < _archive/db_dumps/iskowdbw_sandbox.sql
+mysql -u [user] -p [new_database_name] < superadmin/iskool_new_school_template.sql
 ```
 
-Or use the Superadmin panel to auto-provision a new school.
+The template does not fully match the live schema (see [ARCHITECTURE.md](ARCHITECTURE.md#database-architecture)). Or use the Superadmin panel to auto-provision a new school.
 
 **5. Run tests**
 ```bash
-vendor/bin/phpunit tests/
+php vendor/bin/phpunit tests/
 ```
+In a fresh clone `vendor/bin/phpunit` may not be executable; running it through `php` avoids that.
 
 ---
 
@@ -237,10 +191,12 @@ landulwazi.iskool.xyz  → connects to iskowdbw_landulwazi
 ```
 The active database is stored in `$_SESSION['current_school_db']`.
 
+Unverified: the routing code is in `config.php`, which is not in the repository. This description comes from ARCHITECTURE.md (May 2026). `$_SESSION['current_school_db']` is used in `index.php` and `teacher_dashboard.php`.
+
 ### Schema Reference
-- Full schema: `_archive/db_dumps/iskowdbw_sandbox.sql`
 - New school template: `/superadmin/iskool_new_school_template.sql`
-- Key tables: `users`, `classes`, `quizzes`, `quiz_questions`, `assignments`, `grades`, `evaluations`, `announcements`, `discussions`, `resources`, `academic_years`
+- Key tables: `users`, `classes`, `class_students`, `quizzes`, `quizquestions`, `questions`, `choices`, `quiz_results`, `assignments`, `submissions`, `announcements`, `class_discussions`, `teacher_evaluations`, `resources`, `academic_years`, `parent_links`, `parent_invites`
+- All tables by area: [ARCHITECTURE.md](ARCHITECTURE.md#database-architecture)
 
 ### Adding a New School
 - **Automated (recommended):** Use the Superadmin panel — provisions database, subdomain, and welcome email in ~30 seconds
@@ -254,8 +210,10 @@ The active database is stored in `$_SESSION['current_school_db']`.
 
 | Branch | Environment | How it deploys |
 |--------|------------|----------------|
-| `dev` | Staging server | Push to dev branch |
-| `main` | Production (live users) | GitHub Actions auto-deploys via FTP |
+| `dev` | Sandbox (`sandbox.iskool.online/` on the host) | A push to `dev` runs `deploy-sandbox.yml` (FTP) |
+| `main` | Production (`public_html/` on the host) | A push to `main` runs `deploy-main.yml` (FTP) |
+
+What each deploy skips is listed in the `exclude:` block of its workflow file in `.github/workflows/`.
 
 **Rule: Never commit directly to `main`.** All work goes through `dev` first.
 
@@ -301,30 +259,7 @@ FTP_PASSWORD  → FTP password
 - **Database tables:** `snake_case` → `academic_years`
 
 ### API Endpoint Pattern
-Every file in `/api/` must follow this structure:
-```php
-<?php
-session_start();
-header("Content-Type: application/json");
-
-// 1. Auth check — always first
-if (!isset($_SESSION['email']) || $_SESSION['role'] !== 'learner') {
-    echo json_encode(['error' => 'Unauthorized']);
-    exit;
-}
-
-// 2. Get DB connection
-require_once '../config.php';
-
-// 3. Use prepared statements — always
-$stmt = $conn->prepare("SELECT * FROM quizzes WHERE class_id = ?");
-$stmt->bind_param("i", $class_id);
-$stmt->execute();
-$result = $stmt->get_result();
-
-// 4. Return JSON
-echo json_encode(['success' => true, 'data' => $rows]);
-```
+Every file in `/api/` follows one pattern: start with the shared session guard and `config.php`, check the role, call `verify_csrf_token()` when the endpoint changes data, use prepared statements, and return JSON. The current pattern, with real examples, is in [ARCHITECTURE.md](ARCHITECTURE.md#standard-endpoint-pattern).
 
 ### Security Checklist (before every commit)
 - [ ] All DB queries use prepared statements — no string concatenation with user input
@@ -346,14 +281,14 @@ refactor: move grade calculation to helper function
 ## Known Issues
 
 ### Critical
-- `config.php` contains plaintext database credentials — should be migrated to `.env` variables
-- Test coverage is under 5% — only 1 basic sanity-check test exists
+- Unverified: where database credentials are kept. `config.php` is not in the repository, so this document cannot confirm it (earlier notes said it holds plaintext credentials; `AGENTS.md` says it loads them from `.env`)
+- Test coverage of API and database behaviour is thin. `tests/` has many files, but most of them read page, script and style source files and check them for specific content: of the 43 files, 39 use `file_get_contents` and only 2 mention `mysqli`, `curl` or a URL (checked 2026-11-14)
 
 ### Medium Priority
 - No linter or code formatter configured (inconsistent style across files)
-- No database migration system — schema changes are done manually
+- No tool applies the SQL files in `migrations/`: they are dated files run by hand on each school database. Unverified: the exact procedure
 - No centralised error logging — currently writes to `php_errors.log`
-- No API documentation (no Swagger/OpenAPI spec)
+- No API documentation (no Swagger/OpenAPI spec); a generated reference is planned in `docs/DOCUMENTATION_PLAYBOOK.md`
 
 ### Known Bugs
 - Quiz timer does not always reset if a learner reopens a quiz (workaround: refresh before submitting)
@@ -361,7 +296,7 @@ refactor: move grade calculation to helper function
 - Push notifications not supported on older browsers (IE11, old Safari) — expected behaviour
 
 ### Known Limitations
-- Timezone hardcoded to `Africa/Johannesburg` in `config.php`
+- Unverified: timezone hardcoded to `Africa/Johannesburg` in `config.php` (the file is not in the repository)
 - Session-based auth (not JWT) — adequate for current scale
 - No ORM — raw MySQLi queries throughout
 - Base URL detection uses `$_SERVER['HTTP_HOST']` directly — can behave unexpectedly behind proxies
@@ -371,7 +306,7 @@ refactor: move grade calculation to helper function
 ## Roadmap
 
 **Near term:**
-- Migrate database credentials from `config.php` to `.env`
+- Migrate database credentials from `config.php` to `.env` *(Unverified: may already be done)*
 - Add PHPCodeSniffer for consistent code style
 - Expand test suite with basic API and auth tests
 - Add centralised error logging (Sentry or similar)
